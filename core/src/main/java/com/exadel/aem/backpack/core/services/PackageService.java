@@ -1,6 +1,6 @@
 package com.exadel.aem.backpack.core.services;
 
-import com.exadel.aem.backpack.core.dto.BuildPackageInfo;
+import com.exadel.aem.backpack.core.dto.response.BuildPackageInfo;
 import org.apache.sling.api.resource.ResourceResolver;
 
 import java.util.Collection;

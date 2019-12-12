@@ -1,4 +1,4 @@
-package com.exadel.aem.backpack.core.dto;
+package com.exadel.aem.backpack.core.dto.response;
 
 import java.util.*;
 

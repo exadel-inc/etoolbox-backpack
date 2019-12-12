@@ -1,7 +1,9 @@
 package com.exadel.aem.backpack.core.services.impl;
 
-import com.exadel.aem.backpack.core.dto.BuildPackageInfo;
+import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
+import com.exadel.aem.backpack.core.dto.response.BuildPackageInfo;
 import com.exadel.aem.backpack.core.services.PackageService;
+import com.exadel.aem.backpack.core.services.ReferenceService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
 import org.apache.jackrabbit.vault.fs.api.ProgressTrackerListener;
@@ -12,6 +14,7 @@ import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
 import org.apache.jackrabbit.vault.packaging.PackagingService;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +23,7 @@ import javax.jcr.Session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Component(service = PackageService.class)
 public class PackageServiceImpl implements PackageService {
@@ -29,6 +33,9 @@ public class PackageServiceImpl implements PackageService {
 
 	private static final String DEFAULT_PACKAGE_GROUP = "my_packages";
 	private static final String ERROR = "ERROR: ";
+
+	@Reference
+	private ReferenceService referenceService;
 
 	@Override
 	public BuildPackageInfo createPackage(final ResourceResolver resourceResolver,
@@ -78,7 +85,7 @@ public class PackageServiceImpl implements PackageService {
 
 					@Override
 					public void onError(final Mode mode, final String s, final Exception e) {
-						buildLog.add(s+ " " + e.getMessage());
+						buildLog.add(s + " " + e.getMessage());
 					}
 				});
 			}
@@ -92,16 +99,18 @@ public class PackageServiceImpl implements PackageService {
 		return builder.build();
 	}
 
-	private DefaultWorkspaceFilter getWorkspaceFilter(Collection<String> paths) {
+	private DefaultWorkspaceFilter getWorkspaceFilter(final Collection<String> paths) {
 		DefaultWorkspaceFilter filter = new DefaultWorkspaceFilter();
-		for (String path : paths) {
+		paths.forEach(path -> {
 			PathFilterSet pathFilterSet = new PathFilterSet(path);
 			filter.add(pathFilterSet);
-		}
+		});
+
 		return filter;
 	}
 
-	private boolean isPkgExists(String newPkgName, JcrPackageManager pkgMgr, String pkgGroupName) throws RepositoryException {
+	private boolean isPkgExists(final String newPkgName, final JcrPackageManager pkgMgr,
+								final String pkgGroupName) throws RepositoryException {
 		List<JcrPackage> packages = pkgMgr.listPackages(pkgGroupName, false);
 		for (JcrPackage jcrpackage : packages) {
 			String packageName = jcrpackage.getDefinition().getId().toString();
