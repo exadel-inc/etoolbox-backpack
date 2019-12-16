@@ -1,5 +1,7 @@
 package com.exadel.aem.backpack.core.dto.response;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.*;
 
 public class BuildPackageInfo {
@@ -15,6 +17,8 @@ public class BuildPackageInfo {
 	private Map<String, List<String>> referencedResources;
 
 	private List<String> buildLog;
+
+	private volatile int latestLogIndex;
 
 	public String getPackageName() {
 		return packageName;
@@ -41,10 +45,25 @@ public class BuildPackageInfo {
 	}
 
 	public List<String> getLatestBuildInfo() {
-		//todo implement
-		return Collections.EMPTY_LIST;
+		int currentBuildLogSize = buildLog.size();
+		List<String> latestLog = Collections.emptyList();
+		if (currentBuildLogSize > 0) {
+			latestLog= new ArrayList(buildLog.subList(latestLogIndex, currentBuildLogSize));
+			latestLogIndex = currentBuildLogSize - 1;
+		}
+
+		return Collections.unmodifiableList(latestLog);
 	}
 
+	public void setPackageCreated(final boolean packageCreated) {
+		this.packageCreated = packageCreated;
+	}
+
+	public void addLogMessage(final String message) {
+		if (buildLog != null && StringUtils.isNotBlank(message)) {
+			buildLog.add(message);
+		}
+	}
 
 	@Override
 	public boolean equals(Object o) {
@@ -64,7 +83,6 @@ public class BuildPackageInfo {
 	public static final class BuildPackageInfoBuilder {
 		private String packageName;
 		private String groupName;
-		private boolean packageCreated;
 		private Collection<String> paths;
 		private Map<String, List<String>> referencedResources;
 		private List<String> buildLog;
@@ -86,10 +104,6 @@ public class BuildPackageInfo {
 			return this;
 		}
 
-		public BuildPackageInfoBuilder withPackageCreated(boolean packageCreated) {
-			this.packageCreated = packageCreated;
-			return this;
-		}
 
 		public BuildPackageInfoBuilder withPaths(Collection<String> paths) {
 			this.paths = paths;
@@ -101,19 +115,13 @@ public class BuildPackageInfo {
 			return this;
 		}
 
-		public BuildPackageInfoBuilder withBuildLog(List<String> buildLog) {
-			this.buildLog = buildLog;
-			return this;
-		}
-
 		public BuildPackageInfo build() {
 			BuildPackageInfo buildPackageInfo = new BuildPackageInfo();
 			buildPackageInfo.paths = this.paths;
 			buildPackageInfo.referencedResources = this.referencedResources;
 			buildPackageInfo.groupName = this.groupName;
-			buildPackageInfo.packageCreated = this.packageCreated;
 			buildPackageInfo.packageName = this.packageName;
-			buildPackageInfo.buildLog = this.buildLog;
+			buildPackageInfo.buildLog = new ArrayList<>();
 			return buildPackageInfo;
 		}
 	}

@@ -197,7 +197,7 @@
                 <plugin>
                     <groupId>com.day.jcr.vault</groupId>
                     <artifactId>content-package-maven-plugin</artifactId>
-                    <version>0.5.24</version>
+                    <version>0.5.1</version>
                     <configuration>
                         <targetURL>http://${aem.host}:${aem.port}/crx/packmgr/service.jsp</targetURL>
                         <failOnError>true</failOnError>
@@ -385,12 +385,6 @@
                 <version>6.3.0</version>
                 <classifier>apis</classifier>
                 <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.adobe.cq</groupId>
-                <artifactId>core.wcm.components.all</artifactId>
-                <type>zip</type>
-                <version>2.0.4</version>
             </dependency>
             <!-- Apache Sling Dependencies -->
             <dependency>

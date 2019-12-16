@@ -28,13 +28,14 @@ import org.osgi.service.component.annotations.Reference;
 import javax.servlet.Servlet;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 
 @Component(service = Servlet.class,
 		property = {
-				"sling.servlet.methods=" + HttpConstants.METHOD_POST,
 				"sling.servlet.paths=" + "/services/backpack/createPackage",
-				"sling.servlet.methods=post",
+				"sling.servlet.methods=[get,post]",
+
 		})
 public class BuildPackageServlet extends SlingAllMethodsServlet {
 
@@ -52,8 +53,7 @@ public class BuildPackageServlet extends SlingAllMethodsServlet {
 		String packageName = request.getParameter("packageName");
 		String packageGroup = request.getParameter("packageGroup");
 
-		final BuildPackageInfo buildPackageInfo = packageService.createPackage(
-				request.getResourceResolver(),
+		final BuildPackageInfo buildPackageInfo = packageService.buildPackage(request.getResourceResolver(),
 				Arrays.asList(paths),
 				packageName,
 				packageGroup
@@ -61,6 +61,21 @@ public class BuildPackageServlet extends SlingAllMethodsServlet {
 
 		response.setContentType("application/json");
 		response.getWriter().write(GSON.toJson(buildPackageInfo));
+	}
+
+	@Override
+	protected void doGet(final SlingHttpServletRequest request,
+						 final SlingHttpServletResponse response) throws IOException {
+		String packageName = request.getParameter("packageName");
+		String packageGroup = request.getParameter("packageGroup");
+
+		final List<String> latestPackageBuildInfo = packageService.getLatestPackageBuildInfo(
+				packageName,
+				packageGroup
+		);
+
+		response.setContentType("application/json");
+		response.getWriter().write(GSON.toJson(latestPackageBuildInfo));
 	}
 }
 
