@@ -1,0 +1,28 @@
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0"
+          xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          xmlns:nt="http://www.jcp.org/jcr/nt/1.0" jcr:primaryType="nt:unstructured"
+          jcr:title="Package setup"
+          sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns">
+    <items jcr:primaryType="nt:unstructured">
+        <column jcr:primaryType="nt:unstructured" sling:resourceType="granite/ui/components/coral/foundation/container">
+            <items jcr:primaryType="nt:unstructured">
+                <paths jcr:primaryType="nt:unstructured"
+                       jcr:title="Package Info"
+                       sling:resourceType="granite/ui/components/coral/foundation/form/fieldset">
+                    <items jcr:primaryType="nt:unstructured">
+                        <paths jcr:primaryType="nt:unstructured"
+                               sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                               fieldLabel="Path"
+                               name="./paths"
+                               required="{Boolean}true"/>
+                        <packageName jcr:primaryType="nt:unstructured"
+                               sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                               fieldLabel="Package Name"
+                               name="./packageName"
+                               required="{Boolean}true"/>
+                    </items>
+                </paths>
+            </items>
+        </column>
+    </items>
+</jcr:root>
