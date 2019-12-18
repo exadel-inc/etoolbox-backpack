@@ -49,8 +49,8 @@ public class BuildPackageServlet extends SlingAllMethodsServlet {
 	@Override
 	protected void doPost(final SlingHttpServletRequest request,
 						  final SlingHttpServletResponse response) throws IOException {
-		String[] paths = request.getParameterValues("paths");
-		String packageName = request.getParameter("packageName");
+		String[] paths = request.getParameterValues("./paths");
+		String packageName = request.getParameter("./packageName");
 		String packageGroup = request.getParameter("packageGroup");
 
 		final BuildPackageInfo buildPackageInfo = packageService.buildPackage(request.getResourceResolver(),
