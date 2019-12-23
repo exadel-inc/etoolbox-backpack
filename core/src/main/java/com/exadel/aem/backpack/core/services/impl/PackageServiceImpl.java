@@ -3,6 +3,7 @@ package com.exadel.aem.backpack.core.services.impl;
 import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
 import com.exadel.aem.backpack.core.dto.repository.ReferencedItem;
 import com.exadel.aem.backpack.core.dto.response.BuildPackageInfo;
+import com.exadel.aem.backpack.core.dto.response.TestBuildInfo;
 import com.exadel.aem.backpack.core.services.PackageService;
 import com.exadel.aem.backpack.core.services.ReferenceService;
 
@@ -17,6 +18,7 @@ import org.apache.jackrabbit.vault.packaging.JcrPackage;
 import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
 import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
 import org.apache.jackrabbit.vault.packaging.PackagingService;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.jcr.api.SlingRepository;
 import org.osgi.service.component.annotations.Component;
@@ -27,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.SimpleCredentials;
+import javax.jcr.query.Query;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -50,6 +53,44 @@ public class PackageServiceImpl implements PackageService {
 			.maximumSize(100)
 			.expireAfterWrite(1, TimeUnit.DAYS)
 			.build();
+
+	@Override
+	public BuildPackageInfo testBuild(ResourceResolver resourceResolver, Collection<String> paths) {
+
+		Set<AssetReferencedItem> assetLinks = new HashSet();
+		paths.forEach(path -> {
+			Set<AssetReferencedItem> assetReferences = referenceService.getAssetReferences(resourceResolver, path);
+			assetLinks.addAll(assetReferences);
+		});
+
+		Long totalSize = 0l;
+		for (AssetReferencedItem referencedItem : assetLinks) {
+            totalSize += getAssetSize(resourceResolver, referencedItem.getPath());
+		}
+
+        BuildPackageInfo packageInfo = new BuildPackageInfo();
+        TestBuildInfo testBuildInfo = new TestBuildInfo();
+        packageInfo.setTestBuildInfo(testBuildInfo);
+
+        testBuildInfo.setAssetReferences(assetLinks);
+        testBuildInfo.setTotalSize(totalSize);
+
+		return packageInfo;
+	}
+
+	private Long getAssetSize(ResourceResolver resourceResolver, String path) {
+        Long totalSize = 0l;
+        String queryString = "SELECT * FROM [nt:file] AS a WHERE ISDESCENDANTNODE(a,'"+ path +"')";
+        Iterator<Resource> searchResult = resourceResolver.findResources(queryString, Query.JCR_SQL2);
+        while (searchResult.hasNext()) {
+            Resource resource = searchResult.next();
+            Resource childResource = resource.getChild("jcr:content/jcr:data");
+            if (childResource != null && childResource.getResourceMetadata().containsKey("sling.contentLength")) {
+                totalSize += (Long)childResource.getResourceMetadata().get("sling.contentLength");
+            }
+        }
+		return totalSize;
+	}
 
 	@Override
 	public BuildPackageInfo buildPackage(final ResourceResolver resourceResolver,

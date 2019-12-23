@@ -52,15 +52,21 @@ public class BuildPackageServlet extends SlingAllMethodsServlet {
 		String[] paths = request.getParameterValues("./paths");
 		String packageName = request.getParameter("./packageName");
 		String packageGroup = request.getParameter("packageGroup");
+		String testBuild = request.getParameter("testBuild");
 
-		final BuildPackageInfo buildPackageInfo = packageService.buildPackage(request.getResourceResolver(),
-				Arrays.asList(paths),
-				packageName,
-				packageGroup
-		);
+        BuildPackageInfo buildPackageInfo;
 
-		response.setContentType("application/json");
-		response.getWriter().write(GSON.toJson(buildPackageInfo));
+		if (testBuild != null) {
+            buildPackageInfo = packageService.testBuild(request.getResourceResolver(), Arrays.asList(paths));
+		} else {
+			buildPackageInfo = packageService.buildPackage(request.getResourceResolver(),
+					Arrays.asList(paths),
+					packageName,
+					packageGroup
+			);
+		}
+        response.setContentType("application/json");
+        response.getWriter().write(GSON.toJson(buildPackageInfo));
 	}
 
 	@Override
@@ -68,14 +74,22 @@ public class BuildPackageServlet extends SlingAllMethodsServlet {
 						 final SlingHttpServletResponse response) throws IOException {
 		String packageName = request.getParameter("packageName");
 		String packageGroup = request.getParameter("packageGroup");
+		String testBuild = request.getParameter("testBuild");
+		String[] paths = request.getParameterValues("paths");
 
-		final List<String> latestPackageBuildInfo = packageService.getLatestPackageBuildInfo(
-				packageName,
-				packageGroup
-		);
+        BuildPackageInfo buildPackageInfo;
+		if (testBuild != null) {
+            buildPackageInfo = packageService.testBuild(request.getResourceResolver(), Arrays.asList(paths));
+		} else {
+			buildPackageInfo = packageService.buildPackage(request.getResourceResolver(),
+					Arrays.asList(paths),
+					packageName,
+					packageGroup
+			);
 
-		response.setContentType("application/json");
-		response.getWriter().write(GSON.toJson(latestPackageBuildInfo));
+		}
+        response.setContentType("application/json");
+        response.getWriter().write(GSON.toJson(buildPackageInfo));
 	}
 }
 

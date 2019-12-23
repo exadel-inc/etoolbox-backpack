@@ -20,6 +20,8 @@ public class BuildPackageInfo {
 
 	private volatile int latestLogIndex;
 
+	private TestBuildInfo testBuildInfo;
+
 	public String getPackageName() {
 		return packageName;
 	}
@@ -38,6 +40,14 @@ public class BuildPackageInfo {
 
 	public Map<String, List<String>> getReferencedResources() {
 		return Collections.unmodifiableMap(referencedResources);
+	}
+
+	public TestBuildInfo getTestBuildInfo() {
+		return testBuildInfo;
+	}
+
+	public void setTestBuildInfo(TestBuildInfo testBuildInfo) {
+		this.testBuildInfo = testBuildInfo;
 	}
 
 	public List<String> getBuildLog() {
