@@ -12,4 +12,6 @@ public class AssetReferencedItem extends ReferencedItem {
 	public String getMimeType() {
 		return mimeType;
 	}
+
+
 }

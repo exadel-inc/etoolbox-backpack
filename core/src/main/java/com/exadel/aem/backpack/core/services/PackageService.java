@@ -9,6 +9,7 @@ import java.util.List;
 public interface PackageService {
 
 	BuildPackageInfo testBuild(ResourceResolver resourceResolver, Collection<String> paths);
-	BuildPackageInfo buildPackage(ResourceResolver resourceResolver, Collection<String> paths, String pkgName, String packageGroup);
-	List<String> getLatestPackageBuildInfo(String pkgName, String pkgGroupName);
+	BuildPackageInfo buildPackage(ResourceResolver resourceResolver, String pkgName, String packageGroup, String version);
+	BuildPackageInfo createPackage(ResourceResolver resourceResolver, Collection<String> paths, String pkgName, String packageGroup, String version);
+	List<String> getLatestPackageBuildInfo(String pkgName, String pkgGroupName, String version);
 }

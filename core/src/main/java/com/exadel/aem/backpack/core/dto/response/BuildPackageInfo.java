@@ -1,5 +1,6 @@
 package com.exadel.aem.backpack.core.dto.response;
 
+import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
@@ -10,7 +11,11 @@ public class BuildPackageInfo {
 
 	private String groupName;
 
+	private String version;
+
 	private boolean packageCreated;
+
+	private boolean packageBuilt;
 
 	private Collection<String> paths;
 
@@ -28,6 +33,10 @@ public class BuildPackageInfo {
 
 	public String getGroupName() {
 		return groupName;
+	}
+
+	public String getVersion() {
+		return version;
 	}
 
 	public boolean isPackageCreated() {
@@ -54,19 +63,41 @@ public class BuildPackageInfo {
 		return Collections.unmodifiableList(buildLog);
 	}
 
+	public boolean isPackageBuilt() {
+		return packageBuilt;
+	}
+
 	public List<String> getLatestBuildInfo() {
 		int currentBuildLogSize = buildLog.size();
 		List<String> latestLog = Collections.emptyList();
 		if (currentBuildLogSize > 0) {
-			latestLog= new ArrayList(buildLog.subList(latestLogIndex, currentBuildLogSize));
+			latestLog = new ArrayList(buildLog.subList(latestLogIndex, currentBuildLogSize));
 			latestLogIndex = currentBuildLogSize - 1;
 		}
 
 		return Collections.unmodifiableList(latestLog);
 	}
 
+	public void addAssetReferencedItem(final AssetReferencedItem item) {
+		if (referencedResources == null) {
+			referencedResources = new TreeMap<>();
+		}
+		if (StringUtils.isNotBlank(item.getPath()) && StringUtils.isNotBlank(item.getMimeType())) {
+			List<String> assetsPaths = referencedResources.get(item.getMimeType());
+			if (assetsPaths == null) {
+				assetsPaths = new ArrayList<>();
+				referencedResources.put(item.getMimeType(), assetsPaths);
+			}
+			assetsPaths.add(item.getPath());
+		}
+	}
+
 	public void setPackageCreated(final boolean packageCreated) {
 		this.packageCreated = packageCreated;
+	}
+
+	public void setPackageBuilt(final boolean packageBuilt) {
+		this.packageBuilt = packageBuilt;
 	}
 
 	public void addLogMessage(final String message) {
@@ -93,6 +124,7 @@ public class BuildPackageInfo {
 	public static final class BuildPackageInfoBuilder {
 		private String packageName;
 		private String groupName;
+		private String version;
 		private Collection<String> paths;
 		private Map<String, List<String>> referencedResources;
 		private List<String> buildLog;
@@ -114,6 +146,11 @@ public class BuildPackageInfo {
 			return this;
 		}
 
+		public BuildPackageInfoBuilder withVersion(String version) {
+			this.version = version;
+			return this;
+		}
+
 
 		public BuildPackageInfoBuilder withPaths(Collection<String> paths) {
 			this.paths = paths;
@@ -131,6 +168,7 @@ public class BuildPackageInfo {
 			buildPackageInfo.referencedResources = this.referencedResources;
 			buildPackageInfo.groupName = this.groupName;
 			buildPackageInfo.packageName = this.packageName;
+			buildPackageInfo.version = this.version;
 			buildPackageInfo.buildLog = new ArrayList<>();
 			return buildPackageInfo;
 		}
