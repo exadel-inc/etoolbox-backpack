@@ -22,6 +22,7 @@
     }
 
     String title = resource.getName();
+    String path = resource.getPath();
     String actionRels = StringUtils.join(getActionRels(resource, acm), " ");
 
     Tag tag = cmp.consumeTag();
@@ -75,6 +76,12 @@
     <coral-quickactions-item icon="delete" class="foundation-collection-action" data-foundation-collection-action='{"action": "cq.wcm.delete"}'
     ><%= xssAPI.encodeForHTML(i18n.get("Delete")) %></coral-quickactions-item>
     <%
+    }
+        if (resource != null && hasPermission(acm, resource, Privilege.JCR_READ)) {
+    %>
+    <coral-quickactions-item icon="download" class="foundation-collection-action"
+                             data-foundation-collection-action='{"action": "backpack.download", "data": {"href":"/crx/packmgr/download.jsp?_charset_=utf-8&path=<%= xssAPI.encodeForHTML(path) %>"}}'
+    ><%= xssAPI.encodeForHTML(i18n.get("Download")) %></coral-quickactions-item><%
     }
 %></coral-quickactions>
 
