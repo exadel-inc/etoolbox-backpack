@@ -13,12 +13,12 @@
                         <paths jcr:primaryType="nt:unstructured"
                                sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
                                fieldLabel="Path"
-                               name="./paths"
+                               name="paths"
                                required="{Boolean}true"/>
                         <packageName jcr:primaryType="nt:unstructured"
                                sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
                                fieldLabel="Package Name"
-                               name="./packageName"
+                               name="packageName"
                                required="{Boolean}true"/>
                     </items>
                 </paths>
