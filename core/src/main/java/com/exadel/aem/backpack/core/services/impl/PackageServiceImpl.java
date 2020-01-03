@@ -40,7 +40,7 @@ public class PackageServiceImpl implements PackageService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PackageServiceImpl.class);
 
 
-	private static final String DEFAULT_PACKAGE_GROUP = "my_packages";
+	private static final String DEFAULT_PACKAGE_GROUP = "backpack";
 	private static final String ERROR = "ERROR: ";
 
 	@Reference
@@ -145,8 +145,8 @@ public class PackageServiceImpl implements PackageService {
 
 		if (StringUtils.isNotBlank(packageGroup)) {
 			pkgGroupName = packageGroup;
-			builder.withGroupName(pkgGroupName);
 		}
+		builder.withGroupName(pkgGroupName);
 		BuildPackageInfo packageInfo = builder.build();
 		try {
 			if (isPkgExists(packMgr, pkgName, pkgGroupName, version)) {
