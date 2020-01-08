@@ -12,16 +12,15 @@ import org.osgi.service.component.annotations.Reference;
 
 import javax.servlet.Servlet;
 import java.io.IOException;
-import java.util.Arrays;
 
 
 @Component(service = Servlet.class,
 		property = {
-				"sling.servlet.paths=" + "/services/backpack/createPackage",
-				"sling.servlet.methods=[post]",
+				"sling.servlet.paths=" + "/services/backpack/packageInfo",
+				"sling.servlet.methods=[get]",
 
 		})
-public class CreatePackageServlet extends SlingAllMethodsServlet {
+public class PackageInfoServlet extends SlingAllMethodsServlet {
 
 	private static final long serialVersionUID = 1L;
 
@@ -31,22 +30,12 @@ public class CreatePackageServlet extends SlingAllMethodsServlet {
 	private transient PackageService packageService;
 
 	@Override
-	protected void doPost(final SlingHttpServletRequest request,
-						  final SlingHttpServletResponse response) throws IOException {
-		String[] paths = request.getParameterValues("paths");
-		String packageName = request.getParameter("packageName");
-		String packageGroup = request.getParameter("packageGroup");
-		String version = request.getParameter("version");
+	protected void doGet(final SlingHttpServletRequest request,
+						 final SlingHttpServletResponse response) throws IOException {
+		String pathToPackage = request.getParameter("path");
 
 
-		final PackageInfo packageInfo = packageService.createPackage(
-				request.getResourceResolver(),
-				Arrays.asList(paths),
-				packageName,
-				packageGroup,
-				version
-		);
-
+		PackageInfo packageInfo = packageService.getPackageInfo(request.getResourceResolver(), pathToPackage);
 		response.setContentType("application/json");
 		response.getWriter().write(GSON.toJson(packageInfo));
 	}
