@@ -1,24 +1,19 @@
 package com.exadel.aem.backpack.core.services.impl;
 
 import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
-import com.exadel.aem.backpack.core.dto.response.BuildPackageInfo;
+import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.TestBuildInfo;
 import com.exadel.aem.backpack.core.services.PackageService;
 import com.exadel.aem.backpack.core.services.ReferenceService;
-
-
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
 import org.apache.jackrabbit.vault.fs.api.ProgressTrackerListener;
+import org.apache.jackrabbit.vault.fs.api.WorkspaceFilter;
 import org.apache.jackrabbit.vault.fs.config.DefaultWorkspaceFilter;
 import org.apache.jackrabbit.vault.packaging.*;
-import org.apache.jackrabbit.vault.packaging.JcrPackage;
-import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
-import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
-import org.apache.jackrabbit.vault.packaging.PackagingService;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.jcr.api.SlingRepository;
@@ -27,12 +22,13 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.SimpleCredentials;
-import javax.jcr.query.Query;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Component(service = PackageService.class)
 public class PackageServiceImpl implements PackageService {
@@ -40,7 +36,7 @@ public class PackageServiceImpl implements PackageService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PackageServiceImpl.class);
 
 
-	private static final String DEFAULT_PACKAGE_GROUP = "my_packages";
+	private static final String DEFAULT_PACKAGE_GROUP = "backpack";
 	private static final String ERROR = "ERROR: ";
 
 	@Reference
@@ -49,13 +45,13 @@ public class PackageServiceImpl implements PackageService {
 	@Reference
 	private SlingRepository slingRepository;
 
-	private Cache<String, BuildPackageInfo> packagesInfos = CacheBuilder.newBuilder()
+	private Cache<String, PackageInfo> packagesInfos = CacheBuilder.newBuilder()
 			.maximumSize(100)
 			.expireAfterWrite(1, TimeUnit.DAYS)
 			.build();
 
 	@Override
-	public BuildPackageInfo testBuild(ResourceResolver resourceResolver, Collection<String> paths) {
+	public PackageInfo testBuild(ResourceResolver resourceResolver, Collection<String> paths) {
 
 		Set<AssetReferencedItem> assetLinks = new HashSet();
 		paths.forEach(path -> {
@@ -66,15 +62,15 @@ public class PackageServiceImpl implements PackageService {
 		Long totalSize = 0l;
 		for (AssetReferencedItem referencedItem : assetLinks) {
 			referencedItem.setSize(getAssetSize(resourceResolver, referencedItem.getPath()));
-            totalSize += referencedItem.getSize();
+			totalSize += referencedItem.getSize();
 		}
 
-        BuildPackageInfo packageInfo = new BuildPackageInfo();
-        TestBuildInfo testBuildInfo = new TestBuildInfo();
-        packageInfo.setTestBuildInfo(testBuildInfo);
+		PackageInfo packageInfo = new PackageInfo();
+		TestBuildInfo testBuildInfo = new TestBuildInfo();
+		packageInfo.setTestBuildInfo(testBuildInfo);
 
-        testBuildInfo.setAssetReferences(assetLinks);
-        testBuildInfo.setTotalSize(totalSize);
+		testBuildInfo.setAssetReferences(assetLinks);
+		testBuildInfo.setTotalSize(totalSize);
 
 		return packageInfo;
 	}
@@ -95,20 +91,20 @@ public class PackageServiceImpl implements PackageService {
 		}
 		Resource childResource = resource.getChild("jcr:content/jcr:data");
 		if (childResource != null && childResource.getResourceMetadata().containsKey("sling.contentLength")) {
-			totalSize += (Long)childResource.getResourceMetadata().get("sling.contentLength");
+			totalSize += (Long) childResource.getResourceMetadata().get("sling.contentLength");
 		}
 		return totalSize;
 	}
 
 	@Override
-	public BuildPackageInfo buildPackage(final ResourceResolver resourceResolver,
-										 final String pkgName,
-										 final String packageGroup,
-										 final String version) {
+	public PackageInfo buildPackage(final ResourceResolver resourceResolver,
+									final String pkgName,
+									final String packageGroup,
+									final String version) {
 		final Session session = resourceResolver.adaptTo(Session.class);
 
 		JcrPackageManager packMgr = PackagingService.getPackageManager(session);
-		BuildPackageInfo.BuildPackageInfoBuilder builder = BuildPackageInfo.BuildPackageInfoBuilder.aBuildPackageInfo();
+		PackageInfo.BuildPackageInfoBuilder builder = PackageInfo.BuildPackageInfoBuilder.aBuildPackageInfo();
 		builder.withPackageName(pkgName);
 		builder.withVersion(version);
 
@@ -118,7 +114,7 @@ public class PackageServiceImpl implements PackageService {
 			pkgGroupName = packageGroup;
 			builder.withGroupName(pkgGroupName);
 		}
-		BuildPackageInfo buildInfo = builder.build();
+		PackageInfo buildInfo = builder.build();
 		try {
 			if (!isPkgExists(packMgr, pkgName, pkgGroupName, version)) {
 				String packageExistMsg = "Package with such name don't exist in the" + pkgGroupName + " group.";
@@ -139,12 +135,44 @@ public class PackageServiceImpl implements PackageService {
 		return buildInfo;
 	}
 
+
 	@Override
-	public BuildPackageInfo createPackage(final ResourceResolver resourceResolver, final Collection<String> initialPaths, final String pkgName, final String packageGroup, final String version) {
+	public PackageInfo buildPackage(final ResourceResolver resourceResolver,
+									final String path) {
 		final Session session = resourceResolver.adaptTo(Session.class);
 
 		JcrPackageManager packMgr = PackagingService.getPackageManager(session);
-		BuildPackageInfo.BuildPackageInfoBuilder builder = BuildPackageInfo.BuildPackageInfoBuilder.aBuildPackageInfo();
+		PackageInfo.BuildPackageInfoBuilder builder = PackageInfo.BuildPackageInfoBuilder.aBuildPackageInfo();
+
+
+		PackageInfo buildInfo = builder.build();
+		buildInfo.setPackagePath(path);
+		try {
+			if (!isPkgExists(packMgr, path)) {
+				String packageExistMsg = "Package by this path " + path + " don't exist in the repository.";
+
+				buildInfo.addLogMessage(ERROR + packageExistMsg);
+				LOGGER.error(packageExistMsg);
+				return buildInfo;
+			}
+		} catch (RepositoryException e) {
+			buildInfo.addLogMessage(ERROR + e.getMessage());
+			LOGGER.error("Error during existing packages check", e);
+			return buildInfo;
+		}
+
+		packagesInfos.put(path, buildInfo);
+		buildPackage(resourceResolver.getUserID(), buildInfo);
+
+		return buildInfo;
+	}
+
+	@Override
+	public PackageInfo createPackage(final ResourceResolver resourceResolver, final Collection<String> initialPaths, final String pkgName, final String packageGroup, final String version) {
+		final Session session = resourceResolver.adaptTo(Session.class);
+
+		JcrPackageManager packMgr = PackagingService.getPackageManager(session);
+		PackageInfo.BuildPackageInfoBuilder builder = PackageInfo.BuildPackageInfoBuilder.aBuildPackageInfo();
 		builder.withPackageName(pkgName);
 		builder.withPaths(initialPaths);
 		builder.withVersion(version);
@@ -153,9 +181,9 @@ public class PackageServiceImpl implements PackageService {
 
 		if (StringUtils.isNotBlank(packageGroup)) {
 			pkgGroupName = packageGroup;
-			builder.withGroupName(pkgGroupName);
 		}
-		BuildPackageInfo packageInfo = builder.build();
+		builder.withGroupName(pkgGroupName);
+		PackageInfo packageInfo = builder.build();
 		try {
 			if (isPkgExists(packMgr, pkgName, pkgGroupName, version)) {
 				String packageExistMsg = "Package with such name already exist in the " + pkgGroupName + " group.";
@@ -179,29 +207,60 @@ public class PackageServiceImpl implements PackageService {
 		return packageInfo;
 	}
 
+	@Override
+	public PackageInfo getPackageInfo(final ResourceResolver resourceResolver, final String pathToPackage) {
+		final Session session = resourceResolver.adaptTo(Session.class);
+
+		JcrPackageManager packMgr = PackagingService.getPackageManager(session);
+		Node packageNode = null;
+		JcrPackage jcrPackage = null;
+		PackageInfo.BuildPackageInfoBuilder builder = PackageInfo.BuildPackageInfoBuilder.aBuildPackageInfo();
+		PackageInfo packageInfo = null;
+		try {
+			packageNode = session.getNode(pathToPackage);
+
+			if (packageNode != null) {
+				jcrPackage = packMgr.open(packageNode);
+				JcrPackageDefinition definition = jcrPackage.getDefinition();
+				WorkspaceFilter filter = definition.getMetaInf().getFilter();
+				List<PathFilterSet> filterSets = filter.getFilterSets();
+				builder.withPackageName(definition.get(JcrPackageDefinition.PN_NAME));
+				builder.withGroupName(definition.get(JcrPackageDefinition.PN_GROUP));
+				builder.withVersion(definition.get(JcrPackageDefinition.PN_VERSION));
+				builder.withPaths(filterSets.stream().map(pathFilter -> pathFilter.getRoot()).collect(Collectors.toList()));
+				packageInfo = builder.build();
+				packageInfo.setPackageBuilt(definition.getLastWrapped());
+			}
+		} catch (RepositoryException e) {
+			LOGGER.error("Error during package opening", e);
+		} finally {
+			if (jcrPackage != null) {
+				jcrPackage.close();
+			}
+		}
+		return packageInfo;
+	}
+
+
 	private Collection<String> initAssets(final Collection<String> initialPaths,
 										  final Set<AssetReferencedItem> referencedAssets,
-										  final BuildPackageInfo buildPackageInfo) {
+										  final PackageInfo packageInfo) {
 		Collection<String> resultingPaths = new ArrayList();
 		resultingPaths.addAll(initialPaths);
 		referencedAssets.forEach(assetReferencedItem -> {
 			resultingPaths.add(assetReferencedItem.getPath());
-			buildPackageInfo.addAssetReferencedItem(assetReferencedItem);
+			packageInfo.addAssetReferencedItem(assetReferencedItem);
 
 		});
 		return resultingPaths;
 	}
 
 	@Override
-	public List<String> getLatestPackageBuildInfo(final String pkgName, final String pkgGroupName, final String version) {
-		BuildPackageInfo buildPackageInfo = packagesInfos.asMap().get(getPackageId(pkgGroupName, pkgName, version));
-		if (buildPackageInfo != null) {
-			return buildPackageInfo.getLatestBuildInfo();
-		}
-		return Collections.emptyList();
+	public PackageInfo getLatestPackageBuildInfo(final String packagePath) {
+		return packagesInfos.asMap().get(packagePath);
 	}
 
-	private JcrPackage createPackage(final String userId, final BuildPackageInfo packageBuildInfo, final DefaultWorkspaceFilter filter) {
+	private JcrPackage createPackage(final String userId, final PackageInfo packageBuildInfo, final DefaultWorkspaceFilter filter) {
 
 		Session userSession = null;
 		JcrPackage jcrPackage = null;
@@ -226,15 +285,21 @@ public class PackageServiceImpl implements PackageService {
 		return jcrPackage;
 	}
 
-	private void buildPackage(final String userId, final BuildPackageInfo packageBuildInfo) {
+	private void buildPackage(final String userId, final PackageInfo packageBuildInfo) {
 		new Thread(() -> {
 			Session userSession = null;
 			try {
 				userSession = slingRepository.loginAdministrative(null);
 				userSession.impersonate(new SimpleCredentials(userId, new char[0]));
 				JcrPackageManager packMgr = PackagingService.getPackageManager(userSession);
-				PackageId packageId = new PackageId(packageBuildInfo.getGroupName(), packageBuildInfo.getPackageName(), packageBuildInfo.getVersion());
-				JcrPackage jcrPackage = packMgr.open(packageId);
+				JcrPackage jcrPackage;
+				if (packageBuildInfo.getPackagePath() != null) {
+					jcrPackage = packMgr.open(userSession.getNode(packageBuildInfo.getPackagePath()));
+				} else {
+					PackageId packageId = new PackageId(packageBuildInfo.getGroupName(), packageBuildInfo.getPackageName(), packageBuildInfo.getVersion());
+					jcrPackage = packMgr.open(packageId);
+				}
+
 
 				packMgr.assemble(jcrPackage, new ProgressTrackerListener() {
 					@Override
@@ -248,7 +313,7 @@ public class PackageServiceImpl implements PackageService {
 					}
 				});
 
-				packageBuildInfo.setPackageBuilt(true);
+				packageBuildInfo.setPackageBuilt(Calendar.getInstance());
 
 			} catch (Exception e) {
 				packageBuildInfo.addLogMessage(ERROR + e.getMessage());
@@ -293,6 +358,20 @@ public class PackageServiceImpl implements PackageService {
 		for (JcrPackage jcrpackage : packages) {
 			String packageName = jcrpackage.getDefinition().getId().toString();
 			if (packageName.equalsIgnoreCase(getPackageId(pkgGroupName, newPkgName, version))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+
+	private boolean isPkgExists(final JcrPackageManager pkgMgr,
+								final String path) throws RepositoryException {
+		List<JcrPackage> packages = pkgMgr.listPackages();
+
+		for (JcrPackage jcrpackage : packages) {
+			String packagePath = jcrpackage.getNode().getPath();
+			if (packagePath.equals(path)) {
 				return true;
 			}
 		}

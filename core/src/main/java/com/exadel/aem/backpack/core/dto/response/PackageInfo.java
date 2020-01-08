@@ -5,7 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 
-public class BuildPackageInfo {
+public class PackageInfo {
 
 	private String packageName;
 
@@ -15,7 +15,9 @@ public class BuildPackageInfo {
 
 	private boolean packageCreated;
 
-	private boolean packageBuilt;
+	private Calendar packageBuilt;
+
+	private String packagePath;
 
 	private Collection<String> paths;
 
@@ -63,7 +65,7 @@ public class BuildPackageInfo {
 		return Collections.unmodifiableList(buildLog);
 	}
 
-	public boolean isPackageBuilt() {
+	public Calendar getPackageBuilt() {
 		return packageBuilt;
 	}
 
@@ -96,8 +98,16 @@ public class BuildPackageInfo {
 		this.packageCreated = packageCreated;
 	}
 
-	public void setPackageBuilt(final boolean packageBuilt) {
+	public void setPackageBuilt(final Calendar packageBuilt) {
 		this.packageBuilt = packageBuilt;
+	}
+
+	public void setPackagePath(final String packagePath) {
+		this.packagePath = packagePath;
+	}
+
+	public String getPackagePath() {
+		return packagePath;
 	}
 
 	public void addLogMessage(final String message) {
@@ -110,7 +120,7 @@ public class BuildPackageInfo {
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
-		BuildPackageInfo that = (BuildPackageInfo) o;
+		PackageInfo that = (PackageInfo) o;
 		return Objects.equals(packageName, that.packageName) &&
 				Objects.equals(groupName, that.groupName);
 	}
@@ -162,15 +172,15 @@ public class BuildPackageInfo {
 			return this;
 		}
 
-		public BuildPackageInfo build() {
-			BuildPackageInfo buildPackageInfo = new BuildPackageInfo();
-			buildPackageInfo.paths = this.paths;
-			buildPackageInfo.referencedResources = this.referencedResources;
-			buildPackageInfo.groupName = this.groupName;
-			buildPackageInfo.packageName = this.packageName;
-			buildPackageInfo.version = this.version;
-			buildPackageInfo.buildLog = new ArrayList<>();
-			return buildPackageInfo;
+		public PackageInfo build() {
+			PackageInfo packageInfo = new PackageInfo();
+			packageInfo.paths = this.paths;
+			packageInfo.referencedResources = this.referencedResources;
+			packageInfo.groupName = this.groupName;
+			packageInfo.packageName = this.packageName;
+			packageInfo.version = this.version;
+			packageInfo.buildLog = new ArrayList<>();
+			return packageInfo;
 		}
 	}
 }

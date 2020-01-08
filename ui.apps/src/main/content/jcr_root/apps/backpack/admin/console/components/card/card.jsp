@@ -63,7 +63,7 @@
 </coral-card>
 
 <coral-quickactions target="_prev" alignmy="left top" alignat="left top">
-    <coral-quickactions-item icon="check" class="foundation-collection-item-activator"><%= xssAPI.encodeForHTML(i18n.get("Select")) %></coral-quickactions-item><%
+    <coral-quickactions-item icon="dataRefresh" class="foundation-collection-action" data-foundation-collection-action='{"action": "cq.wcm.open", "data": {"cookiePath":"<%= request.getContextPath() %>/","href":"/backpack/buildPackage.html<%= xssAPI.encodeForHTML(path) %>"}}'><%= xssAPI.encodeForHTML(i18n.get("Build")) %></coral-quickactions-item><%
 
     if (resource != null && hasPermission(acm, resource, Privilege.JCR_READ)) {
 %>
