@@ -37,7 +37,7 @@
 
     attrs.add("data-timeline", true);
 
-%><coral-card <%= attrs %>>
+%><coral-card class="foundation-collection-navigator" data-foundation-collection-navigator-href="#" <%= attrs %>>
 
 <coral-card-asset>
     <img src="<%= xssAPI.getValidHref(thumbnailUrl) %>">
@@ -59,7 +59,7 @@
 %></coral-card-propertylist>
 </coral-card-content>
     <meta class="foundation-collection-quickactions" data-foundation-collection-quickactions-rel="<%= xssAPI.encodeForHTMLAttr(actionRels) %>">
-    <link rel="properties" href="<%= xssAPI.getValidHref(request.getContextPath()) %>"></link>
+    <link rel="properties" href="<%= xssAPI.getValidHref(request.getContextPath()) %>"/>
 </coral-card>
 
 <coral-quickactions target="_prev" alignmy="left top" alignat="left top">
