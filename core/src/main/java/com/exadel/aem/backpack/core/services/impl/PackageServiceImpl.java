@@ -65,29 +65,37 @@ public class PackageServiceImpl implements PackageService {
 
 		Long totalSize = 0l;
 		for (AssetReferencedItem referencedItem : assetLinks) {
-			totalSize += getAssetSize(resourceResolver, referencedItem.getPath());
+			referencedItem.setSize(getAssetSize(resourceResolver, referencedItem.getPath()));
+            totalSize += referencedItem.getSize();
 		}
 
-		BuildPackageInfo packageInfo = new BuildPackageInfo();
-		TestBuildInfo testBuildInfo = new TestBuildInfo();
-		packageInfo.setTestBuildInfo(testBuildInfo);
+        BuildPackageInfo packageInfo = new BuildPackageInfo();
+        TestBuildInfo testBuildInfo = new TestBuildInfo();
+        packageInfo.setTestBuildInfo(testBuildInfo);
 
-		testBuildInfo.setAssetReferences(assetLinks);
-		testBuildInfo.setTotalSize(totalSize);
+        testBuildInfo.setAssetReferences(assetLinks);
+        testBuildInfo.setTotalSize(totalSize);
 
 		return packageInfo;
 	}
 
 	private Long getAssetSize(ResourceResolver resourceResolver, String path) {
+		Resource rootResource = resourceResolver.getResource(path);
+		Long totalSize = getAssetSize(rootResource);
+		return totalSize;
+	}
+
+	private Long getAssetSize(Resource resource) {
 		Long totalSize = 0l;
-		String queryString = "SELECT * FROM [nt:file] AS a WHERE ISDESCENDANTNODE(a,'" + path + "')";
-		Iterator<Resource> searchResult = resourceResolver.findResources(queryString, Query.JCR_SQL2);
-		while (searchResult.hasNext()) {
-			Resource resource = searchResult.next();
-			Resource childResource = resource.getChild("jcr:content/jcr:data");
-			if (childResource != null && childResource.getResourceMetadata().containsKey("sling.contentLength")) {
-				totalSize += (Long) childResource.getResourceMetadata().get("sling.contentLength");
-			}
+		if (resource == null) {
+			return totalSize;
+		}
+		for (Resource child : resource.getChildren()) {
+			totalSize += getAssetSize(child);
+		}
+		Resource childResource = resource.getChild("jcr:content/jcr:data");
+		if (childResource != null && childResource.getResourceMetadata().containsKey("sling.contentLength")) {
+			totalSize += (Long)childResource.getResourceMetadata().get("sling.contentLength");
 		}
 		return totalSize;
 	}
