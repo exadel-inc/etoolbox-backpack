@@ -4,6 +4,7 @@ package com.exadel.aem.backpack.core.servlets;
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.services.PackageService;
 import com.google.gson.Gson;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
@@ -13,6 +14,8 @@ import org.osgi.service.component.annotations.Reference;
 import javax.servlet.Servlet;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 
 @Component(service = Servlet.class,
@@ -33,18 +36,24 @@ public class BuildPackageServlet extends SlingAllMethodsServlet {
 	@Override
 	protected void doPost(final SlingHttpServletRequest request,
 						  final SlingHttpServletResponse response) throws IOException {
-		String paths = request.getParameter("path");
+		String packagePath = request.getParameter("path");
+		String [] referencedResources = request.getParameterValues("referencedResources");
 /*		String packageName = request.getParameter("packageName");
 		String packageGroup = request.getParameter("packageGroup");
 		String version = request.getParameter("version");*/
 		String testBuild = request.getParameter("testBuild");
 
 		PackageInfo packageInfo;
+		Collection<String> referencedResList = Collections.emptyList();
+
+		if(ArrayUtils.isNotEmpty(referencedResources)) {
+			referencedResList = Arrays.asList(referencedResources);
+		}
 
 		if (testBuild != null) {
-			packageInfo = packageService.testBuild(request.getResourceResolver(), Arrays.asList(paths));
+			packageInfo = packageService.testBuild(request.getResourceResolver(), Arrays.asList(packagePath));
 		} else {
-			packageInfo = packageService.buildPackage(request.getResourceResolver(), paths);
+			packageInfo = packageService.buildPackage(request.getResourceResolver(), packagePath, referencedResList);
 		}
 		response.setContentType("application/json");
 		response.getWriter().write(GSON.toJson(packageInfo));

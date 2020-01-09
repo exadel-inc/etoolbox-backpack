@@ -4,22 +4,35 @@
             <div class="content-container-inner">
                 <section class="coral-Well">
 
-                    <h4 id="name" class="coral-Heading coral-Heading--4">Package name</h4>
+                    <h4 id="name" class="coral-Heading coral-Heading--4"></h4>
 
-                    <coral-list>
-                        <coral-list-item id="packageName"></coral-list-item>
-                        <coral-list-item id="version"></coral-list-item>
-                        <coral-list-item id="lastBuilt"></coral-list-item>
-                        <coral-list-item id="filters">Filters:
+                    <ul>
+                        <li id="packageName">Package name:</li>
+                        <li id="version">Package version:</li>
+                        <li id="lastBuilt">Last built:</li>
+                        <li id="filters">Filters:
                             <div></div>
-                        </coral-list-item>
+                        </li>
+                        <li id="referencedResourcesList">Referenced resources:
+                            <ul>
+
+                            </ul>
+                        </li>
+                    </ul>
                     </coral-list>
 
                 </section>
-
-                <button is="coral-button" id="buildButton" class="coral-Form-field" variant="primary">Build</button>
-                <button is="coral-button" id="testBuildButton" class="coral-Form-field" variant="primary">Test build
-                </button>
+                <section id="referencedResources" class="coral-Well">
+                    <h3 class="coral-Form-fieldset-legend">Include resources</h3>
+                    <div class="coral-Form-fieldwrapper">
+                    </div>
+                </section>
+                <section class="coral-Well">
+                    <button is="coral-button" id="buildButton" class="coral-Form-field" variant="primary">Build</button>
+                    <button is="coral-button" id="testBuildButton" class="coral-Form-field" variant="primary">Test
+                        build
+                    </button>
+                </section>
                 <section id="buildLog" class="coral-Well">
                 </section>
             </div>

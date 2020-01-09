@@ -8,6 +8,7 @@ import com.exadel.aem.backpack.core.services.PackageService;
 import com.exadel.aem.backpack.core.services.ReferenceService;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
@@ -42,6 +43,9 @@ public class PackageServiceImpl implements PackageService {
 	private static final String THUMBNAIL_PATH = "/apps/backpack/assets/backpack.png";
 	private static final String THUMBNAIL_FILE = "thumbnail.png";
 	private static final String ERROR = "ERROR: ";
+	private static final Gson GSON = new Gson();
+	private static final String REFERENCED_RESOURCES = "referencedResources";
+	private static final String GENERAL_RESOURCES = "generalResources";
 
 	@Reference
 	private ReferenceService referenceService;
@@ -134,7 +138,7 @@ public class PackageServiceImpl implements PackageService {
 		}
 
 		packagesInfos.put(getPackageId(pkgGroupName, pkgName, version), buildInfo);
-		buildPackage(resourceResolver.getUserID(), buildInfo);
+		buildPackage(resourceResolver.getUserID(), buildInfo, Collections.emptyList());
 
 		return buildInfo;
 	}
@@ -142,7 +146,8 @@ public class PackageServiceImpl implements PackageService {
 
 	@Override
 	public PackageInfo buildPackage(final ResourceResolver resourceResolver,
-									final String path) {
+									final String packagePath,
+									final Collection<String> referencedResources) {
 		final Session session = resourceResolver.adaptTo(Session.class);
 
 		JcrPackageManager packMgr = PackagingService.getPackageManager(session);
@@ -150,10 +155,10 @@ public class PackageServiceImpl implements PackageService {
 
 
 		PackageInfo buildInfo = builder.build();
-		buildInfo.setPackagePath(path);
+		buildInfo.setPackagePath(packagePath);
 		try {
-			if (!isPkgExists(packMgr, path)) {
-				String packageExistMsg = "Package by this path " + path + " don't exist in the repository.";
+			if (!isPkgExists(packMgr, packagePath)) {
+				String packageExistMsg = "Package by this path " + packagePath + " don't exist in the repository.";
 
 				buildInfo.addLogMessage(ERROR + packageExistMsg);
 				LOGGER.error(packageExistMsg);
@@ -165,8 +170,8 @@ public class PackageServiceImpl implements PackageService {
 			return buildInfo;
 		}
 
-		packagesInfos.put(path, buildInfo);
-		buildPackage(resourceResolver.getUserID(), buildInfo);
+		packagesInfos.put(packagePath, buildInfo);
+		buildPackage(resourceResolver.getUserID(), buildInfo, referencedResources);
 
 		return buildInfo;
 	}
@@ -232,6 +237,7 @@ public class PackageServiceImpl implements PackageService {
 				builder.withPackageName(definition.get(JcrPackageDefinition.PN_NAME));
 				builder.withGroupName(definition.get(JcrPackageDefinition.PN_GROUP));
 				builder.withVersion(definition.get(JcrPackageDefinition.PN_VERSION));
+				builder.withReferencedResources(GSON.fromJson(definition.get(REFERENCED_RESOURCES), Map.class));
 				builder.withPaths(filterSets.stream().map(pathFilter -> pathFilter.getRoot()).collect(Collectors.toList()));
 				packageInfo = builder.build();
 				packageInfo.setPackageBuilt(definition.getLastWrapped());
@@ -253,7 +259,7 @@ public class PackageServiceImpl implements PackageService {
 		Collection<String> resultingPaths = new ArrayList();
 		resultingPaths.addAll(initialPaths);
 		referencedAssets.forEach(assetReferencedItem -> {
-			resultingPaths.add(assetReferencedItem.getPath());
+			//resultingPaths.add(assetReferencedItem.getPath());
 			packageInfo.addAssetReferencedItem(assetReferencedItem);
 
 		});
@@ -276,6 +282,9 @@ public class PackageServiceImpl implements PackageService {
 			if (!filter.getFilterSets().isEmpty()) {
 				jcrPackage = packMgr.create(packageBuildInfo.getGroupName(), packageBuildInfo.getPackageName(), packageBuildInfo.getVersion());
 				JcrPackageDefinition jcrPackageDefinition = jcrPackage.getDefinition();
+				jcrPackageDefinition.set(REFERENCED_RESOURCES, GSON.toJson(packageBuildInfo.getReferencedResources()), true);
+				jcrPackageDefinition.set(GENERAL_RESOURCES, GSON.toJson(packageBuildInfo.getPaths()), true);
+
 				jcrPackageDefinition.setFilter(filter, true);
 				jcrPackage.close();
 				addThumbnail(jcrPackageDefinition.getNode(), getThumbnailNode(packageBuildInfo.getThumbnailPath(), resourceResolver));
@@ -291,7 +300,7 @@ public class PackageServiceImpl implements PackageService {
 		return jcrPackage;
 	}
 
-	private void buildPackage(final String userId, final PackageInfo packageBuildInfo) {
+	private void buildPackage(final String userId, final PackageInfo packageBuildInfo, final Collection<String> referencedResources) {
 		new Thread(() -> {
 			Session userSession = null;
 			try {
@@ -305,8 +314,16 @@ public class PackageServiceImpl implements PackageService {
 					PackageId packageId = new PackageId(packageBuildInfo.getGroupName(), packageBuildInfo.getPackageName(), packageBuildInfo.getVersion());
 					jcrPackage = packMgr.open(packageId);
 				}
+				JcrPackageDefinition definition = jcrPackage.getDefinition();
+				Map<String, List<String>> pkgReferencedResources = (Map<String, List<String>>) GSON.fromJson(definition.get(REFERENCED_RESOURCES), Map.class);
+				List<String> pkgGeneralResources = (List<String>) GSON.fromJson(definition.get(GENERAL_RESOURCES), List.class);
 
-
+				DefaultWorkspaceFilter filter = new DefaultWorkspaceFilter();
+				pkgGeneralResources.forEach(s -> filter.add(new PathFilterSet(s)));
+				List<String> includeResources = referencedResources.stream().map(s -> pkgReferencedResources.get(s)).flatMap(List::stream)
+						.collect(Collectors.toList());
+				includeResources.forEach(s -> filter.add(new PathFilterSet(s)));
+				definition.setFilter(filter, true);
 				packMgr.assemble(jcrPackage, new ProgressTrackerListener() {
 					@Override
 					public void onMessage(final Mode mode, final String statusCode, final String path) {
@@ -403,7 +420,7 @@ public class PackageServiceImpl implements PackageService {
 
 	private static Node getThumbnailNode(final String thumbnailPath, final ResourceResolver resourceResolver) {
 		Resource thumbnailResource = resourceResolver.getResource(thumbnailPath);
-		if(thumbnailResource != null && !ResourceUtil.isNonExistingResource(thumbnailResource)) {
+		if (thumbnailResource != null && !ResourceUtil.isNonExistingResource(thumbnailResource)) {
 			return thumbnailResource.adaptTo(Node.class);
 		}
 		return null;

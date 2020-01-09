@@ -135,7 +135,7 @@
     </jcr:content>
     <createpagedialog
             jcr:primaryType="nt:unstructured"
-            jcr:title="Create page"
+            jcr:title="Create package"
             sling:resourceType="granite/ui/components/coral/foundation/dialog">
         <items jcr:primaryType="nt:unstructured">
             <form jcr:primaryType="nt:unstructured"

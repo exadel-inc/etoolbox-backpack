@@ -1,16 +1,20 @@
 $(function () {
     var path = window.location.href.split('.html')[1];
     var $packageName = $('#packageName'),
-        $version = $('version'),
-        $lastBuilt = $('lastBuilt'),
+        $name = $('#name'),
+        $version = $('#version'),
+        $lastBuilt = $('#lastBuilt'),
         $filters = $('#filters'),
         $buildButton = $('#buildButton'),
+        $referencedResources = $('#referencedResources').find('div'),
+        $referencedResourcesList = $('#referencedResourcesList').find('ul'),
         $testBuildButton = $('#testBuildButton'),
         $buildLog = $('#buildLog');
-    if (path) {
+    if (path && $packageName.length != 0) {
         getPackageInfo(path, function (data) {
             $packageName.text('Package name: ' + data.packageName);
-            $version.text('Package version: '+ data.version);
+            $name.text(data.packageName + '.zip')
+            $version.text('Package version: ' + data.version);
             if (data.packageBuilt) {
                 $lastBuilt.text('Last built: ' + data.packageBuilt);
             }
@@ -19,17 +23,45 @@ $(function () {
                 $.each(data.paths, function (index, value) {
                     filters = filters + '<div>' + value + '</div>'
                 });
+
                 $filters.append(filters);
+
+                if (data.referencedResources) {
+                    $.each(data.referencedResources, function (key, value) {
+                        var checkbox = new Coral.Checkbox().set({
+                            label: {
+                                innerHTML: key
+                            },
+                            value: key,
+                            name: 'referencedResources'
+                        });
+                        $referencedResources.append(checkbox);
+
+                        var listItem = '<li>' + key;
+                        $.each(value, function (index, value) {
+                            listItem += '<div>' + value + '</div>'
+                        });
+                        listItem += '</li>';
+                        $referencedResourcesList.append(listItem)
+                    });
+                }
             }
         });
     }
 
     $buildButton.click(function () {
+        var referencedResources = [];
+        $('input[name="referencedResources"]:checked').each(function () {
+            referencedResources.push(this.value);
+        });
         $.ajax({
             type: 'POST',
             url: '/services/backpack/buildPackage',
-            data: {path: path},
-            success: function () {
+            data: {
+                path: path,
+                referencedResources: referencedResources
+            }, success: function () {
+                $buildLog.empty();
                 setTimeout(updateLog, 1000);
             },
             dataType: 'json'
