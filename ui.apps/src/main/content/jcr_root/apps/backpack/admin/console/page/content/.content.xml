@@ -41,7 +41,7 @@
                     path="${requestPathInfo.suffix}"
                     selectionMode="${state[&quot;shell.collectionpage.selectionMode&quot;].boolean}"
                     size="${empty requestPathInfo.selectors[1] ? &quot;20&quot; : requestPathInfo.selectors[1]}"
-                    src="/apps/backpack/admin/console/content/jcr:content/views/card{.offset,limit}.html{+id}"
+                    src="/apps/backpack/admin/console/page/content/jcr:content/views/card{.offset,limit}.html{+id}"
                     stateId="shell.collectionpage">
                 <datasource
                         jcr:primaryType="nt:unstructured"
@@ -75,7 +75,7 @@
                             <data
                                     jcr:primaryType="nt:unstructured"
                                     nesting="hide"
-                                    src.uritemplate="/apps/backpack/admin/console/content/createpagedialog.html"/>
+                                    src.uritemplate="/apps/backpack/admin/console/page/content/createpagedialog.html"/>
                         </createpackage>
                     </items>
                     <granite:rendercondition

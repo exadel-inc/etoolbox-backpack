@@ -1,5 +1,6 @@
 package com.exadel.aem.backpack.core.services.impl;
 
+import com.day.cq.commons.jcr.JcrUtil;
 import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.TestBuildInfo;
@@ -16,6 +17,7 @@ import org.apache.jackrabbit.vault.fs.config.DefaultWorkspaceFilter;
 import org.apache.jackrabbit.vault.packaging.*;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.jcr.api.SlingRepository;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -37,6 +39,8 @@ public class PackageServiceImpl implements PackageService {
 
 
 	private static final String DEFAULT_PACKAGE_GROUP = "backpack";
+	private static final String THUMBNAIL_PATH = "/apps/backpack/assets/backpack.png";
+	private static final String THUMBNAIL_FILE = "thumbnail.png";
 	private static final String ERROR = "ERROR: ";
 
 	@Reference
@@ -176,6 +180,7 @@ public class PackageServiceImpl implements PackageService {
 		builder.withPackageName(pkgName);
 		builder.withPaths(initialPaths);
 		builder.withVersion(version);
+		builder.withThumbnailPath(THUMBNAIL_PATH);
 
 		String pkgGroupName = DEFAULT_PACKAGE_GROUP;
 
@@ -202,7 +207,7 @@ public class PackageServiceImpl implements PackageService {
 		Set<AssetReferencedItem> referencedAssets = getReferencedAssets(resourceResolver, initialPaths);
 		Collection<String> resultingPaths = initAssets(initialPaths, referencedAssets, packageInfo);
 		DefaultWorkspaceFilter filter = getWorkspaceFilter(resultingPaths);
-		createPackage(resourceResolver.getUserID(), packageInfo, filter);
+		createPackage(resourceResolver, packageInfo, filter);
 
 		return packageInfo;
 	}
@@ -260,19 +265,20 @@ public class PackageServiceImpl implements PackageService {
 		return packagesInfos.asMap().get(packagePath);
 	}
 
-	private JcrPackage createPackage(final String userId, final PackageInfo packageBuildInfo, final DefaultWorkspaceFilter filter) {
+	private JcrPackage createPackage(final ResourceResolver resourceResolver, final PackageInfo packageBuildInfo, final DefaultWorkspaceFilter filter) {
 
 		Session userSession = null;
 		JcrPackage jcrPackage = null;
 		try {
 			userSession = slingRepository.loginAdministrative(null);
-			userSession.impersonate(new SimpleCredentials(userId, new char[0]));
+			userSession.impersonate(new SimpleCredentials(resourceResolver.getUserID(), new char[0]));
 			JcrPackageManager packMgr = PackagingService.getPackageManager(userSession);
 			if (!filter.getFilterSets().isEmpty()) {
 				jcrPackage = packMgr.create(packageBuildInfo.getGroupName(), packageBuildInfo.getPackageName(), packageBuildInfo.getVersion());
 				JcrPackageDefinition jcrPackageDefinition = jcrPackage.getDefinition();
 				jcrPackageDefinition.setFilter(filter, true);
 				jcrPackage.close();
+				addThumbnail(jcrPackageDefinition.getNode(), getThumbnailNode(packageBuildInfo.getThumbnailPath(), resourceResolver));
 			}
 			packageBuildInfo.setPackageCreated(true);
 		} catch (Exception e) {
@@ -380,6 +386,27 @@ public class PackageServiceImpl implements PackageService {
 
 	private String getPackageId(final String pkgGroupName, final String packageName, final String version) {
 		return pkgGroupName + ":" + packageName + (StringUtils.isNotBlank(version) ? ":" + version : StringUtils.EMPTY);
+	}
+
+	private static void addThumbnail(Node packageNode, final Node thumbnailNode) {
+		if (packageNode == null || thumbnailNode == null) {
+			LOGGER.warn("Could not add package thumbnail");
+			return;
+		}
+		try {
+			JcrUtil.copy(thumbnailNode, packageNode, THUMBNAIL_FILE);
+			packageNode.getSession().save();
+		} catch (RepositoryException e) {
+			LOGGER.error("A repository exception occurred: ", e);
+		}
+	}
+
+	private static Node getThumbnailNode(final String thumbnailPath, final ResourceResolver resourceResolver) {
+		Resource thumbnailResource = resourceResolver.getResource(thumbnailPath);
+		if(thumbnailResource != null && !ResourceUtil.isNonExistingResource(thumbnailResource)) {
+			return thumbnailResource.adaptTo(Node.class);
+		}
+		return null;
 	}
 
 }

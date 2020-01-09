@@ -19,6 +19,8 @@ public class PackageInfo {
 
 	private String packagePath;
 
+	private String thumbnailPath;
+
 	private Collection<String> paths;
 
 	private Map<String, List<String>> referencedResources;
@@ -110,6 +112,10 @@ public class PackageInfo {
 		return packagePath;
 	}
 
+	public String getThumbnailPath() {
+		return thumbnailPath;
+	}
+
 	public void addLogMessage(final String message) {
 		if (buildLog != null && StringUtils.isNotBlank(message)) {
 			buildLog.add(message);
@@ -138,6 +144,7 @@ public class PackageInfo {
 		private Collection<String> paths;
 		private Map<String, List<String>> referencedResources;
 		private List<String> buildLog;
+		private String thumbnailPath;
 
 		private BuildPackageInfoBuilder() {
 		}
@@ -172,6 +179,11 @@ public class PackageInfo {
 			return this;
 		}
 
+		public BuildPackageInfoBuilder withThumbnailPath (String thumbnailPath) {
+			this.thumbnailPath = thumbnailPath;
+			return this;
+		}
+
 		public PackageInfo build() {
 			PackageInfo packageInfo = new PackageInfo();
 			packageInfo.paths = this.paths;
@@ -180,6 +192,7 @@ public class PackageInfo {
 			packageInfo.packageName = this.packageName;
 			packageInfo.version = this.version;
 			packageInfo.buildLog = new ArrayList<>();
+			packageInfo.thumbnailPath = this.thumbnailPath;
 			return packageInfo;
 		}
 	}
