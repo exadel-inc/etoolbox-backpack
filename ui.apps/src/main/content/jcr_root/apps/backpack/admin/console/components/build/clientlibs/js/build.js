@@ -7,12 +7,12 @@ $(function () {
         $filters = $('#filters'),
         $buildButton = $('#buildButton'),
         $referencedResources = $('#referencedResources').find('div'),
-        $referencedResourcesList = $('#referencedResourcesList').find('ul'),
+        $referencedResourcesList = $('#referencedResourcesList'),
         $testBuildButton = $('#testBuildButton'),
         $buildLog = $('#buildLog');
     if (path && $packageName.length != 0) {
         getPackageInfo(path, function (data) {
-            $packageName.text('Package name: ' + data.packageName);
+            $packageName.html('Package name: ' + data.packageName);
             $name.text(data.packageName + '.zip')
             $version.text('Package version: ' + data.version);
             if (data.packageBuilt) {
@@ -37,7 +37,7 @@ $(function () {
                         });
                         $referencedResources.append(checkbox);
 
-                        var listItem = '<li>' + key;
+                        var listItem = '<li><h4>' + key + '</h4>';
                         $.each(value, function (index, value) {
                             listItem += '<div>' + value + '</div>'
                         });
@@ -49,7 +49,16 @@ $(function () {
         });
     }
 
+    $testBuildButton.click(function () {
+        buildPackage(true);
+    });
+
+
     $buildButton.click(function () {
+        buildPackage(false);
+    });
+
+    function buildPackage(testBuild) {
         var referencedResources = [];
         $('input[name="referencedResources"]:checked').each(function () {
             referencedResources.push(this.value);
@@ -59,14 +68,31 @@ $(function () {
             url: '/services/backpack/buildPackage',
             data: {
                 path: path,
-                referencedResources: referencedResources
-            }, success: function () {
+                referencedResources: referencedResources,
+                testBuild: testBuild
+            }, success: function (data) {
                 $buildLog.empty();
-                setTimeout(updateLog, 1000);
+                if (testBuild) {
+                    if (data.buildLog) {
+                        $.each(data.buildLog, function (index, value) {
+                            $buildLog.append('<div>' + value + '</div>');
+                        });
+                        $buildLog.append('<h4>Approximate referenced resources size: ' + bytesToSize(data.dataSize) + '</h4>');
+                    }
+                } else {
+                    setTimeout(updateLog, 1000);
+                }
             },
             dataType: 'json'
         });
-    });
+    }
+
+    function bytesToSize(bytes) {
+        var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        if (bytes == 0) return '0 Byte';
+        var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+        return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+    }
 
     function updateLog() {
         $.ajax({

@@ -7,11 +7,11 @@ import java.util.Collection;
 
 public interface PackageService {
 
-	PackageInfo testBuild(ResourceResolver resourceResolver, Collection<String> paths);
+	PackageInfo testBuildPackage(ResourceResolver resourceResolver, String packagePath, Collection<String> referencedResources);
 
 	PackageInfo buildPackage(ResourceResolver resourceResolver, String pkgName, String packageGroup, String version);
 
-	PackageInfo buildPackage(ResourceResolver resourceResolver, String packagePath,Collection<String>  referencedResources);
+	PackageInfo buildPackage(ResourceResolver resourceResolver, String packagePath, Collection<String> referencedResources);
 
 	PackageInfo createPackage(ResourceResolver resourceResolver, Collection<String> paths, String pkgName, String packageGroup, String version);
 

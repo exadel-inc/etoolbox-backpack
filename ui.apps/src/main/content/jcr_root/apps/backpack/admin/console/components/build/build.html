@@ -4,7 +4,7 @@
             <div class="content-container-inner">
                 <section class="coral-Well">
 
-                    <h4 id="name" class="coral-Heading coral-Heading--4"></h4>
+                    <h3 id="name" class="coral-Heading coral-Heading--4"></h3>
 
                     <ul>
                         <li id="packageName">Package name:</li>
@@ -13,17 +13,21 @@
                         <li id="filters">Filters:
                             <div></div>
                         </li>
-                        <li id="referencedResourcesList">Referenced resources:
-                            <ul>
 
-                            </ul>
-                        </li>
+                    </ul>
+                    </coral-list>
+
+                </section>
+                <section class="coral-Well scrollable-section">
+                    <h4  class="coral-Heading coral-Heading--4">Referenced resources:</h4>
+                    <ul id="referencedResourcesList">
+
                     </ul>
                     </coral-list>
 
                 </section>
                 <section id="referencedResources" class="coral-Well">
-                    <h3 class="coral-Form-fieldset-legend">Include resources</h3>
+                    <h3 class="coral-Form-fieldset-legend">Include referenced resources</h3>
                     <div class="coral-Form-fieldwrapper">
                     </div>
                 </section>
@@ -33,7 +37,9 @@
                         build
                     </button>
                 </section>
-                <section id="buildLog" class="coral-Well">
+                <section class="coral-Well scrollable-section">
+                    <h3 class="coral-Form-fieldset-legend">Build log</h3>
+                    <div id="buildLog"></div>
                 </section>
             </div>
         </div>

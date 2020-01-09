@@ -3,7 +3,6 @@ package com.exadel.aem.backpack.core.services.impl;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
-import com.exadel.aem.backpack.core.dto.response.TestBuildInfo;
 import com.exadel.aem.backpack.core.services.PackageService;
 import com.exadel.aem.backpack.core.services.ReferenceService;
 import com.google.common.cache.Cache;
@@ -31,6 +30,8 @@ import javax.jcr.Session;
 import javax.jcr.SimpleCredentials;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Component(service = PackageService.class)
@@ -59,27 +60,41 @@ public class PackageServiceImpl implements PackageService {
 			.build();
 
 	@Override
-	public PackageInfo testBuild(ResourceResolver resourceResolver, Collection<String> paths) {
+	public PackageInfo testBuildPackage(final ResourceResolver resourceResolver,
+										final String packagePath,
+										final Collection<String> referencedResources) {
 
-		Set<AssetReferencedItem> assetLinks = new HashSet();
-		paths.forEach(path -> {
-			Set<AssetReferencedItem> assetReferences = referenceService.getAssetReferences(resourceResolver, path);
-			assetLinks.addAll(assetReferences);
-		});
 
-		Long totalSize = 0l;
-		for (AssetReferencedItem referencedItem : assetLinks) {
-			referencedItem.setSize(getAssetSize(resourceResolver, referencedItem.getPath()));
-			totalSize += referencedItem.getSize();
+		final Session session = resourceResolver.adaptTo(Session.class);
+		JcrPackageManager packMgr = PackagingService.getPackageManager(session);
+		Node packageNode = null;
+		JcrPackage jcrPackage = null;
+		PackageInfo.BuildPackageInfoBuilder builder = PackageInfo.BuildPackageInfoBuilder.aBuildPackageInfo();
+		PackageInfo packageInfo = builder.build();
+		AtomicLong totalSize = new AtomicLong();
+
+		try {
+			packageNode = session.getNode(packagePath);
+
+			if (packageNode != null) {
+				jcrPackage = packMgr.open(packageNode);
+				JcrPackageDefinition definition = jcrPackage.getDefinition();
+				PackageInfo finalPackageInfo = packageInfo;
+				includeGeneralResources(definition, s -> finalPackageInfo.addLogMessage("A " + s));
+				includeReferencedResources(referencedResources, definition, s -> {
+					finalPackageInfo.addLogMessage("A " + s);
+					totalSize.addAndGet(getAssetSize(resourceResolver, s));
+				});
+				packageInfo.setDataSize(totalSize.get());
+				packageInfo.setPackageBuilt(definition.getLastWrapped());
+			}
+		} catch (RepositoryException e) {
+			LOGGER.error("Error during package opening", e);
+		} finally {
+			if (jcrPackage != null) {
+				jcrPackage.close();
+			}
 		}
-
-		PackageInfo packageInfo = new PackageInfo();
-		TestBuildInfo testBuildInfo = new TestBuildInfo();
-		packageInfo.setTestBuildInfo(testBuildInfo);
-
-		testBuildInfo.setAssetReferences(assetLinks);
-		testBuildInfo.setTotalSize(totalSize);
-
 		return packageInfo;
 	}
 
@@ -136,7 +151,7 @@ public class PackageServiceImpl implements PackageService {
 			LOGGER.error("Error during existing packages check", e);
 			return buildInfo;
 		}
-
+		//todo change to package path
 		packagesInfos.put(getPackageId(pkgGroupName, pkgName, version), buildInfo);
 		buildPackage(resourceResolver.getUserID(), buildInfo, Collections.emptyList());
 
@@ -259,9 +274,7 @@ public class PackageServiceImpl implements PackageService {
 		Collection<String> resultingPaths = new ArrayList();
 		resultingPaths.addAll(initialPaths);
 		referencedAssets.forEach(assetReferencedItem -> {
-			//resultingPaths.add(assetReferencedItem.getPath());
 			packageInfo.addAssetReferencedItem(assetReferencedItem);
-
 		});
 		return resultingPaths;
 	}
@@ -315,14 +328,9 @@ public class PackageServiceImpl implements PackageService {
 					jcrPackage = packMgr.open(packageId);
 				}
 				JcrPackageDefinition definition = jcrPackage.getDefinition();
-				Map<String, List<String>> pkgReferencedResources = (Map<String, List<String>>) GSON.fromJson(definition.get(REFERENCED_RESOURCES), Map.class);
-				List<String> pkgGeneralResources = (List<String>) GSON.fromJson(definition.get(GENERAL_RESOURCES), List.class);
-
 				DefaultWorkspaceFilter filter = new DefaultWorkspaceFilter();
-				pkgGeneralResources.forEach(s -> filter.add(new PathFilterSet(s)));
-				List<String> includeResources = referencedResources.stream().map(s -> pkgReferencedResources.get(s)).flatMap(List::stream)
-						.collect(Collectors.toList());
-				includeResources.forEach(s -> filter.add(new PathFilterSet(s)));
+				includeGeneralResources(definition, s -> filter.add(new PathFilterSet(s)));
+				includeReferencedResources(referencedResources, definition, s -> filter.add(new PathFilterSet(s)));
 				definition.setFilter(filter, true);
 				packMgr.assemble(jcrPackage, new ProgressTrackerListener() {
 					@Override
@@ -346,6 +354,23 @@ public class PackageServiceImpl implements PackageService {
 				closeSession(userSession);
 			}
 		}).start();
+	}
+
+	private void includeGeneralResources(final JcrPackageDefinition definition, final Consumer<String> pathConsumer) {
+		List<String> pkgGeneralResources = (List<String>) GSON.fromJson(definition.get(GENERAL_RESOURCES), List.class);
+		if (pkgGeneralResources != null) {
+			pkgGeneralResources.forEach(s -> pathConsumer.accept(s));
+		}
+	}
+
+	private void includeReferencedResources(final Collection<String> referencedResources, final JcrPackageDefinition definition, final Consumer<String> pathConsumer) {
+		Map<String, List<String>> pkgReferencedResources = (Map<String, List<String>>) GSON.fromJson(definition.get(REFERENCED_RESOURCES), Map.class);
+
+		if (pkgReferencedResources != null) {
+			List<String> includeResources = referencedResources.stream().map(s -> pkgReferencedResources.get(s)).flatMap(List::stream)
+					.collect(Collectors.toList());
+			includeResources.forEach(s -> pathConsumer.accept(s));
+		}
 	}
 
 	private void closeSession(final Session userSession) {
@@ -405,7 +430,7 @@ public class PackageServiceImpl implements PackageService {
 		return pkgGroupName + ":" + packageName + (StringUtils.isNotBlank(version) ? ":" + version : StringUtils.EMPTY);
 	}
 
-	private static void addThumbnail(Node packageNode, final Node thumbnailNode) {
+	private void addThumbnail(Node packageNode, final Node thumbnailNode) {
 		if (packageNode == null || thumbnailNode == null) {
 			LOGGER.warn("Could not add package thumbnail");
 			return;
@@ -418,7 +443,7 @@ public class PackageServiceImpl implements PackageService {
 		}
 	}
 
-	private static Node getThumbnailNode(final String thumbnailPath, final ResourceResolver resourceResolver) {
+	private Node getThumbnailNode(final String thumbnailPath, final ResourceResolver resourceResolver) {
 		Resource thumbnailResource = resourceResolver.getResource(thumbnailPath);
 		if (thumbnailResource != null && !ResourceUtil.isNonExistingResource(thumbnailResource)) {
 			return thumbnailResource.adaptTo(Node.class);

@@ -29,7 +29,7 @@ public class PackageInfo {
 
 	private volatile int latestLogIndex;
 
-	private TestBuildInfo testBuildInfo;
+	private Long dataSize;
 
 	public String getPackageName() {
 		return packageName;
@@ -55,14 +55,6 @@ public class PackageInfo {
 		return Collections.unmodifiableMap(referencedResources);
 	}
 
-	public TestBuildInfo getTestBuildInfo() {
-		return testBuildInfo;
-	}
-
-	public void setTestBuildInfo(TestBuildInfo testBuildInfo) {
-		this.testBuildInfo = testBuildInfo;
-	}
-
 	public List<String> getBuildLog() {
 		return Collections.unmodifiableList(buildLog);
 	}
@@ -70,6 +62,7 @@ public class PackageInfo {
 	public Calendar getPackageBuilt() {
 		return packageBuilt;
 	}
+
 
 	public List<String> getLatestBuildInfo() {
 		int currentBuildLogSize = buildLog.size();
@@ -120,6 +113,14 @@ public class PackageInfo {
 		if (buildLog != null && StringUtils.isNotBlank(message)) {
 			buildLog.add(message);
 		}
+	}
+
+	public Long getDataSize() {
+		return dataSize;
+	}
+
+	public void setDataSize(final Long dataSize) {
+		this.dataSize = dataSize;
 	}
 
 	@Override

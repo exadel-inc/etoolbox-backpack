@@ -38,10 +38,7 @@ public class BuildPackageServlet extends SlingAllMethodsServlet {
 						  final SlingHttpServletResponse response) throws IOException {
 		String packagePath = request.getParameter("path");
 		String [] referencedResources = request.getParameterValues("referencedResources");
-/*		String packageName = request.getParameter("packageName");
-		String packageGroup = request.getParameter("packageGroup");
-		String version = request.getParameter("version");*/
-		String testBuild = request.getParameter("testBuild");
+		Boolean testBuild = Boolean.parseBoolean(request.getParameter("testBuild"));
 
 		PackageInfo packageInfo;
 		Collection<String> referencedResList = Collections.emptyList();
@@ -50,8 +47,8 @@ public class BuildPackageServlet extends SlingAllMethodsServlet {
 			referencedResList = Arrays.asList(referencedResources);
 		}
 
-		if (testBuild != null) {
-			packageInfo = packageService.testBuild(request.getResourceResolver(), Arrays.asList(packagePath));
+		if (testBuild) {
+			packageInfo = packageService.testBuildPackage(request.getResourceResolver(), packagePath, referencedResList);
 		} else {
 			packageInfo = packageService.buildPackage(request.getResourceResolver(), packagePath, referencedResList);
 		}

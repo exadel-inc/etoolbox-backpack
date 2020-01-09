@@ -85,52 +85,6 @@
                             privileges="jcr:addChildNodes"/>
                 </create>
             </secondary>
-            <!--<selection jcr:primaryType="nt:unstructured">-->
-                <!--<open-->
-                        <!--granite:rel="screens-dcc-actions-properties-activator"-->
-                        <!--jcr:primaryType="nt:unstructured"-->
-                        <!--sling:resourceType="granite/ui/components/coral/foundation/collection/action"-->
-                        <!--action="cq.wcm.open"-->
-                        <!--activeSelectionCount="single"-->
-                        <!--icon="edit"-->
-                        <!--relScope="item"-->
-                        <!--target=".screens-dcc-collection-resources"-->
-                        <!--text="Edit"-->
-                        <!--variant="actionBar">-->
-                    <!--<data-->
-                            <!--jcr:primaryType="nt:unstructured"-->
-                            <!--cookiePath.url="/"-->
-                            <!--href.uritemplate="/bin/wcmcommand?cmd=open&amp;_charset_=utf-8&amp;path={item*}"/>-->
-                    <!--<granite:rendercondition-->
-                            <!--jcr:primaryType="nt:unstructured"-->
-                            <!--sling:resourceType="granite/ui/components/coral/foundation/renderconditions/simple"-->
-                            <!--expression="{Boolean}true"-->
-                            <!--path=""-->
-                            <!--privileges=""/>-->
-                <!--</open>-->
-                <!--<delete-->
-                        <!--granite:rel="screens-dcc-actions-delete-activator"-->
-                        <!--jcr:primaryType="nt:unstructured"-->
-                        <!--sling:resourceType="granite/ui/components/coral/foundation/collection/action"-->
-                        <!--action="cq.wcm.delete"-->
-                        <!--activeSelectionCount="multiple"-->
-                        <!--icon="delete"-->
-                        <!--relScope="item"-->
-                        <!--target=".screens-dcc-collection-resources"-->
-                        <!--text="Delete"-->
-                        <!--variant="actionBar">-->
-                    <!--<granite:rendercondition-->
-                            <!--jcr:primaryType="nt:unstructured"-->
-                            <!--sling:resourceType="granite/ui/components/coral/foundation/renderconditions/simple"-->
-                            <!--expression="{Boolean}true"-->
-                            <!--path=""-->
-                            <!--privileges=""/>-->
-                <!--</delete>-->
-                <!--<granite:rendercondition-->
-                        <!--jcr:primaryType="nt:unstructured"-->
-                        <!--sling:resourceType="granite/ui/components/coral/foundation/renderconditions/simple"-->
-                        <!--expression="{Boolean}true"/>-->
-            <!--</selection>-->
         </actions>
     </jcr:content>
     <createpagedialog
