@@ -256,6 +256,7 @@ public class PackageServiceImpl implements PackageService {
 				builder.withPaths(filterSets.stream().map(pathFilter -> pathFilter.getRoot()).collect(Collectors.toList()));
 				packageInfo = builder.build();
 				packageInfo.setPackageBuilt(definition.getLastWrapped());
+				packageInfo.setDataSize(jcrPackage.getSize());
 			}
 		} catch (RepositoryException e) {
 			LOGGER.error("Error during package opening", e);

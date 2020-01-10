@@ -87,7 +87,7 @@
 
 <%!
     private String getThumbnailUrl(Resource resource1, int width, int height) {
-        return Text.escapePath(resource1.getPath()) + ".thumb." + width + "." + height + ".png?ck=" + System.currentTimeMillis()/1000;
+        return "/crx/packmgr/thumbnail.jsp?_charset_=utf-8&path=" + resource1.getPath();
     }
 
     private List<String> getActionRels(Resource resource, AccessControlManager acm) {
