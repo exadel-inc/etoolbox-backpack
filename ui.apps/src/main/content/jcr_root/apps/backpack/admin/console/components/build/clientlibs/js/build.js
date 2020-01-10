@@ -9,9 +9,14 @@ $(function () {
         $referencedResources = $('#referencedResources').find('div'),
         $referencedResourcesList = $('#referencedResourcesList'),
         $testBuildButton = $('#testBuildButton'),
+        $downloadBtn = $('#downloadBtn'),
         $buildLog = $('#buildLog');
+        $downloadBtn.hide();
     if (path && $packageName.length != 0) {
         getPackageInfo(path, function (data) {
+            if (data.packageBuilt) {
+                $downloadBtn.show();
+            }
             $packageName.html('Package name: ' + data.packageName);
             $name.text(data.packageName + (data.version ? '-' + data.version : '' ) + '.zip');
             $version.text('Package version: ' + data.version);
@@ -56,6 +61,14 @@ $(function () {
         buildPackage(false);
     });
 
+    $downloadBtn.click(function () {
+        downloadPackage(false);
+    });
+
+    function downloadPackage() {
+        window.location.href = path;
+    }
+
     function buildPackage(testBuild) {
         var referencedResources = [];
         $('input[name="referencedResources"]:checked').each(function () {
@@ -77,6 +90,7 @@ $(function () {
                         });
                         $buildLog.append('<h4>Approximate referenced resources size: ' + bytesToSize(data.dataSize) + '</h4>');
                     }
+                    $downloadBtn.show();
                 } else {
                     setTimeout(updateLog, 1000);
                 }
