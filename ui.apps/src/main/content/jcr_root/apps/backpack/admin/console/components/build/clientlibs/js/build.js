@@ -3,21 +3,24 @@ $(function () {
     var $packageName = $('#packageName'),
         $name = $('#name'),
         $version = $('#version'),
-        $lastBuilt = $('#lastBuilt'),
+        $lastBuilt = $('#lastBuilt-time'),
         $filters = $('#filters'),
         $buildButton = $('#buildButton'),
         $referencedResources = $('#referencedResources').find('div'),
         $referencedResourcesList = $('#referencedResourcesList'),
         $testBuildButton = $('#testBuildButton'),
+        $downloadBtn = $('#downloadBtn'),
         $buildLog = $('#buildLog');
+        $downloadBtn.hide();
     if (path && $packageName.length != 0) {
         getPackageInfo(path, function (data) {
-            $packageName.html('Package name: ' + data.packageName);
-            $name.text(data.packageName + '.zip')
-            $version.text('Package version: ' + data.version);
             if (data.packageBuilt) {
-                $lastBuilt.text('Last built: ' + data.packageBuilt);
+                $downloadBtn.show();
             }
+            $packageName.html('Package name: ' + data.packageName);
+            $name.text(data.packageName + '.zip');
+            $version.text('Package version: ' + data.version);
+            $lastBuilt.val(getLastBuiltDate(data.packageBuilt));
             var filters = '';
             if (data.paths) {
                 $.each(data.paths, function (index, value) {
@@ -58,6 +61,14 @@ $(function () {
         buildPackage(false);
     });
 
+    $downloadBtn.click(function () {
+        downloadPackage(false);
+    });
+
+    function downloadPackage() {
+        window.location.href = path;
+    }
+
     function buildPackage(testBuild) {
         var referencedResources = [];
         $('input[name="referencedResources"]:checked').each(function () {
@@ -79,12 +90,26 @@ $(function () {
                         });
                         $buildLog.append('<h4>Approximate referenced resources size: ' + bytesToSize(data.dataSize) + '</h4>');
                     }
+                    $downloadBtn.show();
                 } else {
                     setTimeout(updateLog, 1000);
                 }
             },
             dataType: 'json'
         });
+    }
+
+    function getLastBuiltDate(packageBuiltDate) {
+        if(packageBuiltDate) {
+            return new Date(packageBuiltDate.year,
+                packageBuiltDate.month,
+                packageBuiltDate.dayOfMonth,
+                packageBuiltDate.hourOfDay,
+                packageBuiltDate.minute,
+                packageBuiltDate.second).toISOString();
+        }
+        return 'never';
+
     }
 
     function bytesToSize(bytes) {
