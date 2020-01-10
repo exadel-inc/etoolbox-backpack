@@ -97,7 +97,10 @@ $(function () {
                         });
                         $buildLog.append('<h4>Approximate referenced resources size: ' + bytesToSize(data.dataSize) + '</h4>');
                     }
-                    $downloadBtn.show();
+                    if (!testBuild) {
+                        $downloadBtn.show();
+                    }
+
                 } else {
                     setTimeout(updateLog, 1000);
                     $buildButton.text('Rebuild');
