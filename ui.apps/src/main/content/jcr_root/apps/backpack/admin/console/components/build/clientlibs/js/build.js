@@ -19,7 +19,7 @@ $(function () {
                 $downloadBtn.show();
             }
             $packageName.html('Package name: ' + data.packageName);
-            $name.text(data.packageName + (data.version ? '-' + data.version : '' ) + '.zip');
+            $name.text(data.packageNodeName);
             $version.text('Package version: ' + data.version);
             $lastBuilt.val(getLastBuiltDate(data.packageBuilt));
             if(data.packageBuilt) {
