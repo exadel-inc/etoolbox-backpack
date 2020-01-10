@@ -18,7 +18,7 @@
         <redirector
                 jcr:primaryType="nt:unstructured"
                 sling:resourceType="granite/ui/components/coral/foundation/admin/contentchecker"
-                allowed="^(/etc/packages/backpack)$"
+                allowed="[^/$,^/etc/packages/?$,^/etc/packages/backpack/?$]"
                 path="${requestPathInfo.suffix}"
                 redirectWhenEmpty="/backpack.html/etc/packages/backpack"/>
         <head jcr:primaryType="nt:unstructured">

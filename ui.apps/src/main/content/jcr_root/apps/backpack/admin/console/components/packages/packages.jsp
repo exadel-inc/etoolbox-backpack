@@ -33,6 +33,10 @@
     Config dsCfg = new Config(resource.getChild(Config.DATASOURCE));
 
     String parentPath = ex.getString(dsCfg.get("path", String.class));
+    if (StringUtils.isEmpty(parentPath) || parentPath.equals("/")) {
+        parentPath = ETC_PACKAGES + "backpack";
+    }
+
     final Integer offset = ex.get(dsCfg.get("offset", String.class), Integer.class);
     final Integer limit = ex.get(dsCfg.get("limit", String.class), Integer.class);
 
@@ -42,37 +46,30 @@
     final Session session = resourceResolver.adaptTo(Session.class);
     final JcrPackageManager packageManager = PackagingService.getPackageManager(session);
 
-    DataSource ds;
-    if (parentPath == null) {
-        ds = EmptyDataSource.instance();
-    } else {
-        List<JcrPackage> packages = packageManager.listPackages(StringUtils.substringAfter(parentPath, ETC_PACKAGES), false);
-        final Iterator<Resource> sortedChildrenIterator = getIterator(resourceResolver, packages, sortName, sortDir);
-        final String itemRT = dsCfg.get("itemResourceType", String.class);
+    List<JcrPackage> packages = packageManager.listPackages(StringUtils.substringAfter(parentPath, ETC_PACKAGES), false);
+    final Iterator<Resource> sortedChildrenIterator = getIterator(resourceResolver, packages, sortName, sortDir);
+    final String itemRT = dsCfg.get("itemResourceType", String.class);
 
-        @SuppressWarnings("unchecked")
-        DataSource datasource = new AbstractDataSource() {
-            public Iterator<Resource> iterator() {
-                Iterator<Resource> it = new PagingIterator<Resource>(sortedChildrenIterator, offset, limit);
+    @SuppressWarnings("unchecked")
+    DataSource datasource = new AbstractDataSource() {
+        public Iterator<Resource> iterator() {
+            Iterator<Resource> it = new PagingIterator<Resource>(sortedChildrenIterator, offset, limit);
 
-                return new TransformIterator(it, new Transformer() {
-                    public Object transform(Object o) {
-                        Resource r = ((Resource) o);
+            return new TransformIterator(it, new Transformer() {
+                public Object transform(Object o) {
+                    Resource r = ((Resource) o);
 
-                        return new ResourceWrapper(r) {
-                            public String getResourceType() {
-                                return itemRT;
-                            }
-                        };
-                    }
-                });
-            }
-        };
+                    return new ResourceWrapper(r) {
+                        public String getResourceType() {
+                            return itemRT;
+                        }
+                    };
+                }
+            });
+        }
+    };
 
-        ds = datasource;
-    }
-
-    request.setAttribute(DataSource.class.getName(), ds);
+    request.setAttribute(DataSource.class.getName(), datasource);
 %>
 <%!
 
