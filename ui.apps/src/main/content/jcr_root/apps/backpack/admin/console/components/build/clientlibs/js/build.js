@@ -5,6 +5,7 @@ $(function () {
         $version = $('#version'),
         $lastBuilt = $('#lastBuilt-time'),
         $filters = $('#filters'),
+        $packageSize = $('#packageSize'),
         $buildButton = $('#buildButton'),
         $referencedResources = $('#referencedResources').find('div'),
         $referencedResourcesList = $('#referencedResourcesList'),
@@ -48,6 +49,9 @@ $(function () {
                         $referencedResourcesList.append(listItem)
                     });
                 }
+            }
+            if (data.dataSize) {
+                $packageSize.text('Package size: ' + bytesToSize(data.dataSize));
             }
         });
     }
@@ -116,7 +120,7 @@ $(function () {
         var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
         if (bytes == 0) return '0 Byte';
         var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-        return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+        return (bytes / Math.pow(1024, i)).toFixed( 1) + ' ' + sizes[i];
     }
 
     function updateLog() {
