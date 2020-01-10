@@ -13,7 +13,7 @@ $(function () {
     if (path && $packageName.length != 0) {
         getPackageInfo(path, function (data) {
             $packageName.html('Package name: ' + data.packageName);
-            $name.text(data.packageName + '.zip');
+            $name.text(data.packageName + (data.version ? '-' + data.version : '' ) + '.zip');
             $version.text('Package version: ' + data.version);
             $lastBuilt.val(getLastBuiltDate(data.packageBuilt));
             var filters = '';
