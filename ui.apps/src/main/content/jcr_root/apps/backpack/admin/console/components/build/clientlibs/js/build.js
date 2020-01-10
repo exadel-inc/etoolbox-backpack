@@ -21,6 +21,9 @@ $(function () {
             $name.text(data.packageName + (data.version ? '-' + data.version : '' ) + '.zip');
             $version.text('Package version: ' + data.version);
             $lastBuilt.val(getLastBuiltDate(data.packageBuilt));
+            if(data.packageBuilt) {
+              $buildButton.text('Rebuild');
+            }
             var filters = '';
             if (data.paths) {
                 $.each(data.paths, function (index, value) {
@@ -93,6 +96,7 @@ $(function () {
                     $downloadBtn.show();
                 } else {
                     setTimeout(updateLog, 1000);
+                    $buildButton.text('Rebuild');
                 }
             },
             dataType: 'json'
