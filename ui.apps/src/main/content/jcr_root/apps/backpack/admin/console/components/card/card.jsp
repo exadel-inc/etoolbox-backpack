@@ -48,13 +48,20 @@
 %><coral-card-title class="foundation-collection-item-title"><%= xssAPI.encodeForHTML(title) %></coral-card-title><%
 
     Calendar created = resource.getValueMap().get("jcr:created", Calendar.class);
+    Calendar modified = resource.getChild("jcr:content").getValueMap().get("jcr:lastModified", Calendar.class);
 
 %><coral-card-propertylist><%
     if (created != null) {
-%><coral-card-property icon="edit" title="<%= xssAPI.encodeForHTMLAttr(i18n.get("Created")) %>">
+%><coral-card-property icon="add" title="<%= xssAPI.encodeForHTMLAttr(i18n.get("Created")) %>">
     <foundation-time value="<%= xssAPI.encodeForHTMLAttr(created.toInstant().toString()) %>"></foundation-time>
 </coral-card-property><%
     }
+    if (modified != null) {
+%><coral-card-property icon="edit" title="<%= xssAPI.encodeForHTMLAttr(i18n.get("Modified")) %>">
+        <foundation-time value="<%= xssAPI.encodeForHTMLAttr(modified.toInstant().toString()) %>"></foundation-time>
+    </coral-card-property>
+    <%
+}
 
 %></coral-card-propertylist>
 </coral-card-content>
