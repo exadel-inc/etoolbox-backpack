@@ -257,6 +257,7 @@ public class PackageServiceImpl implements PackageService {
 				packageInfo = builder.build();
 				packageInfo.setPackageBuilt(definition.getLastWrapped());
 				packageInfo.setDataSize(jcrPackage.getSize());
+				packageInfo.setPackageNodeName(jcrPackage.getNode().getName());
 			}
 		} catch (RepositoryException e) {
 			LOGGER.error("Error during package opening", e);
@@ -298,11 +299,13 @@ public class PackageServiceImpl implements PackageService {
 				JcrPackageDefinition jcrPackageDefinition = jcrPackage.getDefinition();
 				jcrPackageDefinition.set(REFERENCED_RESOURCES, GSON.toJson(packageBuildInfo.getReferencedResources()), true);
 				jcrPackageDefinition.set(GENERAL_RESOURCES, GSON.toJson(packageBuildInfo.getPaths()), true);
-
 				jcrPackageDefinition.setFilter(filter, true);
-				jcrPackage.close();
+
+				packageBuildInfo.setPackageNodeName(jcrPackage.getNode().getName());
 				addThumbnail(jcrPackageDefinition.getNode(), getThumbnailNode(packageBuildInfo.getThumbnailPath(), resourceResolver));
+				jcrPackage.close();
 			}
+
 			packageBuildInfo.setPackageCreated(true);
 		} catch (Exception e) {
 			packageBuildInfo.addLogMessage(ERROR + e.getMessage());

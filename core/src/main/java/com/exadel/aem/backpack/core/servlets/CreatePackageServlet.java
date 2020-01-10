@@ -11,6 +11,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import javax.servlet.Servlet;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -49,6 +50,9 @@ public class CreatePackageServlet extends SlingAllMethodsServlet {
 
 		response.setContentType("application/json");
 		response.getWriter().write(GSON.toJson(packageInfo));
+		if (!packageInfo.isPackageCreated()) {
+			response.setStatus(HttpServletResponse.SC_CONFLICT);
+		}
 	}
 }
 

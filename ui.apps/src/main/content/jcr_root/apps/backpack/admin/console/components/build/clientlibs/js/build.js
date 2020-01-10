@@ -19,7 +19,7 @@ $(function () {
                 $downloadBtn.show();
             }
             $packageName.html('Package name: ' + data.packageName);
-            $name.text(data.packageName + (data.version ? '-' + data.version : '' ) + '.zip');
+            $name.text(data.packageNodeName);
             $version.text('Package version: ' + data.version);
             $lastBuilt.val(getLastBuiltDate(data.packageBuilt));
             if(data.packageBuilt) {
@@ -97,7 +97,10 @@ $(function () {
                         });
                         $buildLog.append('<h4>Approximate referenced resources size: ' + bytesToSize(data.dataSize) + '</h4>');
                     }
-                    $downloadBtn.show();
+                    if (!testBuild) {
+                        $downloadBtn.show();
+                    }
+
                 } else {
                     setTimeout(updateLog, 1000);
                     $buildButton.text('Rebuild');
