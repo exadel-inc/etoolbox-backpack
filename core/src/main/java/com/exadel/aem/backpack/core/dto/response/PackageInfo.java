@@ -9,6 +9,8 @@ public class PackageInfo {
 
 	private String packageName;
 
+	private String packageNodeName;
+
 	private String groupName;
 
 	private String version;
@@ -103,6 +105,10 @@ public class PackageInfo {
 
 	public String getPackagePath() {
 		return packagePath;
+	}
+
+	public void setPackageNodeName(final String packageNodeName) {
+		this.packageNodeName = packageNodeName;
 	}
 
 	public String getThumbnailPath() {

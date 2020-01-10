@@ -103,7 +103,7 @@
                         jcr:primaryType="nt:unstructured"
                         jcr:title="Success"
                         sling:resourceType="granite/ui/components/coral/foundation/form/responses/openprompt"
-                        open="/backpack/buildPackage.html${requestPathInfo.suffix}/{packageName}.zip"
+                        open="/backpack/buildPackage.html/etc/packages/backpack/{packageNodeName}"
                         redirect="/backpack.html${granite:encodeURIPath(requestPathInfo.suffix)}"
                         text="Your package has been created."/>
                         <items jcr:primaryType="nt:unstructured">
