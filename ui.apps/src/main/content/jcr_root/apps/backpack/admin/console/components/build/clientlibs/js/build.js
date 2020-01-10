@@ -3,7 +3,7 @@ $(function () {
     var $packageName = $('#packageName'),
         $name = $('#name'),
         $version = $('#version'),
-        $lastBuilt = $('#lastBuilt'),
+        $lastBuilt = $('#lastBuilt-time'),
         $filters = $('#filters'),
         $buildButton = $('#buildButton'),
         $referencedResources = $('#referencedResources').find('div'),
@@ -13,11 +13,9 @@ $(function () {
     if (path && $packageName.length != 0) {
         getPackageInfo(path, function (data) {
             $packageName.html('Package name: ' + data.packageName);
-            $name.text(data.packageName + '.zip')
+            $name.text(data.packageName + '.zip');
             $version.text('Package version: ' + data.version);
-            if (data.packageBuilt) {
-                $lastBuilt.text('Last built: ' + data.packageBuilt);
-            }
+            $lastBuilt.val(getLastBuiltDate(data.packageBuilt));
             var filters = '';
             if (data.paths) {
                 $.each(data.paths, function (index, value) {
@@ -85,6 +83,19 @@ $(function () {
             },
             dataType: 'json'
         });
+    }
+
+    function getLastBuiltDate(packageBuiltDate) {
+        if(packageBuiltDate) {
+            return new Date(packageBuiltDate.year,
+                packageBuiltDate.month,
+                packageBuiltDate.dayOfMonth,
+                packageBuiltDate.hourOfDay,
+                packageBuiltDate.minute,
+                packageBuiltDate.second).toISOString();
+        }
+        return 'never';
+
     }
 
     function bytesToSize(bytes) {
