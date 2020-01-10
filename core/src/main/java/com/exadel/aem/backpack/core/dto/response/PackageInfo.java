@@ -143,7 +143,7 @@ public class PackageInfo {
 		private String groupName;
 		private String version;
 		private Collection<String> paths;
-		private Map<String, List<String>> referencedResources;
+		private Map<String, List<String>> referencedResources = Collections.emptyMap();
 		private List<String> buildLog;
 		private String thumbnailPath;
 

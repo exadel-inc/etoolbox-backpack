@@ -295,9 +295,7 @@ public class PackageServiceImpl implements PackageService {
 			if (!filter.getFilterSets().isEmpty()) {
 				jcrPackage = packMgr.create(packageBuildInfo.getGroupName(), packageBuildInfo.getPackageName(), packageBuildInfo.getVersion());
 				JcrPackageDefinition jcrPackageDefinition = jcrPackage.getDefinition();
-				if (packageBuildInfo.getReferencedResources() != null) {
-					jcrPackageDefinition.set(REFERENCED_RESOURCES, GSON.toJson(packageBuildInfo.getReferencedResources()), true);
-				}
+				jcrPackageDefinition.set(REFERENCED_RESOURCES, GSON.toJson(packageBuildInfo.getReferencedResources()), true);
 				jcrPackageDefinition.set(GENERAL_RESOURCES, GSON.toJson(packageBuildInfo.getPaths()), true);
 
 				jcrPackageDefinition.setFilter(filter, true);
