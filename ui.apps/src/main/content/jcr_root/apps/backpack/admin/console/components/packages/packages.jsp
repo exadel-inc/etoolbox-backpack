@@ -28,6 +28,7 @@
 <%@ page import="org.apache.sling.api.resource.ResourceResolver" %>
 <%
     final String ETC_PACKAGES = "/etc/packages/";
+
     ExpressionHelper ex = cmp.getExpressionHelper();
     Config dsCfg = new Config(resource.getChild(Config.DATASOURCE));
 
@@ -35,8 +36,8 @@
     final Integer offset = ex.get(dsCfg.get("offset", String.class), Integer.class);
     final Integer limit = ex.get(dsCfg.get("limit", String.class), Integer.class);
 
-    final String sortName = slingRequest.getParameter("sortName");
-    final String sortDir = slingRequest.getParameter("sortDir");
+    final String sortName = StringUtils.defaultIfEmpty(slingRequest.getParameter("sortName"), "modified");
+    final String sortDir = StringUtils.defaultIfEmpty(slingRequest.getParameter("sortDir"), sortName.equals("modified") ? "desc" : StringUtils.EMPTY);
 
     final Session session = resourceResolver.adaptTo(Session.class);
     final JcrPackageManager packageManager = PackagingService.getPackageManager(session);
@@ -88,10 +89,8 @@
             //todo: handle ex
         }
 
-        if ((sortName != null && sortDir != null)) {
-            Comparator comparator = getComparator(sortName, sortDir.toLowerCase().equals("desc"));
-            Collections.sort(childrenList, comparator);
-        }
+        Comparator comparator = getComparator(sortName, "desc".equalsIgnoreCase(sortDir));
+        Collections.sort(childrenList, comparator);
         return childrenList.iterator();
     }
 
@@ -102,7 +101,7 @@
                     case "name":
                         return compareProperty(r1, r2, "vlt:definition/name");
                     case "modified":
-                        return compareProperty(r1, r2, "jcr:lastModified\n");
+                        return compareProperty(r1, r2, "jcr:lastModified");
                     default:
                         return 0;
                 }

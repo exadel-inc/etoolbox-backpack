@@ -140,5 +140,10 @@
             <groupId>com.day.cq.wcm</groupId>
             <artifactId>cq-wcm-taglib</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 </project>
