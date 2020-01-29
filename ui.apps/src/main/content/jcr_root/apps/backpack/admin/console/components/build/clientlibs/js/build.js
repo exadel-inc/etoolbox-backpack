@@ -11,7 +11,8 @@ $(function () {
         $referencedResourcesList = $('#referencedResourcesList'),
         $testBuildButton = $('#testBuildButton'),
         $downloadBtn = $('#downloadBtn'),
-        $buildLog = $('#buildLog');
+        $buildLog = $('#buildLog'),
+        $buildLogWrapper = $('#build-log-wrapper');
         $downloadBtn.hide();
     if (path && $packageName.length != 0) {
         getPackageInfo(path, function (data) {
@@ -96,6 +97,7 @@ $(function () {
                             $buildLog.append('<div>' + value + '</div>');
                         });
                         $buildLog.append('<h4>Approximate referenced resources size: ' + bytesToSize(data.dataSize) + '</h4>');
+                        scrollLog();
                     }
                 } else {
                     setTimeout(updateLog, 1000);
@@ -122,7 +124,7 @@ $(function () {
 
     function bytesToSize(bytes) {
         var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-        if (bytes == 0) return '0 Byte';
+        if (bytes == 0) return '0 Bytes';
         var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
         return (bytes / Math.pow(1024, i)).toFixed( 1) + ' ' + sizes[i];
     }
@@ -136,6 +138,7 @@ $(function () {
                     $.each(data.buildLog, function (index, value) {
                         $buildLog.append('<div>' + value + '</div>');
                     });
+                    scrollLog();
                 }
                 if (!data.packageBuilt) {
                     setTimeout(updateLog, 1000);
@@ -150,5 +153,12 @@ $(function () {
             data: {path: path},
             success: updateFunction,
         });
+    }
+
+    function scrollLog() {
+        $buildLogWrapper.stop().animate({
+            scrollTop: $buildLogWrapper[0].scrollHeight
+        }, 800);
+        $buildLogWrapper[0].scrollIntoView();
     }
 });
