@@ -26,7 +26,7 @@
     <artifactId>aem-backpack.core</artifactId>
     <packaging>bundle</packaging>
     <name>AEM BackPack - Core</name>
-    <description>Core bundle for AEM BackPack</description>
+    <description>Core bundle for AEM BackPack Tool</description>
     <build>
         <plugins>
             <plugin>
@@ -114,6 +114,12 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.icfolson.aem.groovy.console</groupId>
+            <artifactId>aem-groovy-console</artifactId>
+            <version>14.0.0</version>
         </dependency>
 
     </dependencies>

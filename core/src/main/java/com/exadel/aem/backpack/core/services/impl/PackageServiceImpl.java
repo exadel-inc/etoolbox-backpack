@@ -19,8 +19,13 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.jcr.api.SlingRepository;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.AttributeType;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +40,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Component(service = PackageService.class)
+@Designate(ocd = PackageServiceImpl.Configuration.class)
 public class PackageServiceImpl implements PackageService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(PackageServiceImpl.class);
@@ -54,10 +60,25 @@ public class PackageServiceImpl implements PackageService {
 	@Reference
 	private SlingRepository slingRepository;
 
-	private Cache<String, PackageInfo> packagesInfos = CacheBuilder.newBuilder()
-			.maximumSize(100)
-			.expireAfterWrite(1, TimeUnit.DAYS)
-			.build();
+	private Cache<String, PackageInfo> packagesInfos;
+
+	@Activate
+	private void activate(Configuration config){
+		packagesInfos = CacheBuilder.newBuilder()
+				.maximumSize(100)
+				.expireAfterWrite(config.buildInfoTTL(), TimeUnit.DAYS)
+				.build();
+	}
+
+	@ObjectClassDefinition(name = "BackPack PackageService configuration")
+	public @interface Configuration {
+		@AttributeDefinition(
+				name = "Package Build Info TTL",
+				description = "Specify TTL for package build information cache (in days).",
+				type= AttributeType.INTEGER
+		)
+		int buildInfoTTL() default 1;
+	}
 
 	@Override
 	public PackageInfo testBuildPackage(final ResourceResolver resourceResolver,

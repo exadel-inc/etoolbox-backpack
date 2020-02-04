@@ -30,17 +30,11 @@
     <!-- ====================================================================== -->
     <!-- P R O J E C T  D E S C R I P T I O N                                   -->
     <!-- ====================================================================== -->
-    <artifactId>aem-backpack.ui.apps</artifactId>
+    <artifactId>aem-backpack-content</artifactId>
     <packaging>content-package</packaging>
     <name>AEM BackPack - UI apps</name>
-    <description>UI apps package for AEM BackPack</description>
+    <description>Content package for AEM BackPack Tool</description>
 
-    <!-- <scm>
-        <connection></connection>
-        <developerConnection></developerConnection>
-        <url></url>
-        <tag>HEAD</tag>
-    </scm-->
 
     <!-- ====================================================================== -->
     <!-- B U I L D   D E F I N I T I O N                                        -->
@@ -64,6 +58,10 @@
                     <exclude>**/target/**</exclude>
                     <exclude>**/pom.xml</exclude>
                 </excludes>
+            </resource>
+            <resource>
+                <directory>${basedir}/src/main/content/META-INF/vault/definition</directory>
+                <targetPath>../vault-work/META-INF/vault/definition</targetPath>
             </resource>
         </resources>
         <plugins>
