@@ -6,9 +6,10 @@ import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.services.PackageService;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -47,7 +48,7 @@ public class CreatePackageServlet extends SlingAllMethodsServlet {
 		String version = request.getParameter("version");
 
 		List<String> actualPaths = Arrays.stream(paths)
-				.map(path -> getActualPath(path, excludeChildren))
+				.map(path -> getActualPath(path, excludeChildren, request.getResourceResolver()))
 				.collect(Collectors.toList());
 
 		final PackageInfo packageInfo = packageService.createPackage(
@@ -65,8 +66,12 @@ public class CreatePackageServlet extends SlingAllMethodsServlet {
 		}
 	}
 
-	private String getActualPath(final String path, final boolean excludeChildren) {
-		if (excludeChildren && !StringUtils.endsWith(path, JCR_CONTENT_NODE)) {
+	private String getActualPath(final String path, final boolean excludeChildren, ResourceResolver resourceResolver) {
+		if (!excludeChildren) {
+			return path;
+		}
+		Resource res = resourceResolver.getResource(path);
+		if (res != null && res.getChild(JcrConstants.JCR_CONTENT) != null) {
 			return path + JCR_CONTENT_NODE;
 		}
 		return path;
