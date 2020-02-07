@@ -15,9 +15,9 @@ public class PackageInfo {
 
 	private String version;
 
-	private boolean packageCreated;
-
 	private Calendar packageBuilt;
+
+	private PackageStatus packageStatus;
 
 	private String packagePath;
 
@@ -29,9 +29,27 @@ public class PackageInfo {
 
 	private List<String> buildLog;
 
-	private volatile int latestLogIndex;
-
 	private Long dataSize;
+
+	public PackageInfo() {
+	}
+
+	public PackageInfo(final PackageInfo packageInfo) {
+		this.packageName = packageInfo.packageName;
+		this.packageNodeName = packageInfo.packageNodeName;
+		this.groupName = packageInfo.groupName;
+		this.version = packageInfo.version;
+		if (packageInfo.packageBuilt != null) {
+			this.packageBuilt = Calendar.getInstance();
+			this.packageBuilt.setTime(packageInfo.packageBuilt.getTime());
+		}
+		this.packageStatus = packageInfo.packageStatus;
+		this.packagePath = packageInfo.getPackagePath();
+		this.thumbnailPath = packageInfo.thumbnailPath;
+		this.referencedResources = new HashMap<>(packageInfo.getReferencedResources());
+		this.buildLog = packageInfo.buildLog;
+		this.dataSize = packageInfo.dataSize;
+	}
 
 	public String getPackageName() {
 		return packageName;
@@ -43,10 +61,6 @@ public class PackageInfo {
 
 	public String getVersion() {
 		return version;
-	}
-
-	public boolean isPackageCreated() {
-		return packageCreated;
 	}
 
 	public Collection<String> getPaths() {
@@ -61,20 +75,28 @@ public class PackageInfo {
 		return Collections.unmodifiableList(buildLog);
 	}
 
+	public void setBuildLog(final List<String> buildLog) {
+		this.buildLog = buildLog;
+	}
+
 	public Calendar getPackageBuilt() {
 		return packageBuilt;
 	}
 
 
-	public List<String> getLatestBuildInfo() {
+	public List<String> getLatestBuildInfo(int latestLogIndex) {
 		int currentBuildLogSize = buildLog.size();
+
 		List<String> latestLog = Collections.emptyList();
 		if (currentBuildLogSize > 0) {
 			latestLog = new ArrayList(buildLog.subList(latestLogIndex, currentBuildLogSize));
-			latestLogIndex = currentBuildLogSize - 1;
 		}
 
 		return Collections.unmodifiableList(latestLog);
+	}
+
+	public void clearLog() {
+		buildLog.clear();
 	}
 
 	public void addAssetReferencedItem(final AssetReferencedItem item) {
@@ -91,8 +113,12 @@ public class PackageInfo {
 		}
 	}
 
-	public void setPackageCreated(final boolean packageCreated) {
-		this.packageCreated = packageCreated;
+	public PackageStatus getPackageStatus() {
+		return packageStatus;
+	}
+
+	public void setPackageStatus(final PackageStatus packageStatus) {
+		this.packageStatus = packageStatus;
 	}
 
 	public void setPackageBuilt(final Calendar packageBuilt) {
@@ -150,7 +176,6 @@ public class PackageInfo {
 		private String version;
 		private Collection<String> paths;
 		private Map<String, List<String>> referencedResources = new TreeMap<>();
-		private List<String> buildLog;
 		private String thumbnailPath;
 
 		private BuildPackageInfoBuilder() {
@@ -186,7 +211,7 @@ public class PackageInfo {
 			return this;
 		}
 
-		public BuildPackageInfoBuilder withThumbnailPath (String thumbnailPath) {
+		public BuildPackageInfoBuilder withThumbnailPath(String thumbnailPath) {
 			this.thumbnailPath = thumbnailPath;
 			return this;
 		}

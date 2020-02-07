@@ -2,6 +2,7 @@
 package com.exadel.aem.backpack.core.servlets;
 
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
+import com.exadel.aem.backpack.core.dto.response.PackageStatus;
 import com.exadel.aem.backpack.core.services.PackageService;
 import com.google.gson.Gson;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -50,7 +51,7 @@ public class CreatePackageServlet extends SlingAllMethodsServlet {
 
 		response.setContentType("application/json");
 		response.getWriter().write(GSON.toJson(packageInfo));
-		if (!packageInfo.isPackageCreated()) {
+		if (!PackageStatus.CREATED.equals(packageInfo.getPackageStatus())) {
 			response.setStatus(HttpServletResponse.SC_CONFLICT);
 		}
 	}

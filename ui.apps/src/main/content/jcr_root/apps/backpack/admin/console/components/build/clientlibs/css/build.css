@@ -2,7 +2,7 @@
     width: 960px;
     margin: 0 auto;
 }
-.scrollable-section {
+.scrollable-section, .info-section {
     max-height: 300px;
     overflow-y: auto;
 }

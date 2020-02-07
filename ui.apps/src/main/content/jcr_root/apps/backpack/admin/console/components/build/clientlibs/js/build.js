@@ -13,27 +13,37 @@ $(function () {
         $downloadBtn = $('#downloadBtn'),
         $buildLog = $('#buildLog'),
         $buildLogWrapper = $('#build-log-wrapper');
-        $downloadBtn.hide();
+
     if (path && $packageName.length != 0) {
+        disableAllActions();
         getPackageInfo(path, function (data) {
-            if (data.packageBuilt) {
-                $downloadBtn.show();
+            if (data.packageStatus === 'BUILT') {
+                packageBuilt();
+            } else if (data.packageStatus === 'BUILD_IN_PROGRESS') {
+                updateLog(0);
+            } else if (data.packageStatus === 'CREATED') {
+                packageCreated();
             }
+
             $packageName.html('Package name: ' + data.packageName);
             $name.text(data.packageNodeName);
             $version.text('Package version: ' + data.version);
             $lastBuilt.val(getLastBuiltDate(data.packageBuilt));
-            if(data.packageBuilt) {
-              $buildButton.text('Rebuild');
+            if (data.dataSize) {
+                $packageSize.text('Package size: ' + bytesToSize(data.dataSize));
             }
-            var filters = '';
-            if (data.paths) {
-                $.each(data.paths, function (index, value) {
-                    filters = filters + '<div>' + value + '</div>'
-                });
 
-                $filters.append(filters);
+            function initFilters() {
+                if (data.paths) {
+                    var filters = '';
+                    $.each(data.paths, function (index, value) {
+                        filters = filters + '<div>' + value + '</div>'
+                    });
+                    $filters.append(filters);
+                }
+            }
 
+            function initReferencedResources() {
                 if (data.referencedResources) {
                     $.each(data.referencedResources, function (key, value) {
                         var checkbox = new Coral.Checkbox().set({
@@ -53,10 +63,11 @@ $(function () {
                         $referencedResourcesList.append(listItem)
                     });
                 }
+
             }
-            if (data.dataSize) {
-                $packageSize.text('Package size: ' + bytesToSize(data.dataSize));
-            }
+
+            initFilters();
+            initReferencedResources();
         });
     }
 
@@ -66,6 +77,7 @@ $(function () {
 
 
     $buildButton.click(function () {
+        disableAllActions();
         buildPackage(false);
     });
 
@@ -100,17 +112,32 @@ $(function () {
                         scrollLog();
                     }
                 } else {
-                    setTimeout(updateLog, 1000);
-                    $buildButton.text('Rebuild');
-                    $downloadBtn.show();
+                    updateLog(0);
                 }
             },
             dataType: 'json'
         });
     }
 
+    function disableAllActions() {
+        $downloadBtn.prop('disabled', true);
+        $testBuildButton.prop('disabled', true);
+        $buildButton.prop('disabled', true);
+    }
+    function packageBuilt() {
+        $buildButton.text('Rebuild');
+        $downloadBtn.prop('disabled', false);
+        $testBuildButton.prop('disabled', false);
+        $buildButton.prop('disabled', false);
+    }
+
+    function packageCreated() {
+        $testBuildButton.prop('disabled', false);
+        $buildButton.prop('disabled', false);
+    }
+
     function getLastBuiltDate(packageBuiltDate) {
-        if(packageBuiltDate) {
+        if (packageBuiltDate) {
             return new Date(packageBuiltDate.year,
                 packageBuiltDate.month,
                 packageBuiltDate.dayOfMonth,
@@ -119,29 +146,36 @@ $(function () {
                 packageBuiltDate.second).toISOString();
         }
         return 'never';
-
     }
 
     function bytesToSize(bytes) {
         var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
         if (bytes == 0) return '0 Bytes';
         var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-        return (bytes / Math.pow(1024, i)).toFixed( 1) + ' ' + sizes[i];
+        return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
     }
 
-    function updateLog() {
+    function updateLog(logIndex) {
         $.ajax({
             url: '/services/backpack/buildPackage',
-            data: {path: path},
+            data: {path: path, latestLogIndex: logIndex},
             success: function (data) {
-                if (data.buildLog) {
+                if (data.buildLog && data.buildLog.length) {
                     $.each(data.buildLog, function (index, value) {
                         $buildLog.append('<div>' + value + '</div>');
                     });
+                    console.log(logIndex);
+                    logIndex = logIndex + data.buildLog.length;
+
                     scrollLog();
                 }
-                if (!data.packageBuilt) {
-                    setTimeout(updateLog, 1000);
+                if (data.packageStatus === 'BUILD_IN_PROGRESS') {
+                    setTimeout(function () {
+                        updateLog(logIndex);
+                    }, 1000);
+
+                } else if (data.packageStatus === 'BUILT') {
+                    packageBuilt();
                 }
             }
         })
