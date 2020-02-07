@@ -211,7 +211,7 @@ public class PackageServiceImpl implements PackageService {
 
 		try {
 			if (!isPkgExists(packMgr, pathToPackage)) {
-				String packageExistMsg = "Package by this path " + pathToPackage + " don't exist in the repository.";
+				String packageExistMsg = "Package by this path " + pathToPackage + " doesn't exist in the repository.";
 				PackageInfo buildInfo = builder.build();
 				buildInfo.setPackagePath(pathToPackage);
 				buildInfo.addLogMessage(ERROR + packageExistMsg);
