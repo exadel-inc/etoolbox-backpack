@@ -3,6 +3,7 @@ package com.exadel.aem.backpack.core.services.impl;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
+import com.exadel.aem.backpack.core.dto.response.PackageStatus;
 import com.exadel.aem.backpack.core.services.PackageService;
 import com.exadel.aem.backpack.core.services.ReferenceService;
 import com.google.common.cache.Cache;
@@ -63,7 +64,7 @@ public class PackageServiceImpl implements PackageService {
 	private Cache<String, PackageInfo> packagesInfos;
 
 	@Activate
-	private void activate(Configuration config){
+	private void activate(Configuration config) {
 		packagesInfos = CacheBuilder.newBuilder()
 				.maximumSize(100)
 				.expireAfterWrite(config.buildInfoTTL(), TimeUnit.DAYS)
@@ -75,7 +76,7 @@ public class PackageServiceImpl implements PackageService {
 		@AttributeDefinition(
 				name = "Package Build Info TTL",
 				description = "Specify TTL for package build information cache (in days).",
-				type= AttributeType.INTEGER
+				type = AttributeType.INTEGER
 		)
 		int buildInfoTTL() default 1;
 	}
@@ -142,74 +143,17 @@ public class PackageServiceImpl implements PackageService {
 
 	@Override
 	public PackageInfo buildPackage(final ResourceResolver resourceResolver,
-									final String pkgName,
-									final String packageGroup,
-									final String version) {
-		final Session session = resourceResolver.adaptTo(Session.class);
-
-		JcrPackageManager packMgr = PackagingService.getPackageManager(session);
-		PackageInfo.BuildPackageInfoBuilder builder = PackageInfo.BuildPackageInfoBuilder.aBuildPackageInfo();
-		builder.withPackageName(pkgName);
-		builder.withVersion(version);
-
-		String pkgGroupName = DEFAULT_PACKAGE_GROUP;
-
-		if (StringUtils.isNotBlank(packageGroup)) {
-			pkgGroupName = packageGroup;
-			builder.withGroupName(pkgGroupName);
-		}
-		PackageInfo buildInfo = builder.build();
-		try {
-			if (!isPkgExists(packMgr, pkgName, pkgGroupName, version)) {
-				String packageExistMsg = "Package with such name don't exist in the" + pkgGroupName + " group.";
-
-				buildInfo.addLogMessage(ERROR + packageExistMsg);
-				LOGGER.error(packageExistMsg);
-				return buildInfo;
-			}
-		} catch (RepositoryException e) {
-			buildInfo.addLogMessage(ERROR + e.getMessage());
-			LOGGER.error("Error during existing packages check", e);
-			return buildInfo;
-		}
-		//todo change to package path
-		packagesInfos.put(getPackageId(pkgGroupName, pkgName, version), buildInfo);
-		buildPackage(resourceResolver.getUserID(), buildInfo, Collections.emptyList());
-
-		return buildInfo;
-	}
-
-
-	@Override
-	public PackageInfo buildPackage(final ResourceResolver resourceResolver,
 									final String packagePath,
 									final Collection<String> referencedResources) {
-		final Session session = resourceResolver.adaptTo(Session.class);
-
-		JcrPackageManager packMgr = PackagingService.getPackageManager(session);
-		PackageInfo.BuildPackageInfoBuilder builder = PackageInfo.BuildPackageInfoBuilder.aBuildPackageInfo();
-
-
-		PackageInfo buildInfo = builder.build();
-		buildInfo.setPackagePath(packagePath);
-		try {
-			if (!isPkgExists(packMgr, packagePath)) {
-				String packageExistMsg = "Package by this path " + packagePath + " don't exist in the repository.";
-
-				buildInfo.addLogMessage(ERROR + packageExistMsg);
-				LOGGER.error(packageExistMsg);
-				return buildInfo;
-			}
-		} catch (RepositoryException e) {
-			buildInfo.addLogMessage(ERROR + e.getMessage());
-			LOGGER.error("Error during existing packages check", e);
-			return buildInfo;
+		PackageInfo packageInfo = getPackageInfo(resourceResolver, packagePath);
+		if (!PackageStatus.BUILD_IN_PROGRESS.equals(packageInfo.getPackageStatus())) {
+			packageInfo.setPackageStatus(PackageStatus.BUILD_IN_PROGRESS);
+			packageInfo.clearLog();
+			packagesInfos.put(packagePath, packageInfo);
+			buildPackage(resourceResolver.getUserID(), packageInfo, referencedResources);
 		}
 
-		packagesInfos.put(packagePath, buildInfo);
-		buildPackage(resourceResolver.getUserID(), buildInfo, referencedResources);
-
-		return buildInfo;
+		return packageInfo;
 	}
 
 	@Override
@@ -255,15 +199,26 @@ public class PackageServiceImpl implements PackageService {
 
 	@Override
 	public PackageInfo getPackageInfo(final ResourceResolver resourceResolver, final String pathToPackage) {
+		PackageInfo packageInfo = packagesInfos.asMap().get(pathToPackage);
+		if (packageInfo != null) {
+			return packageInfo;
+		}
 		final Session session = resourceResolver.adaptTo(Session.class);
 
 		JcrPackageManager packMgr = PackagingService.getPackageManager(session);
-		Node packageNode = null;
 		JcrPackage jcrPackage = null;
 		PackageInfo.BuildPackageInfoBuilder builder = PackageInfo.BuildPackageInfoBuilder.aBuildPackageInfo();
-		PackageInfo packageInfo = null;
+
 		try {
-			packageNode = session.getNode(pathToPackage);
+			if (!isPkgExists(packMgr, pathToPackage)) {
+				String packageExistMsg = "Package by this path " + pathToPackage + " doesn't exist in the repository.";
+				PackageInfo buildInfo = builder.build();
+				buildInfo.setPackagePath(pathToPackage);
+				buildInfo.addLogMessage(ERROR + packageExistMsg);
+				LOGGER.error(packageExistMsg);
+				return buildInfo;
+			}
+			Node packageNode = session.getNode(pathToPackage);
 
 			if (packageNode != null) {
 				jcrPackage = packMgr.open(packageNode);
@@ -277,6 +232,11 @@ public class PackageServiceImpl implements PackageService {
 				builder.withPaths(filterSets.stream().map(pathFilter -> pathFilter.getRoot()).collect(Collectors.toList()));
 				packageInfo = builder.build();
 				packageInfo.setPackageBuilt(definition.getLastWrapped());
+				if (definition.getLastWrapped() != null) {
+					packageInfo.setPackageStatus(PackageStatus.BUILT);
+				} else {
+					packageInfo.setPackageStatus(PackageStatus.CREATED);
+				}
 				packageInfo.setDataSize(jcrPackage.getSize());
 				packageInfo.setPackageNodeName(jcrPackage.getNode().getName());
 			}
@@ -303,8 +263,15 @@ public class PackageServiceImpl implements PackageService {
 	}
 
 	@Override
-	public PackageInfo getLatestPackageBuildInfo(final String packagePath) {
-		return packagesInfos.asMap().get(packagePath);
+	public PackageInfo getLatestPackageBuildInfo(final String packagePath, final int latestLogIndex) {
+		PackageInfo completeBuildInfo = packagesInfos.asMap().get(packagePath);
+		PackageInfo partialBuildInfo = null;
+
+		if (completeBuildInfo != null) {
+			partialBuildInfo = new PackageInfo(completeBuildInfo);
+			partialBuildInfo.setBuildLog(completeBuildInfo.getLatestBuildInfo(latestLogIndex));
+		}
+		return partialBuildInfo;
 	}
 
 	private JcrPackage createPackage(final ResourceResolver resourceResolver, final PackageInfo packageBuildInfo, final DefaultWorkspaceFilter filter) {
@@ -327,7 +294,7 @@ public class PackageServiceImpl implements PackageService {
 				jcrPackage.close();
 			}
 
-			packageBuildInfo.setPackageCreated(true);
+			packageBuildInfo.setPackageStatus(PackageStatus.CREATED);
 		} catch (Exception e) {
 			packageBuildInfo.addLogMessage(ERROR + e.getMessage());
 			packageBuildInfo.addLogMessage(ExceptionUtils.getStackTrace(e));
@@ -357,6 +324,7 @@ public class PackageServiceImpl implements PackageService {
 				includeGeneralResources(definition, s -> filter.add(new PathFilterSet(s)));
 				includeReferencedResources(referencedResources, definition, s -> filter.add(new PathFilterSet(s)));
 				definition.setFilter(filter, true);
+				packageBuildInfo.setPackageStatus(PackageStatus.BUILD_IN_PROGRESS);
 				packMgr.assemble(jcrPackage, new ProgressTrackerListener() {
 					@Override
 					public void onMessage(final Mode mode, final String statusCode, final String path) {
@@ -368,9 +336,8 @@ public class PackageServiceImpl implements PackageService {
 						packageBuildInfo.addLogMessage(s + " " + e.getMessage());
 					}
 				});
-
 				packageBuildInfo.setPackageBuilt(Calendar.getInstance());
-
+				packageBuildInfo.setPackageStatus(PackageStatus.BUILT);
 			} catch (Exception e) {
 				packageBuildInfo.addLogMessage(ERROR + e.getMessage());
 				packageBuildInfo.addLogMessage(ExceptionUtils.getStackTrace(e));

@@ -5,6 +5,7 @@ import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.services.PackageService;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
@@ -60,8 +61,10 @@ public class BuildPackageServlet extends SlingAllMethodsServlet {
 	protected void doGet(final SlingHttpServletRequest request,
 						 final SlingHttpServletResponse response) throws IOException {
 		String paths = request.getParameter("path");
+		int latestLogIndex = NumberUtils.toInt(request.getParameter("latestLogIndex"), 0);
 
-		final PackageInfo latestPackageBuildInfo = packageService.getLatestPackageBuildInfo(paths);
+
+		final PackageInfo latestPackageBuildInfo = packageService.getLatestPackageBuildInfo(paths, latestLogIndex);
 
 		response.setContentType("application/json");
 		response.getWriter().write(GSON.toJson(latestPackageBuildInfo));
