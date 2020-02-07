@@ -1,5 +1,8 @@
 $(function () {
     var path = window.location.href.split('.html')[1];
+    var BUILT = 'BUILT',
+        BUILD_IN_PROGRESS = 'BUILD_IN_PROGRESS',
+        CREATED = 'CREATED';
     var $packageName = $('#packageName'),
         $name = $('#name'),
         $version = $('#version'),
@@ -17,11 +20,11 @@ $(function () {
     if (path && $packageName.length != 0) {
         disableAllActions();
         getPackageInfo(path, function (data) {
-            if (data.packageStatus === 'BUILT') {
+            if (data.packageStatus === BUILT) {
                 packageBuilt();
-            } else if (data.packageStatus === 'BUILD_IN_PROGRESS') {
+            } else if (data.packageStatus === BUILD_IN_PROGRESS) {
                 updateLog(0);
-            } else if (data.packageStatus === 'CREATED') {
+            } else if (data.packageStatus === CREATED) {
                 packageCreated();
             }
 
@@ -45,18 +48,18 @@ $(function () {
 
             function initReferencedResources() {
                 if (data.referencedResources) {
-                    $.each(data.referencedResources, function (key, value) {
+                    $.each(data.referencedResources, function (key, referencedValue) {
                         var checkbox = new Coral.Checkbox().set({
                             label: {
                                 innerHTML: key
                             },
-                            value: key,
+                            referencedValue: key,
                             name: 'referencedResources'
                         });
                         $referencedResources.append(checkbox);
 
                         var listItem = '<li><h4>' + key + '</h4>';
-                        $.each(value, function (index, value) {
+                        $.each(referencedValue, function (index, value) {
                             listItem += '<div>' + value + '</div>'
                         });
                         listItem += '</li>';
@@ -82,7 +85,7 @@ $(function () {
     });
 
     $downloadBtn.click(function () {
-        downloadPackage(false);
+        downloadPackage();
     });
 
     function downloadPackage() {
@@ -169,22 +172,22 @@ $(function () {
 
                     scrollLog();
                 }
-                if (data.packageStatus === 'BUILD_IN_PROGRESS') {
+                if (data.packageStatus === BUILD_IN_PROGRESS) {
                     setTimeout(function () {
                         updateLog(logIndex);
                     }, 1000);
 
-                } else if (data.packageStatus === 'BUILT') {
+                } else if (data.packageStatus === BUILT) {
                     packageBuilt();
                 }
             }
         })
     }
 
-    function getPackageInfo(path, updateFunction) {
+    function getPackageInfo(packagePath, updateFunction) {
         $.ajax({
             url: '/services/backpack/packageInfo',
-            data: {path: path},
+            data: {path: packagePath},
             success: updateFunction,
         });
     }
