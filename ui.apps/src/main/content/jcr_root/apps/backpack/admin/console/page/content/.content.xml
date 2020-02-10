@@ -125,11 +125,17 @@
                                                             fieldLabel="Package Version"
                                                             name="version"/>
                                             <paths jcr:primaryType="nt:unstructured"
-                                                   sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
-                                                   fieldLabel="Path"
-                                                   name="paths"
-                                                   multiple="{Boolean}true"
-                                                   required="{Boolean}true"/>
+                                                  fieldLabel="Path"
+                                                  name="paths"
+                                                  multiple="{Boolean}true"
+                                                  required="{Boolean}true"
+                                                  sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"/>
+                                            <excludeChildren jcr:primaryType="nt:unstructured"
+                                                      fieldDescription="Check exclude child pages from package filter"
+                                                      name="excludeChildren"
+                                                      text="Exclude child pages?"
+                                                      uncheckedValue="false" value="true"
+                                                      sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"/>
                                             <create
                                                     jcr:primaryType="nt:unstructured"
                                                     sling:resourceType="granite/ui/components/coral/foundation/button"

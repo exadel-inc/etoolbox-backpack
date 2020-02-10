@@ -11,6 +11,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.jackrabbit.vault.fs.api.FilterSet;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
 import org.apache.jackrabbit.vault.fs.api.ProgressTrackerListener;
 import org.apache.jackrabbit.vault.fs.api.WorkspaceFilter;
@@ -229,7 +230,7 @@ public class PackageServiceImpl implements PackageService {
 				builder.withGroupName(definition.get(JcrPackageDefinition.PN_GROUP));
 				builder.withVersion(definition.get(JcrPackageDefinition.PN_VERSION));
 				builder.withReferencedResources(GSON.fromJson(definition.get(REFERENCED_RESOURCES), Map.class));
-				builder.withPaths(filterSets.stream().map(pathFilter -> pathFilter.getRoot()).collect(Collectors.toList()));
+				builder.withPaths(filterSets.stream().map(FilterSet::getRoot).collect(Collectors.toList()));
 				packageInfo = builder.build();
 				packageInfo.setPackageBuilt(definition.getLastWrapped());
 				if (definition.getLastWrapped() != null) {
@@ -254,11 +255,8 @@ public class PackageServiceImpl implements PackageService {
 	private Collection<String> initAssets(final Collection<String> initialPaths,
 										  final Set<AssetReferencedItem> referencedAssets,
 										  final PackageInfo packageInfo) {
-		Collection<String> resultingPaths = new ArrayList();
-		resultingPaths.addAll(initialPaths);
-		referencedAssets.forEach(assetReferencedItem -> {
-			packageInfo.addAssetReferencedItem(assetReferencedItem);
-		});
+		Collection<String> resultingPaths = new ArrayList<>(initialPaths);
+		referencedAssets.forEach(packageInfo::addAssetReferencedItem);
 		return resultingPaths;
 	}
 
@@ -351,7 +349,7 @@ public class PackageServiceImpl implements PackageService {
 	private void includeGeneralResources(final JcrPackageDefinition definition, final Consumer<String> pathConsumer) {
 		List<String> pkgGeneralResources = (List<String>) GSON.fromJson(definition.get(GENERAL_RESOURCES), List.class);
 		if (pkgGeneralResources != null) {
-			pkgGeneralResources.forEach(s -> pathConsumer.accept(s));
+			pkgGeneralResources.forEach(pathConsumer);
 		}
 	}
 
@@ -359,9 +357,9 @@ public class PackageServiceImpl implements PackageService {
 		Map<String, List<String>> pkgReferencedResources = (Map<String, List<String>>) GSON.fromJson(definition.get(REFERENCED_RESOURCES), Map.class);
 
 		if (pkgReferencedResources != null) {
-			List<String> includeResources = referencedResources.stream().map(s -> pkgReferencedResources.get(s)).flatMap(List::stream)
+			List<String> includeResources = referencedResources.stream().map(pkgReferencedResources::get).flatMap(List::stream)
 					.collect(Collectors.toList());
-			includeResources.forEach(s -> pathConsumer.accept(s));
+			includeResources.forEach(pathConsumer);
 		}
 	}
 
@@ -372,7 +370,7 @@ public class PackageServiceImpl implements PackageService {
 	}
 
 	private Set<AssetReferencedItem> getReferencedAssets(final ResourceResolver resourceResolver, final Collection<String> paths) {
-		Set<AssetReferencedItem> assetLinks = new HashSet();
+		Set<AssetReferencedItem> assetLinks = new HashSet<>();
 		paths.forEach(path -> {
 			Set<AssetReferencedItem> assetReferences = referenceService.getAssetReferences(resourceResolver, path);
 			assetLinks.addAll(assetReferences);
