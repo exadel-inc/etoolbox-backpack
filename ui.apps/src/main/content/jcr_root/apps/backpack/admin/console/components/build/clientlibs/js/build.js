@@ -53,7 +53,7 @@ $(function () {
                             label: {
                                 innerHTML: key
                             },
-                            referencedValue: key,
+                            value: key,
                             name: 'referencedResources'
                         });
                         $referencedResources.append(checkbox);

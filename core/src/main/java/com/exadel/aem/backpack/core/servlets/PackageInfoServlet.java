@@ -13,6 +13,9 @@ import org.osgi.service.component.annotations.Reference;
 import javax.servlet.Servlet;
 import java.io.IOException;
 
+import static com.exadel.aem.backpack.core.servlets.BuildPackageServlet.APPLICATION_JSON;
+import static com.exadel.aem.backpack.core.servlets.BuildPackageServlet.PATH;
+
 
 @Component(service = Servlet.class,
 		property = {
@@ -32,11 +35,11 @@ public class PackageInfoServlet extends SlingAllMethodsServlet {
 	@Override
 	protected void doGet(final SlingHttpServletRequest request,
 						 final SlingHttpServletResponse response) throws IOException {
-		String pathToPackage = request.getParameter("path");
+		String pathToPackage = request.getParameter(PATH);
 
 
 		PackageInfo packageInfo = packageService.getPackageInfo(request.getResourceResolver(), pathToPackage);
-		response.setContentType("application/json");
+		response.setContentType(APPLICATION_JSON);
 		response.getWriter().write(GSON.toJson(packageInfo));
 	}
 }

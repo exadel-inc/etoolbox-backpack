@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.exadel.aem.backpack.core.servlets.BuildPackageServlet.APPLICATION_JSON;
+
 
 @Component(service = Servlet.class,
 		property = {
@@ -34,7 +36,13 @@ public class CreatePackageServlet extends SlingAllMethodsServlet {
 	private static final long serialVersionUID = 1L;
 
 	private static final Gson GSON = new Gson();
+	private static final String PATHS = "paths";
+	private static final String PACKAGE_NAME = "packageName";
+	private static final String PACKAGE_GROUP = "packageGroup";
+	private static final String VERSION = "version";
 	private static final String JCR_CONTENT_NODE = "/" + JcrConstants.JCR_CONTENT;
+	private static final String EXCLUDE_CHILDREN = "excludeChildren";
+
 
 	@Reference
 	private transient PackageService packageService;
@@ -42,12 +50,12 @@ public class CreatePackageServlet extends SlingAllMethodsServlet {
 	@Override
 	protected void doPost(final SlingHttpServletRequest request,
 						  final SlingHttpServletResponse response) throws IOException {
-		String[] paths = request.getParameterValues("paths");
-		boolean excludeChildren = BooleanUtils.toBoolean(request.getParameter("excludeChildren"));
-		String packageName = request.getParameter("packageName");
-		String packageGroup = request.getParameter("packageGroup");
-		String version = request.getParameter("version");
+		String[] paths = request.getParameterValues(PATHS);
 
+		String packageName = request.getParameter(PACKAGE_NAME);
+		String packageGroup = request.getParameter(PACKAGE_GROUP);
+		String version = request.getParameter(VERSION);
+		boolean excludeChildren = BooleanUtils.toBoolean(request.getParameter(EXCLUDE_CHILDREN));
 		List<String> actualPaths = Arrays.stream(paths)
 				.map(path -> getActualPath(path, excludeChildren, request.getResourceResolver()))
 				.collect(Collectors.toList());
@@ -60,12 +68,13 @@ public class CreatePackageServlet extends SlingAllMethodsServlet {
 				version
 		);
 
-		response.setContentType("application/json");
+		response.setContentType(APPLICATION_JSON);
 		response.getWriter().write(GSON.toJson(packageInfo));
 		if (!PackageStatus.CREATED.equals(packageInfo.getPackageStatus())) {
 			response.setStatus(HttpServletResponse.SC_CONFLICT);
 		}
 	}
+
 
 	private String getActualPath(final String path, final boolean excludeChildren, ResourceResolver resourceResolver) {
 		if (!excludeChildren) {

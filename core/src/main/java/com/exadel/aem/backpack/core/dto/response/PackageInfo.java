@@ -25,9 +25,9 @@ public class PackageInfo {
 
 	private Collection<String> paths;
 
-	private Map<String, List<String>> referencedResources;
+	private Map<String, List<String>> referencedResources = new TreeMap<>();
 
-	private List<String> buildLog;
+	private List<String> buildLog = new ArrayList<>();
 
 	private Long dataSize;
 
@@ -137,6 +137,30 @@ public class PackageInfo {
 		this.packageNodeName = packageNodeName;
 	}
 
+	public void setPackageName(final String packageName) {
+		this.packageName = packageName;
+	}
+
+	public void setGroupName(final String groupName) {
+		this.groupName = groupName;
+	}
+
+	public void setVersion(final String version) {
+		this.version = version;
+	}
+
+	public void setThumbnailPath(final String thumbnailPath) {
+		this.thumbnailPath = thumbnailPath;
+	}
+
+	public void setPaths(final Collection<String> paths) {
+		this.paths = paths;
+	}
+
+	public void setReferencedResources(final Map<String, List<String>> referencedResources) {
+		this.referencedResources = referencedResources;
+	}
+
 	public String getThumbnailPath() {
 		return thumbnailPath;
 	}
@@ -167,65 +191,5 @@ public class PackageInfo {
 	@Override
 	public int hashCode() {
 		return Objects.hash(packageName, groupName);
-	}
-
-
-	public static final class BuildPackageInfoBuilder {
-		private String packageName;
-		private String groupName;
-		private String version;
-		private Collection<String> paths;
-		private Map<String, List<String>> referencedResources = new TreeMap<>();
-		private String thumbnailPath;
-
-		private BuildPackageInfoBuilder() {
-		}
-
-		public static BuildPackageInfoBuilder aBuildPackageInfo() {
-			return new BuildPackageInfoBuilder();
-		}
-
-		public BuildPackageInfoBuilder withPackageName(String packageName) {
-			this.packageName = packageName;
-			return this;
-		}
-
-		public BuildPackageInfoBuilder withGroupName(String groupName) {
-			this.groupName = groupName;
-			return this;
-		}
-
-		public BuildPackageInfoBuilder withVersion(String version) {
-			this.version = version;
-			return this;
-		}
-
-
-		public BuildPackageInfoBuilder withPaths(Collection<String> paths) {
-			this.paths = paths;
-			return this;
-		}
-
-		public BuildPackageInfoBuilder withReferencedResources(Map<String, List<String>> referencedResources) {
-			this.referencedResources = referencedResources;
-			return this;
-		}
-
-		public BuildPackageInfoBuilder withThumbnailPath(String thumbnailPath) {
-			this.thumbnailPath = thumbnailPath;
-			return this;
-		}
-
-		public PackageInfo build() {
-			PackageInfo packageInfo = new PackageInfo();
-			packageInfo.paths = this.paths;
-			packageInfo.referencedResources = this.referencedResources;
-			packageInfo.groupName = this.groupName;
-			packageInfo.packageName = this.packageName;
-			packageInfo.version = this.version;
-			packageInfo.buildLog = new ArrayList<>();
-			packageInfo.thumbnailPath = this.thumbnailPath;
-			return packageInfo;
-		}
 	}
 }

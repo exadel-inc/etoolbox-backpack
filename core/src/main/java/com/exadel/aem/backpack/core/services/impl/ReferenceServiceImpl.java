@@ -19,7 +19,8 @@ public class ReferenceServiceImpl implements ReferenceService {
 	private static final String DAM_ROOT = "/content/dam";
 
 	@Override
-	public Set<AssetReferencedItem> getAssetReferences(final ResourceResolver resourceResolver, final String searchPath) {
+	public Set<AssetReferencedItem> getAssetReferences(final ResourceResolver resourceResolver,
+													   final String searchPath) {
 		Resource resource = resourceResolver.getResource(searchPath);
 
 		if (resource == null) {
