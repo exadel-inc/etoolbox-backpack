@@ -12,6 +12,8 @@ import org.osgi.service.component.annotations.Reference;
 
 import javax.servlet.Servlet;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 import static com.exadel.aem.backpack.core.servlets.BuildPackageServlet.APPLICATION_JSON;
 import static com.exadel.aem.backpack.core.servlets.BuildPackageServlet.PATH;
@@ -35,7 +37,7 @@ public class PackageInfoServlet extends SlingAllMethodsServlet {
 	@Override
 	protected void doGet(final SlingHttpServletRequest request,
 						 final SlingHttpServletResponse response) throws IOException {
-		String pathToPackage = request.getParameter(PATH);
+		String pathToPackage = URLDecoder.decode(request.getParameter(PATH), StandardCharsets.UTF_8.displayName());
 
 
 		PackageInfo packageInfo = packageService.getPackageInfo(request.getResourceResolver(), pathToPackage);
