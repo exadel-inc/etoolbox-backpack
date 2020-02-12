@@ -14,6 +14,8 @@ import org.osgi.service.component.annotations.Reference;
 
 import javax.servlet.Servlet;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -42,7 +44,7 @@ public class BuildPackageServlet extends SlingAllMethodsServlet {
 	@Override
 	protected void doPost(final SlingHttpServletRequest request,
 						  final SlingHttpServletResponse response) throws IOException {
-		String packagePath = request.getParameter(PATH);
+		String packagePath = URLDecoder.decode(request.getParameter(PATH), StandardCharsets.UTF_8.displayName());
 		String [] referencedResources = request.getParameterValues(REFERENCED_RESOURCES);
 		boolean testBuild = Boolean.parseBoolean(request.getParameter(TEST_BUILD));
 
@@ -65,7 +67,7 @@ public class BuildPackageServlet extends SlingAllMethodsServlet {
 	@Override
 	protected void doGet(final SlingHttpServletRequest request,
 						 final SlingHttpServletResponse response) throws IOException {
-		String paths = request.getParameter(PATH);
+		String paths = URLDecoder.decode(request.getParameter(PATH), StandardCharsets.UTF_8.displayName());
 		int latestLogIndex = NumberUtils.toInt(request.getParameter(LATEST_LOG_INDEX), 0);
 
 

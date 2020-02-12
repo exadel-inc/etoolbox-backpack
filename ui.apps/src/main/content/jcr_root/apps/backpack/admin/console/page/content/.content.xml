@@ -131,7 +131,7 @@
                                                   required="{Boolean}true"
                                                   sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"/>
                                             <excludeChildren jcr:primaryType="nt:unstructured"
-                                                      fieldDescription="Check exclude child pages from package filter"
+                                                      fieldDescription="Check to exclude child pages from package filter"
                                                       name="excludeChildren"
                                                       text="Exclude child pages?"
                                                       uncheckedValue="false" value="true"

@@ -1,5 +1,6 @@
 package com.exadel.aem.backpack.core.services.impl;
 
+import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
@@ -52,6 +53,7 @@ public class PackageServiceImpl implements PackageService {
 	private static final String THUMBNAIL_PATH = "/apps/backpack/assets/backpack.png";
 	private static final String THUMBNAIL_FILE = "thumbnail.png";
 	private static final String ERROR = "ERROR: ";
+	private static final String JCR_CONTENT_NODE = "/" + JcrConstants.JCR_CONTENT;
 	private static final Gson GSON = new Gson();
 	private static final String REFERENCED_RESOURCES = "referencedResources";
 	private static final String GENERAL_RESOURCES = "generalResources";
@@ -165,13 +167,17 @@ public class PackageServiceImpl implements PackageService {
 	}
 
 	@Override
-	public PackageInfo createPackage(final ResourceResolver resourceResolver, final Collection<String> initialPaths, final String pkgName, final String packageGroup, final String version) {
+	public PackageInfo createPackage(final ResourceResolver resourceResolver, final Collection<String> initialPaths, boolean excludeChildren, final String pkgName, final String packageGroup, final String version) {
 		final Session session = resourceResolver.adaptTo(Session.class);
+
+		List<String> actualPaths = initialPaths.stream()
+				.map(path -> getActualPath(path, excludeChildren, resourceResolver))
+				.collect(Collectors.toList());
 
 		JcrPackageManager packMgr = PackagingService.getPackageManager(session);
 		PackageInfo packageInfo = new PackageInfo();
 		packageInfo.setPackageName(pkgName);
-		packageInfo.setPaths(initialPaths);
+		packageInfo.setPaths(actualPaths);
 		packageInfo.setVersion(version);
 		packageInfo.setThumbnailPath(THUMBNAIL_PATH);
 
@@ -196,8 +202,8 @@ public class PackageServiceImpl implements PackageService {
 			return packageInfo;
 		}
 
-		Set<AssetReferencedItem> referencedAssets = getReferencedAssets(resourceResolver, initialPaths);
-		Collection<String> resultingPaths = initAssets(initialPaths, referencedAssets, packageInfo);
+		Set<AssetReferencedItem> referencedAssets = getReferencedAssets(resourceResolver, actualPaths);
+		Collection<String> resultingPaths = initAssets(actualPaths, referencedAssets, packageInfo);
 		DefaultWorkspaceFilter filter = getWorkspaceFilter(resultingPaths);
 		createPackage(resourceResolver, packageInfo, filter);
 
@@ -366,6 +372,17 @@ public class PackageServiceImpl implements PackageService {
 				closeSession(userSession);
 			}
 		}).start();
+	}
+
+	private String getActualPath(final String path, final boolean excludeChildren, final ResourceResolver resourceResolver) {
+		if (!excludeChildren) {
+			return path;
+		}
+		Resource res = resourceResolver.getResource(path);
+		if (res != null && res.getChild(JcrConstants.JCR_CONTENT) != null) {
+			return path + JCR_CONTENT_NODE;
+		}
+		return path;
 	}
 
 	private void includeGeneralResources(final JcrPackageDefinition definition, final Consumer<String> pathConsumer) {
