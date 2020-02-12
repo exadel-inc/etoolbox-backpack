@@ -11,7 +11,7 @@ public interface PackageService {
 
 	PackageInfo buildPackage(ResourceResolver resourceResolver, String packagePath, Collection<String> referencedResources);
 
-	PackageInfo createPackage(ResourceResolver resourceResolver, Collection<String> paths, String pkgName, String packageGroup, String version);
+	PackageInfo createPackage(ResourceResolver resourceResolver, Collection<String> paths, boolean excludeChildren, String pkgName, String packageGroup, String version);
 
 	PackageInfo getPackageInfo(ResourceResolver resourceResolver, String pathToPackage);
 
