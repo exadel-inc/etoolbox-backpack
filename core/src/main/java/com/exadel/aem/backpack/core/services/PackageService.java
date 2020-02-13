@@ -9,13 +9,11 @@ public interface PackageService {
 
 	PackageInfo testBuildPackage(ResourceResolver resourceResolver, String packagePath, Collection<String> referencedResources);
 
-	PackageInfo buildPackage(ResourceResolver resourceResolver, String pkgName, String packageGroup, String version);
-
 	PackageInfo buildPackage(ResourceResolver resourceResolver, String packagePath, Collection<String> referencedResources);
 
-	PackageInfo createPackage(ResourceResolver resourceResolver, Collection<String> paths, String pkgName, String packageGroup, String version);
+	PackageInfo createPackage(ResourceResolver resourceResolver, Collection<String> paths, boolean excludeChildren, String pkgName, String packageGroup, String version);
 
 	PackageInfo getPackageInfo(ResourceResolver resourceResolver, String pathToPackage);
 
-	PackageInfo getLatestPackageBuildInfo(String packagePath);
+	PackageInfo getLatestPackageBuildInfo(String packagePath, final int latestLogIndex);
 }
