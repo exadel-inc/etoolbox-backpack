@@ -1,8 +1,7 @@
 $(function () {
     var path = window.location.href.split('.html')[1];
     var BUILT = 'BUILT',
-        BUILD_IN_PROGRESS = 'BUILD_IN_PROGRESS',
-        CREATED = 'CREATED';
+        BUILD_IN_PROGRESS = 'BUILD_IN_PROGRESS';
     var $packageName = $('#packageName'),
         $name = $('#name'),
         $version = $('#version'),
@@ -24,7 +23,7 @@ $(function () {
                 packageBuilt();
             } else if (data.packageStatus === BUILD_IN_PROGRESS) {
                 updateLog(0);
-            } else if (data.packageStatus === CREATED) {
+            } else {
                 packageCreated();
             }
 
@@ -107,8 +106,8 @@ $(function () {
             }, success: function (data) {
                 $buildLog.empty();
                 if (testBuild) {
-                    if (data.buildLog) {
-                        $.each(data.buildLog, function (index, value) {
+                    if (data.log) {
+                        $.each(data.log, function (index, value) {
                             $buildLog.append('<div>' + value + '</div>');
                         });
                         $buildLog.append('<h4>Approximate referenced resources size: ' + bytesToSize(data.dataSize) + '</h4>');
@@ -163,12 +162,12 @@ $(function () {
             url: '/services/backpack/buildPackage',
             data: {path: path, latestLogIndex: logIndex},
             success: function (data) {
-                if (data.buildLog && data.buildLog.length) {
-                    $.each(data.buildLog, function (index, value) {
+                if (data.log && data.log.length) {
+                    $.each(data.log, function (index, value) {
                         $buildLog.append('<div>' + value + '</div>');
                     });
                     console.log(logIndex);
-                    logIndex = logIndex + data.buildLog.length;
+                    logIndex = logIndex + data.log.length;
 
                     scrollLog();
                 }
