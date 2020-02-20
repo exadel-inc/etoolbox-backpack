@@ -36,7 +36,6 @@ import static javax.jcr.query.Query.JCR_SQL2;
         }
 )
 public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
-    public static final String DATASOURCE_TARGET = "datasourceTarget";
     private static final Logger LOG = LoggerFactory.getLogger(GroupDynamicSelectDataSource.class);
     private static final String PN_DROP_DOWN_QUERY_LANGUAGE = "dropDownQueryLanguage";
     private static final String PN_DROP_DOWN_QUERY = "dropDownQuery";
@@ -88,13 +87,6 @@ public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
             return ValueMap.EMPTY;
         }
         ValueMap properties = datasource.getValueMap();
-        if (properties.containsKey(DATASOURCE_TARGET)) {
-            Resource datasourceConf = resourceResolver.getResource(properties.get(DATASOURCE_TARGET, StringUtils.EMPTY));
-            if (datasourceConf == null) {
-                return ValueMap.EMPTY;
-            }
-            return datasourceConf.getValueMap();
-        }
         return properties;
     }
 
