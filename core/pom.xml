@@ -122,5 +122,10 @@
             <version>14.0.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.adobe.acs</groupId>
+            <artifactId>acs-aem-commons-bundle</artifactId>
+        </dependency>
+
     </dependencies>
 </project>

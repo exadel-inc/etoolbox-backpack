@@ -37,6 +37,10 @@
         parentPath = ETC_PACKAGES + "backpack";
     }
 
+    if (StringUtils.isNotBlank(request.getParameter("group"))) {
+        parentPath = request.getParameter("group");
+    }
+
     final Integer offset = ex.get(dsCfg.get("offset", String.class), Integer.class);
     final Integer limit = ex.get(dsCfg.get("limit", String.class), Integer.class);
 

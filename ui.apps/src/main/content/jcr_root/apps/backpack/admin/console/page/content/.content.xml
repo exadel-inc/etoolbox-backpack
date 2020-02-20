@@ -27,6 +27,58 @@
                     sling:resourceType="granite/ui/components/coral/foundation/includeclientlibs"
                     categories="[cq.common.wcm,cq.listview.coral.columns.personalization,cq.siteadmin.admin.page.row,cq.gui.coral.common.admin.references,cq.screens.dcc,backpack]"/>
         </head>
+        <rails
+                jcr:primaryType="nt:unstructured"
+                active="{Boolean}true">
+            <rail
+                    granite:id="searchRail"
+                    jcr:primaryType="nt:unstructured"
+                    jcr:title="Filter"
+                    sling:resourceType="granite/ui/components/coral/foundation/panel/railpanel"
+                    active="{Boolean}true"
+                    id="searchRail">
+                <items
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/container">
+                    <form
+                            granite:id="indexSearchForm"
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form"
+                            autosubmitForm="{Boolean}true"
+                            style="vertical">
+                        <items jcr:primaryType="nt:unstructured">
+
+                            <group_select
+                                    granite:id="indexGroupSelect"
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                    fieldLabel="Group"
+                                    name="group">
+                                <datasource
+                                        jcr:primaryType="nt:unstructured"
+                                        dropDownQuery = "SELECT * FROM [sling:Folder] AS node WHERE ISCHILDNODE(node, '/etc/packages') order by node.[jcr:path] asc"
+                                        dropDownKey = "path"
+                                        dropDownDisplayValue = ""
+                                        sling:resourceType="backpack/data-sources/group-dynamic-select"
+                                        datasourceTarget1="/apps/backpack/components/parameters/component/datasource"/>
+
+                            </group_select>
+                            <typehidden
+                                    granite:id="indexGroupInput"
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                    value="${param.group}"/>
+                            <button
+                                    granite:id="button"
+                                    type = "submit"
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/button"
+                                    text="Ok"/>
+                        </items>
+                    </form>
+                </items>
+            </rail>
+        </rails>
         <views jcr:primaryType="nt:unstructured">
             <card
                     granite:rel="screens-dcc-collection-resources"
@@ -55,7 +107,7 @@
         <breadcrumbs
                 jcr:primaryType="nt:unstructured"
                 sling:resourceType="screens/dcc/components/datasources/breadcrumbs"
-                path="${requestPathInfo.suffix}"/>
+                path="${param.group}"/>
         <actions jcr:primaryType="nt:unstructured">
             <secondary jcr:primaryType="nt:unstructured">
                 <create
