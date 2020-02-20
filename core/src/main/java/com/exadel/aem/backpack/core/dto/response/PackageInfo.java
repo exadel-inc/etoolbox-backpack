@@ -27,7 +27,7 @@ public class PackageInfo {
 
 	private Map<String, List<String>> referencedResources = new TreeMap<>();
 
-	private List<String> buildLog = new ArrayList<>();
+	private List<String> log = new ArrayList<>();
 
 	private Long dataSize;
 
@@ -47,7 +47,7 @@ public class PackageInfo {
 		this.packagePath = packageInfo.getPackagePath();
 		this.thumbnailPath = packageInfo.thumbnailPath;
 		this.referencedResources = new HashMap<>(packageInfo.getReferencedResources());
-		this.buildLog = packageInfo.buildLog;
+		this.log = packageInfo.log;
 		this.dataSize = packageInfo.dataSize;
 	}
 
@@ -71,12 +71,12 @@ public class PackageInfo {
 		return Collections.unmodifiableMap(referencedResources);
 	}
 
-	public List<String> getBuildLog() {
-		return Collections.unmodifiableList(buildLog);
+	public List<String> getLog() {
+		return Collections.unmodifiableList(log);
 	}
 
-	public void setBuildLog(final List<String> buildLog) {
-		this.buildLog = buildLog;
+	public void setLog(final List<String> log) {
+		this.log = log;
 	}
 
 	public Calendar getPackageBuilt() {
@@ -85,18 +85,18 @@ public class PackageInfo {
 
 
 	public List<String> getLatestBuildInfo(int latestLogIndex) {
-		int currentBuildLogSize = buildLog.size();
+		int currentBuildLogSize = log.size();
 
 		List<String> latestLog = Collections.emptyList();
 		if (currentBuildLogSize > 0) {
-			latestLog = new ArrayList(buildLog.subList(latestLogIndex, currentBuildLogSize));
+			latestLog = new ArrayList(log.subList(latestLogIndex, currentBuildLogSize));
 		}
 
 		return Collections.unmodifiableList(latestLog);
 	}
 
 	public void clearLog() {
-		buildLog.clear();
+		log.clear();
 	}
 
 	public void addAssetReferencedItem(final AssetReferencedItem item) {
@@ -166,8 +166,8 @@ public class PackageInfo {
 	}
 
 	public void addLogMessage(final String message) {
-		if (buildLog != null && StringUtils.isNotBlank(message)) {
-			buildLog.add(message);
+		if (log != null && StringUtils.isNotBlank(message)) {
+			log.add(message);
 		}
 	}
 
