@@ -40,6 +40,8 @@ public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
     private static final String PN_DROP_DOWN_QUERY_LANGUAGE = "dropDownQueryLanguage";
     private static final String PN_DROP_DOWN_QUERY = "dropDownQuery";
     private static final String DATASOURCE = "datasource";
+    private static final String ROOT_KEY = "/etc/packages";
+    private static final String ROOT_TEXT = "All packages";
 
     @Reference
     private DataSourceBuilder dataSourceBuilder;
@@ -69,6 +71,8 @@ public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
                     DataSourceOption firstDataSourceOption = new DataSourceOption(getOptionText(groupParam.getString()), getOptionKey(groupParam.getString()));
                     options.add(0, firstDataSourceOption);
                 }
+                DataSourceOption rootDataSourceOption = new DataSourceOption(ROOT_TEXT, ROOT_KEY);
+                options.add(1, rootDataSourceOption);
                 dataSourceBuilder.addDataSource(request, options);
             }
 
