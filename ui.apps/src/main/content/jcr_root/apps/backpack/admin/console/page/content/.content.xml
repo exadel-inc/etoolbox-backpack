@@ -57,8 +57,6 @@
                                 <datasource
                                         jcr:primaryType="nt:unstructured"
                                         dropDownQuery = "SELECT * FROM [sling:Folder] AS node WHERE ISCHILDNODE(node, '/etc/packages') order by node.[jcr:path] asc"
-                                        dropDownKey = "path"
-                                        dropDownDisplayValue = ""
                                         sling:resourceType="backpack/data-sources/group-dynamic-select"/>
 
                             </group_select>

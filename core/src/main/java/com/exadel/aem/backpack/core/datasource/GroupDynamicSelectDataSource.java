@@ -59,14 +59,12 @@ public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
         try {
             String queryLanguage = properties.get(PN_DROP_DOWN_QUERY_LANGUAGE, JCR_SQL2);
             String queryStatement = properties.get(PN_DROP_DOWN_QUERY, StringUtils.EMPTY);
-            String selectorKeyPN = properties.get(PN_SELECTOR_KEY, StringUtils.EMPTY);
-            String selectorDisplayValuePN = properties.get(PN_SELECTOR_DISPLAY_VALUE, StringUtils.EMPTY);
 
             if (StringUtils.isNotBlank(queryStatement)) {
                 // perform the query
                 List<Resource> results = queryHelper.findResources(resolver, queryLanguage, queryStatement, StringUtils.EMPTY);
                 List<DataSourceOption> options = results.stream()
-                        .map(resource -> createDataOption(resource, selectorKeyPN, selectorDisplayValuePN))
+                        .map(resource -> createDataOption(resource))
                         .filter(Objects::nonNull).collect(Collectors.toList());
                 RequestParameter groupParam = request.getRequestParameter("group");
                 if (groupParam != null) {
@@ -90,7 +88,7 @@ public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
         return properties;
     }
 
-    private DataSourceOption createDataOption(Resource resource, String selectorKeyPN, String selectorDisplayValuePN) {
+    private DataSourceOption createDataOption(Resource resource) {
         Map<String, Object> params = new HashMap<>();
         params.putAll(resource.getValueMap());
         params.put(JcrConstants.JCR_PATH, resource.getPath());
@@ -105,5 +103,4 @@ public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
         String[] path = resourcePath.split("/");
         return path[path.length - 1];
     }
-
 }
