@@ -40,6 +40,7 @@ public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
     private static final String PN_DROP_DOWN_QUERY_LANGUAGE = "dropDownQueryLanguage";
     private static final String PN_DROP_DOWN_QUERY = "dropDownQuery";
     private static final String DATASOURCE = "datasource";
+    private static final String DEFAULT_PATH_KEY = "/etc/packages/backpack";
     private static final String ROOT_KEY = "/etc/packages";
     private static final String ROOT_TEXT = "All packages";
 
@@ -69,6 +70,9 @@ public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
                 RequestParameter groupParam = request.getRequestParameter("group");
                 if (groupParam != null) {
                     DataSourceOption firstDataSourceOption = new DataSourceOption(getOptionText(groupParam.getString()), getOptionKey(groupParam.getString()));
+                    options.add(0, firstDataSourceOption);
+                } else {
+                    DataSourceOption firstDataSourceOption = new DataSourceOption(getOptionText(DEFAULT_PATH_KEY), getOptionKey(DEFAULT_PATH_KEY));
                     options.add(0, firstDataSourceOption);
                 }
                 DataSourceOption rootDataSourceOption = new DataSourceOption(ROOT_TEXT, ROOT_KEY);
