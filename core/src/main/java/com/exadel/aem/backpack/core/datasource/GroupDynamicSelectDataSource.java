@@ -39,8 +39,6 @@ public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
     private static final Logger LOG = LoggerFactory.getLogger(GroupDynamicSelectDataSource.class);
     private static final String PN_DROP_DOWN_QUERY_LANGUAGE = "dropDownQueryLanguage";
     private static final String PN_DROP_DOWN_QUERY = "dropDownQuery";
-    private static final String PN_SELECTOR_KEY = "dropDownKey";
-    private static final String PN_SELECTOR_DISPLAY_VALUE = "dropDownDisplayValue";
     private static final String DATASOURCE = "datasource";
 
     @Reference
