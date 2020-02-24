@@ -1,7 +1,6 @@
 package com.exadel.aem.backpack.core.servlets.validation;
 
 import com.exadel.aem.backpack.core.servlets.dto.PackageRequestInfo;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 
 public class LatestIndexProcessor extends RequestProcessor {
@@ -13,25 +12,19 @@ public class LatestIndexProcessor extends RequestProcessor {
     }
 
     @Override
-    public PackageRequestInfo process(final SlingHttpServletRequest request,
-                                      final PackageRequestInfo.PackageRequestInfoBuilder builder) {
-        String parameter = request.getParameter(LATEST_LOG_INDEX);
-
-        if (StringUtils.isNotBlank(parameter)) {
-            int latestLogIndex = Integer.parseInt(parameter);
-            if (latestLogIndex < 0) {
-                builder.withInvalidMessage(LATEST_LOG_INDEX + " must be positive!");
-                return builder.build();
-            }
-            builder.withLatestLogIndex(latestLogIndex);
-        } else if (mandatory) {
-            builder.withInvalidMessage(LATEST_LOG_INDEX + " is mandatory field!");
-            return builder.build();
+    void processRequestParameter(final SlingHttpServletRequest request,
+                                 final PackageRequestInfo.PackageRequestInfoBuilder builder,
+                                 final String[] parameterValues) {
+        int latestLogIndex = Integer.parseInt(parameterValues[0]);
+        if (latestLogIndex < 0) {
+            builder.withInvalidMessage(LATEST_LOG_INDEX + " must be positive!");
+            return;
         }
-        if (nextProcessor != null) {
-            return nextProcessor.process(request, builder);
-        }
+        builder.withLatestLogIndex(latestLogIndex);
+    }
 
-        return builder.build();
+    @Override
+    String getParameterName() {
+        return LATEST_LOG_INDEX;
     }
 }

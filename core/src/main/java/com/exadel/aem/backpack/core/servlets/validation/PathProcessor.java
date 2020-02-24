@@ -1,7 +1,6 @@
 package com.exadel.aem.backpack.core.servlets.validation;
 
 import com.exadel.aem.backpack.core.servlets.dto.PackageRequestInfo;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 
 import java.io.UnsupportedEncodingException;
@@ -17,25 +16,19 @@ public class PathProcessor extends RequestProcessor {
     }
 
     @Override
-    public PackageRequestInfo process(final SlingHttpServletRequest request,
-                                      final PackageRequestInfo.PackageRequestInfoBuilder builder) {
-        String parameter = request.getParameter(PATH);
+    void processRequestParameter(final SlingHttpServletRequest request,
+                                 final PackageRequestInfo.PackageRequestInfoBuilder builder,
+                                 final String[] parameterValues) {
+        try {
+            String packagePath = URLDecoder.decode(parameterValues[0], StandardCharsets.UTF_8.displayName());
+            builder.withPackagePath(packagePath);
+        } catch (UnsupportedEncodingException e) {
+            builder.withInvalidMessage(e.getMessage());
+        }
+    }
 
-        if (StringUtils.isNotBlank(parameter)) {
-            try {
-                String packagePath = URLDecoder.decode(parameter, StandardCharsets.UTF_8.displayName());
-                builder.withPackagePath(packagePath);
-            } catch (UnsupportedEncodingException e) {
-                builder.withInvalidMessage(e.getMessage());
-                return builder.build();
-            }
-        } else if (mandatory) {
-            builder.withInvalidMessage(PATH + " is mandatory field!");
-            return builder.build();
-        }
-        if (nextProcessor != null) {
-            return nextProcessor.process(request, builder);
-        }
-        return builder.build();
+    @Override
+    String getParameterName() {
+        return PATH;
     }
 }

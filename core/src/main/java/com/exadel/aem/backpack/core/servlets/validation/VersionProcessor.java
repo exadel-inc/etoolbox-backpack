@@ -1,7 +1,6 @@
 package com.exadel.aem.backpack.core.servlets.validation;
 
 import com.exadel.aem.backpack.core.servlets.dto.PackageRequestInfo;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 
 public class VersionProcessor extends RequestProcessor {
@@ -13,20 +12,14 @@ public class VersionProcessor extends RequestProcessor {
     }
 
     @Override
-    public PackageRequestInfo process(final SlingHttpServletRequest request,
-                                      final PackageRequestInfo.PackageRequestInfoBuilder builder) {
-        String parameter = request.getParameter(VERSION);
+    void processRequestParameter(final SlingHttpServletRequest request,
+                                 final PackageRequestInfo.PackageRequestInfoBuilder builder,
+                                 final String[] parameterValues) {
+        builder.withVersion(parameterValues[0]);
+    }
 
-        if (StringUtils.isNotBlank(parameter)) {
-            builder.withVersion(parameter);
-        } else if (mandatory) {
-            builder.withInvalidMessage(VERSION + " is mandatory field!");
-            return builder.build();
-        }
-        if (nextProcessor != null) {
-            return nextProcessor.process(request, builder);
-        }
-
-        return builder.build();
+    @Override
+    String getParameterName() {
+        return VERSION;
     }
 }
