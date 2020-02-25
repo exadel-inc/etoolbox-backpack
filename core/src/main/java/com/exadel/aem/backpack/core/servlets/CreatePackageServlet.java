@@ -45,7 +45,7 @@ public class CreatePackageServlet extends SlingAllMethodsServlet {
         GroupProcessor groupProcessor = new GroupProcessor(versionProcessor, false);
         NameProcessor nameProcessor = new NameProcessor(groupProcessor, true);
 
-        PackageRequestInfo requestInfo = nameProcessor.process(request, PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo());
+        PackageRequestInfo requestInfo = nameProcessor.processRequest(request, PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo());
         response.setContentType(APPLICATION_JSON);
 
         if (requestInfo.isInvalid()) {

@@ -38,7 +38,7 @@ public class PackageInfoServlet extends SlingAllMethodsServlet {
     protected void doGet(final SlingHttpServletRequest request,
                          final SlingHttpServletResponse response) throws IOException {
         PathProcessor pathProcessor = new PathProcessor(null, true);
-        PackageRequestInfo requestInfo = pathProcessor.process(request, PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo());
+        PackageRequestInfo requestInfo = pathProcessor.processRequest(request, PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo());
         response.setContentType(APPLICATION_JSON);
 
         if (requestInfo.isInvalid()) {

@@ -167,6 +167,19 @@
                                                   multiple="{Boolean}true"
                                                   required="{Boolean}true"
                                                   sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"/>
+                                            <group_select
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/form/autocomplete"
+                                                    fieldLabel="Group"
+                                                    name="group">
+                                                <datasource
+                                                        jcr:primaryType="nt:unstructured"
+                                                        dropDownQuery = "SELECT * FROM [sling:Folder] AS node WHERE ISCHILDNODE(node, '/etc/packages') order by node.[jcr:path] asc"
+                                                        sling:resourceType="backpack/data-sources/group-dynamic-select"/>
+                                                <options
+                                                        jcr:primaryType="nt:unstructured"
+                                                        sling:resourceType="granite/ui/components/coral/foundation/form/autocomplete/list"/>
+                                            </group_select>
                                             <excludeChildren jcr:primaryType="nt:unstructured"
                                                       fieldDescription="Check to exclude child pages from package filter"
                                                       name="excludeChildren"

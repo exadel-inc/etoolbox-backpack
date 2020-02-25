@@ -28,7 +28,6 @@ public class BuildPackageServlet extends SlingAllMethodsServlet {
     private static final long serialVersionUID = 1L;
 
     private static final Gson GSON = new Gson();
-    public static final String PATH = "path";
     public static final String APPLICATION_JSON = "application/json";
 
     @Reference
@@ -41,7 +40,7 @@ public class BuildPackageServlet extends SlingAllMethodsServlet {
         ReferencedResourceTypesProcessor referencedResourcesProcessor = new ReferencedResourceTypesProcessor(null, false);
         TestBuildProcessor testBuildProcessor = new TestBuildProcessor(referencedResourcesProcessor, false);
         PathProcessor packagePathsProcessor = new PathProcessor(testBuildProcessor, true);
-        PackageRequestInfo requestInfo = packagePathsProcessor.process(request, PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo());
+        PackageRequestInfo requestInfo = packagePathsProcessor.processRequest(request, PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo());
         response.setContentType(APPLICATION_JSON);
 
         if (requestInfo.isInvalid()) {
@@ -63,7 +62,7 @@ public class BuildPackageServlet extends SlingAllMethodsServlet {
                          final SlingHttpServletResponse response) throws IOException {
 		LatestIndexProcessor latestIndexProcessor = new LatestIndexProcessor(null, true);
 		PathProcessor pathProcessor = new PathProcessor(latestIndexProcessor, true);
-		PackageRequestInfo requestInfo = pathProcessor.process(request, PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo());
+		PackageRequestInfo requestInfo = pathProcessor.processRequest(request, PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo());
 
 		response.setContentType(APPLICATION_JSON);
 
