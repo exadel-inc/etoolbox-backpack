@@ -137,6 +137,10 @@ public class PackageInfo {
 		this.packageNodeName = packageNodeName;
 	}
 
+	public String getPackageNodeName() {
+		return packageNodeName;
+	}
+
 	public void setPackageName(final String packageName) {
 		this.packageName = packageName;
 	}
