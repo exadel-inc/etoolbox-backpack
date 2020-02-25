@@ -1,4 +1,3 @@
-
 package com.exadel.aem.backpack.core.servlets;
 
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
@@ -46,7 +45,7 @@ public class PackageInfoServlet extends SlingAllMethodsServlet {
             response.getWriter().write(GSON.toJson(requestInfo));
         } else {
             PackageInfo packageInfo = packageService.getPackageInfo(request.getResourceResolver(), requestInfo);
-			response.getWriter().write(GSON.toJson(packageInfo));
+            response.getWriter().write(GSON.toJson(packageInfo));
         }
     }
 }

@@ -16,30 +16,30 @@ import java.util.Set;
 
 @Component(service = ReferenceService.class)
 public class ReferenceServiceImpl implements ReferenceService {
-	private static final String DAM_ROOT = "/content/dam";
+    private static final String DAM_ROOT = "/content/dam";
 
-	@Override
-	public Set<AssetReferencedItem> getAssetReferences(final ResourceResolver resourceResolver,
-													   final String searchPath) {
-		Resource resource = resourceResolver.getResource(searchPath);
+    @Override
+    public Set<AssetReferencedItem> getAssetReferences(final ResourceResolver resourceResolver,
+                                                       final String searchPath) {
+        Resource resource = resourceResolver.getResource(searchPath);
 
-		if (resource == null) {
-			return Collections.emptySet();
-		}
+        if (resource == null) {
+            return Collections.emptySet();
+        }
 
-		Node node = resource.adaptTo(Node.class);
+        Node node = resource.adaptTo(Node.class);
 
-		AssetReferenceSearch assetReferenceSearch = new AssetReferenceSearch(node, DAM_ROOT,
-				resourceResolver);
+        AssetReferenceSearch assetReferenceSearch = new AssetReferenceSearch(node, DAM_ROOT,
+                resourceResolver);
 
-		Map<String, Asset> result = assetReferenceSearch.search();
-		Set<AssetReferencedItem> assetReferencedItemSet = new LinkedHashSet<>();
+        Map<String, Asset> result = assetReferenceSearch.search();
+        Set<AssetReferencedItem> assetReferencedItemSet = new LinkedHashSet<>();
 
-		for (Map.Entry<String, Asset> entry : result.entrySet()) {
-			Asset asset = entry.getValue();
-			AssetReferencedItem assetDetails = new AssetReferencedItem(asset.getPath(), asset.getMimeType());
-			assetReferencedItemSet.add(assetDetails);
-		}
-		return assetReferencedItemSet;
-	}
+        for (Map.Entry<String, Asset> entry : result.entrySet()) {
+            Asset asset = entry.getValue();
+            AssetReferencedItem assetDetails = new AssetReferencedItem(asset.getPath(), asset.getMimeType());
+            assetReferencedItemSet.add(assetDetails);
+        }
+        return assetReferencedItemSet;
+    }
 }

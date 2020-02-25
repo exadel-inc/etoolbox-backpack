@@ -45,10 +45,10 @@ public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
     private static final String ROOT_TEXT = "All packages";
 
     @Reference
-    private DataSourceBuilder dataSourceBuilder;
+    private transient DataSourceBuilder dataSourceBuilder;
 
     @Reference
-    private QueryHelper queryHelper;
+    private transient QueryHelper queryHelper;
 
     @Reference
     private transient PackageService packageService;
@@ -56,7 +56,7 @@ public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) {
         ResourceResolver resolver = request.getResourceResolver();
-        ValueMap properties = getProperties(request.getResource(), resolver);
+        ValueMap properties = getProperties(request.getResource());
         try {
             String queryLanguage = properties.get(PN_DROP_DOWN_QUERY_LANGUAGE, JCR_SQL2);
             String queryStatement = properties.get(PN_DROP_DOWN_QUERY, StringUtils.EMPTY);
@@ -65,7 +65,7 @@ public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
                 // perform the query
                 List<Resource> results = queryHelper.findResources(resolver, queryLanguage, queryStatement, StringUtils.EMPTY);
                 List<DataSourceOption> options = results.stream()
-                        .map(resource -> createDataOption(resource))
+                        .map(this::createDataOption)
                         .filter(Objects::nonNull).collect(Collectors.toList());
                 RequestParameter groupParam = request.getRequestParameter("group");
                 if (groupParam != null) {
@@ -85,13 +85,12 @@ public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
         }
     }
 
-    private ValueMap getProperties(Resource resource, ResourceResolver resourceResolver) {
+    private ValueMap getProperties(Resource resource) {
         Resource datasource = resource.getChild(DATASOURCE);
         if (datasource == null) {
             return ValueMap.EMPTY;
         }
-        ValueMap properties = datasource.getValueMap();
-        return properties;
+        return datasource.getValueMap();
     }
 
     private DataSourceOption createDataOption(Resource resource) {

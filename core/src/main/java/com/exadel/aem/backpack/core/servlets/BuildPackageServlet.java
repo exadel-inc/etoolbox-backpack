@@ -1,10 +1,12 @@
-
 package com.exadel.aem.backpack.core.servlets;
 
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.services.PackageService;
 import com.exadel.aem.backpack.core.servlets.dto.PackageRequestInfo;
-import com.exadel.aem.backpack.core.servlets.validation.*;
+import com.exadel.aem.backpack.core.servlets.validation.LatestIndexProcessor;
+import com.exadel.aem.backpack.core.servlets.validation.PathProcessor;
+import com.exadel.aem.backpack.core.servlets.validation.ReferencedResourceTypesProcessor;
+import com.exadel.aem.backpack.core.servlets.validation.TestBuildProcessor;
 import com.google.gson.Gson;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -44,8 +46,8 @@ public class BuildPackageServlet extends SlingAllMethodsServlet {
         response.setContentType(APPLICATION_JSON);
 
         if (requestInfo.isInvalid()) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			response.getWriter().write(GSON.toJson(requestInfo));
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write(GSON.toJson(requestInfo));
         } else {
             PackageInfo packageInfo;
             if (requestInfo.isTestBuild()) {
@@ -60,19 +62,19 @@ public class BuildPackageServlet extends SlingAllMethodsServlet {
     @Override
     protected void doGet(final SlingHttpServletRequest request,
                          final SlingHttpServletResponse response) throws IOException {
-		LatestIndexProcessor latestIndexProcessor = new LatestIndexProcessor(null, true);
-		PathProcessor pathProcessor = new PathProcessor(latestIndexProcessor, true);
-		PackageRequestInfo requestInfo = pathProcessor.processRequest(request, PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo());
+        LatestIndexProcessor latestIndexProcessor = new LatestIndexProcessor(null, true);
+        PathProcessor pathProcessor = new PathProcessor(latestIndexProcessor, true);
+        PackageRequestInfo requestInfo = pathProcessor.processRequest(request, PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo());
 
-		response.setContentType(APPLICATION_JSON);
+        response.setContentType(APPLICATION_JSON);
 
-		if(requestInfo.isInvalid()){
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			response.getWriter().write(GSON.toJson(requestInfo));
-		} else{
-			final PackageInfo latestPackageBuildInfo = packageService.getLatestPackageBuildInfo(requestInfo);
-			response.getWriter().write(GSON.toJson(latestPackageBuildInfo));
-		}
+        if (requestInfo.isInvalid()) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write(GSON.toJson(requestInfo));
+        } else {
+            final PackageInfo latestPackageBuildInfo = packageService.getLatestPackageBuildInfo(requestInfo);
+            response.getWriter().write(GSON.toJson(latestPackageBuildInfo));
+        }
     }
 }
 

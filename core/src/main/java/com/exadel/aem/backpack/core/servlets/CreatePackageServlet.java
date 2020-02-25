@@ -1,4 +1,3 @@
-
 package com.exadel.aem.backpack.core.servlets;
 
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
@@ -30,7 +29,7 @@ public class CreatePackageServlet extends SlingAllMethodsServlet {
 
     private static final long serialVersionUID = 1L;
 
-	private static final Gson GSON = new Gson();
+    private static final Gson GSON = new Gson();
 
 
     @Reference
@@ -49,8 +48,8 @@ public class CreatePackageServlet extends SlingAllMethodsServlet {
         response.setContentType(APPLICATION_JSON);
 
         if (requestInfo.isInvalid()) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			response.getWriter().write(GSON.toJson(requestInfo));
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write(GSON.toJson(requestInfo));
         } else {
             final PackageInfo packageInfo = packageService.createPackage(
                     request.getResourceResolver(),

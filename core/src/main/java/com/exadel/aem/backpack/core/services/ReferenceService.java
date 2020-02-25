@@ -8,6 +8,6 @@ import java.util.Set;
 public interface ReferenceService {
 
 
-	Set<AssetReferencedItem> getAssetReferences(ResourceResolver resourceResolver, String searchPath);
+    Set<AssetReferencedItem> getAssetReferences(ResourceResolver resourceResolver, String searchPath);
 
 }
