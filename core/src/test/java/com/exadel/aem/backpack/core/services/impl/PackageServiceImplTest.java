@@ -109,7 +109,6 @@ public class PackageServiceImplTest {
                     if (packageNode != null) {
                         packageInfo.setPackageNodeName(packageNode.getName());
                     }
-                    jcrPackage.close();
                 }
             } finally {
                 if (jcrPackage != null) {
