@@ -11,10 +11,7 @@ import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
 import org.apache.jackrabbit.vault.fs.api.WorkspaceFilter;
 import org.apache.jackrabbit.vault.fs.config.DefaultWorkspaceFilter;
-import org.apache.jackrabbit.vault.packaging.JcrPackage;
-import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
-import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
-import org.apache.jackrabbit.vault.packaging.PackagingService;
+import org.apache.jackrabbit.vault.packaging.*;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
@@ -259,6 +256,7 @@ public class PackageServiceImplTest {
 
             assertEquals((Long) 0L, aPackage.getDataSize());
             assertEquals(Collections.singletonList("A " + PAGE_1), aPackage.getLog());
+            assertNull(aPackage.getPackageBuilt());
         }
 
         @Test
@@ -272,6 +270,7 @@ public class PackageServiceImplTest {
 
             assertNotEquals((Long) 0L, aPackage.getDataSize());
             assertEquals(Arrays.asList("A " + PAGE_1, "A " + PICTURE_1), aPackage.getLog());
+            assertNull(aPackage.getPackageBuilt());
         }
 
         @Test
@@ -292,6 +291,8 @@ public class PackageServiceImplTest {
             assertNotEquals(firstPackage.getDataSize(), secondPackage.getDataSize());
             assertEquals(Arrays.asList("A " + PAGE_1, "A " + PICTURE_1), firstPackage.getLog());
             assertEquals(Arrays.asList("A " + PAGE_1, "A " + PICTURE_1, "A " + PICTURE_2), secondPackage.getLog());
+            assertNull(firstPackage.getPackageBuilt());
+            assertNull(secondPackage.getPackageBuilt());
         }
 
         @Before
