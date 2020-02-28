@@ -91,7 +91,7 @@ public class PackageServiceImplTest {
             PackageInfo packageInfo = new PackageInfo();
             packageInfo.setGroupName(BACKPACK);
             packageInfo.setPackageName(TEST_PACKAGE);
-            packageInfo.setVersion("1");
+            packageInfo.setVersion(PACKAGE_VERSION);
             packageInfo.setReferencedResources(referencedResources);
             packageInfo.setPaths(Arrays.asList(PAGE_1));
             return packageInfo;
@@ -210,7 +210,7 @@ public class PackageServiceImplTest {
             PackageInfo packageInfo = new PackageInfo();
             packageInfo.setGroupName(BACKPACK);
             packageInfo.setPackageName(TEST_PACKAGE);
-            packageInfo.setVersion("1");
+            packageInfo.setVersion(PACKAGE_VERSION);
             packageInfo.setReferencedResources(new HashMap<>());
             packageInfo.setPaths(new ArrayList<>());
             createPackage(packageInfo, new DefaultWorkspaceFilter());
@@ -289,7 +289,7 @@ public class PackageServiceImplTest {
             assertEquals(PACKAGE_PATH, result.getPackagePath());
             assertEquals(BACKPACK, result.getGroupName());
             assertEquals(TEST_PACKAGE, result.getPackageName());
-            assertEquals("1", result.getVersion());
+            assertEquals(PACKAGE_VERSION, result.getVersion());
             assertEquals(referencedResources, result.getReferencedResources());
             assertEquals(PAGE_1, result.getPaths().stream().findFirst().get());
             assertNotNull(result.getDataSize());
