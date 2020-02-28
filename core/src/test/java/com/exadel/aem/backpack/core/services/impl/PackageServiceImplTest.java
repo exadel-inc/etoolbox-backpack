@@ -10,6 +10,7 @@ import com.google.gson.Gson;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
 import org.apache.jackrabbit.vault.fs.api.WorkspaceFilter;
+import org.apache.jackrabbit.vault.fs.config.DefaultWorkspaceFilter;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;
 import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
 import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
@@ -59,7 +60,7 @@ public class PackageServiceImplTest {
         protected ResourceResolver resourceResolver;
         protected JcrPackageManager packMgr;
         protected Session session;
-        protected ReferenceService referenceServiceMock  = mock(ReferenceService.class);
+        protected ReferenceService referenceServiceMock = mock(ReferenceService.class);
         protected Map<String, List<String>> referencedResources;
 
         @Before
@@ -69,7 +70,7 @@ public class PackageServiceImplTest {
 
             HashSet<AssetReferencedItem> assetReferenceItems = new HashSet<>();
             assetReferenceItems.add(new AssetReferencedItem(PICTURE_1, IMAGE_JPEG));
-            referenceServiceMock  = mock(ReferenceService.class);
+            referenceServiceMock = mock(ReferenceService.class);
             when(referenceServiceMock.getAssetReferences(any(ResourceResolver.class), any(String.class))).thenReturn(assetReferenceItems);
 
             context.registerService(ReferenceService.class, referenceServiceMock);
@@ -81,10 +82,35 @@ public class PackageServiceImplTest {
             packMgr = PackagingService.getPackageManager(session);
         }
 
-        protected JcrPackage createDefaultPackage() throws RepositoryException, IOException {
+        protected PackageInfo getDefaultPackageInfo() {
+            PackageInfo packageInfo = new PackageInfo();
+            packageInfo.setGroupName(BACKPACK);
+            packageInfo.setPackageName(TEST_PACKAGE);
+            packageInfo.setVersion("1");
+            HashMap<String, List<String>> referencedResources = new HashMap<>();
+            referencedResources.put(IMAGE_JPEG, Arrays.asList(PICTURE_1));
+            packageInfo.setReferencedResources(referencedResources);
+            packageInfo.setPaths(Arrays.asList(PAGE_1));
+            return packageInfo;
+        }
+
+        protected JcrPackage createPackage(final PackageInfo packageInfo,
+                                           final DefaultWorkspaceFilter filter) throws RepositoryException, IOException {
             JcrPackage jcrPackage = null;
             try {
-                jcrPackage = packMgr.create(BACKPACK, TEST_PACKAGE, PACKAGE_VERSION);
+                jcrPackage = packMgr.create(packageInfo.getGroupName(), packageInfo.getPackageName(), packageInfo.getVersion());
+                JcrPackageDefinition jcrPackageDefinition = jcrPackage.getDefinition();
+                if (jcrPackageDefinition != null) {
+                    jcrPackageDefinition.set(REFERENCED_RESOURCES, GSON.toJson(packageInfo.getReferencedResources()), true);
+                    jcrPackageDefinition.set(GENERAL_RESOURCES, GSON.toJson(packageInfo.getPaths()), true);
+                    jcrPackageDefinition.setFilter(filter, true);
+
+                    Node packageNode = jcrPackage.getNode();
+                    if (packageNode != null) {
+                        packageInfo.setPackageNodeName(packageNode.getName());
+                    }
+                    jcrPackage.close();
+                }
             } finally {
                 if (jcrPackage != null) {
                     jcrPackage.close();
@@ -95,8 +121,8 @@ public class PackageServiceImplTest {
 
 
         protected void verifyPackageFilters(final Node packageNode,
-                                          final List<String> expectedPaths,
-                                          final Map<String, List<String>> expectedReferencedResources) throws RepositoryException {
+                                            final List<String> expectedPaths,
+                                            final Map<String, List<String>> expectedReferencedResources) throws RepositoryException {
             JcrPackage jcrPackage = null;
             try {
                 jcrPackage = packMgr.open(packageNode);
@@ -179,7 +205,13 @@ public class PackageServiceImplTest {
 
         @Test
         public void shouldNotCreatePackageIfSuchPackageAlreadyExist() throws RepositoryException, IOException {
-            createDefaultPackage();
+            PackageInfo packageInfo = new PackageInfo();
+            packageInfo.setGroupName(BACKPACK);
+            packageInfo.setPackageName(TEST_PACKAGE);
+            packageInfo.setVersion("1");
+            packageInfo.setReferencedResources(new HashMap<>());
+            packageInfo.setPaths(new ArrayList<>());
+            createPackage(packageInfo, new DefaultWorkspaceFilter());
 
             PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
             initBasePackageInfo(builder, Arrays.asList(PAGE_1));
