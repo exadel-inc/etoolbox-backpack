@@ -69,7 +69,7 @@ public class PackageServiceImplTest {
         public void beforeTest() {
             referencedResources = new HashMap<>();
             referencedResources.put(IMAGE_JPEG, Collections.singletonList(PICTURE_1));
-            referencedResources.put(IMAGE_PNG, Collections.singletonList(PICTURE_1));
+            referencedResources.put(IMAGE_PNG, Collections.singletonList(PICTURE_2));
 
             HashSet<AssetReferencedItem> assetReferenceItems = new HashSet<>();
             assetReferenceItems.add(new AssetReferencedItem(PICTURE_1, IMAGE_JPEG));
