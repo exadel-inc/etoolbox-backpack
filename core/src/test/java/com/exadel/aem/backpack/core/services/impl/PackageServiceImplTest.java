@@ -46,7 +46,6 @@ public class PackageServiceImplTest {
     private static final String TEST_PACKAGE = "testPackage";
     private static final String PACKAGE_VERSION = "1";
     private static final String TEST_GROUP = "testGroup";
-    private static final String PACKAGE_PATH = "/etc/packages/testGroup/testPackage-1.zip";
 
 
     private static final String REFERENCED_RESOURCES = "referencedResources";
@@ -69,8 +68,8 @@ public class PackageServiceImplTest {
         @Before
         public void beforeTest() {
             referencedResources = new HashMap<>();
-            referencedResources.put(IMAGE_JPEG, Collections.singletonList(PICTURE_1));
-            referencedResources.put(IMAGE_PNG, Collections.singletonList(PICTURE_2));
+            referencedResources.put(IMAGE_JPEG, Arrays.asList(PICTURE_1));
+            referencedResources.put(IMAGE_PNG, Arrays.asList(PICTURE_2));
 
             HashSet<AssetReferencedItem> assetReferenceItems = new HashSet<>();
             assetReferenceItems.add(new AssetReferencedItem(PICTURE_1, IMAGE_JPEG));
@@ -82,6 +81,8 @@ public class PackageServiceImplTest {
             packageService = context.registerInjectActivateService(new PackageServiceImpl());
 
             context.create().page(PAGE_1);
+            context.create().asset(PICTURE_1, 100, 100, IMAGE_JPEG);
+            context.create().asset(PICTURE_2, 100, 100, IMAGE_PNG);
             resourceResolver = context.resourceResolver();
             session = resourceResolver.adaptTo(Session.class);
             packMgr = PackagingService.getPackageManager(session);
@@ -245,11 +246,12 @@ public class PackageServiceImplTest {
     }
 
     public static class TestBuildPackage extends Base {
-        @Test
-        public void shouldReturnZeroSize() {
-            PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
 
-            createBasePackage(builder);
+        private static final String PACKAGE_PATH = "/etc/packages/testGroup/testPackage-1.zip";
+
+        @Test
+        public void shouldReturnZeroSizeWhenNoReferencesFound() {
+            PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
 
             builder.withPackagePath(PACKAGE_PATH);
 
@@ -260,10 +262,8 @@ public class PackageServiceImplTest {
         }
 
         @Test
-        public void shouldReturnNonZeroSize() {
+        public void shouldReturnNonZeroSizeWhenReferencesFound() {
             PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
-
-            createBasePackage(builder);
 
             builder.withPackagePath(PACKAGE_PATH);
             builder.withReferencedResourceTypes(Collections.singletonList(IMAGE_JPEG));
@@ -275,10 +275,8 @@ public class PackageServiceImplTest {
         }
 
         @Test
-        public void shouldReturnNonEqualSize() {
+        public void shouldReturnNonEqualSizeWithDifferentReferences() {
             PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
-
-            createBasePackage(builder);
 
             builder.withPackagePath(PACKAGE_PATH);
             builder.withReferencedResourceTypes(Collections.singletonList(IMAGE_JPEG));
@@ -296,14 +294,15 @@ public class PackageServiceImplTest {
             assertEquals(Arrays.asList("A " + PAGE_1, "A " + PICTURE_1, "A " + PICTURE_2), secondPackage.getLog());
         }
 
-        private void createBasePackage(final PackageRequestInfo.PackageRequestInfoBuilder builder) {
-            builder.withPaths(Collections.singletonList(PAGE_1));
-            builder.withPackageName(TEST_PACKAGE);
-            builder.withVersion(PACKAGE_VERSION);
-            builder.withPackageGroup(TEST_GROUP);
-            context.create().asset(PICTURE_1, 100, 100, IMAGE_JPEG);
-            context.create().asset(PICTURE_2, 100, 100, IMAGE_PNG);
-            packageService.createPackage(resourceResolver, builder.build());
+        @Before
+        public void createBasePackage() throws IOException, RepositoryException {
+            PackageInfo packageInfo = new PackageInfo();
+            packageInfo.setGroupName(TEST_GROUP);
+            packageInfo.setPackageName(TEST_PACKAGE);
+            packageInfo.setVersion(PACKAGE_VERSION);
+            packageInfo.setReferencedResources(referencedResources);
+            packageInfo.setPaths(Arrays.asList(PAGE_1));
+            createPackage(packageInfo, new DefaultWorkspaceFilter());
         }
     }
 }
