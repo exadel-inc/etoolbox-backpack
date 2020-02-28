@@ -12,10 +12,7 @@ import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
 import org.apache.jackrabbit.vault.fs.api.WorkspaceFilter;
 import org.apache.jackrabbit.vault.fs.config.DefaultWorkspaceFilter;
-import org.apache.jackrabbit.vault.packaging.JcrPackage;
-import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
-import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
-import org.apache.jackrabbit.vault.packaging.PackagingService;
+import org.apache.jackrabbit.vault.packaging.*;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
@@ -41,7 +38,9 @@ import static org.mockito.Mockito.when;
 public class PackageServiceImplTest {
     private static final String PAGE_1 = "/content/site/pages/page1";
     private static final String PICTURE_1 = "/content/dam/picture1.jpg";
+    private static final String PICTURE_2 = "/content/dam/picture2.png";
     private static final String IMAGE_JPEG = "image/jpeg";
+    private static final String IMAGE_PNG = "image/png";
     private static final String BACKPACK = "backpack";
     private static final String TEST_PACKAGE = "testPackage";
     private static final String PACKAGE_VERSION = "1";
@@ -69,9 +68,11 @@ public class PackageServiceImplTest {
         public void beforeTest() {
             referencedResources = new HashMap<>();
             referencedResources.put(IMAGE_JPEG, Arrays.asList(PICTURE_1));
+            referencedResources.put(IMAGE_PNG, Arrays.asList(PICTURE_2));
 
             HashSet<AssetReferencedItem> assetReferenceItems = new HashSet<>();
             assetReferenceItems.add(new AssetReferencedItem(PICTURE_1, IMAGE_JPEG));
+            assetReferenceItems.add(new AssetReferencedItem(PICTURE_2, IMAGE_PNG));
             referenceServiceMock = mock(ReferenceService.class);
             when(referenceServiceMock.getAssetReferences(any(ResourceResolver.class), any(String.class))).thenReturn(assetReferenceItems);
 
@@ -79,6 +80,8 @@ public class PackageServiceImplTest {
             packageService = context.registerInjectActivateService(new PackageServiceImpl());
 
             context.create().page(PAGE_1);
+            context.create().asset(PICTURE_1, 100, 100, IMAGE_JPEG);
+            context.create().asset(PICTURE_2, 100, 100, IMAGE_PNG);
             resourceResolver = context.resourceResolver();
             session = resourceResolver.adaptTo(Session.class);
             packMgr = PackagingService.getPackageManager(session);
@@ -292,6 +295,70 @@ public class PackageServiceImplTest {
             assertNotNull(result.getDataSize());
             assertEquals(CREATED, result.getPackageStatus());
             assertEquals("testPackage-1.zip", result.getPackageNodeName());
+        }
+    }
+    public static class TestBuildPackage extends Base {
+
+        private static final String PACKAGE_PATH = "/etc/packages/testGroup/testPackage-1.zip";
+
+        @Test
+        public void shouldReturnZeroSizeWhenNoReferencesFound() {
+            PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
+
+            builder.withPackagePath(PACKAGE_PATH);
+
+            PackageInfo aPackage = packageService.testBuildPackage(resourceResolver, builder.build());
+
+            assertEquals((Long) 0L, aPackage.getDataSize());
+            assertEquals(Collections.singletonList("A " + PAGE_1), aPackage.getLog());
+            assertNull(aPackage.getPackageBuilt());
+        }
+
+        @Test
+        public void shouldReturnNonZeroSizeWhenReferencesFound() {
+            PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
+
+            builder.withPackagePath(PACKAGE_PATH);
+            builder.withReferencedResourceTypes(Collections.singletonList(IMAGE_JPEG));
+
+            PackageInfo aPackage = packageService.testBuildPackage(resourceResolver, builder.build());
+
+            assertNotEquals((Long) 0L, aPackage.getDataSize());
+            assertEquals(Arrays.asList("A " + PAGE_1, "A " + PICTURE_1), aPackage.getLog());
+            assertNull(aPackage.getPackageBuilt());
+        }
+
+        @Test
+        public void shouldReturnNonEqualSizeWithDifferentReferences() {
+            PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
+
+            builder.withPackagePath(PACKAGE_PATH);
+            builder.withReferencedResourceTypes(Collections.singletonList(IMAGE_JPEG));
+
+            PackageInfo firstPackage = packageService.testBuildPackage(resourceResolver, builder.build());
+
+            builder.withReferencedResourceTypes(Arrays.asList(IMAGE_JPEG, IMAGE_PNG));
+
+            PackageInfo secondPackage = packageService.testBuildPackage(resourceResolver, builder.build());
+
+            assertNotEquals((Long) 0L, firstPackage.getDataSize());
+            assertNotEquals((Long) 0L, secondPackage.getDataSize());
+            assertNotEquals(firstPackage.getDataSize(), secondPackage.getDataSize());
+            assertEquals(Arrays.asList("A " + PAGE_1, "A " + PICTURE_1), firstPackage.getLog());
+            assertEquals(Arrays.asList("A " + PAGE_1, "A " + PICTURE_1, "A " + PICTURE_2), secondPackage.getLog());
+            assertNull(firstPackage.getPackageBuilt());
+            assertNull(secondPackage.getPackageBuilt());
+        }
+
+        @Before
+        public void createBasePackage() throws IOException, RepositoryException {
+            PackageInfo packageInfo = new PackageInfo();
+            packageInfo.setGroupName(TEST_GROUP);
+            packageInfo.setPackageName(TEST_PACKAGE);
+            packageInfo.setVersion(PACKAGE_VERSION);
+            packageInfo.setReferencedResources(referencedResources);
+            packageInfo.setPaths(Arrays.asList(PAGE_1));
+            createPackage(packageInfo, new DefaultWorkspaceFilter());
         }
     }
 }
