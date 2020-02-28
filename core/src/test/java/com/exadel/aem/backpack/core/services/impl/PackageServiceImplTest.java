@@ -38,11 +38,14 @@ import static org.mockito.Mockito.when;
 public class PackageServiceImplTest {
     private static final String PAGE_1 = "/content/site/pages/page1";
     private static final String PICTURE_1 = "/content/dam/picture1.jpg";
+    private static final String PICTURE_2 = "/content/dam/picture2.png";
     private static final String IMAGE_JPEG = "image/jpeg";
+    private static final String IMAGE_PNG = "image/png";
     private static final String BACKPACK = "backpack";
     private static final String TEST_PACKAGE = "testPackage";
     private static final String PACKAGE_VERSION = "1";
     private static final String TEST_GROUP = "testGroup";
+    private static final String PACKAGE_PATH = "/etc/packages/testGroup/testPackage-1.zip";
 
 
     private static final String REFERENCED_RESOURCES = "referencedResources";
@@ -65,10 +68,12 @@ public class PackageServiceImplTest {
         @Before
         public void beforeTest() {
             referencedResources = new HashMap<>();
-            referencedResources.put(IMAGE_JPEG, Arrays.asList(PICTURE_1));
+            referencedResources.put(IMAGE_JPEG, Collections.singletonList(PICTURE_1));
+            referencedResources.put(IMAGE_PNG, Collections.singletonList(PICTURE_1));
 
             HashSet<AssetReferencedItem> assetReferenceItems = new HashSet<>();
             assetReferenceItems.add(new AssetReferencedItem(PICTURE_1, IMAGE_JPEG));
+            assetReferenceItems.add(new AssetReferencedItem(PICTURE_2, IMAGE_PNG));
             referenceServiceMock  = mock(ReferenceService.class);
             when(referenceServiceMock.getAssetReferences(any(ResourceResolver.class), any(String.class))).thenReturn(assetReferenceItems);
 
@@ -208,4 +213,66 @@ public class PackageServiceImplTest {
         }
     }
 
+    public static class TestBuildPackage extends Base {
+        @Test
+        public void shouldReturnZeroSize() {
+            PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
+
+            createBasePackage(builder);
+
+            builder.withPackagePath(PACKAGE_PATH);
+
+            PackageInfo aPackage = packageService.testBuildPackage(resourceResolver, builder.build());
+
+            assertEquals((Long) 0L, aPackage.getDataSize());
+            assertEquals(Collections.singletonList("A " + PAGE_1), aPackage.getLog());
+        }
+
+        @Test
+        public void shouldReturnNonZeroSize() {
+            PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
+
+            createBasePackage(builder);
+
+            builder.withPackagePath(PACKAGE_PATH);
+            builder.withReferencedResourceTypes(Collections.singletonList(IMAGE_JPEG));
+
+            PackageInfo aPackage = packageService.testBuildPackage(resourceResolver, builder.build());
+
+            assertNotEquals((Long) 0L, aPackage.getDataSize());
+            assertEquals(Arrays.asList("A " + PAGE_1, "A " + PICTURE_1), aPackage.getLog());
+        }
+
+        @Test
+        public void shouldReturnNonEqualSize() {
+            PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
+
+            createBasePackage(builder);
+
+            builder.withPackagePath(PACKAGE_PATH);
+            builder.withReferencedResourceTypes(Collections.singletonList(IMAGE_JPEG));
+
+            PackageInfo firstPackage = packageService.testBuildPackage(resourceResolver, builder.build());
+
+            builder.withReferencedResourceTypes(Arrays.asList(IMAGE_JPEG, IMAGE_PNG));
+
+            PackageInfo secondPackage = packageService.testBuildPackage(resourceResolver, builder.build());
+
+            assertNotEquals((Long) 0L, firstPackage.getDataSize());
+            assertNotEquals((Long) 0L, secondPackage.getDataSize());
+            assertNotEquals(firstPackage.getDataSize(), secondPackage.getDataSize());
+            assertEquals(Arrays.asList("A " + PAGE_1, "A " + PICTURE_1), firstPackage.getLog());
+            assertEquals(Arrays.asList("A " + PAGE_1, "A " + PICTURE_1, "A " + PICTURE_2), secondPackage.getLog());
+        }
+
+        private void createBasePackage(final PackageRequestInfo.PackageRequestInfoBuilder builder) {
+            builder.withPaths(Collections.singletonList(PAGE_1));
+            builder.withPackageName(TEST_PACKAGE);
+            builder.withVersion(PACKAGE_VERSION);
+            builder.withPackageGroup(TEST_GROUP);
+            context.create().asset(PICTURE_1, 100, 100, IMAGE_JPEG);
+            context.create().asset(PICTURE_2, 100, 100, IMAGE_PNG);
+            packageService.createPackage(resourceResolver, builder.build());
+        }
+    }
 }
