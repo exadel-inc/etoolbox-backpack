@@ -2,6 +2,7 @@ package com.exadel.aem.backpack.core.services.impl;
 
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
+import com.day.cq.dam.api.Asset;
 import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
@@ -26,7 +27,6 @@ import org.apache.jackrabbit.vault.packaging.PackagingService;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.jcr.api.SlingRepository;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -57,7 +57,8 @@ public class PackageServiceImpl implements PackageService {
 
 
     private static final String DEFAULT_PACKAGE_GROUP = "backpack";
-    private static final String THUMBNAIL_PATH_TEMPLATE = "/apps/backpack/assets/backpack%d_%s.png";
+    private static final String DEFAULT_THUMBNAILS_LOCATION = "/apps/backpack/assets/";
+    private static final String THUMBNAIL_PATH_TEMPLATE = DEFAULT_THUMBNAILS_LOCATION + "backpack%d_%s.png";
     private static final String THUMBNAIL_FILE = "thumbnail.png";
     private static final String ERROR = "ERROR: ";
     private static final String JCR_CONTENT_NODE = "/" + JcrConstants.JCR_CONTENT;
@@ -331,7 +332,7 @@ public class PackageServiceImpl implements PackageService {
                         packageBuildInfo.setPackageNodeName(packageNode.getName());
                     }
                     String thumbnailPath = StringUtils.defaultIfBlank(packageBuildInfo.getThumbnailPath(), getDefaultThumbnailPath(true));
-					addThumbnail(jcrPackageDefinition.getNode(), getThumbnailNode(thumbnailPath, resourceResolver));
+					addThumbnail(jcrPackageDefinition.getNode(), resourceResolver.getResource(thumbnailPath));
                     jcrPackage.close();
                     packageBuildInfo.setPackageStatus(PackageStatus.CREATED);
                 }
@@ -365,7 +366,7 @@ public class PackageServiceImpl implements PackageService {
 				includeReferencedResources(referencedResourceTypes, definition, s -> filter.add(new PathFilterSet(s)));
 				definition.setFilter(filter, true);
 				String thumbnailPath = StringUtils.defaultIfBlank(packageBuildInfo.getThumbnailPath(), getDefaultThumbnailPath(false));
-				addThumbnail(definition.getNode(), getThumbnailNode(thumbnailPath, resourceResolver));
+				addThumbnail(definition.getNode(), resourceResolver.getResource(thumbnailPath));
                 packageBuildInfo.setPackageStatus(PackageStatus.BUILD_IN_PROGRESS);
                 packMgr.assemble(jcrPackage, new ProgressTrackerListener() {
                     @Override
@@ -495,26 +496,28 @@ public class PackageServiceImpl implements PackageService {
 		return String.format(THUMBNAIL_PATH_TEMPLATE, thumbnailNum, isEmpty ? "empty" : "full");
 	}
 
-	private void addThumbnail(Node packageNode, final Node thumbnailNode) {
-		if (packageNode == null || thumbnailNode == null) {
-			LOGGER.warn("Could not add package thumbnail");
+	private void addThumbnail(Node packageNode, final Resource thumbnailResource) {
+		if (packageNode == null || thumbnailResource == null) {
+			LOGGER.warn("Could not add package thumbnail.");
 			return;
 		}
 		try {
+            Asset asset = thumbnailResource.adaptTo(Asset.class);
+            Node thumbnailNode = (asset != null) ?
+                    asset.getImagePreviewRendition().adaptTo(Node.class) :
+                    thumbnailResource.adaptTo(Node.class);
+
+            if (thumbnailNode == null) {
+                LOGGER.warn("Thumbnail node can not be retrieved. Could not add package thumbnail.");
+                return;
+            }
+
 			JcrUtil.copy(thumbnailNode, packageNode, THUMBNAIL_FILE);
 			packageNode.getSession().save();
 		} catch (RepositoryException e) {
 			LOGGER.error("A repository exception occurred: ", e);
 		}
 	}
-
-    private Node getThumbnailNode(final String thumbnailPath, final ResourceResolver resourceResolver) {
-        Resource thumbnailResource = resourceResolver.getResource(thumbnailPath);
-        if (thumbnailResource != null && !ResourceUtil.isNonExistingResource(thumbnailResource)) {
-            return thumbnailResource.adaptTo(Node.class);
-        }
-        return null;
-    }
 
 }
 

@@ -161,6 +161,14 @@
                                                             sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
                                                             fieldLabel="Package Version"
                                                             name="version"/>
+                                            <image jcr:primaryType="nt:unstructured"
+                                                   sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                                                   fieldLabel="Thumbnail Path"
+                                                   fieldDescription="Provide path to thumbnail image in PNG format."
+                                                   name="thumbnailPath"
+                                                   rootPath="/content/dam">
+                                                <granite:data jcr:primaryType="nt:unstructured" regex="\.png$" validation-message="Please choose a PNG image."/>
+                                            </image>
                                             <paths jcr:primaryType="nt:unstructured"
                                                   fieldLabel="Path"
                                                   name="paths"
