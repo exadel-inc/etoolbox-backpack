@@ -24,6 +24,7 @@ import org.apache.jackrabbit.vault.packaging.JcrPackage;
 import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
 import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
 import org.apache.jackrabbit.vault.packaging.PackagingService;
+import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -214,7 +215,7 @@ public class PackageServiceImpl implements PackageService {
         Set<AssetReferencedItem> referencedAssets = getReferencedAssets(resourceResolver, actualPaths);
         Collection<String> resultingPaths = initAssets(actualPaths, referencedAssets, packageInfo);
         DefaultWorkspaceFilter filter = getWorkspaceFilter(resultingPaths);
-        createPackage(resourceResolver, packageInfo, filter);
+        createPackage(session, packageInfo, filter);
 
         return packageInfo;
     }
@@ -310,14 +311,11 @@ public class PackageServiceImpl implements PackageService {
         return partialBuildInfo;
     }
 
-    private JcrPackage createPackage(final ResourceResolver resourceResolver,
+    private JcrPackage createPackage(final Session userSession,
                                      final PackageInfo packageBuildInfo,
                                      final DefaultWorkspaceFilter filter) {
-        Session userSession = null;
         JcrPackage jcrPackage = null;
         try {
-            //TODO: use service user
-			userSession = getUserSession(resourceResolver.getUserID());
             JcrPackageManager packMgr = PackagingService.getPackageManager(userSession);
             if (!filter.getFilterSets().isEmpty()) {
                 jcrPackage = packMgr.create(packageBuildInfo.getGroupName(), packageBuildInfo.getPackageName(), packageBuildInfo.getVersion());
@@ -332,7 +330,7 @@ public class PackageServiceImpl implements PackageService {
                         packageBuildInfo.setPackageNodeName(packageNode.getName());
                     }
                     String thumbnailPath = StringUtils.defaultIfBlank(packageBuildInfo.getThumbnailPath(), getDefaultThumbnailPath(true));
-					addThumbnail(jcrPackageDefinition.getNode(), resourceResolver.getResource(thumbnailPath));
+					addThumbnail(jcrPackageDefinition.getNode(), thumbnailPath, userSession);
                     jcrPackage.close();
                     packageBuildInfo.setPackageStatus(PackageStatus.CREATED);
                 }
@@ -346,8 +344,6 @@ public class PackageServiceImpl implements PackageService {
             packageBuildInfo.addLogMessage(ERROR + e.getMessage());
             packageBuildInfo.addLogMessage(ExceptionUtils.getStackTrace(e));
             LOGGER.error("Error during package creation", e);
-        } finally {
-            closeSession(userSession);
         }
         return jcrPackage;
     }
@@ -355,8 +351,7 @@ public class PackageServiceImpl implements PackageService {
     private void buildPackage(final String userId, final PackageInfo packageBuildInfo, final List<String> referencedResourceTypes) {
         new Thread(() -> {
             Session userSession = null;
-            //TODO: use service user
-			try (ResourceResolver resourceResolver = resourceResolverFactory.getAdministrativeResourceResolver(null)){
+			try {
                 userSession = getUserSession(userId);
 				JcrPackageManager packMgr = PackagingService.getPackageManager(userSession);
 				JcrPackage jcrPackage = packMgr.open(userSession.getNode(packageBuildInfo.getPackagePath()));
@@ -366,7 +361,7 @@ public class PackageServiceImpl implements PackageService {
 				includeReferencedResources(referencedResourceTypes, definition, s -> filter.add(new PathFilterSet(s)));
 				definition.setFilter(filter, true);
 				String thumbnailPath = StringUtils.defaultIfBlank(packageBuildInfo.getThumbnailPath(), getDefaultThumbnailPath(false));
-				addThumbnail(definition.getNode(), resourceResolver.getResource(thumbnailPath));
+				addThumbnail(definition.getNode(), thumbnailPath, userSession);
                 packageBuildInfo.setPackageStatus(PackageStatus.BUILD_IN_PROGRESS);
                 packMgr.assemble(jcrPackage, new ProgressTrackerListener() {
                     @Override
@@ -496,12 +491,30 @@ public class PackageServiceImpl implements PackageService {
 		return String.format(THUMBNAIL_PATH_TEMPLATE, thumbnailNum, isEmpty ? "empty" : "full");
 	}
 
-	private void addThumbnail(Node packageNode, final Resource thumbnailResource) {
-		if (packageNode == null || thumbnailResource == null) {
-			LOGGER.warn("Could not add package thumbnail.");
-			return;
-		}
-		try {
+    private void addThumbnail(Node packageNode, final String thumbnailPath, Session session) {
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("user.jcr.session", session);
+
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getResourceResolver(paramMap)) {
+            addThumbnail(packageNode, thumbnailPath, resourceResolver);
+        } catch (LoginException e) {
+            LOGGER.error("Could not get Resource resolver", e);
+        }
+    }
+
+    private void addThumbnail(Node packageNode, final String thumbnailPath, ResourceResolver resourceResolver) {
+        if (packageNode == null || StringUtils.isBlank(thumbnailPath)) {
+            LOGGER.warn("Could not add package thumbnail.");
+            return;
+        }
+
+        Resource thumbnailResource = resourceResolver.getResource(thumbnailPath);
+        if (thumbnailResource == null) {
+            LOGGER.warn("The provided thumbnail does not exist in the repository.");
+            return;
+        }
+
+        try {
             Asset asset = thumbnailResource.adaptTo(Asset.class);
             Node thumbnailNode = (asset != null) ?
                     asset.getImagePreviewRendition().adaptTo(Node.class) :
@@ -512,12 +525,12 @@ public class PackageServiceImpl implements PackageService {
                 return;
             }
 
-			JcrUtil.copy(thumbnailNode, packageNode, THUMBNAIL_FILE);
-			packageNode.getSession().save();
-		} catch (RepositoryException e) {
-			LOGGER.error("A repository exception occurred: ", e);
-		}
-	}
+            JcrUtil.copy(thumbnailNode, packageNode, THUMBNAIL_FILE);
+            packageNode.getSession().save();
+        } catch (RepositoryException e) {
+            LOGGER.error("A repository exception occurred: ", e);
+        }
+    }
 
 }
 
