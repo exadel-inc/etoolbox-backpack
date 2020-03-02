@@ -59,7 +59,7 @@ public class PackageServiceImpl implements PackageService {
 
     private static final String DEFAULT_PACKAGE_GROUP = "backpack";
     private static final String DEFAULT_THUMBNAILS_LOCATION = "/apps/backpack/assets/";
-    private static final String THUMBNAIL_PATH_TEMPLATE = DEFAULT_THUMBNAILS_LOCATION + "backpack%d_%s.png";
+    private static final String THUMBNAIL_PATH_TEMPLATE = DEFAULT_THUMBNAILS_LOCATION + "backpack_%s.png";
     private static final String THUMBNAIL_FILE = "thumbnail.png";
     private static final String ERROR = "ERROR: ";
     private static final String JCR_CONTENT_NODE = "/" + JcrConstants.JCR_CONTENT;
@@ -487,8 +487,7 @@ public class PackageServiceImpl implements PackageService {
     }
 
     private String getDefaultThumbnailPath(boolean isEmpty) {
-		int thumbnailNum = new Random().nextInt(3) + 1;
-		return String.format(THUMBNAIL_PATH_TEMPLATE, thumbnailNum, isEmpty ? "empty" : "full");
+		return String.format(THUMBNAIL_PATH_TEMPLATE, isEmpty ? "empty" : "full");
 	}
 
     private void addThumbnail(Node packageNode, final String thumbnailPath, Session session) {
