@@ -1,5 +1,6 @@
 package com.exadel.aem.backpack.core.services.impl;
 
+import com.day.cq.wcm.api.WCMException;
 import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
@@ -26,6 +27,9 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -303,6 +307,37 @@ public class PackageServiceImplTest {
             packageInfo.setVersion(PACKAGE_VERSION);
             packageInfo.setReferencedResources(referencedResources);
             packageInfo.setPaths(Arrays.asList(PAGE_1));
+            createPackage(packageInfo, new DefaultWorkspaceFilter());
+        }
+    }
+
+    public static class BuildPackage extends Base {
+
+
+        private static final String PACKAGE_PATH = "/etc/packages/testGroup/testPackage-1.zip";
+
+        @Test
+        public void shouldBuildPackage() throws IOException, RepositoryException, InterruptedException, ExecutionException {
+            PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
+
+            builder.withExcludeChildren(false);
+            builder.withPackagePath(PACKAGE_PATH);
+            builder.withReferencedResourceTypes(Arrays.asList(IMAGE_JPEG, IMAGE_PNG));
+
+            CompletableFuture<PackageInfo> completableFuture = CompletableFuture
+                    .supplyAsync(() -> packageService.buildPackage(resourceResolver, builder.build()), Executors.newCachedThreadPool());
+
+            assertEquals(PackageStatus.BUILT, completableFuture.get().getPackageStatus());
+        }
+
+        @Before
+        public void createBasePackage() throws IOException, RepositoryException {
+            PackageInfo packageInfo = new PackageInfo();
+            packageInfo.setGroupName(TEST_GROUP);
+            packageInfo.setPackageName(TEST_PACKAGE);
+            packageInfo.setVersion(PACKAGE_VERSION);
+            packageInfo.setReferencedResources(referencedResources);
+            packageInfo.setPaths(Collections.singletonList(PAGE_1));
             createPackage(packageInfo, new DefaultWorkspaceFilter());
         }
     }
