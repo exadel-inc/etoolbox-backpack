@@ -6,9 +6,13 @@
     $(window).adaptTo("foundation-registry").register("foundation.validation.validator", {
         selector: '[' + REGEX_ATTR + ']',
         validate: function(el) {
+            if (!el.value) {
+                return;
+            }
             var regex = new RegExp(el.getAttribute(REGEX_ATTR));
             var validationMsg = el.getAttribute(VALIDATION_MSG_ATTR) || 'Invalid field value';
-            if(!(el.value || '').match(regex)) {
+
+            if(!el.value.match(regex)) {
                 return validationMsg;
             }
         }
