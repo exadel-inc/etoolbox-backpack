@@ -400,5 +400,16 @@ public class PackageServiceImplTest {
 
             assertEquals(TEST_EMPTY_LOG, result.getLog());
         }
+
+        @Test
+        public void shouldReturnNonExistingLatestPackageBuildInfo() {
+            PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
+            builder.withPackagePath(PACKAGE_PATH);
+
+            PackageInfo result = packageService.getLatestPackageBuildInfo(builder.build());
+
+            assertEquals(PackageStatus.ERROR, result.getPackageStatus());
+            assertEquals("ERROR: Package by this path " + PACKAGE_PATH + " doesn't exist in the repository.", result.getLog().get(0));
+        }
     }
 }
