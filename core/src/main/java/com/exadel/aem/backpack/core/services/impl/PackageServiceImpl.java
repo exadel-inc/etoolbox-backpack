@@ -275,11 +275,11 @@ public class PackageServiceImpl implements PackageService {
     }
 
     private void packageNotExistInfo(final String pathToPackage, final PackageInfo buildInfo) {
-        String packageExistMsg = "Package by this path " + pathToPackage + " doesn't exist in the repository.";
+        String packageNotExistMsg = "Package by this path " + pathToPackage + " doesn't exist in the repository.";
         buildInfo.setPackagePath(pathToPackage);
-        buildInfo.addLogMessage(ERROR + packageExistMsg);
+        buildInfo.addLogMessage(ERROR + packageNotExistMsg);
         buildInfo.setPackageStatus(PackageStatus.ERROR);
-        LOGGER.error(packageExistMsg);
+        LOGGER.error(packageNotExistMsg);
     }
 
 
@@ -294,7 +294,7 @@ public class PackageServiceImpl implements PackageService {
     @Override
     public PackageInfo getLatestPackageBuildInfo(final PackageRequestInfo requestInfo) {
         String packagePath = requestInfo.getPackagePath();
-        String packageExistMsg = "Package by this path " + packagePath + " doesn't exist in the repository.";
+        String packageNotExistMsg = "Package by this path " + packagePath + " doesn't exist in the repository.";
         PackageInfo completeBuildInfo = packageInfos.asMap().get(packagePath);
         PackageInfo partialBuildInfo = null;
 
@@ -304,9 +304,9 @@ public class PackageServiceImpl implements PackageService {
         } else {
             partialBuildInfo = new PackageInfo();
             partialBuildInfo.setPackagePath(packagePath);
-            partialBuildInfo.addLogMessage(ERROR + packageExistMsg);
+            partialBuildInfo.addLogMessage(ERROR + packageNotExistMsg);
             partialBuildInfo.setPackageStatus(PackageStatus.ERROR);
-            LOGGER.error(packageExistMsg);
+            LOGGER.error(packageNotExistMsg);
         }
         return partialBuildInfo;
     }

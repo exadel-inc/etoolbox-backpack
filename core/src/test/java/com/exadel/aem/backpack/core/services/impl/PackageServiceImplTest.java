@@ -362,7 +362,7 @@ public class PackageServiceImplTest {
         }
     }
 
-    public static class getLatestPackageBuildInfo extends Base {
+    public static class GetLatestPackageBuildInfo extends Base {
         private static final String PACKAGE_PATH = "/etc/packages/backpack/testPackage-1.zip";
         private static final String TEST = "test_log";
         private static final List<String> TEST_LOG = new ArrayList<>(Arrays.asList(TEST));
