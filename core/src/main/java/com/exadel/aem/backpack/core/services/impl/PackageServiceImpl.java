@@ -76,11 +76,11 @@ public class PackageServiceImpl implements PackageService {
     @Reference
 	private ResourceResolverFactory resourceResolverFactory;
 
-	private Cache<String, PackageInfo> packagesInfos;
+	private Cache<String, PackageInfo> packageInfos;
 
     @Activate
     private void activate(Configuration config) {
-        packagesInfos = CacheBuilder.newBuilder()
+        packageInfos = CacheBuilder.newBuilder()
                 .maximumSize(100)
                 .expireAfterWrite(config.buildInfoTTL(), TimeUnit.DAYS)
                 .build();
@@ -168,7 +168,7 @@ public class PackageServiceImpl implements PackageService {
         if (!PackageStatus.BUILD_IN_PROGRESS.equals(packageInfo.getPackageStatus())) {
             packageInfo.setPackageStatus(PackageStatus.BUILD_IN_PROGRESS);
             packageInfo.clearLog();
-            packagesInfos.put(requestInfo.getPackagePath(), packageInfo);
+            packageInfos.put(requestInfo.getPackagePath(), packageInfo);
             buildPackage(resourceResolver.getUserID(), packageInfo, requestInfo.getReferencedResourceTypes());
         }
 
@@ -223,7 +223,7 @@ public class PackageServiceImpl implements PackageService {
     @Override
     public PackageInfo getPackageInfo(final ResourceResolver resourceResolver, final PackageRequestInfo packageRequestInfo) {
         String packagePath = packageRequestInfo.getPackagePath();
-        PackageInfo packageInfo = packagesInfos.asMap().get(packagePath);
+        PackageInfo packageInfo = packageInfos.asMap().get(packagePath);
         if (packageInfo != null) {
             return packageInfo;
         }
@@ -287,6 +287,7 @@ public class PackageServiceImpl implements PackageService {
         String packageExistMsg = "Package by this path " + pathToPackage + " doesn't exist in the repository.";
         buildInfo.setPackagePath(pathToPackage);
         buildInfo.addLogMessage(ERROR + packageExistMsg);
+        buildInfo.setPackageStatus(PackageStatus.ERROR);
         LOGGER.error(packageExistMsg);
     }
 
@@ -301,7 +302,7 @@ public class PackageServiceImpl implements PackageService {
 
     @Override
     public PackageInfo getLatestPackageBuildInfo(final PackageRequestInfo requestInfo) {
-        PackageInfo completeBuildInfo = packagesInfos.asMap().get(requestInfo.getPackagePath());
+        PackageInfo completeBuildInfo = packageInfos.asMap().get(requestInfo.getPackagePath());
         PackageInfo partialBuildInfo = null;
 
         if (completeBuildInfo != null) {
@@ -331,7 +332,6 @@ public class PackageServiceImpl implements PackageService {
                     }
                     String thumbnailPath = StringUtils.defaultIfBlank(packageBuildInfo.getThumbnailPath(), getDefaultThumbnailPath(true));
 					addThumbnail(jcrPackageDefinition.getNode(), thumbnailPath, userSession);
-                    jcrPackage.close();
                     packageBuildInfo.setPackageStatus(PackageStatus.CREATED);
                 }
             } else {
@@ -344,6 +344,10 @@ public class PackageServiceImpl implements PackageService {
             packageBuildInfo.addLogMessage(ERROR + e.getMessage());
             packageBuildInfo.addLogMessage(ExceptionUtils.getStackTrace(e));
             LOGGER.error("Error during package creation", e);
+        } finally {
+            if (jcrPackage != null) {
+                jcrPackage.close();
+            }
         }
         return jcrPackage;
     }
@@ -529,6 +533,10 @@ public class PackageServiceImpl implements PackageService {
         } catch (RepositoryException e) {
             LOGGER.error("A repository exception occurred: ", e);
         }
+    }
+
+    protected Cache<String, PackageInfo> getPackageInfos() {
+        return packageInfos;
     }
 
 }
