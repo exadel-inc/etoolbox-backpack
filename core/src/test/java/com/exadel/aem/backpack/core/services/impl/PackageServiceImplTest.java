@@ -377,6 +377,7 @@ public class PackageServiceImplTest {
 
             Cache<String, PackageInfo> packageInfos = ((PackageServiceImpl) packageService).getPackageInfos();
             PackageInfo packageInfo = new PackageInfo();
+
             packageInfo.addLogMessage(TEST);
             packageInfo.addLogMessage(TEST);
             packageInfos.put(PACKAGE_PATH, packageInfo);
