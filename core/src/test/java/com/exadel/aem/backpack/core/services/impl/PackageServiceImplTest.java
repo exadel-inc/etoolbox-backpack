@@ -361,4 +361,43 @@ public class PackageServiceImplTest {
             createPackage(packageInfo, new DefaultWorkspaceFilter());
         }
     }
+
+    public static class getLatestPackageBuildInfo extends Base {
+        private static final String PACKAGE_PATH = "/etc/packages/backpack/testPackage-1.zip";
+        private static final String TEST = "test_log";
+        private static final List<String> TEST_LOG = new ArrayList<>(Arrays.asList(TEST));
+        private static final List<String> TEST_EMPTY_LOG = Collections.EMPTY_LIST;
+        private static final int LATEST_INDEX = 1;
+
+        @Test
+        public void shouldReturnPackageInfoWithLatestLogsIfExist(){
+            PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
+            builder.withPackagePath(PACKAGE_PATH);
+            builder.withLatestLogIndex(LATEST_INDEX);
+
+            Cache<String, PackageInfo> packageInfos = ((PackageServiceImpl) packageService).getPackageInfos();
+            PackageInfo packageInfo = new PackageInfo();
+            packageInfo.addLogMessage(TEST);
+            packageInfo.addLogMessage(TEST);
+            packageInfos.put(PACKAGE_PATH, packageInfo);
+
+            PackageInfo result = packageService.getLatestPackageBuildInfo(builder.build());
+
+            assertEquals(TEST_LOG, result.getLog());
+        }
+
+        @Test
+        public void shouldReturnPackageInfoWithoutLatestLogsIfNotExist() {
+            PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
+            builder.withPackagePath(PACKAGE_PATH);
+
+            Cache<String, PackageInfo> packageInfos = ((PackageServiceImpl) packageService).getPackageInfos();
+            PackageInfo packageInfo = new PackageInfo();
+            packageInfos.put(PACKAGE_PATH, packageInfo);
+
+            PackageInfo result = packageService.getLatestPackageBuildInfo(builder.build());
+
+            assertEquals(TEST_EMPTY_LOG, result.getLog());
+        }
+    }
 }
