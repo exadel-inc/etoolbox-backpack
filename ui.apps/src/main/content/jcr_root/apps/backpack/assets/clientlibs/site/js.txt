@@ -1,4 +1,0 @@
-#base=js
-
-download-action.js
-error-response-action.js

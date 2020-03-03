@@ -9,6 +9,7 @@ public class PackageRequestInfo {
     private String version;
     private boolean excludeChildren;
     private String packagePath;
+    private String thumbnailPath;
     private List<String> referencedResourceTypes;
     private boolean invalid;
     private boolean testBuild;
@@ -39,6 +40,10 @@ public class PackageRequestInfo {
         return packagePath;
     }
 
+    public String getThumbnailPath() {
+        return thumbnailPath;
+    }
+
     public List<String> getReferencedResourceTypes() {
         return referencedResourceTypes;
     }
@@ -66,6 +71,7 @@ public class PackageRequestInfo {
         private String version;
         private boolean excludeChildren;
         private String packagePath;
+        private String thumbnailPath;
         private List<String> referencedResourceTypes;
         private boolean invalid;
         private boolean testBuild;
@@ -109,6 +115,11 @@ public class PackageRequestInfo {
             return this;
         }
 
+        public PackageRequestInfoBuilder withThumbnailPath(final String thumbnailPath) {
+            this.thumbnailPath = thumbnailPath;
+            return this;
+        }
+
         public PackageRequestInfoBuilder withReferencedResourceTypes(final List<String> referencedResourceTypes) {
             this.referencedResourceTypes = referencedResourceTypes;
             return this;
@@ -141,6 +152,7 @@ public class PackageRequestInfo {
             packageRequestInfo.packageGroup = this.packageGroup;
             packageRequestInfo.packageName = this.packageName;
             packageRequestInfo.packagePath = this.packagePath;
+            packageRequestInfo.thumbnailPath = this.thumbnailPath;
             packageRequestInfo.testBuild = this.testBuild;
             packageRequestInfo.latestLogIndex = this.latestLogIndex;
             return packageRequestInfo;

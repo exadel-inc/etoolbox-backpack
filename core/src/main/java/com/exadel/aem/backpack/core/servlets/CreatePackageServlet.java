@@ -42,7 +42,8 @@ public class CreatePackageServlet extends SlingAllMethodsServlet {
         ExcludeChildrenProcessor excludeChildrenProcessor = new ExcludeChildrenProcessor(resourcesPathsProcessor, false);
         VersionProcessor versionProcessor = new VersionProcessor(excludeChildrenProcessor, false);
         GroupProcessor groupProcessor = new GroupProcessor(versionProcessor, false);
-        NameProcessor nameProcessor = new NameProcessor(groupProcessor, true);
+        ThumbnailProcessor thumbnailProcessor = new ThumbnailProcessor(groupProcessor, false);
+        NameProcessor nameProcessor = new NameProcessor(thumbnailProcessor, true);
 
         PackageRequestInfo requestInfo = nameProcessor.processRequest(request, PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo());
         response.setContentType(APPLICATION_JSON);
