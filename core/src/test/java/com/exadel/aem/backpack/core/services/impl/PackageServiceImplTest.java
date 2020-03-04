@@ -1,6 +1,5 @@
 package com.exadel.aem.backpack.core.services.impl;
 
-import com.day.cq.wcm.api.WCMException;
 import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
@@ -13,7 +12,10 @@ import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
 import org.apache.jackrabbit.vault.fs.api.WorkspaceFilter;
 import org.apache.jackrabbit.vault.fs.config.DefaultWorkspaceFilter;
-import org.apache.jackrabbit.vault.packaging.*;
+import org.apache.jackrabbit.vault.packaging.JcrPackage;
+import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
+import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
+import org.apache.jackrabbit.vault.packaging.PackagingService;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
@@ -28,15 +30,11 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 
-import static com.exadel.aem.backpack.core.dto.response.PackageStatus.CREATED;
+import static com.exadel.aem.backpack.core.dto.response.PackageStatus.*;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(Enclosed.class)
 public class PackageServiceImplTest {
@@ -301,6 +299,7 @@ public class PackageServiceImplTest {
             assertEquals("testPackage-1.zip", result.getPackageNodeName());
         }
     }
+
     public static class TestBuildPackage extends Base {
 
         private static final String PACKAGE_PATH = "/etc/packages/testGroup/testPackage-1.zip";
@@ -370,30 +369,49 @@ public class PackageServiceImplTest {
 
 
         private static final String PACKAGE_PATH = "/etc/packages/testGroup/testPackage-1.zip";
+        private PackageServiceImpl packageServiceSpy;
+        private PackageInfo packageInfo;
+        private JcrPackage aPackage;
+        private JcrPackageManager jcrPackageManagerMock;
 
-        @Test
-        public void shouldBuildPackage() throws IOException, RepositoryException, InterruptedException, ExecutionException {
-            PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
-
-            builder.withExcludeChildren(false);
-            builder.withPackagePath(PACKAGE_PATH);
-            builder.withReferencedResourceTypes(Arrays.asList(IMAGE_JPEG, IMAGE_PNG));
-
-            CompletableFuture<PackageInfo> completableFuture = CompletableFuture
-                    .supplyAsync(() -> packageService.buildPackage(resourceResolver, builder.build()), Executors.newCachedThreadPool());
-
-            assertEquals(PackageStatus.BUILT, completableFuture.get().getPackageStatus());
-        }
 
         @Before
-        public void createBasePackage() throws IOException, RepositoryException {
-            PackageInfo packageInfo = new PackageInfo();
+        public void before() throws IOException, RepositoryException {
+            packageInfo = new PackageInfo();
             packageInfo.setGroupName(TEST_GROUP);
             packageInfo.setPackageName(TEST_PACKAGE);
             packageInfo.setVersion(PACKAGE_VERSION);
             packageInfo.setReferencedResources(referencedResources);
             packageInfo.setPaths(Collections.singletonList(PAGE_1));
-            createPackage(packageInfo, new DefaultWorkspaceFilter());
+            packageInfo.setPackagePath(PACKAGE_PATH);
+            aPackage = createPackage(packageInfo, new DefaultWorkspaceFilter());
+
+
+            packageServiceSpy = (PackageServiceImpl) spy(packageService);
+            jcrPackageManagerMock = mock(JcrPackageManager.class);
+            doReturn(jcrPackageManagerMock).when(packageServiceSpy).getPackageManager(any(Session.class));
+        }
+
+        @Test
+        public void shouldBuildPackage() throws RepositoryException {
+            doReturn(aPackage).when(jcrPackageManagerMock).open(any(Node.class));
+
+            List<String> referencedResourceTypes = Arrays.asList(IMAGE_JPEG, IMAGE_PNG);
+
+            packageServiceSpy.buildPackage("admin", packageInfo, referencedResourceTypes);
+
+            assertEquals(BUILT, packageInfo.getPackageStatus());
+            assertNotNull(packageInfo.getPackageBuilt());
+        }
+
+        @Test
+        public void shouldHandleError() {
+            List<String> referencedResourceTypes = Arrays.asList(IMAGE_JPEG, IMAGE_PNG);
+
+            packageServiceSpy.buildPackage("admin", packageInfo, referencedResourceTypes);
+
+            assertEquals(ERROR, packageInfo.getPackageStatus());
+            assertEquals("ERROR: Package by this path /etc/packages/testGroup/testPackage-1.zip doesn't exist in the repository.", packageInfo.getLog().get(0));
         }
     }
 }

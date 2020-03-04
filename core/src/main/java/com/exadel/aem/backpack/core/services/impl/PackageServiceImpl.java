@@ -98,7 +98,7 @@ public class PackageServiceImpl implements PackageService {
             packageInfo.addLogMessage(ERROR + " session is null");
             return packageInfo;
         }
-        JcrPackageManager packMgr = PackagingService.getPackageManager(session);
+        JcrPackageManager packMgr = getPackageManager(session);
         Node packageNode;
         JcrPackage jcrPackage = null;
         AtomicLong totalSize = new AtomicLong();
@@ -162,7 +162,7 @@ public class PackageServiceImpl implements PackageService {
             packageInfo.setPackageStatus(PackageStatus.BUILD_IN_PROGRESS);
             packageInfo.clearLog();
             packageInfos.put(requestInfo.getPackagePath(), packageInfo);
-            buildPackage(resourceResolver.getUserID(), packageInfo, requestInfo.getReferencedResourceTypes());
+            buildPackageAsync(resourceResolver.getUserID(), packageInfo, requestInfo.getReferencedResourceTypes());
         }
 
         return packageInfo;
@@ -176,7 +176,7 @@ public class PackageServiceImpl implements PackageService {
                 .map(path -> getActualPath(path, requestInfo.isExcludeChildren(), resourceResolver))
                 .collect(Collectors.toList());
 
-        JcrPackageManager packMgr = PackagingService.getPackageManager(session);
+        JcrPackageManager packMgr = getPackageManager(session);
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.setPackageName(requestInfo.getPackageName());
         packageInfo.setPaths(actualPaths);
@@ -222,7 +222,7 @@ public class PackageServiceImpl implements PackageService {
         }
 
         final Session session = resourceResolver.adaptTo(Session.class);
-        JcrPackageManager packMgr = PackagingService.getPackageManager(session);
+        JcrPackageManager packMgr = getPackageManager(session);
 
         packageInfo = new PackageInfo();
 
@@ -310,7 +310,7 @@ public class PackageServiceImpl implements PackageService {
         JcrPackage jcrPackage = null;
         try {
             userSession = getUserSession(resourceResolver.getUserID());
-            JcrPackageManager packMgr = PackagingService.getPackageManager(userSession);
+            JcrPackageManager packMgr = getPackageManager(userSession);
             if (!filter.getFilterSets().isEmpty()) {
                 jcrPackage = packMgr.create(packageBuildInfo.getGroupName(), packageBuildInfo.getPackageName(), packageBuildInfo.getVersion());
                 JcrPackageDefinition jcrPackageDefinition = jcrPackage.getDefinition();
@@ -345,13 +345,21 @@ public class PackageServiceImpl implements PackageService {
         return jcrPackage;
     }
 
-    private void buildPackage(final String userId, final PackageInfo packageBuildInfo, final List<String> referencedResourceTypes) {
-        new Thread(() -> {
-            Session userSession = null;
-            try {
-                userSession = getUserSession(userId);
-                JcrPackageManager packMgr = PackagingService.getPackageManager(userSession);
-                JcrPackage jcrPackage = packMgr.open(userSession.getNode(packageBuildInfo.getPackagePath()));
+    protected JcrPackageManager getPackageManager(final Session userSession) {
+        return PackagingService.getPackageManager(userSession);
+    }
+
+    private void buildPackageAsync(final String userId, final PackageInfo packageBuildInfo, final List<String> referencedResourceTypes) {
+        new Thread(() -> buildPackage(userId, packageBuildInfo, referencedResourceTypes)).start();
+    }
+
+    protected void buildPackage(final String userId, final PackageInfo packageBuildInfo, final List<String> referencedResourceTypes) {
+        Session userSession = null;
+        try {
+            userSession = getUserSession(userId);
+            JcrPackageManager packMgr = getPackageManager(userSession);
+            JcrPackage jcrPackage = packMgr.open(userSession.getNode(packageBuildInfo.getPackagePath()));
+            if (jcrPackage != null) {
                 JcrPackageDefinition definition = jcrPackage.getDefinition();
                 DefaultWorkspaceFilter filter = new DefaultWorkspaceFilter();
                 includeGeneralResources(definition, s -> filter.add(new PathFilterSet(s)));
@@ -371,15 +379,18 @@ public class PackageServiceImpl implements PackageService {
                 });
                 packageBuildInfo.setPackageBuilt(Calendar.getInstance());
                 packageBuildInfo.setPackageStatus(PackageStatus.BUILT);
-            } catch (Exception e) {
+            } else {
                 packageBuildInfo.setPackageStatus(PackageStatus.ERROR);
-                packageBuildInfo.addLogMessage(ERROR + e.getMessage());
-                packageBuildInfo.addLogMessage(ExceptionUtils.getStackTrace(e));
-                LOGGER.error("Error during package generation", e);
-            } finally {
-                closeSession(userSession);
+                packageBuildInfo.addLogMessage(ERROR + "Package by this path " + packageBuildInfo.getPackagePath() + " doesn't exist in the repository.");
             }
-        }).start();
+        } catch (Exception e) {
+            packageBuildInfo.setPackageStatus(PackageStatus.ERROR);
+            packageBuildInfo.addLogMessage(ERROR + e.getMessage());
+            packageBuildInfo.addLogMessage(ExceptionUtils.getStackTrace(e));
+            LOGGER.error("Error during package generation", e);
+        } finally {
+            closeSession(userSession);
+        }
     }
 
     private Session getUserSession(final String userId) throws RepositoryException {
