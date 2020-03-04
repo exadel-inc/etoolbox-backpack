@@ -7,6 +7,7 @@ import com.exadel.aem.backpack.core.dto.response.PackageStatus;
 import com.exadel.aem.backpack.core.services.PackageService;
 import com.exadel.aem.backpack.core.services.ReferenceService;
 import com.exadel.aem.backpack.core.servlets.dto.PackageRequestInfo;
+import com.google.common.cache.Cache;
 import com.google.gson.Gson;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
@@ -31,6 +32,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
+import static com.exadel.aem.backpack.core.dto.response.PackageStatus.CREATED;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -93,9 +95,7 @@ public class PackageServiceImplTest {
             PackageInfo packageInfo = new PackageInfo();
             packageInfo.setGroupName(BACKPACK);
             packageInfo.setPackageName(TEST_PACKAGE);
-            packageInfo.setVersion("1");
-            HashMap<String, List<String>> referencedResources = new HashMap<>();
-            referencedResources.put(IMAGE_JPEG, Arrays.asList(PICTURE_1));
+            packageInfo.setVersion(PACKAGE_VERSION);
             packageInfo.setReferencedResources(referencedResources);
             packageInfo.setPaths(Arrays.asList(PAGE_1));
             return packageInfo;
@@ -169,7 +169,7 @@ public class PackageServiceImplTest {
             resourceResolver = context.resourceResolver();
             PackageInfo aPackage = packageService.createPackage(resourceResolver, builder.build());
 
-            assertEquals(PackageStatus.CREATED, aPackage.getPackageStatus());
+            assertEquals(CREATED, aPackage.getPackageStatus());
             assertNotNull("testPackage-1.zip", aPackage.getPackageNodeName());
             assertNotNull(resourceResolver.getResource("/etc/packages/testGroup/testPackage-1.zip"));
             Node packageNode = session.getNode("/etc/packages/testGroup/testPackage-1.zip");
@@ -187,7 +187,7 @@ public class PackageServiceImplTest {
 
             PackageInfo aPackage = packageService.createPackage(resourceResolver, builder.build());
 
-            assertEquals(PackageStatus.CREATED, aPackage.getPackageStatus());
+            assertEquals(CREATED, aPackage.getPackageStatus());
             assertNotNull("testPackage-1.zip", aPackage.getPackageNodeName());
             Node packageNode = session.getNode("/etc/packages/testGroup/testPackage-1.zip");
             assertNotNull(packageNode);
@@ -200,7 +200,7 @@ public class PackageServiceImplTest {
             initBasePackageInfo(builder, Arrays.asList(PAGE_1));
             PackageInfo aPackage = packageService.createPackage(resourceResolver, builder.build());
 
-            assertEquals(PackageStatus.CREATED, aPackage.getPackageStatus());
+            assertEquals(CREATED, aPackage.getPackageStatus());
             assertNotNull("testPackage-1.zip", aPackage.getPackageNodeName());
             assertNotNull(resourceResolver.getResource("/etc/packages/backpack/testPackage-1.zip"));
             Node packageNode = session.getNode("/etc/packages/backpack/testPackage-1.zip");
@@ -214,7 +214,7 @@ public class PackageServiceImplTest {
             PackageInfo packageInfo = new PackageInfo();
             packageInfo.setGroupName(BACKPACK);
             packageInfo.setPackageName(TEST_PACKAGE);
-            packageInfo.setVersion("1");
+            packageInfo.setVersion(PACKAGE_VERSION);
             packageInfo.setReferencedResources(new HashMap<>());
             packageInfo.setPaths(new ArrayList<>());
             createPackage(packageInfo, new DefaultWorkspaceFilter());
@@ -246,6 +246,61 @@ public class PackageServiceImplTest {
         }
     }
 
+    public static class GetPackageInfo extends Base {
+
+        private static final String TEST_ZIP = "/etc/packages/backpack/test.zip";
+        private static final String TEST = "test";
+        private static final String PACKAGE_PATH = "/etc/packages/backpack/testPackage-1.zip";
+
+        @Test
+        public void shouldReturnInMemoryPackageInfo() {
+            PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
+            builder.withPackagePath(TEST_ZIP);
+            Cache<String, PackageInfo> packageInfos = ((PackageServiceImpl) packageService).getPackageInfos();
+            PackageInfo packageInfo = new PackageInfo();
+            packageInfo.setPackageName(TEST);
+            packageInfos.put(TEST_ZIP, packageInfo);
+
+            PackageInfo result = packageService.getPackageInfo(resourceResolver, builder.build());
+
+            assertEquals(TEST, result.getPackageName());
+        }
+
+        @Test
+        public void shouldReturnNonExistingPackageInfo() {
+            PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
+            builder.withPackagePath(TEST_ZIP);
+
+            PackageInfo result = packageService.getPackageInfo(resourceResolver, builder.build());
+
+            assertEquals(PackageStatus.ERROR, result.getPackageStatus());
+            assertEquals("ERROR: Package by this path " + TEST_ZIP + " doesn't exist in the repository.", result.getLog().get(0));
+        }
+
+        @Test
+        public void shouldReturnExistingPackageInfo() throws IOException, RepositoryException {
+            //create package inside the repository
+            PackageInfo packageInfo = getDefaultPackageInfo();
+            DefaultWorkspaceFilter defaultWorkspaceFilter = new DefaultWorkspaceFilter();
+            defaultWorkspaceFilter.add(new PathFilterSet(PAGE_1));
+            createPackage(packageInfo, defaultWorkspaceFilter);
+
+            PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
+            builder.withPackagePath(PACKAGE_PATH);
+
+            PackageInfo result = packageService.getPackageInfo(resourceResolver, builder.build());
+
+            assertEquals(PACKAGE_PATH, result.getPackagePath());
+            assertEquals(BACKPACK, result.getGroupName());
+            assertEquals(TEST_PACKAGE, result.getPackageName());
+            assertEquals(PACKAGE_VERSION, result.getVersion());
+            assertEquals(referencedResources, result.getReferencedResources());
+            assertEquals(PAGE_1, result.getPaths().stream().findFirst().get());
+            assertNotNull(result.getDataSize());
+            assertEquals(CREATED, result.getPackageStatus());
+            assertEquals("testPackage-1.zip", result.getPackageNodeName());
+        }
+    }
     public static class TestBuildPackage extends Base {
 
         private static final String PACKAGE_PATH = "/etc/packages/testGroup/testPackage-1.zip";
