@@ -217,6 +217,10 @@ public class PackageServiceImpl implements PackageService {
         DefaultWorkspaceFilter filter = getWorkspaceFilter(resultingPaths);
         createPackage(session, packageInfo, filter);
 
+        if (PackageStatus.CREATED.equals(packageInfo.getPackageStatus())) {
+            packageInfos.asMap().put(packageInfo.getPackagePath(), packageInfo);
+        }
+
         return packageInfo;
     }
 
@@ -341,6 +345,7 @@ public class PackageServiceImpl implements PackageService {
                     String thumbnailPath = StringUtils.defaultIfBlank(packageBuildInfo.getThumbnailPath(), getDefaultThumbnailPath(true));
 					addThumbnail(jcrPackageDefinition.getNode(), thumbnailPath, userSession);
                     packageBuildInfo.setPackageStatus(PackageStatus.CREATED);
+                    packageBuildInfo.setPackagePath(jcrPackage.getNode().getPath());
                 }
             } else {
                 packageBuildInfo.setPackageStatus(PackageStatus.ERROR);

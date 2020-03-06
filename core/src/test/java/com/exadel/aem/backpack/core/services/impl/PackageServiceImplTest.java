@@ -296,7 +296,34 @@ public class PackageServiceImplTest {
             assertEquals(CREATED, result.getPackageStatus());
             assertEquals("testPackage-1.zip", result.getPackageNodeName());
         }
+
+        @Test
+        public void shouldReturnRightInfoAfterDeletingPackage() throws IOException, RepositoryException {
+            PackageInfo packageInfo = getDefaultPackageInfo();
+            DefaultWorkspaceFilter defaultWorkspaceFilter = new DefaultWorkspaceFilter();
+            defaultWorkspaceFilter.add(new PathFilterSet(PAGE_1));
+            createPackage(packageInfo, defaultWorkspaceFilter);
+
+            PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
+            builder.withPackagePath(PACKAGE_PATH);
+
+            PackageInfo result1 = packageService.getPackageInfo(resourceResolver, builder.build());
+
+            packMgr.remove(packMgr.listPackages().get(0));
+            defaultWorkspaceFilter.add(new PathFilterSet(PICTURE_1));
+            createPackage(packageInfo, defaultWorkspaceFilter);
+
+            PackageInfo result2 = packageService.getPackageInfo(resourceResolver, builder.build());
+
+            assertEquals(result1.getPackageStatus(), result2.getPackageStatus());
+            assertEquals(result1.getPackageName(), result2.getPackageName());
+            assertEquals(result1.getGroupName(), result2.getGroupName());
+            assertEquals(result1.getVersion(), result2.getVersion());
+            assertEquals(result1.getPackagePath(), result2.getPackagePath());
+            assertNotEquals(result1.getPaths(), result2.getPaths());
+        }
     }
+
     public static class TestBuildPackage extends Base {
 
         private static final String PACKAGE_PATH = "/etc/packages/testGroup/testPackage-1.zip";
