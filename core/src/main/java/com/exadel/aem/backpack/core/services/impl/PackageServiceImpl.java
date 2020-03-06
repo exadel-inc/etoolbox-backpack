@@ -328,9 +328,6 @@ public class PackageServiceImpl implements PackageService {
                                      final PackageInfo packageBuildInfo,
                                      final DefaultWorkspaceFilter filter) {
         JcrPackage jcrPackage = null;
-        if (packageBuildInfo.getPackagePath() != null) {
-            packageInfos.invalidate(packageBuildInfo.getPackagePath());
-        }
         try {
             JcrPackageManager packMgr = PackagingService.getPackageManager(userSession);
             if (!filter.getFilterSets().isEmpty()) {
