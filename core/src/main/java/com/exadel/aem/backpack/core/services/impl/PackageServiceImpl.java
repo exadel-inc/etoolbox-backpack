@@ -57,6 +57,7 @@ public class PackageServiceImpl implements PackageService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PackageServiceImpl.class);
 
 
+    private static final String SERVICE_NAME = "backpack-service";
     private static final String DEFAULT_PACKAGE_GROUP = "backpack";
     private static final String DEFAULT_THUMBNAILS_LOCATION = "/apps/backpack/assets/";
     private static final String THUMBNAIL_PATH_TEMPLATE = DEFAULT_THUMBNAILS_LOCATION + "backpack_%s.png";
@@ -376,7 +377,9 @@ public class PackageServiceImpl implements PackageService {
     protected void buildPackage(final String userId, final PackageInfo packageBuildInfo, final List<String> referencedResourceTypes) {
         Session userSession = null;
         try {
-            userSession = getUserSession(userId);
+            userSession = slingRepository.impersonateFromService(SERVICE_NAME,
+                    new SimpleCredentials(userId, StringUtils.EMPTY.toCharArray()),
+                    null);
             JcrPackageManager packMgr = getPackageManager(userSession);
             JcrPackage jcrPackage = packMgr.open(userSession.getNode(packageBuildInfo.getPackagePath()));
             if (jcrPackage != null) {
@@ -413,11 +416,6 @@ public class PackageServiceImpl implements PackageService {
         } finally {
             closeSession(userSession);
         }
-    }
-
-    private Session getUserSession(final String userId) throws RepositoryException {
-        Session adminSession = slingRepository.loginAdministrative(null);
-        return adminSession.impersonate(new SimpleCredentials(userId, new char[0]));
     }
 
     private String getActualPath(final String path, final boolean excludeChildren, final ResourceResolver resourceResolver) {
