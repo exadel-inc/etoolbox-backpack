@@ -298,6 +298,32 @@ public class PackageServiceImplTest {
             assertEquals(CREATED, result.getPackageStatus());
             assertEquals("testPackage-1.zip", result.getPackageNodeName());
         }
+
+        @Test
+        public void shouldReturnRightInfoAfterDeletingPackage() throws IOException, RepositoryException {
+            PackageInfo packageInfo = getDefaultPackageInfo();
+            DefaultWorkspaceFilter defaultWorkspaceFilter = new DefaultWorkspaceFilter();
+            defaultWorkspaceFilter.add(new PathFilterSet(PAGE_1));
+            createPackage(packageInfo, defaultWorkspaceFilter);
+
+            PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
+            builder.withPackagePath(PACKAGE_PATH);
+
+            PackageInfo result1 = packageService.getPackageInfo(resourceResolver, builder.build());
+
+            packMgr.remove(packMgr.listPackages().get(0));
+            defaultWorkspaceFilter.add(new PathFilterSet(PICTURE_1));
+            createPackage(packageInfo, defaultWorkspaceFilter);
+
+            PackageInfo result2 = packageService.getPackageInfo(resourceResolver, builder.build());
+
+            assertEquals(result1.getPackageStatus(), result2.getPackageStatus());
+            assertEquals(result1.getPackageName(), result2.getPackageName());
+            assertEquals(result1.getGroupName(), result2.getGroupName());
+            assertEquals(result1.getVersion(), result2.getVersion());
+            assertEquals(result1.getPackagePath(), result2.getPackagePath());
+            assertNotEquals(result1.getPaths(), result2.getPaths());
+        }
     }
 
     public static class TestBuildPackage extends Base {
@@ -412,6 +438,57 @@ public class PackageServiceImplTest {
 
             assertEquals(ERROR, packageInfo.getPackageStatus());
             assertEquals("ERROR: Package by this path /etc/packages/testGroup/testPackage-1.zip doesn't exist in the repository.", packageInfo.getLog().get(0));
+        }
+    }
+
+    public static class GetLatestPackageBuildInfo extends Base {
+        private static final String PACKAGE_PATH = "/etc/packages/backpack/testPackage-1.zip";
+        private static final String TEST = "test_log";
+        private static final List<String> TEST_LOG = new ArrayList<>(Arrays.asList(TEST));
+        private static final List<String> TEST_EMPTY_LOG = Collections.EMPTY_LIST;
+        private static final int LATEST_INDEX = 1;
+
+        @Test
+        public void shouldReturnPackageInfoWithLatestLogsIfExist(){
+            PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
+            builder.withPackagePath(PACKAGE_PATH);
+            builder.withLatestLogIndex(LATEST_INDEX);
+
+            Cache<String, PackageInfo> packageInfos = ((PackageServiceImpl) packageService).getPackageInfos();
+            PackageInfo packageInfo = new PackageInfo();
+
+            packageInfo.addLogMessage(TEST);
+            packageInfo.addLogMessage(TEST);
+            packageInfos.put(PACKAGE_PATH, packageInfo);
+
+            PackageInfo result = packageService.getLatestPackageBuildInfo(builder.build());
+
+            assertEquals(TEST_LOG, result.getLog());
+        }
+
+        @Test
+        public void shouldReturnPackageInfoWithoutLatestLogsIfNotExist() {
+            PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
+            builder.withPackagePath(PACKAGE_PATH);
+
+            Cache<String, PackageInfo> packageInfos = ((PackageServiceImpl) packageService).getPackageInfos();
+            PackageInfo packageInfo = new PackageInfo();
+            packageInfos.put(PACKAGE_PATH, packageInfo);
+
+            PackageInfo result = packageService.getLatestPackageBuildInfo(builder.build());
+
+            assertEquals(TEST_EMPTY_LOG, result.getLog());
+        }
+
+        @Test
+        public void shouldReturnNonExistingLatestPackageBuildInfo() {
+            PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
+            builder.withPackagePath(PACKAGE_PATH);
+
+            PackageInfo result = packageService.getLatestPackageBuildInfo(builder.build());
+
+            assertEquals(PackageStatus.ERROR, result.getPackageStatus());
+            assertEquals("ERROR: Package by this path " + PACKAGE_PATH + " doesn't exist in the repository.", result.getLog().get(0));
         }
     }
 }

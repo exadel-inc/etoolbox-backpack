@@ -11,7 +11,7 @@
                   javax.jcr.security.Privilege,
                   java.util.ArrayList,
                   java.util.List" %>
-<%@ page import="java.util.Calendar" %>
+<%@ page import="java.util.Calendar, java.time.LocalDateTime" %>
 <%
 
     AccessControlManager acm = null;
@@ -28,7 +28,7 @@
     Tag tag = cmp.consumeTag();
     AttrBuilder attrs = tag.getAttrs();
 
-    String thumbnailUrl = getThumbnailUrl(resource, 800, 480);
+    String thumbnailUrl = getThumbnailUrl(resource);
     if (thumbnailUrl.startsWith("/")) {
         thumbnailUrl = request.getContextPath() + thumbnailUrl;
     }
@@ -37,7 +37,7 @@
 
     attrs.add("data-timeline", true);
 
-%><coral-card class="foundation-collection-navigator" data-foundation-collection-navigator-href="#" <%= attrs %>>
+%><coral-card class="foundation-collection-navigator backpack-card" data-foundation-collection-navigator-href="#" <%= attrs %>>
 
 <coral-card-asset>
     <img src="<%= xssAPI.getValidHref(thumbnailUrl) %>">
@@ -93,12 +93,12 @@
 %></coral-quickactions>
 
 <%!
-    private String getThumbnailUrl(Resource resource1, int width, int height) {
-        return "/crx/packmgr/thumbnail.jsp?_charset_=utf-8&path=" + resource1.getPath();
+    private String getThumbnailUrl(Resource resource) {
+        return "/crx/packmgr/thumbnail.jsp?_charset_=utf-8&path=" + resource.getPath() + "&ck=" + Long.toString(System.currentTimeMillis());
     }
 
     private List<String> getActionRels(Resource resource, AccessControlManager acm) {
-        List<String> actionRels = new ArrayList<String>();
+        List<String> actionRels = new ArrayList();
 
         actionRels.add("cq-siteadmin-admin-actions-edit-activator");
         actionRels.add("cq-siteadmin-admin-actions-properties-activator");
