@@ -416,6 +416,7 @@ public class PackageServiceImplTest {
             packageServiceSpy = (PackageServiceImpl) spy(packageService);
             jcrPackageManagerMock = mock(JcrPackageManager.class);
             doReturn(jcrPackageManagerMock).when(packageServiceSpy).getPackageManager(any(Session.class));
+            doReturn(resourceResolver.adaptTo(Session.class)).when(packageServiceSpy).getUserImpersonatedSession(any(String.class));
         }
 
         @Test
