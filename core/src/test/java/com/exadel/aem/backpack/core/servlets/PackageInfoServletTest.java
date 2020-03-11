@@ -10,12 +10,11 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.stubbing.Answer;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -30,10 +29,11 @@ public class PackageInfoServletTest {
     protected PackageInfoServlet servlet;
     protected PackageService packageServiceMock = mock(PackageService.class);
     protected Gson GSON;
+    protected PackageInfo packageInfo = getPackageInfo();
 
     @Before
     public void beforeTest() {
-        when(packageServiceMock.getPackageInfo(any(ResourceResolver.class), any(PackageRequestInfo.class))).then(getResult());
+        when(packageServiceMock.getPackageInfo(any(ResourceResolver.class), any(PackageRequestInfo.class))).thenReturn(packageInfo);
         context.registerService(PackageService.class, packageServiceMock);
         servlet = context.registerInjectActivateService(new PackageInfoServlet());
         GSON = new Gson();
@@ -58,22 +58,12 @@ public class PackageInfoServletTest {
         servlet.doGet(context.request(), context.response());
 
         assertEquals(HttpServletResponse.SC_OK, context.response().getStatus());
-        assertEquals(GSON.toJson(getPackageExistInfo(PACKAGE_PATH)), context.response().getOutputAsString());
+        assertEquals(GSON.toJson(packageInfo), context.response().getOutputAsString());
     }
 
-    @Test
-    public void shouldReturnOkWithNonExistingPackage() throws IOException {
-        context.request().addRequestParameter(PATH_PARAM, "non-existing-path");
-
-        servlet.doGet(context.request(), context.response());
-
-        assertEquals(HttpServletResponse.SC_OK, context.response().getStatus());
-        assertEquals(GSON.toJson(getPackageNotExistInfo("non-existing-path")), context.response().getOutputAsString());
-    }
-
-    private PackageInfo getPackageExistInfo(String path) {
+    private PackageInfo getPackageInfo() {
         PackageInfo info = new PackageInfo();
-        info.setPackagePath(path);
+        info.setPackagePath(PACKAGE_PATH);
         info.setPackageStatus(PackageStatus.CREATED);
         info.setDataSize(0L);
         info.setGroupName("test");
@@ -81,21 +71,4 @@ public class PackageInfoServletTest {
         info.setVersion("1");
         return info;
     }
-
-    private PackageInfo getPackageNotExistInfo(String path) {
-        PackageInfo info = new PackageInfo();
-        info.setPackagePath(path);
-        info.addLogMessage("ERROR: Package by this path " + path + " doesn't exist in the repository.");
-        info.setPackageStatus(PackageStatus.ERROR);
-        return info;
-    }
-
-    private Answer<PackageInfo> getResult() {
-        return invocationOnMock -> {
-            PackageRequestInfo requestInfo = invocationOnMock.getArgument(1);
-            String path = requestInfo.getPackagePath();
-            return path.equals(PACKAGE_PATH) ? getPackageExistInfo(path) : getPackageNotExistInfo(path);
-        };
-    }
-
 }
