@@ -377,9 +377,7 @@ public class PackageServiceImpl implements PackageService {
     protected void buildPackage(final String userId, final PackageInfo packageBuildInfo, final List<String> referencedResourceTypes) {
         Session userSession = null;
         try {
-            userSession = slingRepository.impersonateFromService(SERVICE_NAME,
-                    new SimpleCredentials(userId, StringUtils.EMPTY.toCharArray()),
-                    null);
+            userSession = getUserImpersonatedSession(userId);
             JcrPackageManager packMgr = getPackageManager(userSession);
             JcrPackage jcrPackage = packMgr.open(userSession.getNode(packageBuildInfo.getPackagePath()));
             if (jcrPackage != null) {
@@ -416,6 +414,12 @@ public class PackageServiceImpl implements PackageService {
         } finally {
             closeSession(userSession);
         }
+    }
+
+    protected Session getUserImpersonatedSession(final String userId) throws RepositoryException {
+        return slingRepository.impersonateFromService(SERVICE_NAME,
+                new SimpleCredentials(userId, StringUtils.EMPTY.toCharArray()),
+                null);
     }
 
     private String getActualPath(final String path, final boolean excludeChildren, final ResourceResolver resourceResolver) {
