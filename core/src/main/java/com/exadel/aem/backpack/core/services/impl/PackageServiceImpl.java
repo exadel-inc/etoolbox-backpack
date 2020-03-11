@@ -57,6 +57,7 @@ public class PackageServiceImpl implements PackageService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PackageServiceImpl.class);
 
 
+    private static final String SERVICE_NAME = "backpack-service";
     private static final String DEFAULT_PACKAGE_GROUP = "backpack";
     private static final String DEFAULT_THUMBNAILS_LOCATION = "/apps/backpack/assets/";
     private static final String THUMBNAIL_PATH_TEMPLATE = DEFAULT_THUMBNAILS_LOCATION + "backpack_%s.png";
@@ -217,6 +218,10 @@ public class PackageServiceImpl implements PackageService {
         DefaultWorkspaceFilter filter = getWorkspaceFilter(resultingPaths);
         createPackage(session, packageInfo, filter);
 
+        if (PackageStatus.CREATED.equals(packageInfo.getPackageStatus())) {
+            packageInfos.asMap().put(packageInfo.getPackagePath(), packageInfo);
+        }
+
         return packageInfo;
     }
 
@@ -341,6 +346,7 @@ public class PackageServiceImpl implements PackageService {
                     String thumbnailPath = StringUtils.defaultIfBlank(packageBuildInfo.getThumbnailPath(), getDefaultThumbnailPath(true));
 					addThumbnail(jcrPackageDefinition.getNode(), thumbnailPath, userSession);
                     packageBuildInfo.setPackageStatus(PackageStatus.CREATED);
+                    packageBuildInfo.setPackagePath(jcrPackage.getNode().getPath());
                 }
             } else {
                 packageBuildInfo.setPackageStatus(PackageStatus.ERROR);
@@ -364,7 +370,9 @@ public class PackageServiceImpl implements PackageService {
         new Thread(() -> {
             Session userSession = null;
 			try {
-                userSession = getUserSession(userId);
+                userSession = slingRepository.impersonateFromService(SERVICE_NAME,
+                        new SimpleCredentials(userId, StringUtils.EMPTY.toCharArray()),
+                        null);
 				JcrPackageManager packMgr = PackagingService.getPackageManager(userSession);
 				JcrPackage jcrPackage = packMgr.open(userSession.getNode(packageBuildInfo.getPackagePath()));
 				JcrPackageDefinition definition = jcrPackage.getDefinition();
@@ -397,11 +405,6 @@ public class PackageServiceImpl implements PackageService {
                 closeSession(userSession);
             }
         }).start();
-    }
-
-    private Session getUserSession(final String userId) throws RepositoryException {
-        Session adminSession = slingRepository.loginAdministrative(null);
-        return adminSession.impersonate(new SimpleCredentials(userId, new char[0]));
     }
 
     private String getActualPath(final String path, final boolean excludeChildren, final ResourceResolver resourceResolver) {
