@@ -9,15 +9,11 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.stubbing.Answer;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -34,11 +30,13 @@ public class CreatePackageServletTest {
     public AemContext context = new AemContext();
     protected CreatePackageServlet servlet;
     protected PackageService packageServiceMock = mock(PackageService.class);
-    protected Set<String> createdPackages = new HashSet<>();
+    private PackageInfo packageInfoWithCreatedStatus;
+    protected PackageInfo packageInfoWithErrorStatus;
 
     @Before
     public void beforeTest() {
-        when(packageServiceMock.createPackage(any(ResourceResolver.class), any(PackageRequestInfo.class))).thenAnswer(getPackageInfo());
+        packageInfoWithCreatedStatus = getPackageInfoWithCreatedStatus();
+        packageInfoWithErrorStatus = getPackageInfoWithErrorStatus();
         context.registerService(PackageService.class, packageServiceMock);
         servlet = context.registerInjectActivateService(new CreatePackageServlet());
 
@@ -48,56 +46,31 @@ public class CreatePackageServletTest {
     @Test
     public void shouldReturnBadRequestWhenRequestIsEmpty() throws IOException {
         servlet.doPost(context.request(), context.response());
+
         assertEquals(HttpServletResponse.SC_BAD_REQUEST, context.response().getStatus());
+        assertEquals(APPLICATION_JSON, context.response().getContentType());
     }
 
     @Test
-    public void shouldReturnBadRequestWhenRequestHasNonExistingPath() throws IOException {
+    public void shouldReturnOkWhenRequestIsValid() throws IOException {
         createBaseRequest();
-        context.request().addRequestParameter(PACKAGE_PATHS_PARAM, "/content/site/pages/page2");
+        when(packageServiceMock.createPackage(any(ResourceResolver.class), any(PackageRequestInfo.class))).thenReturn(packageInfoWithCreatedStatus);
 
         servlet.doPost(context.request(), context.response());
-        assertEquals(HttpServletResponse.SC_BAD_REQUEST, context.response().getStatus());
-    }
 
-    @Test
-    public void shouldReturnOkWhenRequestIsGood() throws IOException {
-        createBaseRequest();
-
-        servlet.doPost(context.request(), context.response());
         assertEquals(HttpServletResponse.SC_OK, context.response().getStatus());
+        assertEquals(APPLICATION_JSON, context.response().getContentType());
     }
 
     @Test
     public void shouldReturnConflictWhenPackageAlreadyExist() throws IOException {
         createBaseRequest();
+        when(packageServiceMock.createPackage(any(ResourceResolver.class), any(PackageRequestInfo.class))).thenReturn(packageInfoWithErrorStatus);
 
         servlet.doPost(context.request(), context.response());
-        assertEquals(HttpServletResponse.SC_OK, context.response().getStatus());
 
-        createdPackages.add(context.response().getOutputAsString());
-        servlet.doPost(context.request(), context.response());
         assertEquals(HttpServletResponse.SC_CONFLICT, context.response().getStatus());
-    }
-
-    @Test
-    public void shouldReturnOkWithDifferentGroupAndVersionAndName() throws IOException {
-        createBaseRequest();
-
-        servlet.doPost(context.request(), context.response());
-        assertEquals(HttpServletResponse.SC_OK, context.response().getStatus());
-
-        context.request().addRequestParameter("group", "test");
-        servlet.doPost(context.request(), context.response());
-        assertEquals(HttpServletResponse.SC_OK, context.response().getStatus());
-
-        context.request().addRequestParameter("version", "1");
-        servlet.doPost(context.request(), context.response());
-        assertEquals(HttpServletResponse.SC_OK, context.response().getStatus());
-
-        context.request().removeAttribute(PACKAGE_PATHS_PARAM);
-        context.request().addRequestParameter(PACKAGE_NAME_PARAM, "test-package2");
-        assertEquals(HttpServletResponse.SC_OK, context.response().getStatus());
+        assertEquals(APPLICATION_JSON, context.response().getContentType());
     }
 
     private void createBaseRequest() {
@@ -105,24 +78,15 @@ public class CreatePackageServletTest {
         context.request().addRequestParameter(PACKAGE_PATHS_PARAM, PAGE_1);
     }
 
-    private String createPackageName(PackageRequestInfo info) {
-        return info.getPackageGroup() + "/" + info.getPackageName() + "/" + info.getVersion();
+    private PackageInfo getPackageInfoWithErrorStatus() {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.setPackageStatus(PackageStatus.ERROR);
+        return packageInfo;
     }
 
-    private Answer<PackageInfo> getPackageInfo() {
-        return invocationOnMock -> {
-            PackageInfo info = new PackageInfo();
-            PackageRequestInfo requestInfo = invocationOnMock.getArgument(1);
-            String packagePath = createPackageName(requestInfo);
-            if (createdPackages.contains(packagePath)) {
-                info.setPackageStatus(PackageStatus.ERROR);
-            } else {
-                createdPackages.add(packagePath);
-                info.setPackageStatus(PackageStatus.CREATED);
-            }
-            assertFalse(requestInfo.isInvalid());
-            assertEquals(context.response().getContentType(), APPLICATION_JSON);
-            return info;
-        };
+    private PackageInfo getPackageInfoWithCreatedStatus() {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.setPackageStatus(PackageStatus.CREATED);
+        return packageInfo;
     }
 }
