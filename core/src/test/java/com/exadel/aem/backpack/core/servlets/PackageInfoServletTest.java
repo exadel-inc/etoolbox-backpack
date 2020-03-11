@@ -40,7 +40,7 @@ public class PackageInfoServletTest {
     }
 
     @Test
-    public void shouldReturnBadRequestWithEmptyRequest() throws IOException {
+    public void shouldReturnBadRequestWithNonExistingPathParameter() throws IOException {
         PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
 
         builder.withInvalidMessage(PATH_PARAM + " is mandatory field!");
@@ -52,7 +52,7 @@ public class PackageInfoServletTest {
     }
 
     @Test
-    public void shouldReturnOkWithExistingPackage() throws IOException {
+    public void shouldReturnOkWithExistingPathParameter() throws IOException {
         context.request().addRequestParameter(PATH_PARAM, PACKAGE_PATH);
 
         servlet.doGet(context.request(), context.response());
