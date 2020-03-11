@@ -1,19 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
- |  Copyright 2015 Adobe Systems Incorporated
- |
- |  Licensed under the Apache License, Version 2.0 (the "License");
- |  you may not use this file except in compliance with the License.
- |  You may obtain a copy of the License at
- |
- |      http://www.apache.org/licenses/LICENSE-2.0
- |
- |  Unless required by applicable law or agreed to in writing, software
- |  distributed under the License is distributed on an "AS IS" BASIS,
- |  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- |  See the License for the specific language governing permissions and
- |  limitations under the License.
--->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -24,7 +9,6 @@
         <groupId>com.exadel.aem</groupId>
         <artifactId>aem-backpack</artifactId>
         <version>1.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <!-- ====================================================================== -->
@@ -32,8 +16,9 @@
     <!-- ====================================================================== -->
     <artifactId>aem-backpack-content</artifactId>
     <packaging>content-package</packaging>
-    <name>AEM BackPack - UI apps</name>
-    <description>Content package for AEM BackPack Tool</description>
+    <name>AEM BackPack - UI</name>
+
+    <description>UI Content package for AEM BackPack Tool</description>
 
 
     <!-- ====================================================================== -->
@@ -107,41 +92,11 @@
             </plugin>
         </plugins>
     </build>
-
-    <!-- ====================================================================== -->
-    <!-- D E P E N D E N C I E S                                                -->
-    <!-- ====================================================================== -->
     <dependencies>
         <dependency>
             <groupId>com.exadel.aem</groupId>
             <artifactId>aem-backpack.core</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.adobe.aem</groupId>
-            <artifactId>uber-jar</artifactId>
-            <classifier>apis</classifier>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.jcr</groupId>
-            <artifactId>jcr</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.day.cq.wcm</groupId>
-            <artifactId>cq-wcm-taglib</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <scope>compile</scope>
+            <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
 </project>
