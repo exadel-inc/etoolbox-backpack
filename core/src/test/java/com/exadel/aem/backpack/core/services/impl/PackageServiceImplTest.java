@@ -8,6 +8,7 @@ import com.exadel.aem.backpack.core.services.ReferenceService;
 import com.exadel.aem.backpack.core.servlets.dto.PackageRequestInfo;
 import com.google.common.cache.Cache;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
 import org.apache.jackrabbit.vault.fs.api.WorkspaceFilter;
@@ -29,11 +30,11 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.*;
 
 import static com.exadel.aem.backpack.core.dto.response.PackageStatus.*;
 import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @RunWith(Enclosed.class)
@@ -69,8 +70,8 @@ public class PackageServiceImplTest {
         @Before
         public void beforeTest() {
             referencedResources = new HashMap<>();
-            referencedResources.put(IMAGE_JPEG, Arrays.asList(PICTURE_1));
-            referencedResources.put(IMAGE_PNG, Arrays.asList(PICTURE_2));
+            referencedResources.put(IMAGE_JPEG, Collections.singletonList(PICTURE_1));
+            referencedResources.put(IMAGE_PNG, Collections.singletonList(PICTURE_2));
 
             HashSet<AssetReferencedItem> assetReferenceItems = new HashSet<>();
             assetReferenceItems.add(new AssetReferencedItem(PICTURE_1, IMAGE_JPEG));
@@ -95,7 +96,7 @@ public class PackageServiceImplTest {
             packageInfo.setPackageName(TEST_PACKAGE);
             packageInfo.setVersion(PACKAGE_VERSION);
             packageInfo.setReferencedResources(referencedResources);
-            packageInfo.setPaths(Arrays.asList(PAGE_1));
+            packageInfo.setPaths(Collections.singletonList(PAGE_1));
             return packageInfo;
         }
 
@@ -128,14 +129,16 @@ public class PackageServiceImplTest {
                                             final List<String> expectedPaths,
                                             final Map<String, List<String>> expectedReferencedResources) throws RepositoryException {
             JcrPackage jcrPackage = null;
+            Type listType = new TypeToken<List<String>>() {}.getType();
+            Type mapType = new TypeToken<Map<String, List<String>>>() {}.getType();
             try {
                 jcrPackage = packMgr.open(packageNode);
                 JcrPackageDefinition definition = jcrPackage.getDefinition();
                 WorkspaceFilter filter = definition.getMetaInf().getFilter();
-                List<String> pkgGeneralResources = (List<String>) GSON.fromJson(definition.get(GENERAL_RESOURCES), List.class);
-                Map<String, List<String>> pkgReferencedResources = (Map<String, List<String>>) GSON.fromJson(definition.get(REFERENCED_RESOURCES), Map.class);
+                List<String> pkgGeneralResources = GSON.fromJson(definition.get(GENERAL_RESOURCES), listType);
+                Map<String, List<String>> pkgReferencedResources = GSON.fromJson(definition.get(REFERENCED_RESOURCES), mapType);
 
-                expectedReferencedResources.entrySet().stream().forEach(listEntry -> {
+                pkgReferencedResources.entrySet().stream().forEach(listEntry -> {
                     List<String> expectedPath = expectedReferencedResources.get(listEntry.getKey());
                     expectedPath.forEach(s -> assertTrue("Referenced resources from the package metadata must be as expected map", listEntry.getValue().contains(s)));
                 });
@@ -162,7 +165,7 @@ public class PackageServiceImplTest {
         public void shouldCreatePackage() throws RepositoryException {
             PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
 
-            initBasePackageInfo(builder, Arrays.asList(PAGE_1));
+            initBasePackageInfo(builder, Collections.singletonList(PAGE_1));
             builder.withPackageGroup(TEST_GROUP);
             resourceResolver = context.resourceResolver();
             PackageInfo aPackage = packageService.createPackage(resourceResolver, builder.build());
@@ -172,14 +175,14 @@ public class PackageServiceImplTest {
             assertNotNull(resourceResolver.getResource("/etc/packages/testGroup/testPackage-1.zip"));
             Node packageNode = session.getNode("/etc/packages/testGroup/testPackage-1.zip");
             assertNotNull(packageNode);
-            verifyPackageFilters(packageNode, Arrays.asList(PAGE_1), referencedResources);
+            verifyPackageFilters(packageNode, Collections.singletonList(PAGE_1), referencedResources);
         }
 
         @Test
         public void shouldCreatePackageWithJcrContentInCaseOfExcludedChildren() throws RepositoryException {
             PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
 
-            initBasePackageInfo(builder, Arrays.asList(PAGE_1));
+            initBasePackageInfo(builder, Collections.singletonList(PAGE_1));
             builder.withPackageGroup(TEST_GROUP);
             builder.withExcludeChildren(true);
 
@@ -189,13 +192,13 @@ public class PackageServiceImplTest {
             assertNotNull("testPackage-1.zip", aPackage.getPackageNodeName());
             Node packageNode = session.getNode("/etc/packages/testGroup/testPackage-1.zip");
             assertNotNull(packageNode);
-            verifyPackageFilters(packageNode, Arrays.asList(PAGE_1 + "/jcr:content"), referencedResources);
+            verifyPackageFilters(packageNode, Collections.singletonList(PAGE_1 + "/jcr:content"), referencedResources);
         }
 
         @Test
         public void shouldCreatePackageWithDefaultGroup() throws RepositoryException {
             PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
-            initBasePackageInfo(builder, Arrays.asList(PAGE_1));
+            initBasePackageInfo(builder, Collections.singletonList(PAGE_1));
             PackageInfo aPackage = packageService.createPackage(resourceResolver, builder.build());
 
             assertEquals(CREATED, aPackage.getPackageStatus());
@@ -203,7 +206,7 @@ public class PackageServiceImplTest {
             assertNotNull(resourceResolver.getResource("/etc/packages/backpack/testPackage-1.zip"));
             Node packageNode = session.getNode("/etc/packages/backpack/testPackage-1.zip");
             assertNotNull(packageNode);
-            verifyPackageFilters(packageNode, Arrays.asList(PAGE_1), referencedResources);
+            verifyPackageFilters(packageNode, Collections.singletonList(PAGE_1), referencedResources);
 
         }
 
@@ -218,7 +221,7 @@ public class PackageServiceImplTest {
             createPackage(packageInfo, new DefaultWorkspaceFilter());
 
             PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
-            initBasePackageInfo(builder, Arrays.asList(PAGE_1));
+            initBasePackageInfo(builder, Collections.singletonList(PAGE_1));
             PackageInfo aPackage = packageService.createPackage(resourceResolver, builder.build());
 
             assertEquals(PackageStatus.ERROR, aPackage.getPackageStatus());
@@ -228,7 +231,7 @@ public class PackageServiceImplTest {
         }
 
         @Test
-        public void shouldNotCreatePackageWithoutFilters() throws RepositoryException, IOException {
+        public void shouldNotCreatePackageWithoutFilters() {
             PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
             initBasePackageInfo(builder, Collections.emptyList());
             PackageInfo aPackage = packageService.createPackage(resourceResolver, builder.build());
@@ -386,7 +389,7 @@ public class PackageServiceImplTest {
             packageInfo.setPackageName(TEST_PACKAGE);
             packageInfo.setVersion(PACKAGE_VERSION);
             packageInfo.setReferencedResources(referencedResources);
-            packageInfo.setPaths(Arrays.asList(PAGE_1));
+            packageInfo.setPaths(Collections.singletonList(PAGE_1));
             createPackage(packageInfo, new DefaultWorkspaceFilter());
         }
     }
@@ -445,8 +448,8 @@ public class PackageServiceImplTest {
     public static class GetLatestPackageBuildInfo extends Base {
         private static final String PACKAGE_PATH = "/etc/packages/backpack/testPackage-1.zip";
         private static final String TEST = "test_log";
-        private static final List<String> TEST_LOG = new ArrayList<>(Arrays.asList(TEST));
-        private static final List<String> TEST_EMPTY_LOG = Collections.EMPTY_LIST;
+        private static final List<String> TEST_LOG = new ArrayList<>(Collections.singletonList(TEST));
+        private static final List<String> TEST_EMPTY_LOG = Collections.emptyList();
         private static final int LATEST_INDEX = 1;
 
         @Test

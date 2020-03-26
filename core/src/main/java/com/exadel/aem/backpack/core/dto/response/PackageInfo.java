@@ -89,7 +89,7 @@ public class PackageInfo {
 
         List<String> latestLog = Collections.emptyList();
         if (currentBuildLogSize > 0) {
-            latestLog = new ArrayList(log.subList(latestLogIndex, currentBuildLogSize));
+            latestLog = new ArrayList<>(log.subList(latestLogIndex, currentBuildLogSize));
         }
 
         return Collections.unmodifiableList(latestLog);
@@ -104,11 +104,7 @@ public class PackageInfo {
             referencedResources = new TreeMap<>();
         }
         if (StringUtils.isNotBlank(item.getPath()) && StringUtils.isNotBlank(item.getMimeType())) {
-            List<String> assetsPaths = referencedResources.get(item.getMimeType());
-            if (assetsPaths == null) {
-                assetsPaths = new ArrayList<>();
-                referencedResources.put(item.getMimeType(), assetsPaths);
-            }
+            List<String> assetsPaths = referencedResources.computeIfAbsent(item.getMimeType(), k -> new ArrayList<>());
             assetsPaths.add(item.getPath());
         }
     }

@@ -16,7 +16,7 @@ $(function () {
         $buildLog = $('#buildLog'),
         $buildLogWrapper = $('#build-log-wrapper');
 
-    if (path && $packageName.length != 0) {
+    if (path && $packageName.length !== 0) {
         disableAllActions();
         getPackageInfo(path, function (data) {
             if (data.packageStatus === BUILT) {
