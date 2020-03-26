@@ -57,7 +57,7 @@
     @SuppressWarnings("unchecked")
     DataSource datasource = new AbstractDataSource() {
         public Iterator<Resource> iterator() {
-            Iterator<Resource> it = new PagingIterator<Resource>(sortedChildrenIterator, offset, limit);
+            Iterator<Resource> it = new PagingIterator<>(sortedChildrenIterator, offset, limit);
 
             return new TransformIterator(it, new Transformer() {
                 public Object transform(Object o) {
@@ -90,22 +90,20 @@
             //todo: handle ex
         }
 
-        Comparator comparator = getComparator(sortName, "desc".equalsIgnoreCase(sortDir));
-        Collections.sort(childrenList, comparator);
+        Comparator<Resource> comparator = getComparator(sortName, "desc".equalsIgnoreCase(sortDir));
+        childrenList.sort(comparator);
         return childrenList.iterator();
     }
 
     private Comparator<Resource> getComparator(final String sortName, final boolean reverse) {
-        Comparator comparator = new Comparator<Resource>() {
-            public int compare(Resource r1, Resource r2) {
-                switch (sortName) {
-                    case "name":
-                        return compareProperty(r1, r2, "vlt:definition/name");
-                    case "modified":
-                        return compareProperty(r1, r2, "jcr:lastModified");
-                    default:
-                        return 0;
-                }
+        Comparator<Resource> comparator = (r1, r2) -> {
+            switch (sortName) {
+                case "name":
+                    return compareProperty(r1, r2, "vlt:definition/name");
+                case "modified":
+                    return compareProperty(r1, r2, "jcr:lastModified");
+                default:
+                    return 0;
             }
         };
         return reverse ? Collections.reverseOrder(comparator) : comparator;

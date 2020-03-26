@@ -3,7 +3,7 @@ package com.exadel.aem.backpack.core.dto.repository;
 import java.util.Objects;
 
 public class ReferencedItem {
-    private String path;
+    private final String path;
 
     public ReferencedItem(String path) {
         this.path = path;

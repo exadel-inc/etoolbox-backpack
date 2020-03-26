@@ -67,6 +67,7 @@ public class PackageServiceImpl implements PackageService {
     private static final Gson GSON = new Gson();
     private static final String REFERENCED_RESOURCES = "referencedResources";
     private static final String GENERAL_RESOURCES = "generalResources";
+    private static final String PACKAGE_DOES_NOT_EXIST_MESSAGE = "Package by this path %s doesn't exist in the repository.";
 
     @Reference
     private ReferenceService referenceService;
@@ -289,7 +290,7 @@ public class PackageServiceImpl implements PackageService {
     }
 
     private void packageNotExistInfo(final String pathToPackage, final PackageInfo buildInfo) {
-        String packageNotExistMsg = "Package by this path " + pathToPackage + " doesn't exist in the repository.";
+        String packageNotExistMsg = String.format(PACKAGE_DOES_NOT_EXIST_MESSAGE, pathToPackage);
         buildInfo.setPackagePath(pathToPackage);
         buildInfo.addLogMessage(ERROR + packageNotExistMsg);
         buildInfo.setPackageStatus(PackageStatus.ERROR);
@@ -308,9 +309,9 @@ public class PackageServiceImpl implements PackageService {
     @Override
     public PackageInfo getLatestPackageBuildInfo(final PackageRequestInfo requestInfo) {
         String packagePath = requestInfo.getPackagePath();
-        String packageNotExistMsg = "Package by this path " + packagePath + " doesn't exist in the repository.";
+        String packageNotExistMsg = String.format(PACKAGE_DOES_NOT_EXIST_MESSAGE, packagePath);
         PackageInfo completeBuildInfo = packageInfos.asMap().get(packagePath);
-        PackageInfo partialBuildInfo = null;
+        PackageInfo partialBuildInfo;
 
         if (completeBuildInfo != null) {
             partialBuildInfo = new PackageInfo(completeBuildInfo);
@@ -404,7 +405,7 @@ public class PackageServiceImpl implements PackageService {
                 packageBuildInfo.setPackageStatus(PackageStatus.BUILT);
             } else {
                 packageBuildInfo.setPackageStatus(PackageStatus.ERROR);
-                packageBuildInfo.addLogMessage(ERROR + "Package by this path " + packageBuildInfo.getPackagePath() + " doesn't exist in the repository.");
+                packageBuildInfo.addLogMessage(ERROR + String.format(PACKAGE_DOES_NOT_EXIST_MESSAGE, packageBuildInfo.getPackagePath()));
             }
         } catch (Exception e) {
             packageBuildInfo.setPackageStatus(PackageStatus.ERROR);

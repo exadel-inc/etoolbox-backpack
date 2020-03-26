@@ -3,7 +3,6 @@ package com.exadel.aem.backpack.core.datasource;
 import com.adobe.acs.commons.util.QueryHelper;
 import com.adobe.acs.commons.wcm.datasources.DataSourceBuilder;
 import com.adobe.acs.commons.wcm.datasources.DataSourceOption;
-import com.day.crx.JcrConstants;
 import com.exadel.aem.backpack.core.services.PackageService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -20,10 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.Servlet;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static javax.jcr.query.Query.JCR_SQL2;
@@ -66,13 +62,13 @@ public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
                 List<Resource> results = queryHelper.findResources(resolver, queryLanguage, queryStatement, StringUtils.EMPTY);
                 List<DataSourceOption> options = results.stream()
                         .map(this::createDataOption)
-                        .filter(Objects::nonNull).collect(Collectors.toList());
+                        .collect(Collectors.toList());
                 RequestParameter groupParam = request.getRequestParameter("group");
                 if (groupParam != null) {
-                    DataSourceOption firstDataSourceOption = new DataSourceOption(getOptionText(groupParam.getString()), getOptionKey(groupParam.getString()));
+                    DataSourceOption firstDataSourceOption = new DataSourceOption(getOptionText(groupParam.getString()), groupParam.getString());
                     options.add(0, firstDataSourceOption);
                 } else {
-                    DataSourceOption firstDataSourceOption = new DataSourceOption(getOptionText(DEFAULT_PATH_KEY), getOptionKey(DEFAULT_PATH_KEY));
+                    DataSourceOption firstDataSourceOption = new DataSourceOption(getOptionText(DEFAULT_PATH_KEY), DEFAULT_PATH_KEY);
                     options.add(0, firstDataSourceOption);
                 }
                 DataSourceOption rootDataSourceOption = new DataSourceOption(ROOT_TEXT, ROOT_KEY);
@@ -94,14 +90,7 @@ public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
     }
 
     private DataSourceOption createDataOption(Resource resource) {
-        Map<String, Object> params = new HashMap<>();
-        params.putAll(resource.getValueMap());
-        params.put(JcrConstants.JCR_PATH, resource.getPath());
-        return new DataSourceOption(getOptionText(resource.getPath()), getOptionKey(resource.getPath()));
-    }
-
-    private String getOptionKey(String resourcePath) {
-        return resourcePath;
+        return new DataSourceOption(getOptionText(resource.getPath()), resource.getPath());
     }
 
     private String getOptionText(String resourcePath) {

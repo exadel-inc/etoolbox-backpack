@@ -11,7 +11,7 @@
                   javax.jcr.security.Privilege,
                   java.util.ArrayList,
                   java.util.List" %>
-<%@ page import="java.util.Calendar, java.time.LocalDateTime" %>
+<%@ page import="java.util.Calendar" %>
 <%
 
     AccessControlManager acm = null;
@@ -40,7 +40,7 @@
 %><coral-card class="foundation-collection-navigator backpack-card" data-foundation-collection-navigator-href="#" <%= attrs %>>
 
 <coral-card-asset>
-    <img src="<%= xssAPI.getValidHref(thumbnailUrl) %>">
+    <img src="<%= xssAPI.getValidHref(thumbnailUrl) %>" alt="<%= xssAPI.encodeForHTMLAttr(title) %>">
 </coral-card-asset>
 
     <coral-card-content><%
@@ -98,7 +98,7 @@
     }
 
     private List<String> getActionRels(Resource resource, AccessControlManager acm) {
-        List<String> actionRels = new ArrayList();
+        List<String> actionRels = new ArrayList<>();
 
         actionRels.add("cq-siteadmin-admin-actions-edit-activator");
         actionRels.add("cq-siteadmin-admin-actions-properties-activator");
