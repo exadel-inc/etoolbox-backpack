@@ -3,8 +3,9 @@ package com.exadel.aem.backpack.core.servlets;
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
 import com.exadel.aem.backpack.core.services.PackageService;
-import com.exadel.aem.backpack.core.servlets.dto.PackageRequestInfo;
-import com.exadel.aem.backpack.core.servlets.validation.*;
+import com.exadel.aem.backpack.core.servlets.model.CreatePackageModel;
+import com.exadel.aem.request.RequestAdapter;
+import com.exadel.aem.request.validator.ValidatorResponse;
 import com.google.gson.Gson;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -31,6 +32,9 @@ public class CreatePackageServlet extends SlingAllMethodsServlet {
 
     private static final Gson GSON = new Gson();
 
+    @Reference
+    private transient RequestAdapter requestAdapter;
+
 
     @Reference
     private transient PackageService packageService;
@@ -38,23 +42,17 @@ public class CreatePackageServlet extends SlingAllMethodsServlet {
     @Override
     protected void doPost(final SlingHttpServletRequest request,
                           final SlingHttpServletResponse response) throws IOException {
-        ResourcesPathsProcessor resourcesPathsProcessor = new ResourcesPathsProcessor(null, true);
-        ExcludeChildrenProcessor excludeChildrenProcessor = new ExcludeChildrenProcessor(resourcesPathsProcessor, false);
-        VersionProcessor versionProcessor = new VersionProcessor(excludeChildrenProcessor, false);
-        GroupProcessor groupProcessor = new GroupProcessor(versionProcessor, false);
-        ThumbnailProcessor thumbnailProcessor = new ThumbnailProcessor(groupProcessor, false);
-        NameProcessor nameProcessor = new NameProcessor(thumbnailProcessor, true);
+        ValidatorResponse<CreatePackageModel> validatorResponse = requestAdapter.adaptValidate(request.getParameterMap(), CreatePackageModel.class);
 
-        PackageRequestInfo requestInfo = nameProcessor.processRequest(request, PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo());
         response.setContentType(APPLICATION_JSON);
 
-        if (requestInfo.isInvalid()) {
+        if (!validatorResponse.isValid()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(GSON.toJson(requestInfo));
+            response.getWriter().write(GSON.toJson(validatorResponse));
         } else {
             final PackageInfo packageInfo = packageService.createPackage(
                     request.getResourceResolver(),
-                    requestInfo
+                    validatorResponse.getModel()
             );
             response.getWriter().write(GSON.toJson(packageInfo));
             if (!PackageStatus.CREATED.equals(packageInfo.getPackageStatus())) {
