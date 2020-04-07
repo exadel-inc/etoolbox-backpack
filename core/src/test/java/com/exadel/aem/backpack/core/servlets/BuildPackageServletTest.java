@@ -4,6 +4,8 @@ import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
 import com.exadel.aem.backpack.core.services.PackageService;
 import com.exadel.aem.backpack.core.servlets.model.BuildPackageModel;
+import com.exadel.aem.request.RequestAdapter;
+import com.exadel.aem.request.impl.RequestAdapterImpl;
 import com.exadel.aem.request.validator.ValidatorResponse;
 import com.google.gson.Gson;
 import io.wcm.testing.mock.aem.junit.AemContext;
@@ -38,6 +40,7 @@ public class BuildPackageServletTest {
     @Before
     public void beforeTest() {
         context.registerService(PackageService.class, packageServiceMock);
+        context.registerService(RequestAdapter.class, new RequestAdapterImpl());
         servlet = context.registerInjectActivateService(new BuildPackageServlet());
         packageInfoTestBuilt = getTestBuildPackageInfo();
         packageInfoWithBuiltStatus = getPackageInfoWithBuiltStatus();

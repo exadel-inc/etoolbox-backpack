@@ -11,6 +11,7 @@ import java.util.Map;
 public class RequestAdapterOsgi implements RequestAdapter {
 
     private RequestAdapter requestAdapter = new RequestAdapterImpl();
+
     @Override
     public <T> T adapt(final Map<String, Object> parameterMap, final Class<T> tClazz) {
         return requestAdapter.adapt(parameterMap, tClazz);
