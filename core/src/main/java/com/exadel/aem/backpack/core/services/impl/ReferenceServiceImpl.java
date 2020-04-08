@@ -40,6 +40,7 @@ public class ReferenceServiceImpl implements ReferenceService {
             AssetReferencedItem assetDetails = new AssetReferencedItem(asset.getPath(), asset.getMimeType());
             assetReferencedItemSet.add(assetDetails);
         }
+
         return assetReferencedItemSet;
     }
 }

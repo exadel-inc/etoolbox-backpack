@@ -2,8 +2,9 @@ package com.exadel.aem.backpack.core.servlets;
 
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.services.PackageService;
-import com.exadel.aem.backpack.core.servlets.dto.PackageRequestInfo;
-import com.exadel.aem.backpack.core.servlets.validation.PathProcessor;
+import com.exadel.aem.backpack.core.servlets.model.PackageInfoModel;
+import com.exadel.aem.request.RequestAdapter;
+import com.exadel.aem.request.validator.ValidatorResponse;
 import com.google.gson.Gson;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -31,20 +32,22 @@ public class PackageInfoServlet extends SlingAllMethodsServlet {
     private static final Gson GSON = new Gson();
 
     @Reference
+    private transient RequestAdapter requestAdapter;
+    @Reference
     private transient PackageService packageService;
 
     @Override
     protected void doGet(final SlingHttpServletRequest request,
                          final SlingHttpServletResponse response) throws IOException {
-        PathProcessor pathProcessor = new PathProcessor(null, true);
-        PackageRequestInfo requestInfo = pathProcessor.processRequest(request, PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo());
+        ValidatorResponse<PackageInfoModel> validatorResponse = requestAdapter.adaptValidate(request.getParameterMap(), PackageInfoModel.class);
+
         response.setContentType(APPLICATION_JSON);
 
-        if (requestInfo.isInvalid()) {
+        if (!validatorResponse.isValid()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(GSON.toJson(requestInfo));
+            response.getWriter().write(GSON.toJson(validatorResponse));
         } else {
-            PackageInfo packageInfo = packageService.getPackageInfo(request.getResourceResolver(), requestInfo);
+            PackageInfo packageInfo = packageService.getPackageInfo(request.getResourceResolver(), validatorResponse.getModel());
             response.getWriter().write(GSON.toJson(packageInfo));
         }
     }
