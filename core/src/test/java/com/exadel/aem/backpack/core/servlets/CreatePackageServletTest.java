@@ -3,7 +3,9 @@ package com.exadel.aem.backpack.core.servlets;
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
 import com.exadel.aem.backpack.core.services.PackageService;
-import com.exadel.aem.backpack.core.servlets.dto.PackageRequestInfo;
+import com.exadel.aem.backpack.core.servlets.model.CreatePackageModel;
+import com.exadel.aem.request.RequestAdapter;
+import com.exadel.aem.request.impl.RequestAdapterImpl;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
@@ -38,6 +40,7 @@ public class CreatePackageServletTest {
         packageInfoWithCreatedStatus = getPackageInfoWithCreatedStatus();
         packageInfoWithErrorStatus = getPackageInfoWithErrorStatus();
         context.registerService(PackageService.class, packageServiceMock);
+        context.registerService(RequestAdapter.class, new RequestAdapterImpl());
         servlet = context.registerInjectActivateService(new CreatePackageServlet());
 
         context.create().page(PAGE_1);
@@ -54,7 +57,7 @@ public class CreatePackageServletTest {
     @Test
     public void shouldReturnOkWhenRequestIsValid() throws IOException {
         createBaseRequest();
-        when(packageServiceMock.createPackage(any(ResourceResolver.class), any(PackageRequestInfo.class))).thenReturn(packageInfoWithCreatedStatus);
+        when(packageServiceMock.createPackage(any(ResourceResolver.class), any(CreatePackageModel.class))).thenReturn(packageInfoWithCreatedStatus);
 
         servlet.doPost(context.request(), context.response());
 
@@ -65,7 +68,7 @@ public class CreatePackageServletTest {
     @Test
     public void shouldReturnConflictWhenPackageAlreadyExist() throws IOException {
         createBaseRequest();
-        when(packageServiceMock.createPackage(any(ResourceResolver.class), any(PackageRequestInfo.class))).thenReturn(packageInfoWithErrorStatus);
+        when(packageServiceMock.createPackage(any(ResourceResolver.class), any(CreatePackageModel.class))).thenReturn(packageInfoWithErrorStatus);
 
         servlet.doPost(context.request(), context.response());
 

@@ -3,7 +3,10 @@ package com.exadel.aem.backpack.core.servlets;
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
 import com.exadel.aem.backpack.core.services.PackageService;
-import com.exadel.aem.backpack.core.servlets.dto.PackageRequestInfo;
+import com.exadel.aem.backpack.core.servlets.model.PackageInfoModel;
+import com.exadel.aem.request.RequestAdapter;
+import com.exadel.aem.request.impl.RequestAdapterImpl;
+import com.exadel.aem.request.validator.ValidatorResponse;
 import com.google.gson.Gson;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -13,6 +16,7 @@ import org.junit.Test;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,22 +37,22 @@ public class PackageInfoServletTest {
 
     @Before
     public void beforeTest() {
-        when(packageServiceMock.getPackageInfo(any(ResourceResolver.class), any(PackageRequestInfo.class))).thenReturn(packageInfo);
+        when(packageServiceMock.getPackageInfo(any(ResourceResolver.class), any(PackageInfoModel.class))).thenReturn(packageInfo);
         context.registerService(PackageService.class, packageServiceMock);
+        context.registerService(RequestAdapter.class, new RequestAdapterImpl());
         servlet = context.registerInjectActivateService(new PackageInfoServlet());
         GSON = new Gson();
     }
 
     @Test
     public void shouldReturnBadRequestWithNonExistingPathParameter() throws IOException {
-        PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
-
-        builder.withInvalidMessage(PATH_PARAM + " is mandatory field!");
+        ValidatorResponse validatorResponse = new ValidatorResponse();
+        validatorResponse.setLog(Arrays.asList("Path field is required"));
 
         servlet.doGet(context.request(), context.response());
 
         assertEquals(HttpServletResponse.SC_BAD_REQUEST, context.response().getStatus());
-        assertEquals(GSON.toJson(builder.build()), context.response().getOutputAsString());
+        assertEquals(GSON.toJson(validatorResponse), context.response().getOutputAsString());
     }
 
     @Test

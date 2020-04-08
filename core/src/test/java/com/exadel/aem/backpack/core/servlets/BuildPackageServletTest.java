@@ -3,7 +3,11 @@ package com.exadel.aem.backpack.core.servlets;
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
 import com.exadel.aem.backpack.core.services.PackageService;
-import com.exadel.aem.backpack.core.servlets.dto.PackageRequestInfo;
+import com.exadel.aem.backpack.core.servlets.model.BuildPackageModel;
+import com.exadel.aem.request.RequestAdapter;
+import com.exadel.aem.request.impl.RequestAdapterImpl;
+import com.exadel.aem.request.validator.ValidatorResponse;
+import com.google.gson.Gson;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
@@ -12,8 +16,7 @@ import org.junit.Test;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-
-import com.google.gson.Gson;
+import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,6 +40,7 @@ public class BuildPackageServletTest {
     @Before
     public void beforeTest() {
         context.registerService(PackageService.class, packageServiceMock);
+        context.registerService(RequestAdapter.class, new RequestAdapterImpl());
         servlet = context.registerInjectActivateService(new BuildPackageServlet());
         packageInfoTestBuilt = getTestBuildPackageInfo();
         packageInfoWithBuiltStatus = getPackageInfoWithBuiltStatus();
@@ -45,13 +49,13 @@ public class BuildPackageServletTest {
 
     @Test
     public void doGetShouldReturnBadRequestWhenRequestIsEmpty() throws IOException {
-        PackageRequestInfo.PackageRequestInfoBuilder builder = PackageRequestInfo.PackageRequestInfoBuilder.aPackageRequestInfo();
-        builder.withInvalidMessage(PATH_PARAM + " is mandatory field!");
+        ValidatorResponse validatorResponse = new ValidatorResponse();
+        validatorResponse.setLog(Arrays.asList("Path field is required", "Latest log index field is required"));
 
         servlet.doGet(context.request(), context.response());
 
         assertEquals(HttpServletResponse.SC_BAD_REQUEST, context.response().getStatus());
-        assertEquals(GSON.toJson(builder.build()), context.response().getOutputAsString());
+        assertEquals(GSON.toJson(validatorResponse), context.response().getOutputAsString());
     }
 
     @Test
@@ -73,7 +77,7 @@ public class BuildPackageServletTest {
     @Test
     public void doPostShouldReturnOkWhenTestBuildPackage() throws IOException {
         createBaseRequest();
-        when(packageServiceMock.testBuildPackage(any(ResourceResolver.class), any(PackageRequestInfo.class))).thenReturn(packageInfoTestBuilt);
+        when(packageServiceMock.testBuildPackage(any(ResourceResolver.class), any(BuildPackageModel.class))).thenReturn(packageInfoTestBuilt);
 
         context.request().addRequestParameter("testBuild", "true");
 
@@ -87,7 +91,7 @@ public class BuildPackageServletTest {
     @Test
     public void doPostShouldReturnOkWhenRequestIsValid() throws IOException {
         createBaseRequest();
-        when(packageServiceMock.buildPackage(any(ResourceResolver.class), any(PackageRequestInfo.class))).thenReturn(packageInfoWithBuiltStatus);
+        when(packageServiceMock.buildPackage(any(ResourceResolver.class), any(BuildPackageModel.class))).thenReturn(packageInfoWithBuiltStatus);
 
         servlet.doPost(context.request(), context.response());
 
