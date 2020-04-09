@@ -1,55 +1,45 @@
-# Sample AEM project template
+# AEM BackPack
 
-This is a project template for AEM-based applications. It is intended as a best-practice set of examples as well as a potential starting point to develop your own functionality.
+A tool for easily creating, handling and distributing content packages across Adobe Experience Manager (AEM) ecosystem.
 
-## Modules
+Based on the out-of-box AEM Package Manager, the **BackPack** provides the ability to bundle together different pieces of website content (texts, image sources and renditions, videos, documents, etc.) in a flexible manner.
 
-The main parts of the template are:
+When you select e.g. a page for inclusion into package, all the assets referenced by this page (and, optionally, its children) are included as well. The tool analyzes relations between resources to produce comprehensive sets of data so that entire web pages with all their addenda can be moved across sites, translated, reformatted or backed up for later usage.
 
-* core: Java bundle containing all core functionality like OSGi services, listeners or schedulers, as well as component-related Java code such as servlets or request filters.
-* ui.apps: contains the /apps (and /etc) parts of the project, ie JS&CSS clientlibs, components, templates, runmode specific configs as well as Hobbes-tests
+**BackPack** is aimed to decrease the effort and costs of content management and distribution; improve the security and reliability
+  of content-related business processes.
 
-## How to build
+### Project structure
 
-To build all the modules run in the project root directory the following command with Maven 3:
+The project consists of two modules: 
 
-    mvn clean install
+* *core module* runs in an AEM instance containing to respond to user commands and provide data processing service.
+* *ui/application module* embeds into AEM administering interface to give to the user control over package creation and storage, as well as detailed feedback. This module is built upon the modern Coral 3 graphic interface and TouchUI-ready.
 
-If you have a running AEM instance you can build and package the whole project and deploy into AEM with  
+### Installation
+
+**BackPack** is distributed as a package you can install by hand or, optionally, add to your project building workflow via e.g. *Content Package Maven Plugin* (either *Adobe* version or *wcm.io* version).
+
+Alternatively you can build and install **BackPack** from source code. Clone this repository and run
 
     mvn clean install -PautoInstallPackage
     
-Or to deploy it to a publish instance, run
+from the command line. You can change `aem.host` and `aem.port` values as needed in the main POM file's <properties> section or via a command-line key like `-Daem.host=xxx -Daem.port=xxx` (default is *localhost:4502*).
 
-    mvn clean install -PautoInstallPackagePublish
-    
-Or alternatively
+### Usage
 
-    mvn clean install -PautoInstallPackage -Daem.port=4503
+In your _Adobe Experience Manager_ console, navigate to _Tools_ section and choose _Deployment_ from the left menu rail. Click _"Backpack"_ in the right section.
 
-Or to deploy only the bundle to the author, run
+TouchUI-compliant *Package Manager* interface opens. In the _"Group"_ dropdown to the left, you can choose a particular packages group, or see them all, if "All packages" option selected.
 
-    mvn clean install -PautoInstallBundle
+Hover over a package to see available options. _"Edit"_ button will open the same package in the "classic" interface with some aditional capabilities.
 
-## Testing
+To create a new package, click _"Create"_ button in the top right. A dialog window will open, where you can put package's name, version, group, thumbnail, path to the node containing resources for the package, and turn child resources inclusion on or off. Several paths may be selected. Click the button in the bottom to complete the operation.
 
-There are three levels of testing contained in the project:
+### Testing and development
 
-* unit test in core: this show-cases classic unit testing of the code contained in the bundle. To test, execute:
+The source code of the project is test-covered. You can run unit tests apart from the usual Maven build workflow with
 
     mvn clean test
 
-* server-side integration tests: this allows to run unit-like tests in the AEM-environment, ie on the AEM server. To test, execute:
-
-    mvn clean verify -PintegrationTests
-
-* client-side Hobbes.js tests: JavaScript-based browser-side tests that verify browser-side behavior. To test:
-
-    in the browser, open the page in 'Developer mode', open the left panel and switch to the 'Tests' tab and find the generated 'MyName Tests' and run them.
-
-
-## Maven settings
-
-The project comes with the auto-public repository configured. To setup the repository in your Maven settings, refer to:
-
-    http://helpx.adobe.com/experience-manager/kb/SetUpTheAdobeMavenRepository.html
+The project is in active development stage. Community contribution is heartily welcome.
