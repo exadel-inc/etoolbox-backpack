@@ -19,8 +19,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Marks a field within a data model class that is able to be populated via a respective
+ * {@link org.apache.sling.api.SlingHttpServletRequest} parameter
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface RequestParam {
+    /**
+     * The name of respective {@code SlingHttpServletRequest} parameter. Defaults to the annotated field's name
+     * if no value set
+     * @return String value, or an empty string
+     */
     String name() default "";
 }

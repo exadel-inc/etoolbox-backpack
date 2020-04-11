@@ -14,7 +14,15 @@
 
 package com.exadel.aem.request.validator;
 
+/**
+ * Represents a routine testing an arbitrary object coming from a HTTP request's parameter map for validity
+ */
 public interface Validator {
 
+    /**
+     * Gets whether the supplied object is valid according to some testing logic
+     * @param parameter An object coming from an HTTP request's {@code ParameterMap}
+     * @return True or false
+     */
     boolean isValid(Object parameter);
 }

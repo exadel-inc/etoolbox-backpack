@@ -19,18 +19,26 @@ import com.exadel.aem.request.impl.RequestAdapterImpl;
 import com.exadel.aem.request.validator.ValidatorResponse;
 import org.osgi.service.component.annotations.Component;
 
-import java.util.Map;
-
+/**
+ * Implements {@link RequestAdapter} to adapt user-defined {@code SlingHttpServletRequest} parameters to a data model object
+ * which is then used in operations by {@link com.exadel.aem.backpack.core.services.PackageService}
+ */
 @Component(service = RequestAdapter.class)
 public class RequestAdapterOsgi implements RequestAdapter {
 
     private RequestAdapter requestAdapter = new RequestAdapterImpl();
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public <T> T adapt(final Map<String, Object> parameterMap, final Class<T> tClazz) {
         return requestAdapter.adapt(parameterMap, tClazz);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public <T> ValidatorResponse<T> adaptValidate(final Map<String, Object> parameterMap, final Class<T> tClazz) {
         return requestAdapter.adaptValidate(parameterMap, tClazz);

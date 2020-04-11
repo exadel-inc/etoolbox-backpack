@@ -58,6 +58,9 @@ public class RequestAdapterImpl implements RequestAdapter {
         SUPPORTED_TYPES.put(StringBuffer.class, StringBuffer::new);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public <T> T adapt(Map<String, Object> parameterMap, Class<T> tClazz) {
         T newObject = null;
@@ -80,6 +83,9 @@ public class RequestAdapterImpl implements RequestAdapter {
         return newObject;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public <T> ValidatorResponse<T> adaptValidate(Map<String, Object> parameterMap, Class<T> tClazz) {
 
@@ -102,7 +108,19 @@ public class RequestAdapterImpl implements RequestAdapter {
         return response;
     }
 
-    protected <T> boolean initValidateFields(final Map<String, Object> parameterMap,
+    /**
+     * Called by {@link RequestAdapterImpl#adaptValidate(Map, Class)}. Attempts to store values
+     * from a {@code SlingHttpRequest} parameter map to the fields of a {@code <T>}-typed adaptation object. Values
+     * extracted from the parameter map are validated as needed. Returns Boolean value indicating whether all the stored
+     * values have been valid
+     * @param parameterMap Parameters taken from a {@code SlingHttpRequest}
+     * @param newObject Reference to the {@code <T>}-typed adaptation object instance
+     * @param validationMessages Reference to the collection of warnings produced by validation routines
+     * @param allFields Collection of {@code Field} instances than need to be populated with data
+     * @param <T> Type of the adaptation object instance
+     * @return True is the adaptation object has been successfullt populated with validated data; otherwise, false
+     */
+    private <T> boolean initValidateFields(final Map parameterMap,
                                              final T newObject,
                                              final List<String> validationMassages,
                                              final List<Field> allFields) {
@@ -124,6 +142,14 @@ public class RequestAdapterImpl implements RequestAdapter {
         return objectValid;
     }
 
+    /**
+     * Called by {@link RequestAdapterImpl#adaptValidate(Map, Class)} to get a collection of declared fields
+     * of the specified class and its superclasses that will then be populated with data coming in a
+     * {@code SlingHttpServletRequest}
+     * @param fields List of pre-collected fields that will be prepended to fields of the current class
+     * @param type Class to analyze
+     * @return {@code List<Field>} object
+     */
     private List<Field> getAllFields(List<Field> fields, Class<?> type) {
 
         if (type.getSuperclass() != null) {
@@ -134,9 +160,17 @@ public class RequestAdapterImpl implements RequestAdapter {
         return fields;
     }
 
-    private boolean isFieldValid(Object parameter,
-                                 final List<String> validationMassages,
-                                 final Field field) {
+    /**
+     * Gets whether the given parameter is valid per an [optional] validator associated with the current field
+     * @param parameter And arbitrary parameter value
+     * @param validationMessages Reference to the collection of validation messages to add an emerging warning to
+     * @param field {@code Field} instance used to get an [optional] validator
+     * @return True if no validator assigned to the currend {@code Field} or else the provided object is valid
+     * for the field; otherwise, false
+     */
+    private boolean isParameterValid(Object parameter,
+                                     final List<String> validationMessages,
+                                     final Field field) {
         Validate validateAnnotation = field.getAnnotation(Validate.class);
         if (validateAnnotation != null) {
             final Class<? extends Validator>[] validatorsArray = validateAnnotation.validator();
@@ -151,6 +185,14 @@ public class RequestAdapterImpl implements RequestAdapter {
         return true;
     }
 
+    /**
+     * Attempts to store a value arrived from a {@code SlingHttpRequest} parameter map to the specified field
+     * of the given adaptation object instance
+     * @param newObject Reference to the {@code <T>}-typed adaptation object instance
+     * @param parameter An arbitrary parameter value
+     * @param field {@code Field} instance used to populate the parameter value
+     * @param <T> Type of the adaptation object instance
+     */
     private <T> void initField(final T newObject, final Object parameter, final Field field) {
         Class<?> fieldType = field.getType();
         if (parameter != null) {
@@ -167,7 +209,15 @@ public class RequestAdapterImpl implements RequestAdapter {
         }
     }
 
-    private <T> void handleArray(final T t, final Field field, final String[] arrayParams) {
+    /**
+     * Called by {@link RequestAdapterImpl#initField(Object, Object, Field)} to populate an array value the given adaptation
+     * object instance
+     * @param newObject Reference to the {@code <T>}-typed adaptation object instance
+     * @param field {@code Field} instance used to populate the parameter value
+     * @param arrayParams An arbitrary parameter value, castable to a string array
+     * @param <T> Type of the adaptation object instance
+     */
+    private <T> void handleArray(final T newObject, final Field field, final String[] arrayParams) {
         Class<?> componentType = field.getType().getComponentType();
         if (isSupportedType(componentType)) {
             Object[] arrayNewInstance = (Object[]) Array.newInstance(componentType, arrayParams.length);
@@ -181,8 +231,16 @@ public class RequestAdapterImpl implements RequestAdapter {
         }
     }
 
-    private <T> void handleList(final T t, final Field field, final String[] arrayParams) {
-        List list = new ArrayList();
+    /**
+     * Called by {@link RequestAdapterImpl#initField(Object, Object, Field)} to populate an array value the given adaptation
+     * object instance
+     * @param newObject Reference to the {@code <T>}-typed adaptation object instance
+     * @param field {@code Field} instance used to populate the parameter value
+     * @param arrayParams An arbitrary parameter value, castable to a list of strings
+     * @param <T> Type of the adaptation object instance
+     */
+    private <T> void handleList(final T newObject, final Field field, final String[] arrayParams) {
+        List<Object> list = new ArrayList<>();
         Type type = field.getGenericType();
         if (type instanceof ParameterizedType) {
             ParameterizedType genericTypes = (ParameterizedType) type;
@@ -202,7 +260,13 @@ public class RequestAdapterImpl implements RequestAdapter {
         }
     }
 
-    private Object convert(Class clazz, String value) {
+    /**
+     * Casts the provided value to the specified type via the appropriate casting routine
+     * @param clazz Target class
+     * @param value Value to cast
+     * @return Casted entity, {@code Object}-wrapped
+     */
+    private Object convert(Class<?> clazz, String value) {
         if (isSupportedType(clazz)) {
             try {
                 return SUPPORTED_TYPES.get(clazz).apply(value);
@@ -213,11 +277,24 @@ public class RequestAdapterImpl implements RequestAdapter {
         return null;
     }
 
-    private boolean isSupportedType(Class clazz) {
+    /**
+     * Gets whether the provided value type can be targeted by value casting
+     * @param clazz Target class
+     * @return True or false
+     * @see RequestAdapterImpl#convert(Class, String)
+     */
+    private boolean isSupportedType(Class<?> clazz) {
         return SUPPORTED_TYPES.containsKey(clazz);
     }
 
-    protected <T> void setFieldValue(final T t, final Field field, final Object param) {
+    /**
+     * Sets the provided parameter value to the field of the adapted object instance
+     * @param newObject Reference to the {@code <T>}-typed adaptation object instance
+     * @param field {@code Field} instance used to populate the parameter value
+     * @param param An arbitrary parameter value
+     * @param <T> Type of the adaptation object instance
+     */
+    private <T> void setFieldValue(final T newObject, final Field field, final Object param) {
         try {
             field.setAccessible(true);
             field.set(t, param);
@@ -226,7 +303,13 @@ public class RequestAdapterImpl implements RequestAdapter {
         }
     }
 
-    protected static <T> T createDefaultObject(final Class<T> tClazz) {
+    /**
+     * Gets a new instance of the provided object type and wraps unerlying reflection exceptions
+     * @param tClazz Target class
+     * @param <T> Type of the instance to create
+     * @return {@code <T>}-typed object, or null
+     */
+    private static <T> T createDefaultObject(final Class<T> tClazz) {
         try {
             return tClazz.getConstructor().newInstance();
         } catch (Exception e) {

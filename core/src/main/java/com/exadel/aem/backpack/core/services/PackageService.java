@@ -21,15 +21,53 @@ import com.exadel.aem.backpack.core.servlets.model.LatestPackageInfoModel;
 import com.exadel.aem.backpack.core.servlets.model.PackageInfoModel;
 import org.apache.sling.api.resource.ResourceResolver;
 
+/**
+ * Represents a service running in an AEM instance responsible for managing packages and reporting packages's status info
+ * This service's methods are mainly called from {@link com.exadel.aem.backpack.core.servlets.CreatePackageServlet},
+ * {@link com.exadel.aem.backpack.core.servlets.BuildPackageServlet}, and {@link com.exadel.aem.backpack.core.servlets.PackageInfoServlet}
+ * to serve corresponding HTTP requests and produce responses
+ */
 public interface PackageService {
 
+    /**
+     * Gets structured information about a package specified in a user request. This information can be subsequently serialized
+     * to a JSON-coded HTTP response
+     * @param resourceResolver {@code ResourceResolver} instance used to collect data for a package as a JCR repository item
+     * @param packageInfoModel {@link PackageInfoModel} instance containing requisites of the required package
+     * @return {@link PackageInfo} instance
+     */
     PackageInfo getPackageInfo(ResourceResolver resourceResolver, PackageInfoModel packageInfoModel);
 
+    /**
+     * Triggers operations needed to create a content package in JCR according to options specified, and reports the results
+     * @param resourceResolver {@code ResourceResolver} instance used to create the package
+     * @param createPackageModel {@link CreatePackageModel} instance containing user-set options for the package creation
+     * @return {@link PackageInfo} instance reporting the current package status
+     */
     PackageInfo createPackage(ResourceResolver resourceResolver, CreatePackageModel createPackageModel);
 
+    /**
+     * Triggers operations needed to build a content package specified in the request, and reports the results
+     * @param resourceResolver {@code ResourceResolver} instance used to build the package
+     * @param buildPackageModel {@link BuildPackageModel} instance containing user-set options for the package building
+     * @return {@link PackageInfo} instance reporting the current package status
+     */
     PackageInfo buildPackage(ResourceResolver resourceResolver, BuildPackageModel buildPackageModel);
 
+    /**
+     * Triggers operations needed to perform a <i>dry-run</i> package build (an imitation without assembling actual
+     * storage entity) according to the settings specified in the request, and reports the results
+     * @param resourceResolver {@code ResourceResolver} instance used to build the package
+     * @param buildPackageModel {@link BuildPackageModel} instance containing user-set options for the package building
+     * @return {@link PackageInfo} instance reporting the current package status
+     */
     PackageInfo testBuildPackage(ResourceResolver resourceResolver, BuildPackageModel buildPackageModel);
 
+    /**
+     * Gets a chunk of rolling package building process update according to options specified in the HTTP request
+     * @param latestPackageInfoModel {@link LatestPackageInfoModel} containing reqiusites of of required log information
+     *                                                             chunk
+     * @return {@link PackageInfo} instance
+     */
     PackageInfo getLatestPackageBuildInfo(LatestPackageInfoModel latestPackageInfoModel);
 }

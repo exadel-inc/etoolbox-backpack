@@ -18,8 +18,14 @@ import com.exadel.aem.request.validator.Validator;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * Implements {@link Validator} to test an HTTP request {@code ParameterMap} value expected to a non-blank {@code String}
+ */
 public class RequiredValidator implements Validator {
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isValid(final Object parameter) {
         if (parameter instanceof String[]) {

@@ -38,6 +38,10 @@ import java.util.stream.Collectors;
 
 import static javax.jcr.query.Query.JCR_SQL2;
 
+/**
+ * Servlet that implements {@code datasource} pattern for populating a TouchUI {@code select} widget
+ * with present packages' groups' names
+ */
 @Component(
         service = Servlet.class,
         property = {
@@ -63,6 +67,12 @@ public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
     @Reference
     private transient PackageService packageService;
 
+    /**
+     * Processes {@code GET} requests to the current endpoint to add to the {@code SlingHttpServletRequest}
+     * a {@code datasource} object filled with names of present packages' groups
+     * @param request {@code SlingHttpServletRequest} instance
+     * @param response {@code SlingHttpServletResponse} instance
+     */
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) {
         ResourceResolver resolver = request.getResourceResolver();
@@ -95,18 +105,21 @@ public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
         }
     }
 
-    private ValueMap getProperties(Resource resource) {
-        Resource datasource = resource.getChild(DATASOURCE);
-        if (datasource == null) {
-            return ValueMap.EMPTY;
-        }
-        return datasource.getValueMap();
-    }
-
+    /**
+     * Called from {@link GroupDynamicSelectDataSource#doGet(SlingHttpServletRequest, SlingHttpServletResponse)} to
+     * map a {@code Resource} containing datasource option requisites to a {@code DataSourceOption} instance
+     * @param resource {@code Resource} object
+     * @return {@code DataSourceOption} object
+     */
     private DataSourceOption createDataOption(Resource resource) {
         return new DataSourceOption(getOptionText(resource.getPath()), resource.getPath());
     }
 
+    /**
+     * Gets {@code datasource} option label by returning the trailing element of an underlying JCR path
+     * @param resourcePath String representing a JCR path
+     * @return String value
+     */
     private String getOptionText(String resourcePath) {
         String[] path = resourcePath.split("/");
         return path[path.length - 1];

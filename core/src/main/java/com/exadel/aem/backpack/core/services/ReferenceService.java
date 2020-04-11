@@ -17,11 +17,19 @@ package com.exadel.aem.backpack.core.services;
 import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
 import org.apache.sling.api.resource.ResourceResolver;
 
-import java.util.Set;
-
+/**
+ * Represents a service running in an AEM instance responsible for gathering information on assets referenced by resources
+ * of the current package (under specified JCR path). This is mainly invoked from the {@link PackageService}
+ */
 public interface ReferenceService {
 
-
+    /**
+     * Gets a collection of unique {@link AssetReferencedItem} instances representing assets referenced by resources
+     * under specified JCR path
+     * @param resourceResolver {@code ResourceResolver} used to access JCR resources
+     * @param searchPath String value representing root path containg resources to gather references for
+     * @return {@code Set<AssetReferencedItem>} object, or an empty {@code Set}
+     */
     Set<AssetReferencedItem> getAssetReferences(ResourceResolver resourceResolver, String searchPath);
 
 }

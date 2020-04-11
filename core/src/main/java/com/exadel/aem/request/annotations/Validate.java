@@ -21,11 +21,22 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Marks a field within a data model class, the value of which needs to be validated by a specific routine upon
+ * adaptation from a {@link org.apache.sling.api.SlingHttpServletRequest} object
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface Validate {
-
+    /**
+     * Gets zero or more validators assigned to this field
+     * @return An array of classes extending {@link Validator}, or null
+     */
     Class<? extends Validator>[] validator() default {};
 
+    /**
+     * Gets zero or more messages informing that validation has failed
+     * @return An array of strings, or null
+     */
     String[] invalidMessages() default {};
 }

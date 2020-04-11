@@ -32,7 +32,14 @@ import java.io.IOException;
 
 import static com.exadel.aem.backpack.core.servlets.BuildPackageServlet.APPLICATION_JSON;
 
-
+/**
+ * Serves as the network endpoint for user requests polling for information about previously created and/or built
+ * packages<br><br>
+ *
+ * See also:<br>
+ *     {@link CreatePackageServlet} - endpoint for requests for package creation<br>
+ *     {@link BuildPackageServlet} - endpoint for requests for building of created package and reporting package status<br>
+ */
 @Component(service = Servlet.class,
         property = {
                 "sling.servlet.paths=" + "/services/backpack/packageInfo",
@@ -50,6 +57,14 @@ public class PackageInfoServlet extends SlingAllMethodsServlet {
     @Reference
     private transient PackageService packageService;
 
+    /**
+     * Processes {@code GET} requests to the current endpoint. Reports information on the specified previously
+     * created/built package. Request parameters are parsed to a {@link PackageInfoModel} which is validated and passed
+     * to the corresponding {@link PackageService} routine if proven valid; otherwise, the {@code HTTP status 400} reported
+     * @param request {@code SlingHttpServletRequest} instance
+     * @param response {@code SlingHttpServletResponse} instance
+     * @throws IOException in case writing data to the {@code SlingHttpServletResponse} fails
+     */
     @Override
     protected void doGet(final SlingHttpServletRequest request,
                          final SlingHttpServletResponse response) throws IOException {

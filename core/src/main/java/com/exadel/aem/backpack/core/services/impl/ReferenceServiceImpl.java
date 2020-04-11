@@ -22,16 +22,17 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Component;
 
-import javax.jcr.Node;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-
+/**
+ * Implements {@link ReferenceService} to facilitate getting a collection of asses referenced by resources
+ * under specified JCR path
+ */
 @Component(service = ReferenceService.class)
 public class ReferenceServiceImpl implements ReferenceService {
     private static final String DAM_ROOT = "/content/dam";
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Set<AssetReferencedItem> getAssetReferences(final ResourceResolver resourceResolver,
                                                        final String searchPath) {

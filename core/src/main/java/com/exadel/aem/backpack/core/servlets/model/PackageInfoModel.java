@@ -22,11 +22,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-
+/**
+ * Represents the set of user-defined options supplied to a request for information about a previously created/built
+ * package. Upon initialization, passed as a parameter to the {@link com.exadel.aem.backpack.core.services.PackageService#getPackageInfo(ResourceResolver, PackageInfoModel)}
+ * @see com.exadel.aem.backpack.core.servlets.PackageInfoServlet
+ */
 @RequestMapping
 public class PackageInfoModel {
     private static final Logger LOGGER = LoggerFactory.getLogger(PackageInfoModel.class);
@@ -37,14 +37,25 @@ public class PackageInfoModel {
             invalidMessages = "Path field is required")
     private String packagePath;
 
+    /**
+     * Gets the package path in JCR
+     * @return String value, non-blank
+     */
     public String getPackagePath() {
         return packagePath;
     }
 
+    /**
+     * Assigns the value of package path in JCR to the current instance
+     * @param packagePath String value, non-blank string expected
+     */
     public void setPackagePath(final String packagePath) {
         this.packagePath = packagePath;
     }
 
+    /**
+     * Called from the Sling model initialization flow to decode the value per {@link PackageInfoModel#getPackagePath()}
+     */
     @PostConstruct
     public void init() {
         if (StringUtils.isNotBlank(packagePath)) {

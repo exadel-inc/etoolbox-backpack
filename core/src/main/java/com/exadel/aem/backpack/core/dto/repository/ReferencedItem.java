@@ -16,17 +16,33 @@ package com.exadel.aem.backpack.core.dto.repository;
 
 import java.util.Objects;
 
+/**
+ * Data model representing a JCR storage item accessible by its path
+ */
 public class ReferencedItem {
     private final String path;
 
-    public ReferencedItem(String path) {
+    /**
+     * Basic constructor
+     * @param path String value representing path to a JCR storage item
+     */
+    ReferencedItem(String path) {
         this.path = path;
     }
 
+    /**
+     * Gets the JCR path of the current item
+     * @return String value
+     */
     public String getPath() {
         return path;
     }
 
+    /**
+     * Overrides the standard {@code equals()} routine to implement items comparison by their path requisites
+     * @param o Object to test for equality with the current object
+     * @return True or false
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -35,6 +51,10 @@ public class ReferencedItem {
         return Objects.equals(path, that.path);
     }
 
+    /**
+     * Overrides the standard {@code hashCode()} routine to accompany {@link ReferencedItem#equals(Object)}
+     * @return Integer value
+     */
     @Override
     public int hashCode() {
         return Objects.hash(path);

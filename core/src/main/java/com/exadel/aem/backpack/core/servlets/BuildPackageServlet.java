@@ -31,7 +31,14 @@ import javax.servlet.Servlet;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-
+/**
+ * Serves as the network endpoint for user requests that trigger start of package building or else poll information
+ * on package building progress<br><br>
+ *
+ * See also:<br>
+ *     {@link CreatePackageServlet} - endpoint for requests for package creation<br>
+ *     {@link PackageInfoServlet} - endpoint for requests for information on previously built packages
+ */
 @Component(service = Servlet.class,
         property = {
                 "sling.servlet.paths=" + "/services/backpack/buildPackage",
@@ -51,6 +58,14 @@ public class BuildPackageServlet extends SlingAllMethodsServlet {
     @Reference
     private transient RequestAdapter requestAdapter;
 
+    /**
+     * Processes {@code POST} requests to the current endpoint. Attempts to build a package according to the request parameters.
+     * Request parameters are parsed to a {@link BuildPackageModel} which is validated and passed
+     * to the corresponding {@link PackageService} routine if proven valid; otherwise, the {@code HTTP status 400} reported
+     * @param request {@code SlingHttpServletRequest} instance
+     * @param response {@code SlingHttpServletResponse} instance
+     * @throws IOException in case writing data to the {@code SlingHttpServletResponse} fails
+     */
     @Override
     protected void doPost(final SlingHttpServletRequest request,
                           final SlingHttpServletResponse response) throws IOException {
@@ -71,6 +86,14 @@ public class BuildPackageServlet extends SlingAllMethodsServlet {
         }
     }
 
+    /**
+     * Processes {@code GET} requests to the current endpoint. Reports information on the latest package build status.
+     * Request parameters are parsed to a {@link LatestPackageInfoModel} which is validated and passed
+     * to the corresponding {@link PackageService} routine if proven valid; otherwise, the {@code HTTP status 400} reported
+     * @param request {@code SlingHttpServletRequest} instance
+     * @param response {@code SlingHttpServletResponse} instance
+     * @throws IOException in case writing data to the {@code SlingHttpServletResponse} fails
+     */
     @Override
     protected void doGet(final SlingHttpServletRequest request,
                          final SlingHttpServletResponse response) throws IOException {

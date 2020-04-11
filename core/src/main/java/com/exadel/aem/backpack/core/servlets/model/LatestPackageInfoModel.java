@@ -20,6 +20,11 @@ import com.exadel.aem.request.annotations.Validate;
 import com.exadel.aem.request.validator.impl.RequiredValidator;
 import com.exadel.aem.request.validator.impl.WholeNumberValidator;
 
+/**
+ * Represents user-defined options supplied to a request for a rolling package build status information.
+ * Upon initialization, passed as a parameter to the {@link com.exadel.aem.backpack.core.services.PackageService#getLatestPackageBuildInfo(LatestPackageInfoModel)}
+ * @see com.exadel.aem.backpack.core.servlets.BuildPackageServlet
+ */
 @RequestMapping
 public class LatestPackageInfoModel extends PackageInfoModel {
 
@@ -28,10 +33,18 @@ public class LatestPackageInfoModel extends PackageInfoModel {
             invalidMessages = {"Latest log index field is required", "Latest log index must be whole number!"})
     private int latestLogIndex;
 
+    /**
+     * Gets position in log flow to start output from
+     * @return Integer value, non-negative
+     */
     public int getLatestLogIndex() {
         return latestLogIndex;
     }
 
+    /**
+     * Sets position in log flow to start output from
+     * @param latestLogIndex Integer value, non-negative number expected
+     */
     public void setLatestLogIndex(final int latestLogIndex) {
         this.latestLogIndex = latestLogIndex;
     }

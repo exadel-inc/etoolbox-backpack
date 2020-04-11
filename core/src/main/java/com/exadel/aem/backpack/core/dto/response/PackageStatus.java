@@ -14,6 +14,13 @@
 
 package com.exadel.aem.backpack.core.dto.response;
 
+/**
+ * Enumerates possible package statuses as reported by {@link PackageInfo} objects
+ * @see com.exadel.aem.backpack.core.services.PackageService
+ */
 public enum PackageStatus {
-    CREATED, BUILD_IN_PROGRESS, BUILT, ERROR
+    CREATED,
+    BUILD_IN_PROGRESS,
+    BUILT,
+    ERROR
 }

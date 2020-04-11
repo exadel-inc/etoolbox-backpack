@@ -19,6 +19,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Marks a data model class that is able to be adapted from a {@link org.apache.sling.api.SlingHttpServletRequest} object
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface RequestMapping {

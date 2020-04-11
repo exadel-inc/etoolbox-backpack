@@ -33,7 +33,13 @@ import java.io.IOException;
 
 import static com.exadel.aem.backpack.core.servlets.BuildPackageServlet.APPLICATION_JSON;
 
-
+/**
+ * Serves as the network endpoint for user requests that trigger package creation<br><br>
+ *
+ * See also:<br>
+ *     {@link BuildPackageServlet} - endpoint for requests for building of created package and reporting package status<br>
+ *     {@link PackageInfoServlet} - endpoint for requests for information on previously built packages
+ */
 @Component(service = Servlet.class,
         property = {
                 "sling.servlet.paths=" + "/services/backpack/createPackage",
@@ -53,6 +59,15 @@ public class CreatePackageServlet extends SlingAllMethodsServlet {
     @Reference
     private transient PackageService packageService;
 
+    /**
+     * Processes {@code POST} requests to the current endpoint. Attempts to create a package for a consequential build
+     * according to the request parameters.
+     * Request parameters are parsed to a {@link CreatePackageModel} which is validated and passed
+     * to the corresponding {@link PackageService} routine if proven valid; otherwise, the {@code HTTP status 400} reported
+     * @param request {@code SlingHttpServletRequest} instance
+     * @param response {@code SlingHttpServletResponse} instance
+     * @throws IOException in case writing data to the {@code SlingHttpServletResponse} fails
+     */
     @Override
     protected void doPost(final SlingHttpServletRequest request,
                           final SlingHttpServletResponse response) throws IOException {
