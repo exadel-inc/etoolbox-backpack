@@ -51,11 +51,12 @@ import static javax.jcr.query.Query.JCR_SQL2;
 )
 public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
     private static final Logger LOG = LoggerFactory.getLogger(GroupDynamicSelectDataSource.class);
-    private static final String PN_DROP_DOWN_QUERY_LANGUAGE = "dropDownQueryLanguage";
-    private static final String PN_DROP_DOWN_QUERY = "dropDownQuery";
-    private static final String DATASOURCE = "datasource";
+
+    @SuppressWarnings("squid:S1075") // this JCR path is static by design
     private static final String DEFAULT_PATH_KEY = "/etc/packages/backpack";
     private static final String ROOT_KEY = "/etc/packages";
+
+    private static final String SELECT_STATEMENT = "SELECT * FROM [sling:Folder] AS node WHERE ISCHILDNODE(node, '/etc/packages') order by node.[jcr:path] asc";
     private static final String ROOT_TEXT = "All packages";
 
     @Reference
@@ -76,30 +77,22 @@ public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) {
         ResourceResolver resolver = request.getResourceResolver();
-        ValueMap properties = getProperties(request.getResource());
         try {
-            String queryLanguage = properties.get(PN_DROP_DOWN_QUERY_LANGUAGE, JCR_SQL2);
-            String queryStatement = properties.get(PN_DROP_DOWN_QUERY, StringUtils.EMPTY);
-
-            if (StringUtils.isNotBlank(queryStatement)) {
-                // perform the query
-                List<Resource> results = queryHelper.findResources(resolver, queryLanguage, queryStatement, StringUtils.EMPTY);
-                List<DataSourceOption> options = results.stream()
-                        .map(this::createDataOption)
-                        .collect(Collectors.toList());
-                RequestParameter groupParam = request.getRequestParameter("group");
-                if (groupParam != null) {
-                    DataSourceOption firstDataSourceOption = new DataSourceOption(getOptionText(groupParam.getString()), groupParam.getString());
-                    options.add(0, firstDataSourceOption);
-                } else {
-                    DataSourceOption firstDataSourceOption = new DataSourceOption(getOptionText(DEFAULT_PATH_KEY), DEFAULT_PATH_KEY);
-                    options.add(0, firstDataSourceOption);
-                }
-                DataSourceOption rootDataSourceOption = new DataSourceOption(ROOT_TEXT, ROOT_KEY);
-                options.add(1, rootDataSourceOption);
-                dataSourceBuilder.addDataSource(request, options);
+            List<Resource> results = queryHelper.findResources(resolver, JCR_SQL2, SELECT_STATEMENT, StringUtils.EMPTY);
+            List<DataSourceOption> options = results.stream()
+                    .map(this::createDataOption)
+                    .collect(Collectors.toList());
+            RequestParameter groupParam = request.getRequestParameter("group");
+            if (groupParam != null) {
+                DataSourceOption firstDataSourceOption = new DataSourceOption(getOptionText(groupParam.getString()), groupParam.getString());
+                options.add(0, firstDataSourceOption);
+            } else {
+                DataSourceOption firstDataSourceOption = new DataSourceOption(getOptionText(DEFAULT_PATH_KEY), DEFAULT_PATH_KEY);
+                options.add(0, firstDataSourceOption);
             }
-
+            DataSourceOption rootDataSourceOption = new DataSourceOption(ROOT_TEXT, ROOT_KEY);
+            options.add(1, rootDataSourceOption);
+            dataSourceBuilder.addDataSource(request, options);
         } catch (Exception e) {
             LOG.error("Unable to collect the information to populate the dynamic-select drop-down.", e);
         }
