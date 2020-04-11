@@ -14,27 +14,27 @@
 
 package com.exadel.aem.backpack.core.datasource;
 
-import com.adobe.acs.commons.util.QueryHelper;
-import com.adobe.acs.commons.wcm.datasources.DataSourceBuilder;
-import com.adobe.acs.commons.wcm.datasources.DataSourceOption;
-import com.exadel.aem.backpack.core.services.PackageService;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.servlet.Servlet;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.adobe.acs.commons.util.QueryHelper;
+import com.adobe.acs.commons.wcm.datasources.DataSourceBuilder;
+import com.adobe.acs.commons.wcm.datasources.DataSourceOption;
 
-import javax.servlet.Servlet;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.exadel.aem.backpack.core.services.PackageService;
 
 import static javax.jcr.query.Query.JCR_SQL2;
 

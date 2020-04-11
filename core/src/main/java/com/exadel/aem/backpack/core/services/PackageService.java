@@ -14,6 +14,8 @@
 
 package com.exadel.aem.backpack.core.services;
 
+import org.apache.sling.api.resource.ResourceResolver;
+
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.servlets.model.BuildPackageModel;
 import com.exadel.aem.backpack.core.servlets.model.CreatePackageModel;

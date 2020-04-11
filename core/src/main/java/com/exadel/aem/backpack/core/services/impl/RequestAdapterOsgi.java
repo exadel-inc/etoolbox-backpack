@@ -14,6 +14,10 @@
 
 package com.exadel.aem.backpack.core.services.impl;
 
+import java.util.Map;
+
+import org.osgi.service.component.annotations.Component;
+
 import com.exadel.aem.request.RequestAdapter;
 import com.exadel.aem.request.impl.RequestAdapterImpl;
 import com.exadel.aem.request.validator.ValidatorResponse;

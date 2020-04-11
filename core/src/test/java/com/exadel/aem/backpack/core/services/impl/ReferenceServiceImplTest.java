@@ -14,6 +14,9 @@
 
 package com.exadel.aem.backpack.core.services.impl;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
 import com.exadel.aem.backpack.core.services.ReferenceService;
@@ -23,10 +26,10 @@ import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import io.wcm.testing.mock.aem.junit.AemContext;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
+import com.exadel.aem.backpack.core.services.ReferenceService;
 
 import static org.junit.Assert.assertEquals;
 

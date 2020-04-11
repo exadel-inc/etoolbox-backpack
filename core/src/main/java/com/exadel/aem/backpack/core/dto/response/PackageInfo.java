@@ -14,6 +14,18 @@
 
 package com.exadel.aem.backpack.core.dto.response;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.TreeMap;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
 import org.apache.commons.lang3.StringUtils;
 

@@ -14,22 +14,25 @@
 
 package com.exadel.aem.backpack.core.services.impl;
 
-import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.commons.jcr.JcrUtil;
-import com.day.cq.dam.api.Asset;
-import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
-import com.exadel.aem.backpack.core.dto.response.PackageInfo;
-import com.exadel.aem.backpack.core.dto.response.PackageStatus;
-import com.exadel.aem.backpack.core.services.PackageService;
-import com.exadel.aem.backpack.core.services.ReferenceService;
-import com.exadel.aem.backpack.core.servlets.model.BuildPackageModel;
-import com.exadel.aem.backpack.core.servlets.model.CreatePackageModel;
-import com.exadel.aem.backpack.core.servlets.model.LatestPackageInfoModel;
-import com.exadel.aem.backpack.core.servlets.model.PackageInfoModel;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.SimpleCredentials;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.jackrabbit.vault.fs.api.FilterSet;
@@ -55,17 +58,23 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.day.cq.commons.jcr.JcrConstants;
+import com.day.cq.commons.jcr.JcrUtil;
+import com.day.cq.dam.api.Asset;
 
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.jcr.SimpleCredentials;
-import java.lang.reflect.Type;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
+import com.exadel.aem.backpack.core.dto.response.PackageInfo;
+import com.exadel.aem.backpack.core.dto.response.PackageStatus;
+import com.exadel.aem.backpack.core.services.PackageService;
+import com.exadel.aem.backpack.core.services.ReferenceService;
+import com.exadel.aem.backpack.core.servlets.model.BuildPackageModel;
+import com.exadel.aem.backpack.core.servlets.model.CreatePackageModel;
+import com.exadel.aem.backpack.core.servlets.model.LatestPackageInfoModel;
+import com.exadel.aem.backpack.core.servlets.model.PackageInfoModel;
 
 /**
  * Implements {@link PackageService} to facilitate routines for managing packages and reporting packages' status info

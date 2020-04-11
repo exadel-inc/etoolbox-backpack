@@ -14,6 +14,8 @@
 
 package com.exadel.aem.request;
 
+import java.util.Map;
+
 import com.exadel.aem.request.validator.ValidatorResponse;
 
 /**

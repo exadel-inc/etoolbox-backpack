@@ -14,6 +14,10 @@
 
 package com.exadel.aem.backpack.core.servlets.model;
 
+import java.util.List;
+
+import org.apache.sling.api.resource.ResourceResolver;
+
 import com.exadel.aem.request.annotations.RequestMapping;
 import com.exadel.aem.request.annotations.RequestParam;
 

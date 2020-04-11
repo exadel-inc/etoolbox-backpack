@@ -14,6 +14,10 @@
 
 package com.exadel.aem.backpack.core.services;
 
+import java.util.Set;
+
+import org.apache.sling.api.resource.ResourceResolver;
+
 import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
 import org.apache.sling.api.resource.ResourceResolver;
 
