@@ -30,16 +30,6 @@ import com.exadel.aem.backpack.core.services.PackageService;
 import com.exadel.aem.backpack.core.servlets.model.PackageInfoModel;
 import com.exadel.aem.request.RequestAdapter;
 import com.exadel.aem.request.validator.ValidatorResponse;
-import com.google.gson.Gson;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-
-import javax.servlet.Servlet;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 import static com.exadel.aem.backpack.core.servlets.BuildPackageServlet.APPLICATION_JSON;
 
@@ -57,6 +47,7 @@ import static com.exadel.aem.backpack.core.servlets.BuildPackageServlet.APPLICAT
                 "sling.servlet.methods=[get]",
 
         })
+@SuppressWarnings("PackageAccessibility") // because Servlet and HttpServletResponse classes reported as a non-bundle dependency
 public class PackageInfoServlet extends SlingAllMethodsServlet {
 
     private static final long serialVersionUID = 1L;
@@ -64,8 +55,11 @@ public class PackageInfoServlet extends SlingAllMethodsServlet {
     private static final Gson GSON = new Gson();
 
     @Reference
+    @SuppressWarnings("UnusedDeclaration") // value injected by Sling
     private transient RequestAdapter requestAdapter;
+
     @Reference
+    @SuppressWarnings("UnusedDeclaration") // value injected by Sling
     private transient PackageService packageService;
 
     /**
@@ -79,9 +73,8 @@ public class PackageInfoServlet extends SlingAllMethodsServlet {
     @Override
     protected void doGet(final SlingHttpServletRequest request,
                          final SlingHttpServletResponse response) throws IOException {
-        ValidatorResponse<PackageInfoModel> validatorResponse = requestAdapter.adaptValidate(request.getParameterMap(), PackageInfoModel.class);
-
         response.setContentType(APPLICATION_JSON);
+        ValidatorResponse<PackageInfoModel> validatorResponse = requestAdapter.adaptValidate(request.getParameterMap(), PackageInfoModel.class);
 
         if (!validatorResponse.isValid()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

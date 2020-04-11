@@ -27,7 +27,6 @@ import java.util.TreeMap;
 import org.apache.commons.lang3.StringUtils;
 
 import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * Data model containing comprehensive data required to manage a package
@@ -87,6 +86,7 @@ public class PackageInfo {
         this.referencedResources = new HashMap<>(packageInfo.getReferencedResources());
         this.log = packageInfo.log;
         this.dataSize = packageInfo.dataSize;
+        this.paths = packageInfo.paths;
     }
 
     /**

@@ -24,7 +24,6 @@ import com.exadel.aem.request.validator.ValidatorResponse;
  * The data model can be subsequently validated by a specific routine as required
  */
 public interface RequestAdapter {
-    <T> T adapt(Map<String, Object> parameterMap, Class<T> tClazz);
 
     /**
      * Adapts parameters of a {@code SlingHttpServletRequest} to a specified data model object

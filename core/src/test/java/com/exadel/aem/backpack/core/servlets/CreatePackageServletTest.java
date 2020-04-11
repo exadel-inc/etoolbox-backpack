@@ -29,13 +29,6 @@ import com.exadel.aem.backpack.core.servlets.model.CreatePackageModel;
 import com.exadel.aem.request.RequestAdapter;
 import com.exadel.aem.request.impl.RequestAdapterImpl;
 import io.wcm.testing.mock.aem.junit.AemContext;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,7 +37,7 @@ import static org.mockito.Mockito.when;
 
 public class CreatePackageServletTest {
 
-    public static final String APPLICATION_JSON = "application/json";
+    private static final String APPLICATION_JSON = "application/json";
     private static final String PAGE_1 = "/content/site/pages/page1";
     private static final String PACKAGE_NAME = "test-package";
     private static final String PACKAGE_NAME_PARAM = "packageName";
@@ -52,10 +45,10 @@ public class CreatePackageServletTest {
 
     @Rule
     public AemContext context = new AemContext();
-    protected CreatePackageServlet servlet;
-    protected PackageService packageServiceMock = mock(PackageService.class);
+    private CreatePackageServlet servlet;
+    private PackageService packageServiceMock = mock(PackageService.class);
     private PackageInfo packageInfoWithCreatedStatus;
-    protected PackageInfo packageInfoWithErrorStatus;
+    private PackageInfo packageInfoWithErrorStatus;
 
     @Before
     public void beforeTest() {

@@ -28,9 +28,6 @@ import com.exadel.aem.request.annotations.RequestMapping;
 import com.exadel.aem.request.annotations.RequestParam;
 import com.exadel.aem.request.annotations.Validate;
 import com.exadel.aem.request.validator.impl.RequiredValidator;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Represents the set of user-defined options supplied to a request for information about a previously created/built
@@ -40,7 +37,6 @@ import org.slf4j.LoggerFactory;
 @RequestMapping
 public class PackageInfoModel {
     private static final Logger LOGGER = LoggerFactory.getLogger(PackageInfoModel.class);
-
 
     @RequestParam(name = "path")
     @Validate(validator = RequiredValidator.class,
@@ -67,7 +63,8 @@ public class PackageInfoModel {
      * Called from the Sling model initialization flow to decode the value per {@link PackageInfoModel#getPackagePath()}
      */
     @PostConstruct
-    public void init() {
+    @SuppressWarnings("PackageAccessibility") // because PostConstruct class reported as a non-bundle dependency
+    private void init() {
         if (StringUtils.isNotBlank(packagePath)) {
             try {
                 packagePath = URLDecoder.decode(packagePath, StandardCharsets.UTF_8.displayName());

@@ -36,23 +36,16 @@ import com.exadel.aem.request.annotations.RequestParam;
 import com.exadel.aem.request.annotations.Validate;
 import com.exadel.aem.request.validator.Validator;
 import com.exadel.aem.request.validator.ValidatorResponse;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.*;
-import java.util.function.Function;
-
+/**
+ * Implements {@link RequestAdapter} to adapt user-defined {@code SlingHttpServletRequest} parameters to a data model object
+ * which is then used in operations by {@link com.exadel.aem.backpack.core.services.PackageService}
+ */
 public class RequestAdapterImpl implements RequestAdapter {
 
-    private static final Map<Class, Function<String, Object>> SUPPORTED_TYPES;
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestAdapterImpl.class);
 
+    private static final Map<Class, Function<String, Object>> SUPPORTED_TYPES;
     static {
         SUPPORTED_TYPES = new HashMap<>();
         SUPPORTED_TYPES.put(Boolean.class, Boolean::valueOf);
@@ -78,7 +71,7 @@ public class RequestAdapterImpl implements RequestAdapter {
      * {@inheritDoc}
      */
     @Override
-    public <T> T adapt(Map<String, Object> parameterMap, Class<T> tClazz) {
+    public <T> T adapt(Map parameterMap, Class<T> tClazz) {
         T newObject = null;
         if (tClazz.isAnnotationPresent(RequestMapping.class)) {
             newObject = createDefaultObject(tClazz);
@@ -103,18 +96,17 @@ public class RequestAdapterImpl implements RequestAdapter {
      * {@inheritDoc}
      */
     @Override
-    public <T> ValidatorResponse<T> adaptValidate(Map<String, Object> parameterMap, Class<T> tClazz) {
-
-        ValidatorResponse response = new ValidatorResponse();
+    public <T> ValidatorResponse<T> adaptValidate(Map parameterMap, Class<T> tClazz) {
+        ValidatorResponse<T> response = new ValidatorResponse<>();
         if (tClazz.isAnnotationPresent(RequestMapping.class)) {
             T newObject = createDefaultObject(tClazz);
             boolean objectValid = true;
             if (newObject != null) {
-                List<String> validationMassages = new ArrayList<>();
-                response.setLog(validationMassages);
+                List<String> validationMessages = new ArrayList<>();
+                response.setLog(validationMessages);
                 List<Field> allFields;
                 allFields = getAllFields(new ArrayList<>(), tClazz);
-                objectValid = initValidateFields(parameterMap, newObject, validationMassages, allFields);
+                objectValid = initValidateFields(parameterMap, newObject, validationMessages, allFields);
             }
             if (objectValid) {
                 response.setModel(newObject);
@@ -138,7 +130,7 @@ public class RequestAdapterImpl implements RequestAdapter {
      */
     private <T> boolean initValidateFields(final Map parameterMap,
                                              final T newObject,
-                                             final List<String> validationMassages,
+                                             final List<String> validationMessages,
                                              final List<Field> allFields) {
         boolean objectValid = true;
         for (Field field : allFields) {
@@ -148,7 +140,7 @@ public class RequestAdapterImpl implements RequestAdapter {
                 if (StringUtils.isBlank(parameterName)) {
                     parameterName = field.getName();
                 }
-                boolean fieldValid = isFieldValid(parameterMap.get(parameterName), validationMassages, field);
+                boolean fieldValid = isParameterValid(parameterMap.get(parameterName), validationMessages, field);
                 if (fieldValid) {
                     initField(newObject, parameterMap.get(parameterName), field);
                 }
@@ -193,7 +185,7 @@ public class RequestAdapterImpl implements RequestAdapter {
             for (int i = 0; i < validatorsArray.length; i++) {
                 Validator validator = createDefaultObject(validatorsArray[i]);
                 if (validator != null && !validator.isValid(parameter)) {
-                    validationMassages.add(validateAnnotation.invalidMessages()[i]);
+                    validationMessages.add(validateAnnotation.invalidMessages()[i]);
                     return false;
                 }
             }
@@ -243,7 +235,7 @@ public class RequestAdapterImpl implements RequestAdapter {
                     arrayNewInstance[i] = converted;
                 }
             }
-            setFieldValue(t, field, arrayNewInstance);
+            setFieldValue(newObject, field, arrayNewInstance);
         }
     }
 
@@ -270,7 +262,7 @@ public class RequestAdapterImpl implements RequestAdapter {
                             list.add(converted);
                         }
                     }
-                    setFieldValue(t, field, list);
+                    setFieldValue(newObject, field, list);
                 }
             }
         }
@@ -313,7 +305,7 @@ public class RequestAdapterImpl implements RequestAdapter {
     private <T> void setFieldValue(final T newObject, final Field field, final Object param) {
         try {
             field.setAccessible(true);
-            field.set(t, param);
+            field.set(newObject, param);
         } catch (IllegalAccessException e) {
             LOGGER.error("Can't access field {}", field.getName(), e);
         }

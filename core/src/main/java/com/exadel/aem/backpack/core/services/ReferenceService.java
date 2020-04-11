@@ -19,7 +19,6 @@ import java.util.Set;
 import org.apache.sling.api.resource.ResourceResolver;
 
 import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
-import org.apache.sling.api.resource.ResourceResolver;
 
 /**
  * Represents a service running in an AEM instance responsible for gathering information on assets referenced by resources
@@ -35,5 +34,4 @@ public interface ReferenceService {
      * @return {@code Set<AssetReferencedItem>} object, or an empty {@code Set}
      */
     Set<AssetReferencedItem> getAssetReferences(ResourceResolver resourceResolver, String searchPath);
-
 }

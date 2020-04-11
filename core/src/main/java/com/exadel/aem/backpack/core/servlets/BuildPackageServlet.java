@@ -31,16 +31,6 @@ import com.exadel.aem.backpack.core.servlets.model.BuildPackageModel;
 import com.exadel.aem.backpack.core.servlets.model.LatestPackageInfoModel;
 import com.exadel.aem.request.RequestAdapter;
 import com.exadel.aem.request.validator.ValidatorResponse;
-import com.google.gson.Gson;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-
-import javax.servlet.Servlet;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 /**
  * Serves as the network endpoint for user requests that trigger start of package building or else poll information
@@ -56,17 +46,19 @@ import java.io.IOException;
                 "sling.servlet.methods=[get,post]",
 
         })
+@SuppressWarnings("PackageAccessibility") // because Servlet and HttpServletResponse classes reported as a non-bundle dependency
 public class BuildPackageServlet extends SlingAllMethodsServlet {
-
     private static final long serialVersionUID = 1L;
 
     private static final Gson GSON = new Gson();
-    public static final String APPLICATION_JSON = "application/json";
+    static final String APPLICATION_JSON = "application/json";
 
     @Reference
+    @SuppressWarnings("UnusedDeclaration") // value injected by Sling
     private transient PackageService packageService;
 
     @Reference
+    @SuppressWarnings("UnusedDeclaration") // value injected by Sling
     private transient RequestAdapter requestAdapter;
 
     /**

@@ -49,6 +49,7 @@ import static javax.jcr.query.Query.JCR_SQL2;
                 "sling.servlet.methods=" + HttpConstants.METHOD_GET,
         }
 )
+@SuppressWarnings("PackageAccessibility") // because Servlet and HttpServletResponse classes reported as a non-bundle dependency
 public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
     private static final Logger LOG = LoggerFactory.getLogger(GroupDynamicSelectDataSource.class);
 
@@ -60,12 +61,15 @@ public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
     private static final String ROOT_TEXT = "All packages";
 
     @Reference
+    @SuppressWarnings("UnusedDeclaration") // value injected by Sling
     private transient DataSourceBuilder dataSourceBuilder;
 
     @Reference
+    @SuppressWarnings("UnusedDeclaration") // value injected by Sling
     private transient QueryHelper queryHelper;
 
     @Reference
+    @SuppressWarnings("UnusedDeclaration") // value injected by Sling
     private transient PackageService packageService;
 
     /**

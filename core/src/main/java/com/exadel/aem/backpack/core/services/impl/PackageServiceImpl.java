@@ -85,7 +85,6 @@ public class PackageServiceImpl implements PackageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PackageServiceImpl.class);
 
-
     private static final String SERVICE_NAME = "backpack-service";
     private static final String DEFAULT_PACKAGE_GROUP = "backpack";
     private static final String DEFAULT_THUMBNAILS_LOCATION = "/apps/backpack/assets/";
@@ -99,14 +98,18 @@ public class PackageServiceImpl implements PackageService {
     private static final String PACKAGE_DOES_NOT_EXIST_MESSAGE = "Package by this path %s doesn't exist in the repository.";
 
     @Reference
+    @SuppressWarnings("UnusedDeclaration") // value injected by Sling
     private ReferenceService referenceService;
 
     @Reference
+    @SuppressWarnings("UnusedDeclaration") // value injected by Sling
     private SlingRepository slingRepository;
 
     @Reference
+    @SuppressWarnings("UnusedDeclaration") // value injected by Sling
     private ResourceResolverFactory resourceResolverFactory;
 
+    @SuppressWarnings("UnstableApiUsage") // cannot change Guava Cache version bundled in uber-jar; still safe to use
     private Cache<String, PackageInfo> packageInfos;
 
     /**
@@ -114,6 +117,7 @@ public class PackageServiceImpl implements PackageService {
      * @param config {@link Configuration} instance representing this OSGi service's starting configuration
      */
     @Activate
+    @SuppressWarnings("unused") // run internally by the OSGi mechanism
     private void activate(Configuration config) {
         packageInfos = CacheBuilder.newBuilder()
                 .maximumSize(100)
@@ -259,7 +263,7 @@ public class PackageServiceImpl implements PackageService {
         packageInfo.setGroupName(pkgGroupName);
         try {
             if (isPkgExists(packMgr, createPackageModel.getPackageName(), pkgGroupName, createPackageModel.getVersion())) {
-                String packageExistMsg = "Package with such name already exist in the " + pkgGroupName + " group.";
+                String packageExistMsg = "Package with such name already exists in the " + pkgGroupName + " group.";
 
                 packageInfo.addLogMessage(ERROR + packageExistMsg);
                 packageInfo.setPackageStatus(PackageStatus.ERROR);
@@ -285,6 +289,55 @@ public class PackageServiceImpl implements PackageService {
         return packageInfo;
     }
 
+    /**
+     * Called by {@link PackageServiceImpl#createPackage(ResourceResolver, CreatePackageModel)} to implement package
+     * creation on the standard {@link JcrPackage} package layer and report package status upon completion
+     * @param userSession Current user {@code Session} as adapted from the acting {@code ResourceResolver}
+     * @param packageInfo {@code PackageInfo} object to store status information in
+     * @param filter {@code DefaultWorkspaceFilter} instance representing resource selection mechanism for the package
+     */
+    private void createPackage(final Session userSession,
+                                     final PackageInfo packageInfo,
+                                     final DefaultWorkspaceFilter filter) {
+        JcrPackage jcrPackage = null;
+        try {
+            JcrPackageManager packMgr = PackagingService.getPackageManager(userSession);
+            if (!filter.getFilterSets().isEmpty()) {
+                jcrPackage = packMgr.create(packageInfo.getGroupName(), packageInfo.getPackageName(), packageInfo.getVersion());
+                JcrPackageDefinition jcrPackageDefinition = jcrPackage.getDefinition();
+                if (jcrPackageDefinition != null) {
+                    jcrPackageDefinition.set(REFERENCED_RESOURCES, GSON.toJson(packageInfo.getReferencedResources()), true);
+                    jcrPackageDefinition.set(GENERAL_RESOURCES, GSON.toJson(packageInfo.getPaths()), true);
+                    jcrPackageDefinition.setFilter(filter, true);
+
+                    String thumbnailPath = StringUtils.defaultIfBlank(packageInfo.getThumbnailPath(), getDefaultThumbnailPath(true));
+                    addThumbnail(jcrPackageDefinition.getNode(), thumbnailPath, userSession);
+                    packageInfo.setPackageStatus(PackageStatus.CREATED);
+                    Node packageNode = jcrPackage.getNode();
+                    if (packageNode != null) {
+                        packageInfo.setPackageNodeName(packageNode.getName());
+                        packageInfo.setPackagePath(packageNode.getPath());
+                    }
+                }
+            } else {
+                packageInfo.setPackageStatus(PackageStatus.ERROR);
+                packageInfo.addLogMessage(ERROR + "Package does not contain any valid filters.");
+            }
+        } catch (Exception e) {
+            packageInfo.setPackageStatus(PackageStatus.ERROR);
+            packageInfo.addLogMessage(ERROR + e.getMessage());
+            packageInfo.addLogMessage(ExceptionUtils.getStackTrace(e));
+            LOGGER.error("Error during package creation", e);
+        } finally {
+            if (jcrPackage != null) {
+                jcrPackage.close();
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PackageInfo getPackageInfo(final ResourceResolver resourceResolver, final PackageInfoModel packageInfoModel) {
         String packagePath = packageInfoModel.getPackagePath();
@@ -359,11 +412,17 @@ public class PackageServiceImpl implements PackageService {
         }
     }
 
-    private void packageNotExistInfo(final String pathToPackage, final PackageInfo buildInfo) {
+    /**
+     * Called by {@link PackageServiceImpl#getPackageInfo(ResourceResolver, PackageInfoModel)} to populate a preliminarily
+     * initialized {@link PackageInfo} object as it represents a <i>non-existing</i> JCR storage item
+     * @param pathToPackage Path to a package as supplied by yser
+     * @param packageInfo {@code PackageInfo} object to store information in
+     */
+    private void packageNotExistInfo(final String pathToPackage, final PackageInfo packageInfo) {
         String packageNotExistMsg = String.format(PACKAGE_DOES_NOT_EXIST_MESSAGE, pathToPackage);
-        buildInfo.setPackagePath(pathToPackage);
-        buildInfo.addLogMessage(ERROR + packageNotExistMsg);
-        buildInfo.setPackageStatus(PackageStatus.ERROR);
+        packageInfo.setPackagePath(pathToPackage);
+        packageInfo.addLogMessage(ERROR + packageNotExistMsg);
+        packageInfo.setPackageStatus(PackageStatus.ERROR);
         LOGGER.error(packageNotExistMsg);
     }
 
@@ -408,49 +467,12 @@ public class PackageServiceImpl implements PackageService {
         return partialBuildInfo;
     }
 
-    private JcrPackage createPackage(final Session userSession,
-                                     final PackageInfo packageBuildInfo,
-                                     final DefaultWorkspaceFilter filter) {
-        JcrPackage jcrPackage = null;
-        try {
-            JcrPackageManager packMgr = PackagingService.getPackageManager(userSession);
-            if (!filter.getFilterSets().isEmpty()) {
-                jcrPackage = packMgr.create(packageBuildInfo.getGroupName(), packageBuildInfo.getPackageName(), packageBuildInfo.getVersion());
-                JcrPackageDefinition jcrPackageDefinition = jcrPackage.getDefinition();
-                if (jcrPackageDefinition != null) {
-                    jcrPackageDefinition.set(REFERENCED_RESOURCES, GSON.toJson(packageBuildInfo.getReferencedResources()), true);
-                    jcrPackageDefinition.set(GENERAL_RESOURCES, GSON.toJson(packageBuildInfo.getPaths()), true);
-                    jcrPackageDefinition.setFilter(filter, true);
-
-
-                    String thumbnailPath = StringUtils.defaultIfBlank(packageBuildInfo.getThumbnailPath(), getDefaultThumbnailPath(true));
-                    addThumbnail(jcrPackageDefinition.getNode(), thumbnailPath, userSession);
-                    packageBuildInfo.setPackageStatus(PackageStatus.CREATED);
-                    Node packageNode = jcrPackage.getNode();
-                    if (packageNode != null) {
-                        packageBuildInfo.setPackageNodeName(packageNode.getName());
-                        packageBuildInfo.setPackagePath(packageNode.getPath());
-                    }
-                }
-            } else {
-                packageBuildInfo.setPackageStatus(PackageStatus.ERROR);
-                packageBuildInfo.addLogMessage(ERROR + "Package does not contain any valid filters.");
-            }
-
-        } catch (Exception e) {
-            packageBuildInfo.setPackageStatus(PackageStatus.ERROR);
-            packageBuildInfo.addLogMessage(ERROR + e.getMessage());
-            packageBuildInfo.addLogMessage(ExceptionUtils.getStackTrace(e));
-            LOGGER.error("Error during package creation", e);
-        } finally {
-            if (jcrPackage != null) {
-                jcrPackage.close();
-            }
-        }
-        return jcrPackage;
-    }
-
-    protected JcrPackageManager getPackageManager(final Session userSession) {
+    /**
+     * Gets {@link JcrPackageManager} instance associated with the current {@code Sessuib}
+     * @param userSession {@code Session} object to retrieve package manager for
+     * @return {@code JcrPackageManager} instance
+     */
+    JcrPackageManager getPackageManager(final Session userSession) {
         return PackagingService.getPackageManager(userSession);
     }
 
@@ -484,7 +506,7 @@ public class PackageServiceImpl implements PackageService {
             JcrPackageManager packMgr = getPackageManager(userSession);
             JcrPackage jcrPackage = packMgr.open(userSession.getNode(packageBuildInfo.getPackagePath()));
             if (jcrPackage != null) {
-                JcrPackageDefinition definition = jcrPackage.getDefinition();
+                JcrPackageDefinition definition = Objects.requireNonNull(jcrPackage.getDefinition());
                 DefaultWorkspaceFilter filter = new DefaultWorkspaceFilter();
                 includeGeneralResources(definition, s -> filter.add(new PathFilterSet(s)));
                 includeReferencedResources(referencedResourceTypes, definition, s -> filter.add(new PathFilterSet(s)));
@@ -774,6 +796,3 @@ public class PackageServiceImpl implements PackageService {
     }
 
 }
-
-
-

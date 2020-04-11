@@ -40,17 +40,17 @@ import static org.mockito.Mockito.when;
 
 public class BuildPackageServletTest {
 
-    public static final String APPLICATION_JSON = "application/json";
+    private static final String APPLICATION_JSON = "application/json";
     private static final String PACKAGE_PATH = "/etc/packages/testGroup/testPackage-1.zip";
     private static final String PATH_PARAM = "path";
 
     @Rule
     public AemContext context = new AemContext();
-    protected BuildPackageServlet servlet;
-    protected PackageService packageServiceMock = mock(PackageService.class);
+    private BuildPackageServlet servlet;
+    private PackageService packageServiceMock = mock(PackageService.class);
     private PackageInfo packageInfoTestBuilt;
     private PackageInfo packageInfoWithBuiltStatus;
-    protected Gson GSON;
+    private Gson GSON;
 
     @Before
     public void beforeTest() {

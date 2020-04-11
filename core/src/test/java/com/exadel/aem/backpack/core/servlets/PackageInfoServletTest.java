@@ -31,16 +31,7 @@ import com.exadel.aem.backpack.core.servlets.model.PackageInfoModel;
 import com.exadel.aem.request.RequestAdapter;
 import com.exadel.aem.request.impl.RequestAdapterImpl;
 import com.exadel.aem.request.validator.ValidatorResponse;
-import com.google.gson.Gson;
 import io.wcm.testing.mock.aem.junit.AemContext;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -54,10 +45,10 @@ public class PackageInfoServletTest {
 
     @Rule
     public AemContext context = new AemContext();
-    protected PackageInfoServlet servlet;
-    protected PackageService packageServiceMock = mock(PackageService.class);
-    protected Gson GSON;
-    protected PackageInfo packageInfo = getPackageInfo();
+    private PackageInfoServlet servlet;
+    private PackageService packageServiceMock = mock(PackageService.class);
+    private Gson GSON;
+    private PackageInfo packageInfo = getPackageInfo();
 
     @Before
     public void beforeTest() {
@@ -71,7 +62,7 @@ public class PackageInfoServletTest {
     @Test
     public void shouldReturnBadRequestWithNonExistingPathParameter() throws IOException {
         ValidatorResponse validatorResponse = new ValidatorResponse();
-        validatorResponse.setLog(Arrays.asList("Path field is required"));
+        validatorResponse.setLog(Collections.singletonList("Path field is required"));
 
         servlet.doGet(context.request(), context.response());
 

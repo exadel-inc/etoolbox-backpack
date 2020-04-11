@@ -29,8 +29,8 @@ import com.exadel.aem.request.annotations.RequestParam;
 @RequestMapping
 public class BuildPackageModel extends PackageInfoModel {
 
-
     @RequestParam
+    @SuppressWarnings("UnusedDeclaration") // directly injected by the RequestAdapter routine
     private boolean testBuild;
 
     @RequestParam
