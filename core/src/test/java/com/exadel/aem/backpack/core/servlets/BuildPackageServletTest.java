@@ -1,4 +1,28 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License").
+ * You may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exadel.aem.backpack.core.servlets;
+
+import java.io.IOException;
+import java.util.Arrays;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.sling.api.resource.ResourceResolver;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import com.google.gson.Gson;
 
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
@@ -7,16 +31,7 @@ import com.exadel.aem.backpack.core.servlets.model.BuildPackageModel;
 import com.exadel.aem.request.RequestAdapter;
 import com.exadel.aem.request.impl.RequestAdapterImpl;
 import com.exadel.aem.request.validator.ValidatorResponse;
-import com.google.gson.Gson;
 import io.wcm.testing.mock.aem.junit.AemContext;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -25,17 +40,17 @@ import static org.mockito.Mockito.when;
 
 public class BuildPackageServletTest {
 
-    public static final String APPLICATION_JSON = "application/json";
+    private static final String APPLICATION_JSON = "application/json";
     private static final String PACKAGE_PATH = "/etc/packages/testGroup/testPackage-1.zip";
     private static final String PATH_PARAM = "path";
 
     @Rule
     public AemContext context = new AemContext();
-    protected BuildPackageServlet servlet;
-    protected PackageService packageServiceMock = mock(PackageService.class);
+    private BuildPackageServlet servlet;
+    private PackageService packageServiceMock = mock(PackageService.class);
     private PackageInfo packageInfoTestBuilt;
     private PackageInfo packageInfoWithBuiltStatus;
-    protected Gson GSON;
+    private Gson GSON;
 
     @Before
     public void beforeTest() {

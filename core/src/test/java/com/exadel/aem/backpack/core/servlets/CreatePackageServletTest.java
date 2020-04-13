@@ -1,4 +1,26 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License").
+ * You may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exadel.aem.backpack.core.servlets;
+
+import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.sling.api.resource.ResourceResolver;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
@@ -7,13 +29,6 @@ import com.exadel.aem.backpack.core.servlets.model.CreatePackageModel;
 import com.exadel.aem.request.RequestAdapter;
 import com.exadel.aem.request.impl.RequestAdapterImpl;
 import io.wcm.testing.mock.aem.junit.AemContext;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -22,7 +37,7 @@ import static org.mockito.Mockito.when;
 
 public class CreatePackageServletTest {
 
-    public static final String APPLICATION_JSON = "application/json";
+    private static final String APPLICATION_JSON = "application/json";
     private static final String PAGE_1 = "/content/site/pages/page1";
     private static final String PACKAGE_NAME = "test-package";
     private static final String PACKAGE_NAME_PARAM = "packageName";
@@ -30,10 +45,10 @@ public class CreatePackageServletTest {
 
     @Rule
     public AemContext context = new AemContext();
-    protected CreatePackageServlet servlet;
-    protected PackageService packageServiceMock = mock(PackageService.class);
+    private CreatePackageServlet servlet;
+    private PackageService packageServiceMock = mock(PackageService.class);
     private PackageInfo packageInfoWithCreatedStatus;
-    protected PackageInfo packageInfoWithErrorStatus;
+    private PackageInfo packageInfoWithErrorStatus;
 
     @Before
     public void beforeTest() {

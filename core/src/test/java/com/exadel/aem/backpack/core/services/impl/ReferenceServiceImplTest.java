@@ -1,18 +1,32 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License").
+ * You may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exadel.aem.backpack.core.services.impl;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
-import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
-import com.exadel.aem.backpack.core.services.ReferenceService;
-import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import io.wcm.testing.mock.aem.junit.AemContext;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
+import com.exadel.aem.backpack.core.services.ReferenceService;
 
 import static org.junit.Assert.assertEquals;
 
@@ -30,9 +44,9 @@ public class ReferenceServiceImplTest {
 
     @Rule
     public AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
-    protected ReferenceService referenceService;
-    protected Set<AssetReferencedItem> expectedReferencedItems;
-    protected ResourceResolver resourceResolver;
+    private ReferenceService referenceService;
+    private Set<AssetReferencedItem> expectedReferencedItems;
+    private ResourceResolver resourceResolver;
 
     @Before
     public void beforeTest() {

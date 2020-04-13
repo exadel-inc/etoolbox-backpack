@@ -1,18 +1,33 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License").
+ * You may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exadel.aem.backpack.core.services.impl;
 
-import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
-import com.exadel.aem.backpack.core.dto.response.PackageInfo;
-import com.exadel.aem.backpack.core.dto.response.PackageStatus;
-import com.exadel.aem.backpack.core.services.PackageService;
-import com.exadel.aem.backpack.core.services.ReferenceService;
-import com.exadel.aem.backpack.core.servlets.model.BuildPackageModel;
-import com.exadel.aem.backpack.core.servlets.model.CreatePackageModel;
-import com.exadel.aem.backpack.core.servlets.model.LatestPackageInfoModel;
-import com.exadel.aem.backpack.core.servlets.model.PackageInfoModel;
-import com.google.common.cache.Cache;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import io.wcm.testing.mock.aem.junit.AemContext;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
 import org.apache.jackrabbit.vault.fs.api.WorkspaceFilter;
 import org.apache.jackrabbit.vault.fs.config.DefaultWorkspaceFilter;
@@ -23,28 +38,45 @@ import org.apache.jackrabbit.vault.packaging.PackagingService;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
+import com.google.common.cache.Cache;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import io.wcm.testing.mock.aem.junit.AemContext;
 
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.*;
+import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
+import com.exadel.aem.backpack.core.dto.response.PackageInfo;
+import com.exadel.aem.backpack.core.dto.response.PackageStatus;
+import com.exadel.aem.backpack.core.services.PackageService;
+import com.exadel.aem.backpack.core.services.ReferenceService;
+import com.exadel.aem.backpack.core.servlets.model.BuildPackageModel;
+import com.exadel.aem.backpack.core.servlets.model.CreatePackageModel;
+import com.exadel.aem.backpack.core.servlets.model.LatestPackageInfoModel;
+import com.exadel.aem.backpack.core.servlets.model.PackageInfoModel;
 
-import static com.exadel.aem.backpack.core.dto.response.PackageStatus.*;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static com.exadel.aem.backpack.core.dto.response.PackageStatus.BUILT;
+import static com.exadel.aem.backpack.core.dto.response.PackageStatus.CREATED;
+import static com.exadel.aem.backpack.core.dto.response.PackageStatus.ERROR;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 @RunWith(Enclosed.class)
 public class PackageServiceImplTest {
     private static final String PAGE_1 = "/content/site/pages/page1";
     private static final String PICTURE_1 = "/content/dam/picture1.jpg";
     private static final String PICTURE_2 = "/content/dam/picture2.png";
+    private static final String THUMBNAIL = "/content/dam/thumbnail.jpg";
     private static final String IMAGE_JPEG = "image/jpeg";
     private static final String IMAGE_PNG = "image/png";
     private static final String BACKPACK = "backpack";
@@ -52,23 +84,21 @@ public class PackageServiceImplTest {
     private static final String PACKAGE_VERSION = "1";
     private static final String TEST_GROUP = "testGroup";
 
-
     private static final String REFERENCED_RESOURCES = "referencedResources";
     private static final String GENERAL_RESOURCES = "generalResources";
 
     private static final Gson GSON = new Gson();
 
-    @Ignore
-    public static class Base {
+    public abstract static class Base {
 
         @Rule
         public AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
-        protected PackageService packageService;
-        protected ResourceResolver resourceResolver;
-        protected JcrPackageManager packMgr;
-        protected Session session;
-        protected ReferenceService referenceServiceMock = mock(ReferenceService.class);
-        protected Map<String, List<String>> referencedResources;
+        PackageService packageService;
+        ResourceResolver resourceResolver;
+        JcrPackageManager packMgr;
+        Session session;
+        ReferenceService referenceServiceMock = mock(ReferenceService.class);
+        Map<String, List<String>> referencedResources;
 
         @Before
         public void beforeTest() {
@@ -93,7 +123,7 @@ public class PackageServiceImplTest {
             packMgr = PackagingService.getPackageManager(session);
         }
 
-        protected PackageInfo getDefaultPackageInfo() {
+        PackageInfo getDefaultPackageInfo() {
             PackageInfo packageInfo = new PackageInfo();
             packageInfo.setGroupName(BACKPACK);
             packageInfo.setPackageName(TEST_PACKAGE);
@@ -103,7 +133,7 @@ public class PackageServiceImplTest {
             return packageInfo;
         }
 
-        protected JcrPackage createPackage(final PackageInfo packageInfo,
+        JcrPackage createPackage(final PackageInfo packageInfo,
                                            final DefaultWorkspaceFilter filter) throws RepositoryException, IOException {
             JcrPackage jcrPackage = null;
             try {
@@ -128,7 +158,7 @@ public class PackageServiceImplTest {
         }
 
 
-        protected void verifyPackageFilters(final Node packageNode,
+        void verifyPackageFilters(final Node packageNode,
                                             final List<String> expectedPaths,
                                             final Map<String, List<String>> expectedReferencedResources) throws RepositoryException {
             JcrPackage jcrPackage = null;
@@ -137,21 +167,26 @@ public class PackageServiceImplTest {
             Type mapType = new TypeToken<Map<String, List<String>>>() {
             }.getType();
             try {
-                jcrPackage = packMgr.open(packageNode);
-                JcrPackageDefinition definition = jcrPackage.getDefinition();
-                WorkspaceFilter filter = definition.getMetaInf().getFilter();
-                List<String> pkgGeneralResources = GSON.fromJson(definition.get(GENERAL_RESOURCES), listType);
-                Map<String, List<String>> pkgReferencedResources = GSON.fromJson(definition.get(REFERENCED_RESOURCES), mapType);
+                jcrPackage = Objects.requireNonNull(packMgr.open(packageNode));
+                JcrPackageDefinition definition = Objects.requireNonNull(jcrPackage.getDefinition());
+                WorkspaceFilter filter = Objects.requireNonNull(definition.getMetaInf().getFilter());
+                List<String> pkgGeneralResources = Objects.requireNonNull(GSON.fromJson(definition.get(GENERAL_RESOURCES), listType));
+                Map<String, List<String>> pkgReferencedResources = Objects.requireNonNull(GSON.fromJson(definition.get(REFERENCED_RESOURCES), mapType));
 
-                pkgReferencedResources.entrySet().stream().forEach(listEntry -> {
-                    List<String> expectedPath = expectedReferencedResources.get(listEntry.getKey());
-                    expectedPath.forEach(s -> assertTrue("Referenced resources from the package metadata must be as expected map", listEntry.getValue().contains(s)));
+                pkgReferencedResources.forEach((key, value) -> {
+                    List<String> expectedPath = expectedReferencedResources.get(key);
+                    expectedPath.forEach(s -> assertTrue("Referenced resources from the package metadata must be as expected map",
+                            value.contains(s)));
                 });
 
                 List<PathFilterSet> filterSets = filter.getFilterSets();
 
-                assertEquals("Count of filters must be the same as expected list size", expectedPaths.size(), filterSets.size());
-                assertEquals("Count of general resources from metadata must be the same as expected list size", pkgGeneralResources.size(), filterSets.size());
+                assertEquals("Count of filters must be the same as expected list size",
+                        expectedPaths.size(),
+                        filterSets.size());
+                assertEquals("Count of general resources from metadata must be the same as expected list size",
+                        pkgGeneralResources.size(),
+                        filterSets.size());
 
                 filterSets.forEach(pathFilterSet -> {
                     assertTrue(expectedPaths.contains(pathFilterSet.getRoot()));
@@ -230,7 +265,7 @@ public class PackageServiceImplTest {
             PackageInfo aPackage = packageService.createPackage(resourceResolver, createPackageModel);
 
             assertEquals(PackageStatus.ERROR, aPackage.getPackageStatus());
-            assertEquals("ERROR: Package with such name already exist in the backpack group.", aPackage.getLog().get(0));
+            assertEquals("ERROR: Package with such name already exists in the backpack group.", aPackage.getLog().get(0));
 
             session.removeItem("/etc/packages/backpack/testPackage-1.zip");
         }
@@ -248,6 +283,7 @@ public class PackageServiceImplTest {
         private void initBasePackageInfo(final CreatePackageModel model, final List<String> strings) {
             model.setPaths(strings);
             model.setPackageName(TEST_PACKAGE);
+            model.setThumbnailPath(THUMBNAIL);
             model.setVersion(PACKAGE_VERSION);
         }
     }
@@ -259,6 +295,7 @@ public class PackageServiceImplTest {
         private static final String PACKAGE_PATH = "/etc/packages/backpack/testPackage-1.zip";
 
         @Test
+        @SuppressWarnings("UnstableApiUsage") // cannot change Guava Cache version bundled in uber-jar; still safe to use
         public void shouldReturnInMemoryPackageInfo() {
             PackageInfoModel packageInfoModel = new PackageInfoModel();
             packageInfoModel.setPackagePath(TEST_ZIP);
@@ -301,7 +338,7 @@ public class PackageServiceImplTest {
             assertEquals(TEST_PACKAGE, result.getPackageName());
             assertEquals(PACKAGE_VERSION, result.getVersion());
             assertEquals(referencedResources, result.getReferencedResources());
-            assertEquals(PAGE_1, result.getPaths().stream().findFirst().get());
+            assertEquals(PAGE_1, result.getPaths().stream().findFirst().orElse(null));
             assertNotNull(result.getDataSize());
             assertEquals(CREATED, result.getPackageStatus());
             assertEquals("testPackage-1.zip", result.getPackageNodeName());
@@ -463,6 +500,7 @@ public class PackageServiceImplTest {
             latestPackageInfoModel.setPackagePath(PACKAGE_PATH);
             latestPackageInfoModel.setLatestLogIndex(LATEST_INDEX);
 
+            @SuppressWarnings("UnstableApiUsage") // cannot change Guava Cache version bundled in uber-jar; still safe to use
             Cache<String, PackageInfo> packageInfos = ((PackageServiceImpl) packageService).getPackageInfos();
             PackageInfo packageInfo = new PackageInfo();
 
@@ -480,6 +518,7 @@ public class PackageServiceImplTest {
             LatestPackageInfoModel latestPackageInfoModel = new LatestPackageInfoModel();
             latestPackageInfoModel.setPackagePath(PACKAGE_PATH);
 
+            @SuppressWarnings("UnstableApiUsage") // cannot change Guava Cache version bundled in uber-jar; still safe to use
             Cache<String, PackageInfo> packageInfos = ((PackageServiceImpl) packageService).getPackageInfos();
             PackageInfo packageInfo = new PackageInfo();
             packageInfos.put(PACKAGE_PATH, packageInfo);
