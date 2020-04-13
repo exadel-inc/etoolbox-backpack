@@ -1,4 +1,4 @@
-![BackPack Logo](https://gitlab.exadel.com/EDMTP/backpack/blob/dev/ui.apps/src/main/content/jcr_root/apps/backpack/assets/backpack_full.png])
+![BackPack Logo](https://gitlab.exadel.com/EDMTP/backpack/raw/dev/ui.apps/src/main/content/jcr_root/apps/backpack/assets/backpack_full.png)
 
 # AEM BackPack
 
