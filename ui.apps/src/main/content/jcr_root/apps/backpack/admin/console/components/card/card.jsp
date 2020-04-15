@@ -53,32 +53,32 @@
 
 %><coral-card class="foundation-collection-navigator backpack-card" data-foundation-collection-navigator-href="#" <%= attrs %>>
 
-<coral-card-asset>
-    <img src="<%= xssAPI.getValidHref(thumbnailUrl) %>" alt="<%= xssAPI.encodeForHTMLAttr(title) %>">
-</coral-card-asset>
+    <coral-card-asset class="coral-card-asset">
+        <img src="<%= xssAPI.getValidHref(thumbnailUrl) %>" alt="<%= xssAPI.encodeForHTMLAttr(title) %>">
+    </coral-card-asset>
 
     <coral-card-content><%
-%><coral-card-context><%= xssAPI.encodeForHTML("Package") %></coral-card-context><%
-%><coral-card-title class="foundation-collection-item-title"><%= xssAPI.encodeForHTML(title) %></coral-card-title><%
+    %><coral-card-context><%= xssAPI.encodeForHTML("Package") %></coral-card-context><%
+    %><coral-card-title class="foundation-collection-item-title"><%= xssAPI.encodeForHTML(title) %></coral-card-title><%
 
-    Calendar created = resource.getValueMap().get("jcr:created", Calendar.class);
-    Calendar modified = resource.getChild("jcr:content").getValueMap().get("jcr:lastModified", Calendar.class);
+        Calendar created = resource.getValueMap().get("jcr:created", Calendar.class);
+        Calendar modified = resource.getChild("jcr:content").getValueMap().get("jcr:lastModified", Calendar.class);
 
-%><coral-card-propertylist><%
-    if (created != null) {
-%><coral-card-property icon="add" title="<%= xssAPI.encodeForHTMLAttr(i18n.get("Created")) %>">
-    <foundation-time value="<%= xssAPI.encodeForHTMLAttr(created.toInstant().toString()) %>"></foundation-time>
-</coral-card-property><%
-    }
-    if (modified != null) {
-%><coral-card-property icon="edit" title="<%= xssAPI.encodeForHTMLAttr(i18n.get("Modified")) %>">
+    %><coral-card-propertylist><%
+        if (created != null) {
+    %><coral-card-property icon="add" title="<%= xssAPI.encodeForHTMLAttr(i18n.get("Created")) %>">
+        <foundation-time value="<%= xssAPI.encodeForHTMLAttr(created.toInstant().toString()) %>"></foundation-time>
+    </coral-card-property><%
+        }
+        if (modified != null) {
+    %><coral-card-property icon="edit" title="<%= xssAPI.encodeForHTMLAttr(i18n.get("Modified")) %>">
         <foundation-time value="<%= xssAPI.encodeForHTMLAttr(modified.toInstant().toString()) %>"></foundation-time>
     </coral-card-property>
-    <%
-}
+        <%
+            }
 
-%></coral-card-propertylist>
-</coral-card-content>
+        %></coral-card-propertylist>
+    </coral-card-content>
     <meta class="foundation-collection-quickactions" data-foundation-collection-quickactions-rel="<%= xssAPI.encodeForHTMLAttr(actionRels) %>">
     <link rel="properties" href="<%= xssAPI.getValidHref(request.getContextPath()) %>"/>
 </coral-card>
@@ -89,7 +89,7 @@
     if (resource != null && hasPermission(acm, resource, Privilege.JCR_READ)) {
 %>
     <coral-quickactions-item icon="edit" class="foundation-collection-action" data-foundation-collection-action='{"action": "cq.wcm.open", "data": {"cookiePath":"<%= request.getContextPath() %>/","href":"/crx/packmgr/index.jsp#<%= xssAPI.getValidHref(path) %>"}}'
-><%= xssAPI.encodeForHTML(i18n.get("Open")) %></coral-quickactions-item><%
+    ><%= xssAPI.encodeForHTML(i18n.get("Open")) %></coral-quickactions-item><%
     }
 
     if (hasPermission(acm, resource, Privilege.JCR_REMOVE_NODE)) {
@@ -97,7 +97,7 @@
     <coral-quickactions-item icon="delete" class="foundation-collection-action" data-foundation-collection-action='{"action": "cq.wcm.delete"}'
     ><%= xssAPI.encodeForHTML(i18n.get("Delete")) %></coral-quickactions-item>
     <%
-    }
+        }
         if (resource != null && hasPermission(acm, resource, Privilege.JCR_READ)) {
     %>
     <coral-quickactions-item icon="download" class="foundation-collection-action"
