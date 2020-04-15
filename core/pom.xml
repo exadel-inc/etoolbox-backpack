@@ -11,7 +11,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>aem-backpack.core</artifactId>
+    <artifactId>aem-backpack-core</artifactId>
 
     <name>AEM BackPack Tool - Bundle</name>
     <description>Contains classes and interfaces required to facilitate AEM BackPack server-side functionality</description>
