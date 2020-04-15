@@ -14,7 +14,9 @@ When you select e.g. a page for inclusion into package, all the assets reference
 The project consists of two modules: 
 
 * *core module* runs in an AEM instance containing to respond to user commands and provide data processing service.
-* *ui/application module* embeds into AEM administering interface to give to the user control over package creation and storage, as well as detailed feedback. This module is built upon the modern Coral 3 graphic interface and TouchUI-ready.
+* *ui/application module* embeds into AEM administering interface and runs in browser to give to the user control over package creation and storage, as well as detailed feedback. This module is built upon the modern Coral 3 graphic interface and TouchUI-ready.
+
+The two modules communicate via JSON-based REST protocol. Basically, a user command is sent to an endpoint, parsed and processed by a specially designed AEM service, then result and/or status message returned to user.
 
 ### Installation
 
@@ -42,4 +44,8 @@ The source code of the project is test-covered. You can run unit tests apart fro
 
     mvn clean test
 
+There is also the specific "test" profile that helps to collect code quality statistics, engage test coverage analysis, etc. Run it with e.g.
+
+    mvn clean verify sonar:sonar -Ptest -Dsonar.host.url=[....]
+    
 The project is in active development stage. Community contribution is heartily welcome.
