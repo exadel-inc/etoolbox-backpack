@@ -86,6 +86,7 @@
             </build>
         </profile>
     </profiles>
+
     <dependencies>
         <dependency>
             <groupId>com.exadel.aem</groupId>
