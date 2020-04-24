@@ -49,7 +49,8 @@ import static javax.jcr.query.Query.JCR_SQL2;
                 "sling.servlet.methods=" + HttpConstants.METHOD_GET,
         }
 )
-@SuppressWarnings("PackageAccessibility") // because Servlet and HttpServletResponse classes reported as a non-bundle dependency
+@SuppressWarnings("PackageAccessibility")
+// because Servlet and HttpServletResponse classes reported as a non-bundle dependency
 public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
     private static final Logger LOG = LoggerFactory.getLogger(GroupDynamicSelectDataSource.class);
 
@@ -75,7 +76,8 @@ public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
     /**
      * Processes {@code GET} requests to the current endpoint to add to the {@code SlingHttpServletRequest}
      * a {@code datasource} object filled with names of present packages' groups
-     * @param request {@code SlingHttpServletRequest} instance
+     *
+     * @param request  {@code SlingHttpServletRequest} instance
      * @param response {@code SlingHttpServletResponse} instance
      */
     @Override
@@ -105,6 +107,7 @@ public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
     /**
      * Called from {@link GroupDynamicSelectDataSource#doGet(SlingHttpServletRequest, SlingHttpServletResponse)} to
      * map a {@code Resource} containing datasource option requisites to a {@code DataSourceOption} instance
+     *
      * @param resource {@code Resource} object
      * @return {@code DataSourceOption} object
      */
@@ -114,6 +117,7 @@ public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
 
     /**
      * Gets {@code datasource} option label by returning the trailing element of an underlying JCR path
+     *
      * @param resourcePath String representing a JCR path
      * @return String value
      */
