@@ -14,10 +14,10 @@
 
 package com.exadel.aem.backpack.core.datasource;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.servlet.Servlet;
-
+import com.adobe.acs.commons.util.QueryHelper;
+import com.adobe.acs.commons.wcm.datasources.DataSourceBuilder;
+import com.adobe.acs.commons.wcm.datasources.DataSourceOption;
+import com.exadel.aem.backpack.core.services.PackageService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -30,11 +30,11 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.adobe.acs.commons.util.QueryHelper;
-import com.adobe.acs.commons.wcm.datasources.DataSourceBuilder;
-import com.adobe.acs.commons.wcm.datasources.DataSourceOption;
 
-import com.exadel.aem.backpack.core.services.PackageService;
+import javax.jcr.RepositoryException;
+import javax.servlet.Servlet;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static javax.jcr.query.Query.JCR_SQL2;
 
@@ -97,7 +97,7 @@ public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
             DataSourceOption rootDataSourceOption = new DataSourceOption(ROOT_TEXT, ROOT_KEY);
             options.add(1, rootDataSourceOption);
             dataSourceBuilder.addDataSource(request, options);
-        } catch (Exception e) {
+        } catch (RepositoryException e) {
             LOG.error("Unable to collect the information to populate the dynamic-select drop-down.", e);
         }
     }
