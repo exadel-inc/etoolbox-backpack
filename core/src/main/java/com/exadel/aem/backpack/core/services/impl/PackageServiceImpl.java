@@ -100,6 +100,7 @@ public class PackageServiceImpl implements PackageService {
 
     @SuppressWarnings("UnstableApiUsage") // cannot change Guava Cache version bundled in uber-jar; still safe to use
     private Cache<String, PackageInfo> packageInfos;
+    private boolean enableStackTrace;
 
     /**
      * Run upon this OSGi servide activation to initialize cache storage of collected {@link PackageInfo} objects
@@ -109,6 +110,7 @@ public class PackageServiceImpl implements PackageService {
     @Activate
     @SuppressWarnings("unused") // run internally by the OSGi mechanism
     private void activate(Configuration config) {
+        enableStackTrace = config.enableStackTraceShowing();
         packageInfos = CacheBuilder.newBuilder()
                 .maximumSize(100)
                 .expireAfterWrite(config.buildInfoTTL(), TimeUnit.DAYS)
@@ -126,6 +128,13 @@ public class PackageServiceImpl implements PackageService {
                 type = AttributeType.INTEGER
         )
         int buildInfoTTL() default 1;
+
+        @AttributeDefinition(
+                name = "Enable errors stack trace shoving",
+                description = "Show error stack trace as part of build long",
+                type = AttributeType.BOOLEAN
+        )
+        boolean enableStackTraceShowing() default true;
     }
 
     /**
@@ -167,6 +176,7 @@ public class PackageServiceImpl implements PackageService {
                 }
             }
         } catch (RepositoryException e) {
+            addExceptionToLog(packageInfo, e);
             LOGGER.error("Error during package opening", e);
         } finally {
             if (jcrPackage != null) {
@@ -174,6 +184,19 @@ public class PackageServiceImpl implements PackageService {
             }
         }
         return packageInfo;
+    }
+
+    /**
+     * Add information about the exception to {@link PackageInfo}
+     *
+     * @param packageInfo
+     * @param e
+     */
+    private void addExceptionToLog(final PackageInfo packageInfo, final Exception e) {
+        packageInfo.addLogMessage(ERROR + e.getMessage());
+        if (enableStackTrace) {
+            packageInfo.addLogMessage(ExceptionUtils.getStackTrace(e));
+        }
     }
 
     /**
@@ -263,8 +286,7 @@ public class PackageServiceImpl implements PackageService {
                 return packageInfo;
             }
         } catch (RepositoryException e) {
-            packageInfo.addLogMessage(ERROR + e.getMessage());
-            packageInfo.addLogMessage(ExceptionUtils.getStackTrace(e));
+            addExceptionToLog(packageInfo, e);
             LOGGER.error("Error during existing packages check", e);
             return packageInfo;
         }
@@ -318,8 +340,7 @@ public class PackageServiceImpl implements PackageService {
             }
         } catch (RepositoryException | IOException e) {
             packageInfo.setPackageStatus(PackageStatus.ERROR);
-            packageInfo.addLogMessage(ERROR + e.getMessage());
-            packageInfo.addLogMessage(ExceptionUtils.getStackTrace(e));
+            addExceptionToLog(packageInfo, e);
             LOGGER.error("Error during package creation", e);
         } finally {
             if (jcrPackage != null) {
@@ -357,6 +378,7 @@ public class PackageServiceImpl implements PackageService {
                 }
             }
         } catch (RepositoryException e) {
+            addExceptionToLog(packageInfo, e);
             LOGGER.error("Error during package opening", e);
         } finally {
             if (jcrPackage != null) {
@@ -532,8 +554,7 @@ public class PackageServiceImpl implements PackageService {
             }
         } catch (RepositoryException | PackageException | IOException e) {
             packageBuildInfo.setPackageStatus(PackageStatus.ERROR);
-            packageBuildInfo.addLogMessage(ERROR + e.getMessage());
-            packageBuildInfo.addLogMessage(ExceptionUtils.getStackTrace(e));
+            addExceptionToLog(packageBuildInfo, e);
             LOGGER.error("Error during package generation", e);
         } finally {
             closeSession(userSession);
