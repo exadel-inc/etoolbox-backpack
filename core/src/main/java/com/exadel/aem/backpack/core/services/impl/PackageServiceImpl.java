@@ -53,6 +53,7 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -64,7 +65,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
 /**
  * Implements {@link PackageService} to facilitate routines for managing packages and reporting packages' status info
  */
@@ -167,6 +167,8 @@ public class PackageServiceImpl implements PackageService {
                 }
             }
         } catch (RepositoryException e) {
+            packageInfo.addLogMessage(ERROR + e.getMessage());
+            packageInfo.addLogMessage(ExceptionUtils.getStackTrace(e));
             LOGGER.error("Error during package opening", e);
         } finally {
             if (jcrPackage != null) {
@@ -357,6 +359,8 @@ public class PackageServiceImpl implements PackageService {
                 }
             }
         } catch (RepositoryException e) {
+            packageInfo.addLogMessage(ERROR + e.getMessage());
+            packageInfo.addLogMessage(ExceptionUtils.getStackTrace(e));
             LOGGER.error("Error during package opening", e);
         } finally {
             if (jcrPackage != null) {
