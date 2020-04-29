@@ -14,23 +14,22 @@
 
 package com.exadel.aem.backpack.core.servlets;
 
-import java.io.IOException;
-import javax.servlet.Servlet;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import com.google.gson.Gson;
-
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.services.PackageService;
 import com.exadel.aem.backpack.core.servlets.model.BuildPackageModel;
 import com.exadel.aem.backpack.core.servlets.model.LatestPackageInfoModel;
 import com.exadel.aem.request.RequestAdapter;
 import com.exadel.aem.request.validator.ValidatorResponse;
+import com.google.gson.Gson;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.servlets.SlingAllMethodsServlet;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
+import javax.servlet.Servlet;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * Serves as the network endpoint for user requests that trigger start of package building or else poll information

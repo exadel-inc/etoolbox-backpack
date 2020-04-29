@@ -14,20 +14,19 @@
 
 package com.exadel.aem.backpack.core.servlets.model;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import javax.annotation.PostConstruct;
-
+import com.exadel.aem.request.annotations.RequestMapping;
+import com.exadel.aem.request.annotations.RequestParam;
+import com.exadel.aem.request.annotations.Validate;
+import com.exadel.aem.request.validator.impl.RequiredValidator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.exadel.aem.request.annotations.RequestMapping;
-import com.exadel.aem.request.annotations.RequestParam;
-import com.exadel.aem.request.annotations.Validate;
-import com.exadel.aem.request.validator.impl.RequiredValidator;
+import javax.annotation.PostConstruct;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Represents the set of user-defined options supplied to a request for information about a previously created/built

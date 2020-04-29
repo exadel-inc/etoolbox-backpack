@@ -14,11 +14,10 @@
 
 package com.exadel.aem.backpack.core.services;
 
-import java.util.Set;
-
+import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
 import org.apache.sling.api.resource.ResourceResolver;
 
-import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
+import java.util.Set;
 
 /**
  * Represents a service running in an AEM instance responsible for gathering information on assets referenced by resources
