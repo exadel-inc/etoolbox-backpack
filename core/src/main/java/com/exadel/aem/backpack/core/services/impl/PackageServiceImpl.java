@@ -119,7 +119,7 @@ public class PackageServiceImpl implements PackageService {
      * Represents this OSGi service's configuration
      */
     @ObjectClassDefinition(name = "BackPack PackageService configuration")
-    public @interface Configuration {
+    @interface Configuration {
         @AttributeDefinition(
                 name = "Package Build Info TTL",
                 description = "Specify TTL for package build information cache (in days).",
@@ -500,7 +500,7 @@ public class PackageServiceImpl implements PackageService {
      * @param referencedResourceTypes Collection of strings representing resource types to be embedded
      *                                in the resulting package
      */
-    protected void buildPackage(final String userId,
+    void buildPackage(final String userId,
                                 final PackageInfo packageBuildInfo,
                                 final List<String> referencedResourceTypes) {
         Session userSession = null;

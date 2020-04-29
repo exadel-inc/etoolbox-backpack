@@ -89,10 +89,10 @@ public class PackageServiceImplTest {
 
     private static final Gson GSON = new Gson();
 
-    public abstract static class Base {
+    abstract static class Base {
 
         @Rule
-        public AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
+        public final AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
         PackageService packageService;
         ResourceResolver resourceResolver;
         JcrPackageManager packMgr;

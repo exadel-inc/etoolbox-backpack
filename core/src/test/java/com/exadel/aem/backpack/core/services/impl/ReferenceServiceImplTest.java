@@ -43,7 +43,7 @@ public class ReferenceServiceImplTest {
     private static final String MINE_TYPE_PDF = "application/pdf";
 
     @Rule
-    public AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
+    public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
     private ReferenceService referenceService;
     private Set<AssetReferencedItem> expectedReferencedItems;
     private ResourceResolver resourceResolver;

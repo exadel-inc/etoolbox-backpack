@@ -21,6 +21,7 @@ import com.exadel.aem.request.validator.impl.RequiredValidator;
 import com.exadel.aem.request.validator.impl.WholeNumberValidator;
 
 @RequestMapping
+@SuppressWarnings("UnusedDeclaration") // contains directly injected fields
 public class ValidateModel {
 
     @RequestParam

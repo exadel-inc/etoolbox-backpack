@@ -20,6 +20,7 @@ import com.exadel.aem.request.annotations.RequestParam;
 import java.util.List;
 
 @RequestMapping
+@SuppressWarnings("UnusedDeclaration") // contains directly injected fields
 public class DataStructureModel {
 
     @RequestParam(name = "listOfStrings")

@@ -58,7 +58,7 @@ public class RequestAdapterImpl implements RequestAdapter {
         SUPPORTED_TYPES.put(float.class, Float::parseFloat);
         SUPPORTED_TYPES.put(Double.class, Double::valueOf);
         SUPPORTED_TYPES.put(double.class, Double::parseDouble);
-        SUPPORTED_TYPES.put(Character.class, s -> Character.valueOf(s.charAt(0)));
+        SUPPORTED_TYPES.put(Character.class, s -> s.charAt(0));
         SUPPORTED_TYPES.put(char.class, s -> s.charAt(0));
         SUPPORTED_TYPES.put(String.class, s -> s);
         SUPPORTED_TYPES.put(StringBuilder.class, StringBuilder::new);

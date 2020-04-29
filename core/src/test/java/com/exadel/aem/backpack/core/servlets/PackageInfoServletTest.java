@@ -44,11 +44,11 @@ public class PackageInfoServletTest {
     private static final String PATH_PARAM = "path";
 
     @Rule
-    public AemContext context = new AemContext();
+    public final AemContext context = new AemContext();
+    private final PackageService packageServiceMock = mock(PackageService.class);
+    private final PackageInfo packageInfo = getPackageInfo();
     private PackageInfoServlet servlet;
-    private PackageService packageServiceMock = mock(PackageService.class);
     private Gson GSON;
-    private PackageInfo packageInfo = getPackageInfo();
 
     @Before
     public void beforeTest() {

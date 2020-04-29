@@ -32,7 +32,6 @@ public class ValidatorResponse<T> {
      * Gets whether the underlying data model has passed validation and proven valid
      * @return True or false
      */
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted") // for semantic contingency reasons
     public boolean isValid() {
         return valid;
     }
