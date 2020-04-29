@@ -125,7 +125,7 @@ public class RequestAdapterImpl implements RequestAdapter {
      * @param validationMessages Reference to the collection of warnings produced by validation routines
      * @param allFields          Collection of {@code Field} instances than need to be populated with data
      * @param <T>                Type of the adaptation object instance
-     * @return True is the adaptation object has been successfullt populated with validated data; otherwise, false
+     * @return True is the adaptation object has been successfully populated with validated data; otherwise, false
      */
     private <T> boolean initValidateFields(final Map parameterMap,
                                            final T newObject,
@@ -174,7 +174,7 @@ public class RequestAdapterImpl implements RequestAdapter {
      * @param parameter          And arbitrary parameter value
      * @param validationMessages Reference to the collection of validation messages to add an emerging warning to
      * @param field              {@code Field} instance used to get an [optional] validator
-     * @return True if no validator assigned to the currend {@code Field} or else the provided object is valid
+     * @return True if no validator assigned to the current {@code Field} or else the provided object is valid
      * for the field; otherwise, false
      */
     private boolean isParameterValid(Object parameter,
@@ -319,7 +319,7 @@ public class RequestAdapterImpl implements RequestAdapter {
     }
 
     /**
-     * Gets a new instance of the provided object type and wraps unerlying reflection exceptions
+     * Gets a new instance of the provided object type and wraps underlying reflection exceptions
      *
      * @param tClazz Target class
      * @param <T>    Type of the instance to create

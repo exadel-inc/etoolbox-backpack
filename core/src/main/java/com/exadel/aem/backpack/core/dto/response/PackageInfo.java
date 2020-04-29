@@ -69,7 +69,7 @@ public class PackageInfo {
 
     /**
      * Cloning constructor
-     * @param packageInfo The {@code PachakeInfo} object to make a clone
+     * @param packageInfo The {@code PackageInfo} object to make a clone
      */
     public PackageInfo(final PackageInfo packageInfo) {
         this.packageName = packageInfo.packageName;

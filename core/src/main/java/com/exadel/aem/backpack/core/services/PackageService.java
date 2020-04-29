@@ -66,7 +66,7 @@ public interface PackageService {
 
     /**
      * Gets a chunk of rolling package building process update according to options specified in the HTTP request
-     * @param latestPackageInfoModel {@link LatestPackageInfoModel} containing reqiusites of of required log information
+     * @param latestPackageInfoModel {@link LatestPackageInfoModel} containing requisites of of required log information
      *                                                             chunk
      * @return {@link PackageInfo} instance
      */
