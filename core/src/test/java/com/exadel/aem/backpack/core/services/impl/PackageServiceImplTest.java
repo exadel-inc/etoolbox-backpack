@@ -295,7 +295,7 @@ public class PackageServiceImplTest {
         private static final String PACKAGE_PATH = "/etc/packages/backpack/testPackage-1.zip";
 
         @Test
-        @SuppressWarnings("UnstableApiUsage") // cannot change Guava Cache version bundled in uber-jar; still safe to use
+        @SuppressWarnings("UnstableApiUsage") // sticking to Guava Cache version bundled in uber-jar; still safe to use
         public void shouldReturnInMemoryPackageInfo() {
             PackageInfoModel packageInfoModel = new PackageInfoModel();
             packageInfoModel.setPackagePath(TEST_ZIP);
@@ -500,7 +500,7 @@ public class PackageServiceImplTest {
             latestPackageInfoModel.setPackagePath(PACKAGE_PATH);
             latestPackageInfoModel.setLatestLogIndex(LATEST_INDEX);
 
-            @SuppressWarnings("UnstableApiUsage") // cannot change Guava Cache version bundled in uber-jar; still safe to use
+            @SuppressWarnings("UnstableApiUsage") // sticking to Guava Cache version bundled in uber-jar; still safe to use
             Cache<String, PackageInfo> packageInfos = ((PackageServiceImpl) packageService).getPackageInfos();
             PackageInfo packageInfo = new PackageInfo();
 
@@ -518,7 +518,7 @@ public class PackageServiceImplTest {
             LatestPackageInfoModel latestPackageInfoModel = new LatestPackageInfoModel();
             latestPackageInfoModel.setPackagePath(PACKAGE_PATH);
 
-            @SuppressWarnings("UnstableApiUsage") // cannot change Guava Cache version bundled in uber-jar; still safe to use
+            @SuppressWarnings("UnstableApiUsage") // sticking to Guava Cache version bundled in uber-jar; still safe to use
             Cache<String, PackageInfo> packageInfos = ((PackageServiceImpl) packageService).getPackageInfos();
             PackageInfo packageInfo = new PackageInfo();
             packageInfos.put(PACKAGE_PATH, packageInfo);

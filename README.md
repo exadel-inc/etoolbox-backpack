@@ -30,6 +30,11 @@ Alternatively you can build and install **BackPack** from source code. Clone thi
     
 from the command line. You can change `aem.host` and `aem.port` values as needed in the main POM file's <properties> section or via a command-line key like `-Daem.host=xxx -Daem.port=xxx` (default is *localhost:4502*).
 
+
+### Requirements
+
+The project is developed and tested in *AEM 6.4.5* (*uber-jar* 6.3.0) with Java 1.8. Please compile and use in environments other that this with caution.
+
 ### Usage
 
 In your _Adobe Experience Manager_ console, navigate to _Tools_ section and choose _Deployment_ from the left menu rail. Click _"Backpack"_ in the right section.
@@ -51,3 +56,11 @@ There is also the specific "test" profile that helps to collect code quality sta
     mvn clean verify sonar:sonar -Ptest -Dsonar.host.url=[....]
     
 The project is in active development stage. Community contribution is heartily welcome.
+
+### Known issues
+
+The project uses `com.google.common.cache.Cache` bundled in `uber-jar-6.3.0` which s in "beta" status. Despite this class is out of *beta* stage in standalone Google Guava releases since *20.0* we are currently sticking to *uber-jar* version to avoid inconsistency having proved this doesn't cause trouble in regular usage.
+
+### Licensing
+
+The project is licensed under [Apache License, Version 2.0](LICENSE.txt). All runtime project dependencies are guaranteed to be compliant with the license. Dependencies such as Adobe's *uber-jar* are considered *provided* in the end-user environment and are not explicitly engaged. The end user is to comply with the regulations of the corresponding licenses. 

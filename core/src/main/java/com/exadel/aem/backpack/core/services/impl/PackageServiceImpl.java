@@ -98,7 +98,7 @@ public class PackageServiceImpl implements PackageService {
     @SuppressWarnings("UnusedDeclaration") // value injected by Sling
     private ResourceResolverFactory resourceResolverFactory;
 
-    @SuppressWarnings("UnstableApiUsage") // cannot change Guava Cache version bundled in uber-jar; still safe to use
+    @SuppressWarnings("UnstableApiUsage") // sticking to Guava Cache version bundled in uber-jar; still safe to use
     private Cache<String, PackageInfo> packageInfos;
 
     /**
@@ -807,8 +807,7 @@ public class PackageServiceImpl implements PackageService {
      *
      * @return {@code Cache<String, PackageInfo>} object
      */
-    @SuppressWarnings("UnstableApiUsage")
-    // cannot change Guava Cache version bundled in uber-jar; still safe to use
+    @SuppressWarnings("UnstableApiUsage") // sticking to Guava Cache version bundled in uber-jar; still safe to use
     Cache<String, PackageInfo> getPackageInfos() {
         return packageInfos;
     }
