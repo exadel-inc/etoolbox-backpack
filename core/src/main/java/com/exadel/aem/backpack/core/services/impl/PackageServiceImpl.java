@@ -130,8 +130,8 @@ public class PackageServiceImpl implements PackageService {
         int buildInfoTTL() default 1;
 
         @AttributeDefinition(
-                name = "Enable errors stack trace shoving",
-                description = "Show error stack trace as part of build long",
+                name = "Enable stack traces",
+                description = "Show exceptions stack traces in the packages build log",
                 type = AttributeType.BOOLEAN
         )
         boolean enableStackTraceShowing() default true;
@@ -189,8 +189,8 @@ public class PackageServiceImpl implements PackageService {
     /**
      * Add information about the exception to {@link PackageInfo}
      *
-     * @param packageInfo
-     * @param e
+     * @param packageInfo {@code PackageInfo} object to store status information in
+     * @param e Exception to log
      */
     private void addExceptionToLog(final PackageInfo packageInfo, final Exception e) {
         packageInfo.addLogMessage(ERROR + e.getMessage());
