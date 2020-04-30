@@ -102,7 +102,7 @@ public class PackageServiceImpl implements PackageService {
     private Cache<String, PackageInfo> packageInfos;
 
     /**
-     * Run upon this OSGi servide activation to initialize cache storage of collected {@link PackageInfo} objects
+     * Run upon this OSGi service activation to initialize cache storage of collected {@link PackageInfo} objects
      *
      * @param config {@link Configuration} instance representing this OSGi service's starting configuration
      */
@@ -119,7 +119,7 @@ public class PackageServiceImpl implements PackageService {
      * Represents this OSGi service's configuration
      */
     @ObjectClassDefinition(name = "BackPack PackageService configuration")
-    public @interface Configuration {
+    @interface Configuration {
         @AttributeDefinition(
                 name = "Package Build Info TTL",
                 description = "Specify TTL for package build information cache (in days).",
@@ -414,7 +414,7 @@ public class PackageServiceImpl implements PackageService {
      * Called by {@link PackageServiceImpl#getPackageInfo(ResourceResolver, PackageInfoModel)} to populate a preliminarily
      * initialized {@link PackageInfo} object as it represents a <i>non-existing</i> JCR storage item
      *
-     * @param pathToPackage Path to a package as supplied by yser
+     * @param pathToPackage Path to a package as supplied by user
      * @param packageInfo   {@code PackageInfo} object to store information in
      */
     private void packageNotExistInfo(final String pathToPackage, final PackageInfo packageInfo) {
@@ -468,7 +468,7 @@ public class PackageServiceImpl implements PackageService {
     }
 
     /**
-     * Gets {@link JcrPackageManager} instance associated with the current {@code Sessuib}
+     * Gets {@link JcrPackageManager} instance associated with the current {@code Session}
      *
      * @param userSession {@code Session} object to retrieve package manager for
      * @return {@code JcrPackageManager} instance
@@ -500,7 +500,7 @@ public class PackageServiceImpl implements PackageService {
      * @param referencedResourceTypes Collection of strings representing resource types to be embedded
      *                                in the resulting package
      */
-    protected void buildPackage(final String userId,
+    void buildPackage(final String userId,
                                 final PackageInfo packageBuildInfo,
                                 final List<String> referencedResourceTypes) {
         Session userSession = null;

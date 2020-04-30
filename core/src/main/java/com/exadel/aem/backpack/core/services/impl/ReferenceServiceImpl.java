@@ -14,20 +14,19 @@
 
 package com.exadel.aem.backpack.core.services.impl;
 
+import com.day.cq.dam.api.Asset;
+import com.day.cq.dam.commons.util.AssetReferenceSearch;
+import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
+import com.exadel.aem.backpack.core.services.ReferenceService;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.service.component.annotations.Component;
+
+import javax.jcr.Node;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.jcr.Node;
-
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.osgi.service.component.annotations.Component;
-import com.day.cq.dam.api.Asset;
-import com.day.cq.dam.commons.util.AssetReferenceSearch;
-
-import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
-import com.exadel.aem.backpack.core.services.ReferenceService;
 
 /**
  * Implements {@link ReferenceService} to facilitate getting a collection of asses referenced by resources

@@ -80,6 +80,6 @@ public class AssetReferencedItem extends ReferencedItem {
      */
     @Override
     public int hashCode() {
-        return super.hashCode();
+        return Objects.hash(super.getPath(), mimeType);
     }
 }

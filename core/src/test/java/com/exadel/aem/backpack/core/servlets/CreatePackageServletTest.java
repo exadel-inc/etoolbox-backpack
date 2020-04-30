@@ -14,14 +14,6 @@
 
 package com.exadel.aem.backpack.core.servlets;
 
-import java.io.IOException;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.sling.api.resource.ResourceResolver;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
 import com.exadel.aem.backpack.core.services.PackageService;
@@ -29,6 +21,13 @@ import com.exadel.aem.backpack.core.servlets.model.CreatePackageModel;
 import com.exadel.aem.request.RequestAdapter;
 import com.exadel.aem.request.impl.RequestAdapterImpl;
 import io.wcm.testing.mock.aem.junit.AemContext;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,9 +43,9 @@ public class CreatePackageServletTest {
     private static final String PACKAGE_PATHS_PARAM = "paths";
 
     @Rule
-    public AemContext context = new AemContext();
+    public final AemContext context = new AemContext();
+    private final PackageService packageServiceMock = mock(PackageService.class);
     private CreatePackageServlet servlet;
-    private PackageService packageServiceMock = mock(PackageService.class);
     private PackageInfo packageInfoWithCreatedStatus;
     private PackageInfo packageInfoWithErrorStatus;
 

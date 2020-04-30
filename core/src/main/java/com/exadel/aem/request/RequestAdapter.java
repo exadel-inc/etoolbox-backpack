@@ -23,6 +23,7 @@ import com.exadel.aem.request.validator.ValidatorResponse;
  * which is then used in operations by {@link com.exadel.aem.backpack.core.services.PackageService}.
  * The data model can be subsequently validated by a specific routine as required
  */
+@SuppressWarnings("unused") // exposes methods as part of public API
 public interface RequestAdapter {
 
     /**

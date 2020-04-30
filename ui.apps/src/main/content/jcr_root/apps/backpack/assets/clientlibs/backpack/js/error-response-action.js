@@ -15,7 +15,7 @@
 (function(window) {
     $(window).adaptTo("foundation-registry").register("foundation.form.response.ui.error", {
         name: "errorResponseCreated",
-        handler: function(form, data, xhr, error, errorThrown) {
+        handler: function(form, data, xhr) {
             var title = Granite.I18n.get("Error");
             var message = xhr.responseJSON.log;
 

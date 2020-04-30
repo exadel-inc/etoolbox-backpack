@@ -14,16 +14,6 @@
 
 package com.exadel.aem.backpack.core.servlets;
 
-import java.io.IOException;
-import java.util.Collections;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.sling.api.resource.ResourceResolver;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import com.google.gson.Gson;
-
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
 import com.exadel.aem.backpack.core.services.PackageService;
@@ -31,7 +21,16 @@ import com.exadel.aem.backpack.core.servlets.model.PackageInfoModel;
 import com.exadel.aem.request.RequestAdapter;
 import com.exadel.aem.request.impl.RequestAdapterImpl;
 import com.exadel.aem.request.validator.ValidatorResponse;
+import com.google.gson.Gson;
 import io.wcm.testing.mock.aem.junit.AemContext;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,11 +43,11 @@ public class PackageInfoServletTest {
     private static final String PATH_PARAM = "path";
 
     @Rule
-    public AemContext context = new AemContext();
+    public final AemContext context = new AemContext();
+    private final PackageService packageServiceMock = mock(PackageService.class);
+    private final PackageInfo packageInfo = getPackageInfo();
     private PackageInfoServlet servlet;
-    private PackageService packageServiceMock = mock(PackageService.class);
     private Gson GSON;
-    private PackageInfo packageInfo = getPackageInfo();
 
     @Before
     public void beforeTest() {

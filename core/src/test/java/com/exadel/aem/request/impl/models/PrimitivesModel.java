@@ -18,6 +18,7 @@ import com.exadel.aem.request.annotations.RequestMapping;
 import com.exadel.aem.request.annotations.RequestParam;
 
 @RequestMapping
+@SuppressWarnings("UnusedDeclaration") // contains directly injected fields
 public class PrimitivesModel {
 
     @RequestParam

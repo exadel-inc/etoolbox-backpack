@@ -18,10 +18,9 @@ import com.exadel.aem.request.annotations.RequestMapping;
 import com.exadel.aem.request.annotations.RequestParam;
 import com.exadel.aem.request.annotations.Validate;
 import com.exadel.aem.request.validator.impl.RequiredValidator;
+import org.apache.sling.api.resource.ResourceResolver;
 
 import java.util.List;
-
-import org.apache.sling.api.resource.ResourceResolver;
 
 /**
  * Represents the set of user-defined options for a request to build a package. Upon initialization, passed

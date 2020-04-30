@@ -41,7 +41,7 @@ In your _Adobe Experience Manager_ console, navigate to _Tools_ section and choo
 
 TouchUI-compliant *Package Manager* interface opens. In the _"Group"_ dropdown to the left, you can choose a particular packages group, or see them all, if "All packages" option selected.
 
-Hover over a package to see available options. _"Edit"_ button will open the same package in the "classic" interface with some aditional capabilities.
+Hover over a package to see available options. _"Edit"_ button will open the same package in the "classic" interface with some additional capabilities.
 
 To create a new package, click _"Create"_ button in the top right. A dialog window will open, where you can put package's name, version, group, thumbnail, path to the node containing resources for the package, and turn child resources inclusion on or off. Several paths may be selected. Click the button in the bottom to complete the operation.
 
@@ -63,4 +63,4 @@ The project uses `com.google.common.cache.Cache` bundled in `uber-jar-6.3.0` whi
 
 ### Licensing
 
-The project is licensed under [Apache License, Version 2.0](LICENSE.txt). All runtime project dependencies are guaranteed to be compliant with the license. Dependencies such as Adobe's *uber-jar* are considered *provided* in the end-user environment and are not explicitly engaged. The end user is to comply with the regulations of the corresponding licenses. 
+The project is licensed under [Apache License, Version 2.0](LICENSE). All runtime project dependencies are guaranteed to be compliant with the license. Dependencies such as Adobe's *uber-jar* are considered *provided* in the end-user environment and are not explicitly engaged. The end user is to comply with the regulations of the corresponding licenses. 
