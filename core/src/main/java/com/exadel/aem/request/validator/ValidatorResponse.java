@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Data object wrapping a model adatped from an HTTP request together with the result of its validation and an optional
+ * Data object wrapping a model adapted from an HTTP request together with the result of its validation and an optional
  * log message
  * @param <T> Generic type of the underlying data model
  */
@@ -32,7 +32,6 @@ public class ValidatorResponse<T> {
      * Gets whether the underlying data model has passed validation and proven valid
      * @return True or false
      */
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted") // for semantic contingency reasons
     public boolean isValid() {
         return valid;
     }

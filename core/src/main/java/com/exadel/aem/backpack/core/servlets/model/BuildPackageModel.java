@@ -14,12 +14,11 @@
 
 package com.exadel.aem.backpack.core.servlets.model;
 
-import java.util.List;
-
-import org.apache.sling.api.resource.ResourceResolver;
-
 import com.exadel.aem.request.annotations.RequestMapping;
 import com.exadel.aem.request.annotations.RequestParam;
+import org.apache.sling.api.resource.ResourceResolver;
+
+import java.util.List;
 
 /**
  * Represents the set of user-defined options for a request to build a package. Upon initialization, passed

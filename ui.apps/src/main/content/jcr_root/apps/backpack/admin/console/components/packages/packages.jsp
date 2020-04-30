@@ -75,7 +75,7 @@
 
             return new TransformIterator(it, new Transformer() {
                 public Object transform(Object o) {
-                    Resource r = ((Resource) o);
+                    Resource r = (Resource) o;
 
                     return new ResourceWrapper(r) {
                         public String getResourceType() {

@@ -14,13 +14,12 @@
 
 package com.exadel.aem.backpack.core.services;
 
-import org.apache.sling.api.resource.ResourceResolver;
-
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.servlets.model.BuildPackageModel;
 import com.exadel.aem.backpack.core.servlets.model.CreatePackageModel;
 import com.exadel.aem.backpack.core.servlets.model.LatestPackageInfoModel;
 import com.exadel.aem.backpack.core.servlets.model.PackageInfoModel;
+import org.apache.sling.api.resource.ResourceResolver;
 
 /**
  * Represents a service running in an AEM instance responsible for managing packages and reporting packages's status info
@@ -66,7 +65,7 @@ public interface PackageService {
 
     /**
      * Gets a chunk of rolling package building process update according to options specified in the HTTP request
-     * @param latestPackageInfoModel {@link LatestPackageInfoModel} containing reqiusites of of required log information
+     * @param latestPackageInfoModel {@link LatestPackageInfoModel} containing requisites of of required log information
      *                                                             chunk
      * @return {@link PackageInfo} instance
      */

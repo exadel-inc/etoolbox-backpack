@@ -1,3 +1,17 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License").
+ * You may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exadel.aem.request.impl;
 
 import com.exadel.aem.request.impl.models.*;
@@ -17,10 +31,10 @@ import static org.junit.Assert.*;
 
 public class RequestAdapterImplTest {
 
-    private RequestAdapterImpl requestAdapter = new RequestAdapterImpl();
+    private final RequestAdapterImpl requestAdapter = new RequestAdapterImpl();
 
     @Rule
-    public AemContext aemContext = new AemContext();
+    public final AemContext aemContext = new AemContext();
 
     private MockSlingHttpServletRequest request;
     private HashMap<String, Object> parameterMap;
@@ -40,7 +54,7 @@ public class RequestAdapterImplTest {
     public void shouldAdaptPrimitiveTypes() {
         final PrimitivesModel primitivesModel = requestAdapter.adapt(request.getParameterMap(), PrimitivesModel.class);
 
-        assertEquals(true, primitivesModel.isBoolean());
+        assertTrue(primitivesModel.isBoolean());
         assertEquals(12, primitivesModel.getByte());
         assertEquals(-3612, primitivesModel.getShort());
         assertEquals(23423434, primitivesModel.getInt());
@@ -53,7 +67,7 @@ public class RequestAdapterImplTest {
     public void shouldAdaptWrapperTypes() {
         final WrappersModel wrappersModel = requestAdapter.adapt(request.getParameterMap(), WrappersModel.class);
 
-        assertEquals(true, wrappersModel.isBoolean());
+        assertTrue(wrappersModel.isBoolean());
         assertEquals(12, wrappersModel.getByte());
         assertEquals(-3612, wrappersModel.getShort());
         assertEquals(23423434, wrappersModel.getInt());
@@ -102,18 +116,17 @@ public class RequestAdapterImplTest {
 
         assertTrue(response.isValid());
 
-        final List<String> log = response.getLog();
         assertEquals("String", response.getModel().getRequiredString());
         assertEquals(12, response.getModel().getWholeNumber());
     }
 
-    protected void initStrings(final HashMap<String, Object> parameterMap) {
+    private void initStrings(final HashMap<String, Object> parameterMap) {
         parameterMap.put("string", "A test string");
         parameterMap.put("stringBuilder", "A String Builder string");
         parameterMap.put("stringBuffer", "A String Buffer string");
     }
 
-    protected void initPrimitives(final HashMap<String, Object> parameterMap) {
+    private void initPrimitives(final HashMap<String, Object> parameterMap) {
         parameterMap.put("aBoolean", "true");
         parameterMap.put("aByte", "12");
         parameterMap.put("aShort", "-3612");
@@ -123,7 +136,7 @@ public class RequestAdapterImplTest {
         parameterMap.put("aDouble", "23423412323.347");
     }
 
-    protected void initDataStructures(final HashMap<String, Object> parameterMap) {
+    private void initDataStructures(final HashMap<String, Object> parameterMap) {
         parameterMap.put("listOfStrings", new String[]{"String one", "String two"});
         parameterMap.put("arrayOfIntegers", new String[]{"123", "567457657"});
     }
