@@ -59,7 +59,7 @@ The project is in active development stage. Community contribution is heartily w
 
 ### Known issues
 
-The project uses `com.google.common.cache.Cache` bundled in `uber-jar-6.3.0` which s in "beta" status. Despite this class is out of *beta* stage in standalone Google Guava releases since *20.0* we are currently sticking to *uber-jar* version to avoid inconsistency having proved this doesn't cause trouble in regular usage.
+The project uses `com.google.common.cache.Cache` bundled in `uber-jar-6.3.0` which is in "beta" status. Despite this class is out of beta stage in standalone Google Guava releases since *20.0*, we are currently sticking to *uber-jar* version to avoid inconsistency. We have tested this doesn't cause trouble in regular usage.
 
 ### Licensing
 
