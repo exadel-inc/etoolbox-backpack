@@ -145,11 +145,11 @@
                     <configuration>
                         <rules>
                             <requireMavenVersion>
-                                <version>[3.3.9,)</version>
+                                <version>3.3.9</version>
                             </requireMavenVersion>
                             <requireJavaVersion>
+                                <version>1.8</version>
                                 <message>Project is designed for compilation with Java 8 at least</message>
-                                <version>[1.8,)</version>
                             </requireJavaVersion>
                         </rules>
                     </configuration>
