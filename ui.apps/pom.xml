@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <packaging>content-package</packaging>
@@ -13,7 +14,9 @@
     <artifactId>aem-backpack-content</artifactId>
 
     <name>AEM BackPack Tool - UI</name>
-    <description>Contains static assets and webpage-rendering logic required to facilitate AEM BackPack browser functionality</description>
+    <description>Contains static assets and webpage-rendering logic required to facilitate AEM BackPack browser
+        functionality
+    </description>
 
     <build>
         <sourceDirectory>src/main/content/jcr_root</sourceDirectory>
@@ -47,7 +50,7 @@
                     <embeddeds>
                         <embedded>
                             <groupId>com.exadel.aem</groupId>
-                            <artifactId>aem-backpack.core</artifactId>
+                            <artifactId>aem-backpack-core</artifactId>
                             <target>/apps/backpack/install</target>
                         </embedded>
                     </embeddeds>
@@ -90,7 +93,7 @@
     <dependencies>
         <dependency>
             <groupId>com.exadel.aem</groupId>
-            <artifactId>aem-backpack.core</artifactId>
+            <artifactId>aem-backpack-core</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
     </dependencies>

@@ -40,7 +40,7 @@ public class RequestAdapterImpl implements RequestAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestAdapterImpl.class);
 
-    private static final Map<Class, Function<String, Object>> SUPPORTED_TYPES;
+    private static final Map<Class<?>, Function<String, Object>> SUPPORTED_TYPES;
 
     static {
         SUPPORTED_TYPES = new HashMap<>();
@@ -69,7 +69,7 @@ public class RequestAdapterImpl implements RequestAdapter {
      * {@inheritDoc}
      */
     @Override
-    public <T> T adapt(Map parameterMap, Class<T> tClazz) {
+    public <T> T adapt(Map<?, ?> parameterMap, Class<T> tClazz) {
         T newObject = null;
         if (tClazz.isAnnotationPresent(RequestMapping.class)) {
             newObject = createDefaultObject(tClazz);
@@ -94,7 +94,7 @@ public class RequestAdapterImpl implements RequestAdapter {
      * {@inheritDoc}
      */
     @Override
-    public <T> ValidatorResponse<T> adaptValidate(Map parameterMap, Class<T> tClazz) {
+    public <T> ValidatorResponse<T> adaptValidate(Map<?, ?> parameterMap, Class<T> tClazz) {
         ValidatorResponse<T> response = new ValidatorResponse<>();
         if (tClazz.isAnnotationPresent(RequestMapping.class)) {
             T newObject = createDefaultObject(tClazz);
@@ -127,7 +127,7 @@ public class RequestAdapterImpl implements RequestAdapter {
      * @param <T>                Type of the adaptation object instance
      * @return True is the adaptation object has been successfully populated with validated data; otherwise, false
      */
-    private <T> boolean initValidateFields(final Map parameterMap,
+    private <T> boolean initValidateFields(final Map<?, ?> parameterMap,
                                            final T newObject,
                                            final List<String> validationMessages,
                                            final List<Field> allFields) {
@@ -258,7 +258,7 @@ public class RequestAdapterImpl implements RequestAdapter {
             ParameterizedType genericTypes = (ParameterizedType) type;
             Type genericType = genericTypes.getActualTypeArguments()[0];
             if (genericType instanceof Class) {
-                Class genericClass = (Class) genericType;
+                Class<?> genericClass = (Class<?>) genericType;
                 if (isSupportedType(genericClass)) {
                     for (String param : arrayParams) {
                         final Object converted = convert(genericClass, param);
