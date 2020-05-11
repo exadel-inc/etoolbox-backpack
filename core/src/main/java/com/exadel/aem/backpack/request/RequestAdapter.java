@@ -12,9 +12,9 @@
  * limitations under the License.
  */
 
-package com.exadel.aem.request;
+package com.exadel.aem.backpack.request;
 
-import com.exadel.aem.request.validator.ValidatorResponse;
+import com.exadel.aem.backpack.request.validator.ValidatorResponse;
 
 import java.util.Map;
 

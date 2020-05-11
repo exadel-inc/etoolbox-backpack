@@ -12,35 +12,35 @@
  * limitations under the License.
  */
 
-package com.exadel.aem.request.impl.models;
+package com.exadel.aem.backpack.request.impl.models;
 
-import com.exadel.aem.request.annotations.RequestMapping;
-import com.exadel.aem.request.annotations.RequestParam;
+import com.exadel.aem.backpack.request.annotations.RequestMapping;
+import com.exadel.aem.backpack.request.annotations.RequestParam;
 
 @RequestMapping
 @SuppressWarnings("UnusedDeclaration") // contains directly injected fields
-public class PrimitivesModel {
+public class WrappersModel {
 
     @RequestParam
-    private boolean aBoolean;
+    private Boolean aBoolean;
 
     @RequestParam
-    private byte aByte;
+    private Byte aByte;
 
     @RequestParam
-    private short aShort;
+    private Short aShort;
 
     @RequestParam
-    private int anInt;
+    private Integer anInt;
 
     @RequestParam
-    private long aLong;
+    private Long aLong;
 
     @RequestParam
-    private float aFloat;
+    private Float aFloat;
 
     @RequestParam
-    private double aDouble;
+    private Double aDouble;
 
     public boolean isBoolean() {
         return aBoolean;

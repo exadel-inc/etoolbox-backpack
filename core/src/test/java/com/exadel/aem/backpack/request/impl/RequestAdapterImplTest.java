@@ -12,10 +12,10 @@
  * limitations under the License.
  */
 
-package com.exadel.aem.request.impl;
+package com.exadel.aem.backpack.request.impl;
 
-import com.exadel.aem.request.impl.models.*;
-import com.exadel.aem.request.validator.ValidatorResponse;
+import com.exadel.aem.backpack.request.impl.models.*;
+import com.exadel.aem.backpack.request.validator.ValidatorResponse;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.junit.Before;

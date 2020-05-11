@@ -12,17 +12,17 @@
  * limitations under the License.
  */
 
-package com.exadel.aem.request.validator;
+package com.exadel.aem.backpack.request.annotations;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Represents a routine testing an arbitrary object coming from a HTTP request's parameter map for validity
+ * Marks a data model class that is able to be adapted from a {@link org.apache.sling.api.SlingHttpServletRequest} object
  */
-public interface Validator {
-
-    /**
-     * Gets whether the supplied object is valid according to some testing logic
-     * @param parameter An object coming from an HTTP request's {@code ParameterMap}
-     * @return True or false
-     */
-    boolean isValid(Object parameter);
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface RequestMapping {
 }

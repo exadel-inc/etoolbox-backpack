@@ -12,17 +12,16 @@
  * limitations under the License.
  */
 
-package com.exadel.aem.request.validator.impl;
+package com.exadel.aem.backpack.request.validator.impl;
 
-import com.exadel.aem.request.validator.Validator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.exadel.aem.backpack.request.validator.Validator;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
- * Implements {@link Validator} to test an HTTP request {@code ParameterMap} value expected to be a number
+ * Implements {@link Validator} to test an HTTP request {@code ParameterMap} value expected to a non-blank {@code String}
  */
-public class WholeNumberValidator implements Validator {
-    private static final Logger LOGGER = LoggerFactory.getLogger(WholeNumberValidator.class);
+public class RequiredValidator implements Validator {
 
     /**
      * {@inheritDoc}
@@ -31,14 +30,7 @@ public class WholeNumberValidator implements Validator {
     public boolean isValid(final Object parameter) {
         if (parameter instanceof String[]) {
             String[] arrayParams = (String[]) parameter;
-            if (arrayParams.length == 1) {
-                try {
-                    final int i = Integer.parseInt(arrayParams[0]);
-                    return i >= 0;
-                } catch (NumberFormatException e) {
-                    LOGGER.error("Parse parameter exception", e);
-                }
-            }
+            return ArrayUtils.isNotEmpty(arrayParams) && StringUtils.isNotBlank(arrayParams[0]);
         }
         return false;
     }
