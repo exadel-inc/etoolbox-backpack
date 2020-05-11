@@ -126,13 +126,10 @@
                     <configuration>
                         <exportScr>true</exportScr>
                         <instructions>
-                            <!-- Import any version of javax.inject, to allow running on multiple versions of AEM -->
-                            <Import-Package>javax.inject;version=0.0.0,*</Import-Package>
+                            <Import-Package>javax.inject;javax.annotation;version=0.0.0,*</Import-Package>
                             <Sling-Model-Packages>com.exadel.aem.backpack.core</Sling-Model-Packages>
                             <exportScr>true</exportScr>
-                            <!-- Enable processing of OSGI DS component annotations -->
                             <_dsannotations>*</_dsannotations>
-                            <!-- Enable processing of OSGI metatype annotations -->
                             <_metatypeannotations>*</_metatypeannotations>
                         </instructions>
                     </configuration>
