@@ -14,9 +14,9 @@
 
 package com.exadel.aem.request;
 
-import java.util.Map;
-
 import com.exadel.aem.request.validator.ValidatorResponse;
+
+import java.util.Map;
 
 /**
  * Represents a service used to adapt user-defined {@code SlingHttpServletRequest} parameters to a data model object
@@ -33,7 +33,7 @@ public interface RequestAdapter {
      * @param <T> Generic parameter representing the type of data model
      * @return {@code <T>}-typed data object
      */
-    <T> T adapt(Map parameterMap, Class<T> tClazz);
+    <T> T adapt(Map<?, ?> parameterMap, Class<T> tClazz);
 
     /**
      * Adapts parameters of a {@code SlingHttpServletRequest} to a specified data model object and then validates
@@ -43,5 +43,5 @@ public interface RequestAdapter {
      * @param <T> Generic parameter representing the type of data model
      * @return {@code ValidatorResponse} containing the data model together with its validation report
      */
-    <T> ValidatorResponse<T> adaptValidate(Map parameterMap, Class<T> tClazz);
+    <T> ValidatorResponse<T> adaptValidate(Map<?, ?> parameterMap, Class<T> tClazz);
 }
