@@ -549,6 +549,7 @@ public class PackageServiceImpl implements PackageService {
                 packageBuildInfo.setPackageBuilt(Calendar.getInstance());
                 packageBuildInfo.setPackageStatus(PackageStatus.BUILT);
                 packageBuildInfo.setDataSize(jcrPackage.getSize());
+                packageBuildInfo.setPaths(filter.getFilterSets().stream().map(pathFilterSet -> pathFilterSet.seal().getRoot()).collect(Collectors.toList()));
             } else {
                 packageBuildInfo.setPackageStatus(PackageStatus.ERROR);
                 packageBuildInfo.addLogMessage(ERROR + String.format(PACKAGE_DOES_NOT_EXIST_MESSAGE, packageBuildInfo.getPackagePath()));
