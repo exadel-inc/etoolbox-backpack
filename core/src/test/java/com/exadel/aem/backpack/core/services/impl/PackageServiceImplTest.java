@@ -437,7 +437,7 @@ public class PackageServiceImplTest {
             packageInfo.setReferencedResources(referencedResources);
             packageInfo.setPaths(Collections.singletonList(PAGE_1));
             packageInfo.setPackagePath(PACKAGE_PATH);
-            aPackage = createPackage(packageInfo, new DefaultWorkspaceFilter());
+            aPackage = spy(createPackage(packageInfo, new DefaultWorkspaceFilter()));
 
 
             packageServiceSpy = (PackageServiceImpl) spy(packageService);
@@ -449,6 +449,7 @@ public class PackageServiceImplTest {
         @Test
         public void shouldBuildPackage() throws RepositoryException {
             doReturn(aPackage).when(jcrPackageManagerMock).open(any(Node.class));
+            doReturn(100L).when(aPackage).getSize();
 
             List<String> referencedResourceTypes = Arrays.asList(IMAGE_JPEG, IMAGE_PNG);
 
