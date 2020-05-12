@@ -18,8 +18,8 @@ import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
 import com.exadel.aem.backpack.core.services.PackageService;
 import com.exadel.aem.backpack.core.servlets.model.CreatePackageModel;
-import com.exadel.aem.request.RequestAdapter;
-import com.exadel.aem.request.validator.ValidatorResponse;
+import com.exadel.aem.backpack.request.RequestAdapter;
+import com.exadel.aem.backpack.request.validator.ValidatorResponse;
 import com.google.gson.Gson;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -40,11 +40,11 @@ import static com.exadel.aem.backpack.core.servlets.BuildPackageServlet.APPLICAT
  *     {@link BuildPackageServlet} - endpoint for requests for building of created package and reporting package status<br>
  *     {@link PackageInfoServlet} - endpoint for requests for information on previously built packages
  */
-@Component(service = Servlet.class,
+@Component(
+        service = Servlet.class,
         property = {
-                "sling.servlet.paths=" + "/services/backpack/createPackage",
-                "sling.servlet.methods=[post]",
-
+                "sling.servlet.paths=/services/backpack/createPackage",
+                "sling.servlet.methods=post"
         })
 @SuppressWarnings("PackageAccessibility") // because Servlet and HttpServletResponse classes reported as a non-bundle dependency
 public class CreatePackageServlet extends SlingAllMethodsServlet {

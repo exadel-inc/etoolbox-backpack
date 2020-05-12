@@ -14,10 +14,10 @@
 
 package com.exadel.aem.backpack.core.servlets.model;
 
-import com.exadel.aem.request.annotations.RequestMapping;
-import com.exadel.aem.request.annotations.RequestParam;
-import com.exadel.aem.request.annotations.Validate;
-import com.exadel.aem.request.validator.impl.RequiredValidator;
+import com.exadel.aem.backpack.request.annotations.RequestMapping;
+import com.exadel.aem.backpack.request.annotations.RequestParam;
+import com.exadel.aem.backpack.request.annotations.Validate;
+import com.exadel.aem.backpack.request.validator.impl.RequiredValidator;
 import org.apache.sling.api.resource.ResourceResolver;
 
 import java.util.List;

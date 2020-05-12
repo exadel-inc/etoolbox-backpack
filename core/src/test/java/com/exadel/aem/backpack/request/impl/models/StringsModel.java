@@ -12,28 +12,33 @@
  * limitations under the License.
  */
 
-package com.exadel.aem.request.impl.models;
+package com.exadel.aem.backpack.request.impl.models;
 
-import com.exadel.aem.request.annotations.RequestMapping;
-import com.exadel.aem.request.annotations.RequestParam;
-
-import java.util.List;
+import com.exadel.aem.backpack.request.annotations.RequestMapping;
+import com.exadel.aem.backpack.request.annotations.RequestParam;
 
 @RequestMapping
 @SuppressWarnings("UnusedDeclaration") // contains directly injected fields
-public class DataStructureModel {
+public class StringsModel {
 
-    @RequestParam(name = "listOfStrings")
-    private List<String> list;
+    @RequestParam
+    private String string;
 
-    @RequestParam(name = "arrayOfIntegers")
-    private Integer[] integers;
+    @RequestParam
+    private StringBuilder stringBuilder;
 
-    public List<String> getList() {
-        return list;
+    @RequestParam
+    private StringBuffer stringBuffer;
+
+    public String getString() {
+        return string;
     }
 
-    public Integer[] getIntegers() {
-        return integers;
+    public StringBuilder getStringBuilder() {
+        return stringBuilder;
+    }
+
+    public StringBuffer getStringBuffer() {
+        return stringBuffer;
     }
 }

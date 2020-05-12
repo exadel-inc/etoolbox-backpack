@@ -67,7 +67,8 @@
                                     jcr:primaryType="nt:unstructured"
                                     sling:resourceType="granite/ui/components/coral/foundation/form/select"
                                     fieldLabel="Group"
-                                    name="group">
+                                    name="group"
+                                    deleteHint="{Boolean}false">
                                 <datasource
                                         jcr:primaryType="nt:unstructured"
                                         sling:resourceType="backpack/data-sources/group-dynamic-select"/>
@@ -153,7 +154,7 @@
                         jcr:primaryType="nt:unstructured"
                         jcr:title="Success"
                         sling:resourceType="granite/ui/components/coral/foundation/form/responses/openprompt"
-                        open="/backpack/buildPackage.html/etc/packages/backpack/{packageNodeName}"
+                        open="/backpack/buildPackage.html/etc/packages/{groupName}/{packageNodeName}"
                         redirect="/backpack.html${granite:encodeURIPath(requestPathInfo.suffix)}"
                         text="Your package has been created."/>
                         <items jcr:primaryType="nt:unstructured">
@@ -195,7 +196,8 @@
                                                     name="group">
                                                 <datasource
                                                         jcr:primaryType="nt:unstructured"
-                                                        sling:resourceType="backpack/data-sources/group-dynamic-select"/>
+                                                        sling:resourceType="backpack/data-sources/group-dynamic-select"
+                                                        valueMember="title"/>
                                                 <options
                                                         jcr:primaryType="nt:unstructured"
                                                         sling:resourceType="granite/ui/components/coral/foundation/form/autocomplete/list"/>

@@ -17,12 +17,12 @@ package com.exadel.aem.backpack.core.servlets;
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.services.PackageService;
 import com.exadel.aem.backpack.core.servlets.model.PackageInfoModel;
-import com.exadel.aem.request.RequestAdapter;
-import com.exadel.aem.request.validator.ValidatorResponse;
+import com.exadel.aem.backpack.request.RequestAdapter;
+import com.exadel.aem.backpack.request.validator.ValidatorResponse;
 import com.google.gson.Gson;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.servlets.SlingAllMethodsServlet;
+import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -40,14 +40,14 @@ import static com.exadel.aem.backpack.core.servlets.BuildPackageServlet.APPLICAT
  *     {@link CreatePackageServlet} - endpoint for requests for package creation<br>
  *     {@link BuildPackageServlet} - endpoint for requests for building of created package and reporting package status<br>
  */
-@Component(service = Servlet.class,
+@Component(
+        service = Servlet.class,
         property = {
-                "sling.servlet.paths=" + "/services/backpack/packageInfo",
-                "sling.servlet.methods=[get]",
-
+                "sling.servlet.paths=/services/backpack/packageInfo",
+                "sling.servlet.methods=get"
         })
 @SuppressWarnings("PackageAccessibility") // because Servlet and HttpServletResponse classes reported as a non-bundle dependency
-public class PackageInfoServlet extends SlingAllMethodsServlet {
+public class PackageInfoServlet extends SlingSafeMethodsServlet {
 
     private static final long serialVersionUID = 1L;
 

@@ -28,7 +28,7 @@
 <%@ page import="java.util.Calendar" %>
 <%
 
-    AccessControlManager acm;
+    AccessControlManager acm = null;
     try {
         acm = resourceResolver.adaptTo(Session.class).getAccessControlManager();
     } catch (RepositoryException e) {

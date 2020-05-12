@@ -12,13 +12,13 @@
  * limitations under the License.
  */
 
-package com.exadel.aem.request.impl.models;
+package com.exadel.aem.backpack.request.impl.models;
 
-import com.exadel.aem.request.annotations.RequestMapping;
-import com.exadel.aem.request.annotations.RequestParam;
-import com.exadel.aem.request.annotations.Validate;
-import com.exadel.aem.request.validator.impl.RequiredValidator;
-import com.exadel.aem.request.validator.impl.WholeNumberValidator;
+import com.exadel.aem.backpack.request.annotations.RequestMapping;
+import com.exadel.aem.backpack.request.annotations.RequestParam;
+import com.exadel.aem.backpack.request.annotations.Validate;
+import com.exadel.aem.backpack.request.validator.impl.RequiredValidator;
+import com.exadel.aem.backpack.request.validator.impl.WholeNumberValidator;
 
 @RequestMapping
 @SuppressWarnings("UnusedDeclaration") // contains directly injected fields

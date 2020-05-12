@@ -12,9 +12,7 @@
  * limitations under the License.
  */
 
-package com.exadel.aem.request.annotations;
-
-import com.exadel.aem.request.validator.Validator;
+package com.exadel.aem.backpack.request.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -22,21 +20,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks a field within a data model class, the value of which needs to be validated by a specific routine upon
- * adaptation from a {@link org.apache.sling.api.SlingHttpServletRequest} object
+ * Marks a field within a data model class that is able to be populated via a respective
+ * {@link org.apache.sling.api.SlingHttpServletRequest} parameter
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface Validate {
+public @interface RequestParam {
     /**
-     * Gets zero or more validators assigned to this field
-     * @return An array of classes extending {@link Validator}, or null
+     * The name of respective {@code SlingHttpServletRequest} parameter. Defaults to the annotated field's name
+     * if no value set
+     * @return String value, or an empty string
      */
-    Class<? extends Validator>[] validator() default {};
-
-    /**
-     * Gets zero or more messages informing that validation has failed
-     * @return An array of strings, or null
-     */
-    String[] invalidMessages() default {};
+    String name() default "";
 }

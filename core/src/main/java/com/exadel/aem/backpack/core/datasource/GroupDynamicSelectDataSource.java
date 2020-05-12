@@ -62,15 +62,15 @@ public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
     private static final String ROOT_TEXT = "All packages";
 
     @Reference
-    @SuppressWarnings("UnusedDeclaration") // value injected by Sling
+    @SuppressWarnings("UnusedDeclaration") // injected value
     private transient DataSourceBuilder dataSourceBuilder;
 
     @Reference
-    @SuppressWarnings("UnusedDeclaration") // value injected by Sling
+    @SuppressWarnings("UnusedDeclaration") // injected value
     private transient QueryHelper queryHelper;
 
     @Reference
-    @SuppressWarnings("UnusedDeclaration") // value injected by Sling
+    @SuppressWarnings("UnusedDeclaration") // injected value
     private transient PackageService packageService;
 
     /**
@@ -83,10 +83,13 @@ public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) {
         ResourceResolver resolver = request.getResourceResolver();
+        Resource datasourceResource = resolver.getResource(request.getRequestPathInfo().getResourcePath() + "/datasource");
+        boolean useTitleAsValue = datasourceResource != null
+                && datasourceResource.getValueMap().getOrDefault("valueMember", StringUtils.EMPTY).equals("title");
         try {
             List<Resource> results = queryHelper.findResources(resolver, JCR_SQL2, SELECT_STATEMENT, StringUtils.EMPTY);
             List<DataSourceOption> options = results.stream()
-                    .map(this::createDataOption)
+                    .map(resource -> createDataOption(resource, useTitleAsValue))
                     .collect(Collectors.toList());
             RequestParameter groupParam = request.getRequestParameter("group");
             if (groupParam != null) {
@@ -109,10 +112,14 @@ public class GroupDynamicSelectDataSource extends SlingSafeMethodsServlet {
      * map a {@code Resource} containing datasource option requisites to a {@code DataSourceOption} instance
      *
      * @param resource {@code Resource} object
+     * @param useTitleAsValue True to use option text (without a path) as option value; otherwise, false
      * @return {@code DataSourceOption} object
      */
-    private DataSourceOption createDataOption(Resource resource) {
-        return new DataSourceOption(getOptionText(resource.getPath()), resource.getPath());
+    private DataSourceOption createDataOption(Resource resource, boolean useTitleAsValue) {
+        return new DataSourceOption(
+                getOptionText(resource.getPath()),
+                useTitleAsValue ? getOptionText(resource.getPath()) : resource.getPath()
+        );
     }
 
     /**

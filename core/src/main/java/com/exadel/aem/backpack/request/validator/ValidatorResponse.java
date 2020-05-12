@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.exadel.aem.request.validator;
+package com.exadel.aem.backpack.request.validator;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -12,16 +12,17 @@
  * limitations under the License.
  */
 
-package com.exadel.aem.request.impl;
+package com.exadel.aem.backpack.request.impl;
 
-import com.exadel.aem.request.RequestAdapter;
-import com.exadel.aem.request.annotations.RequestMapping;
-import com.exadel.aem.request.annotations.RequestParam;
-import com.exadel.aem.request.annotations.Validate;
-import com.exadel.aem.request.validator.Validator;
-import com.exadel.aem.request.validator.ValidatorResponse;
+import com.exadel.aem.backpack.request.RequestAdapter;
+import com.exadel.aem.backpack.request.annotations.RequestMapping;
+import com.exadel.aem.backpack.request.annotations.RequestParam;
+import com.exadel.aem.backpack.request.annotations.Validate;
+import com.exadel.aem.backpack.request.validator.Validator;
+import com.exadel.aem.backpack.request.validator.ValidatorResponse;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +37,7 @@ import java.util.function.Function;
  * Implements {@link RequestAdapter} to adapt user-defined {@code SlingHttpServletRequest} parameters to a data model object
  * which is then used in operations by {@link com.exadel.aem.backpack.core.services.PackageService}
  */
+@Component(service = RequestAdapter.class)
 public class RequestAdapterImpl implements RequestAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestAdapterImpl.class);
