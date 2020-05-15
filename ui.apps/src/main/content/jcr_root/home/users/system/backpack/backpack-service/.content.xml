@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+    jcr:primaryType="rep:SystemUser"
+    jcr:uuid="31c078ae-66af-3cbc-b03b-67a41cb8c773"
+    rep:authorizableId="backpack-service"
+    rep:principalName="backpack-service"/>
