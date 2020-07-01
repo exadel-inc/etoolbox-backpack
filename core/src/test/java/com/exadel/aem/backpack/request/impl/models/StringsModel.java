@@ -16,6 +16,12 @@ package com.exadel.aem.backpack.request.impl.models;
 
 import com.exadel.aem.backpack.request.annotations.RequestMapping;
 import com.exadel.aem.backpack.request.annotations.RequestParam;
+import org.apache.commons.lang3.StringUtils;
+
+import javax.annotation.PostConstruct;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 @RequestMapping
 @SuppressWarnings("UnusedDeclaration") // contains directly injected fields
@@ -40,5 +46,12 @@ public class StringsModel {
 
     public StringBuffer getStringBuffer() {
         return stringBuffer;
+    }
+
+    @PostConstruct
+    private void init() throws UnsupportedEncodingException {
+        if (StringUtils.isNotBlank(string)) {
+            string = URLDecoder.decode(string, StandardCharsets.UTF_8.displayName());
+        }
     }
 }

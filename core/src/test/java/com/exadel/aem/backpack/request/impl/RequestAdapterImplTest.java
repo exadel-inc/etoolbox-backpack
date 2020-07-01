@@ -80,7 +80,7 @@ public class RequestAdapterImplTest {
     public void shouldAdaptStringsTypes() {
         final StringsModel stringsModel = requestAdapter.adapt(request.getParameterMap(), StringsModel.class);
 
-        assertEquals("A test string", stringsModel.getString());
+        assertEquals("test encoded whitespace.zip", stringsModel.getString());
         assertEquals("A String Builder string", stringsModel.getStringBuilder().toString());
         assertEquals("A String Buffer string", stringsModel.getStringBuffer().toString());
     }
@@ -121,7 +121,7 @@ public class RequestAdapterImplTest {
     }
 
     private void initStrings(final HashMap<String, Object> parameterMap) {
-        parameterMap.put("string", "A test string");
+        parameterMap.put("string", "test%20encoded%20whitespace.zip");
         parameterMap.put("stringBuilder", "A String Builder string");
         parameterMap.put("stringBuffer", "A String Buffer string");
     }
