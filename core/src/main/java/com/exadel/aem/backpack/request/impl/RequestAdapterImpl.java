@@ -26,10 +26,9 @@ import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import javax.annotation.PostConstruct;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.Function;
 
@@ -85,6 +84,7 @@ public class RequestAdapterImpl implements RequestAdapter {
                             parameterName = field.getName();
                         }
                         initField(newObject, parameterMap.get(parameterName), field);
+                        callPostConstructMethods(tClazz, newObject);
                     }
                 }
             }
@@ -109,11 +109,31 @@ public class RequestAdapterImpl implements RequestAdapter {
                 objectValid = initValidateFields(parameterMap, newObject, validationMessages, allFields);
             }
             if (objectValid) {
+                callPostConstructMethods(tClazz, newObject);
                 response.setModel(newObject);
                 response.setValid(true);
             }
         }
         return response;
+    }
+
+    /**
+     * Find and call all methods without arguments and with {@link PostConstruct} annotation
+     *
+     * @param tClazz class object
+     * @param newObject the object on which the method will be called
+     * @param <T> type of the class
+     */
+    private <T> void callPostConstructMethods(final Class<T> tClazz, final T newObject) {
+        final List<Method> methodsAnnotatedWith = getMethodsAnnotatedWith(tClazz, PostConstruct.class);
+        methodsAnnotatedWith.forEach(method -> {
+            method.setAccessible(true);
+            try {
+                method.invoke(newObject, null);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                LOGGER.error("Exception during method invocation", e);
+            }
+        });
     }
 
     /**
@@ -168,6 +188,26 @@ public class RequestAdapterImpl implements RequestAdapter {
         fields.addAll(Arrays.asList(type.getDeclaredFields()));
 
         return fields;
+    }
+
+    /**
+     * Find all methods without arguments from the class by specific annotation
+     * @param type class object
+     * @param annotation search annotation
+     * @return list of found methods
+     */
+    private List<Method> getMethodsAnnotatedWith(final Class<?> type, final Class<? extends Annotation> annotation) {
+        final List<Method> methods = new ArrayList<Method>();
+        Class<?> clazz = type;
+        while (clazz != Object.class) {
+            for (final Method method : clazz.getDeclaredMethods()) {
+                if (method.isAnnotationPresent(annotation) && method.getParameterTypes().length == 0) {
+                    methods.add(method);
+                }
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return methods;
     }
 
     /**
