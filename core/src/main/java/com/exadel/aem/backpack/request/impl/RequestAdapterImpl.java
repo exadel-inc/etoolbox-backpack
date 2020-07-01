@@ -119,7 +119,7 @@ public class RequestAdapterImpl implements RequestAdapter {
 
     /**
      * Find and call all methods vithout argements and with {@link PostConstruct} annotation
-     * 
+     *
      * @param tClazz class object
      * @param newObject the object on which the method will be called
      * @param <T> type of the class

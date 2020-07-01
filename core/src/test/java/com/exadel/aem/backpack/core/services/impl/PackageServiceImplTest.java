@@ -290,23 +290,7 @@ public class PackageServiceImplTest {
 
             assertEquals(TEST, result.getPackageName());
         }
-
-        @Test
-        @SuppressWarnings("UnstableApiUsage") // sticking to Guava Cache version bundled in uber-jar; still safe to use
-        public void shouldReturnInMemoryPackageInfoForEncodedPackageName() {
-            PackageInfoModel packageInfoModel = new PackageInfoModel();
-            packageInfoModel.setPackagePath(TEST_ZIP);
-            Cache<String, PackageInfo> packageInfos = ((PackageServiceImpl) packageService).getPackageInfos();
-            PackageInfo packageInfo = new PackageInfo();
-            packageInfo.setPackageName(TEST);
-            packageInfos.put(TEST_ZIP, packageInfo);
-
-            PackageInfo result = packageService.getPackageInfo(resourceResolver, packageInfoModel);
-
-            assertEquals(TEST, result.getPackageName());
-        }
-
-
+        
         @Test
         public void shouldReturnNonExistingPackageInfo() {
             PackageInfoModel packageInfoModel = new PackageInfoModel();
