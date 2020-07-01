@@ -198,14 +198,14 @@ public class RequestAdapterImpl implements RequestAdapter {
      */
     private List<Method> getMethodsAnnotatedWith(final Class<?> type, final Class<? extends Annotation> annotation) {
         final List<Method> methods = new ArrayList<Method>();
-        Class<?> klass = type;
-        while (klass != Object.class) {
-            for (final Method method : klass.getDeclaredMethods()) {
+        Class<?> clazz = type;
+        while (clazz != Object.class) {
+            for (final Method method : clazz.getDeclaredMethods()) {
                 if (method.isAnnotationPresent(annotation) && method.getParameterTypes().length == 0) {
                     methods.add(method);
                 }
             }
-            klass = klass.getSuperclass();
+            clazz = clazz.getSuperclass();
         }
         return methods;
     }

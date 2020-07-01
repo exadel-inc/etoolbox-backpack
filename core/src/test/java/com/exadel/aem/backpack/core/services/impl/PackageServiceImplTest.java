@@ -290,7 +290,7 @@ public class PackageServiceImplTest {
 
             assertEquals(TEST, result.getPackageName());
         }
-        
+
         @Test
         public void shouldReturnNonExistingPackageInfo() {
             PackageInfoModel packageInfoModel = new PackageInfoModel();
