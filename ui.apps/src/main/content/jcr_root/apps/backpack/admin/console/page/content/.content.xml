@@ -105,8 +105,9 @@
         </views>
         <breadcrumbs
                 jcr:primaryType="nt:unstructured"
-                sling:resourceType="screens/dcc/components/datasources/breadcrumbs"
-                path="${param.group != null ? param.group : requestPathInfo.suffix}"/>
+                sling:resourceType="wcm/commons/ui/shell/datasources/breadcrumbs"
+                path="${param.group != null ? param.group : requestPathInfo.suffix}"
+                rootPath="/etc/packages"/>
         <actions jcr:primaryType="nt:unstructured">
             <secondary jcr:primaryType="nt:unstructured">
                 <create
