@@ -41,13 +41,7 @@ $(function () {
                 packageCreated();
             }
 
-            $packageName.html('Package name: ' + data.packageName);
-            $name.text(data.packageNodeName);
-            $version.text('Package version: ' + data.version);
-            $lastBuilt.val(getLastBuiltDate(data.packageBuilt));
-            if (data.dataSize) {
-                $packageSize.text('Package size: ' + bytesToSize(data.dataSize));
-            }
+            updatePackageDisplayInfo(data);
 
             function initFilters() {
                 if (data.paths) {
@@ -180,7 +174,6 @@ $(function () {
                     $.each(data.log, function (index, value) {
                         $buildLog.append('<div>' + value + '</div>');
                     });
-                    console.log(logIndex);
                     logIndex = logIndex + data.log.length;
 
                     scrollLog();
@@ -192,6 +185,7 @@ $(function () {
 
                 } else if (data.packageStatus === BUILT) {
                     packageBuilt();
+                    updatePackageDisplayInfo(data);
                 }
             }
         })
@@ -210,5 +204,15 @@ $(function () {
             scrollTop: $buildLogWrapper[0].scrollHeight
         }, 800);
         $buildLogWrapper[0].scrollIntoView();
+    }
+
+    function updatePackageDisplayInfo(data) {
+        $packageName.html('Package name: ' + data.packageName);
+        $name.text(data.packageNodeName);
+        $version.text('Package version: ' + data.version);
+        $lastBuilt.val(getLastBuiltDate(data.packageBuilt));
+        if (data.dataSize) {
+            $packageSize.text('Package size: ' + bytesToSize(data.dataSize));
+        }
     }
 });
