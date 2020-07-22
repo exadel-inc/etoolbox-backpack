@@ -368,9 +368,7 @@ public class PackageServiceImpl implements PackageService {
         JcrPackage jcrPackage = null;
 
         try {
-            if (!isPkgExists(packMgr, packagePath)) {
-                packageNotExistInfo(packagePath, packageInfo);
-            } else if (session != null) {
+            if (session != null) {
                 Node packageNode = session.getNode(packagePath);
                 if (packageNode != null) {
                     jcrPackage = packMgr.open(packageNode);
@@ -426,21 +424,6 @@ public class PackageServiceImpl implements PackageService {
                 }
             }
         }
-    }
-
-    /**
-     * Called by {@link PackageServiceImpl#getPackageInfo(ResourceResolver, PackageInfoModel)} to populate a preliminarily
-     * initialized {@link PackageInfo} object as it represents a <i>non-existing</i> JCR storage item
-     *
-     * @param pathToPackage Path to a package as supplied by user
-     * @param packageInfo   {@code PackageInfo} object to store information in
-     */
-    private void packageNotExistInfo(final String pathToPackage, final PackageInfo packageInfo) {
-        String packageNotExistMsg = String.format(PACKAGE_DOES_NOT_EXIST_MESSAGE, pathToPackage);
-        packageInfo.setPackagePath(pathToPackage);
-        packageInfo.addLogMessage(ERROR + packageNotExistMsg);
-        packageInfo.setPackageStatus(PackageStatus.ERROR);
-        LOGGER.error(packageNotExistMsg);
     }
 
     /**
@@ -719,7 +702,7 @@ public class PackageServiceImpl implements PackageService {
     }
 
     /**
-     * Called from {@link PackageServiceImpl#getPackageInfo(ResourceResolver, PackageInfoModel)} to get whether
+     * Called from {@link PackageServiceImpl#isPackageExist(ResourceResolver, PackageInfoModel)} to get whether
      * a package exists at specified path
      *
      * @param pkgMgr Standard {@link JcrPackageManager} object associated with the current user session
@@ -819,6 +802,17 @@ public class PackageServiceImpl implements PackageService {
         } catch (RepositoryException e) {
             LOGGER.error("A repository exception occurred: ", e);
         }
+    }
+
+    @Override
+    public boolean isPackageExist(ResourceResolver resourceResolver, PackageInfoModel packageInfoModel) {
+        final Session session = resourceResolver.adaptTo(Session.class);
+        try {
+            return isPkgExists(getPackageManager(session), packageInfoModel.getPackagePath());
+        } catch (RepositoryException e) {
+            LOGGER.error(String.format(PACKAGE_DOES_NOT_EXIST_MESSAGE, packageInfoModel.getPackagePath()));
+        }
+        return false;
     }
 
     /**
