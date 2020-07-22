@@ -13,7 +13,8 @@
  */
 
 $(function () {
-    var path = new URL(window.location.href).searchParams.get('path');
+    var path = new URL(window.location.href).searchParams.get('path')
+                || (window.location.href.indexOf('.html/') ? window.location.href.split('.html').pop() : '');
     var BUILT = 'BUILT',
         BUILD_IN_PROGRESS = 'BUILD_IN_PROGRESS';
     var $packageName = $('#packageName'),
