@@ -20,3 +20,12 @@
     max-height: 300px;
     overflow-y: auto;
 }
+.content-container-error {
+    padding-top: 3%;
+    text-align: center;
+    margin: 0 auto;
+}
+
+.content-container-error #link, #error {
+    margin-bottom: 3%;
+}

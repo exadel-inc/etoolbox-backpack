@@ -29,7 +29,9 @@ $(function () {
         $testBuildButton = $('#testBuildButton'),
         $downloadBtn = $('#downloadBtn'),
         $buildLog = $('#buildLog'),
-        $buildLogWrapper = $('#build-log-wrapper');
+        $buildLogWrapper = $('#build-log-wrapper'),
+        $containerInner = $('.content-container-inner')[0],
+        $containerError = $('.content-container-error')[0];
 
     if (path && $packageName.length !== 0) {
         disableAllActions();
@@ -79,6 +81,10 @@ $(function () {
 
             initFilters();
             initReferencedResources();
+        }, function (data) {
+            $containerError.hidden = false;
+            $containerInner.hidden = true;
+            $('#error').find('h3').text('Package by path ' + data.responseText + ' does not exist');
         });
     }
 
@@ -192,11 +198,12 @@ $(function () {
         })
     }
 
-    function getPackageInfo(packagePath, updateFunction) {
+    function getPackageInfo(packagePath, updateFunction, errorFunction) {
         $.ajax({
             url: '/services/backpack/packageInfo',
             data: {path: packagePath},
-            success: updateFunction
+            success: updateFunction,
+            statusCode: {404: errorFunction}
         });
     }
 
