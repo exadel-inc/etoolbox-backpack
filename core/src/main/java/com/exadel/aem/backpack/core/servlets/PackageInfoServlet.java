@@ -79,7 +79,7 @@ public class PackageInfoServlet extends SlingSafeMethodsServlet {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write(GSON.toJson(validatorResponse));
         } else {
-            if (!packageService.isPackageExist(request.getResourceResolver(), validatorResponse.getModel())) {
+            if (!packageService.packageExists(request.getResourceResolver(), validatorResponse.getModel())) {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 response.getWriter().write(GSON.toJson(validatorResponse.getModel().getPackagePath()));
             } else {

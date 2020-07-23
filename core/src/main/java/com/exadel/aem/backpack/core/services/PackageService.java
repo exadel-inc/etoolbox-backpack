@@ -15,11 +15,15 @@
 package com.exadel.aem.backpack.core.services;
 
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
+import com.exadel.aem.backpack.core.services.impl.PackageServiceImpl;
 import com.exadel.aem.backpack.core.servlets.model.BuildPackageModel;
 import com.exadel.aem.backpack.core.servlets.model.CreatePackageModel;
 import com.exadel.aem.backpack.core.servlets.model.LatestPackageInfoModel;
 import com.exadel.aem.backpack.core.servlets.model.PackageInfoModel;
+import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
 import org.apache.sling.api.resource.ResourceResolver;
+
+import javax.jcr.RepositoryException;
 
 /**
  * Represents a service running in an AEM instance responsible for managing packages and reporting packages's status info
@@ -77,5 +81,5 @@ public interface PackageService {
      * @param packageInfoModel {@link PackageInfoModel} instance containing requisites of the required package
      * @return {@code boolean} reporting package existence
      */
-    boolean isPackageExist(ResourceResolver resourceResolver, PackageInfoModel packageInfoModel);
+    boolean packageExists(ResourceResolver resourceResolver, PackageInfoModel packageInfoModel);
 }

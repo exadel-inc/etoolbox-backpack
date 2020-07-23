@@ -702,30 +702,6 @@ public class PackageServiceImpl implements PackageService {
     }
 
     /**
-     * Called from {@link PackageServiceImpl#isPackageExist(ResourceResolver, PackageInfoModel)} to get whether
-     * a package exists at specified path
-     *
-     * @param pkgMgr Standard {@link JcrPackageManager} object associated with the current user session
-     * @return True or false
-     * @throws RepositoryException in case {@code JcrPackageManager} could not enumerated existing packages
-     *                             or retrieve a packages's info
-     */
-    private boolean isPkgExists(final JcrPackageManager pkgMgr,
-                                final String path) throws RepositoryException {
-        List<JcrPackage> packages = pkgMgr.listPackages();
-        for (JcrPackage jcrpackage : packages) {
-            Node packageNode = jcrpackage.getNode();
-            if (packageNode != null) {
-                String packagePath = packageNode.getPath();
-                if (packagePath.equals(path)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
      * Generates package identifier string for the specified package own name, group name, and version
      *
      * @param pkgGroupName String representing package group name to check
@@ -804,11 +780,21 @@ public class PackageServiceImpl implements PackageService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public boolean isPackageExist(ResourceResolver resourceResolver, PackageInfoModel packageInfoModel) {
+    public boolean packageExists(ResourceResolver resourceResolver, PackageInfoModel packageInfoModel) {
         final Session session = resourceResolver.adaptTo(Session.class);
+        final JcrPackageManager pkgMgr = getPackageManager(session);
         try {
-            return isPkgExists(getPackageManager(session), packageInfoModel.getPackagePath());
+            List<Node> nodes = pkgMgr.listPackages().stream().map(JcrPackage::getNode)
+                    .filter(Objects::nonNull).collect(Collectors.toList());
+            for (Node node : nodes) {
+                if (node.getPath().equals(packageInfoModel.getPackagePath())) {
+                    return true;
+                }
+            }
         } catch (RepositoryException e) {
             LOGGER.error(String.format(PACKAGE_DOES_NOT_EXIST_MESSAGE, packageInfoModel.getPackagePath()));
         }
