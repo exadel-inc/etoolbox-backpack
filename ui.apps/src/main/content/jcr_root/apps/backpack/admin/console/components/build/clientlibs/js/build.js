@@ -30,8 +30,8 @@ $(function () {
         $downloadBtn = $('#downloadBtn'),
         $buildLog = $('#buildLog'),
         $buildLogWrapper = $('#build-log-wrapper'),
-        $containerInner = $('.content-container-inner')[0],
-        $containerError = $('.content-container-error')[0];
+        $containerInner = $('.content-container-inner'),
+        $errorContainer = $('.content-error-container');
 
     if (path && $packageName.length !== 0) {
         disableAllActions();
@@ -82,9 +82,9 @@ $(function () {
             initFilters();
             initReferencedResources();
         }, function (data) {
-            $containerError.hidden = false;
-            $containerInner.hidden = true;
-            $('#error').find('h3').text('Package by path ' + data.responseText + ' does not exist');
+            $errorContainer.removeAttr('hidden');
+            $containerInner.attr('hidden', true);
+            $('#error').find('h3').text('Package by path ' + path + ' does not exist');
         });
     }
 
