@@ -25,6 +25,7 @@ import com.exadel.aem.backpack.request.validator.ValidatorResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.wcm.testing.mock.aem.junit.AemContext;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
 import org.junit.Rule;
@@ -70,16 +71,6 @@ public class PackageInfoServletTest {
 
         assertEquals(HttpServletResponse.SC_BAD_REQUEST, context.response().getStatus());
         assertEquals(GSON.toJson(validatorResponse), context.response().getOutputAsString());
-    }
-
-    @Test
-    public void shouldReturnOkWithExistingPathParameter() throws IOException {
-        context.request().addRequestParameter(PATH_PARAM, PACKAGE_PATH);
-
-        servlet.doGet(context.request(), context.response());
-
-        assertEquals(HttpServletResponse.SC_OK, context.response().getStatus());
-        assertEquals(GSON.toJson(packageInfo), context.response().getOutputAsString());
     }
 
     private PackageInfo getPackageInfo() {
