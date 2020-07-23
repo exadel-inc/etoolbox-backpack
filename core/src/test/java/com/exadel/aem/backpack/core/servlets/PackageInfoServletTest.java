@@ -56,7 +56,6 @@ public class PackageInfoServletTest {
     @Before
     public void beforeTest() {
         when(packageServiceMock.getPackageInfo(any(ResourceResolver.class), any(PackageInfoModel.class))).thenReturn(packageInfo);
-        when(packageServiceMock.packageExists(any(ResourceResolver.class), any(PackageInfoModel.class))).thenReturn(true);
         context.registerService(PackageService.class, packageServiceMock);
         context.registerService(RequestAdapter.class, new RequestAdapterImpl());
         servlet = context.registerInjectActivateService(new PackageInfoServlet());
