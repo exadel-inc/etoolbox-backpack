@@ -17,9 +17,11 @@ package com.exadel.aem.backpack.core.servlets;
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.services.PackageService;
 import com.exadel.aem.backpack.core.servlets.model.PackageInfoModel;
+import com.exadel.aem.backpack.core.util.CalendarAdapter;
 import com.exadel.aem.backpack.request.RequestAdapter;
 import com.exadel.aem.backpack.request.validator.ValidatorResponse;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
@@ -29,6 +31,7 @@ import org.osgi.service.component.annotations.Reference;
 import javax.servlet.Servlet;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Calendar;
 
 import static com.exadel.aem.backpack.core.servlets.BuildPackageServlet.APPLICATION_JSON;
 
@@ -51,7 +54,7 @@ public class PackageInfoServlet extends SlingSafeMethodsServlet {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Gson GSON = new Gson();
+    private static final Gson GSON = new GsonBuilder().registerTypeHierarchyAdapter(Calendar.class, new CalendarAdapter()).create();
 
     @Reference
     @SuppressWarnings("UnusedDeclaration") // value injected by Sling

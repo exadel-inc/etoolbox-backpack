@@ -148,13 +148,15 @@ $(function () {
     }
 
     function getLastBuiltDate(packageBuiltDate) {
-        if (packageBuiltDate) {
+        if (packageBuiltDate && typeof packageBuiltDate === 'object') {
             return new Date(packageBuiltDate.year,
                 packageBuiltDate.month,
                 packageBuiltDate.dayOfMonth,
                 packageBuiltDate.hourOfDay,
                 packageBuiltDate.minute,
                 packageBuiltDate.second).toISOString();
+        } else if (typeof packageBuiltDate === 'string') {
+            return new Date(packageBuiltDate).toISOString();
         }
         return 'never';
     }
