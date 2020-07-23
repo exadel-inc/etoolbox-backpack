@@ -84,7 +84,7 @@ $(function () {
         }, function (data) {
             $errorContainer.removeAttr('hidden');
             $containerInner.attr('hidden', true);
-            $('#error').find('h3').text('Package by path ' + path + ' does not exist');
+            $('#error').find('h3').text('Package at path ' + path + ' does not exist');
         });
     }
 
