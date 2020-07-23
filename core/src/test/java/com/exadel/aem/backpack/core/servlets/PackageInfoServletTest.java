@@ -25,6 +25,7 @@ import com.exadel.aem.backpack.request.validator.ValidatorResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.wcm.testing.mock.aem.junit.AemContext;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
 import org.junit.Rule;
@@ -55,6 +56,7 @@ public class PackageInfoServletTest {
     @Before
     public void beforeTest() {
         when(packageServiceMock.getPackageInfo(any(ResourceResolver.class), any(PackageInfoModel.class))).thenReturn(packageInfo);
+        when(packageServiceMock.packageExists(any(ResourceResolver.class), any(PackageInfoModel.class))).thenReturn(true);
         context.registerService(PackageService.class, packageServiceMock);
         context.registerService(RequestAdapter.class, new RequestAdapterImpl());
         servlet = context.registerInjectActivateService(new PackageInfoServlet());
