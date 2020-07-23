@@ -74,16 +74,6 @@ public class PackageInfoServletTest {
         assertEquals(GSON.toJson(validatorResponse), context.response().getOutputAsString());
     }
 
-    @Test
-    public void shouldReturnOkWithExistingPathParameter() throws IOException {
-        context.request().addRequestParameter(PATH_PARAM, PACKAGE_PATH);
-
-        servlet.doGet(context.request(), context.response());
-
-        assertEquals(HttpServletResponse.SC_OK, context.response().getStatus());
-        assertEquals(GSON.toJson(packageInfo), context.response().getOutputAsString());
-    }
-
     private PackageInfo getPackageInfo() {
         PackageInfo info = new PackageInfo();
         info.setPackagePath(PACKAGE_PATH);
