@@ -368,9 +368,7 @@ public class PackageServiceImpl implements PackageService {
         JcrPackage jcrPackage = null;
 
         try {
-            if (!isPkgExists(packMgr, packagePath)) {
-                packageNotExistInfo(packagePath, packageInfo);
-            } else if (session != null) {
+            if (session != null) {
                 Node packageNode = session.getNode(packagePath);
                 if (packageNode != null) {
                     jcrPackage = packMgr.open(packageNode);
@@ -426,21 +424,6 @@ public class PackageServiceImpl implements PackageService {
                 }
             }
         }
-    }
-
-    /**
-     * Called by {@link PackageServiceImpl#getPackageInfo(ResourceResolver, PackageInfoModel)} to populate a preliminarily
-     * initialized {@link PackageInfo} object as it represents a <i>non-existing</i> JCR storage item
-     *
-     * @param pathToPackage Path to a package as supplied by user
-     * @param packageInfo   {@code PackageInfo} object to store information in
-     */
-    private void packageNotExistInfo(final String pathToPackage, final PackageInfo packageInfo) {
-        String packageNotExistMsg = String.format(PACKAGE_DOES_NOT_EXIST_MESSAGE, pathToPackage);
-        packageInfo.setPackagePath(pathToPackage);
-        packageInfo.addLogMessage(ERROR + packageNotExistMsg);
-        packageInfo.setPackageStatus(PackageStatus.ERROR);
-        LOGGER.error(packageNotExistMsg);
     }
 
     /**
@@ -719,30 +702,6 @@ public class PackageServiceImpl implements PackageService {
     }
 
     /**
-     * Called from {@link PackageServiceImpl#getPackageInfo(ResourceResolver, PackageInfoModel)} to get whether
-     * a package exists at specified path
-     *
-     * @param pkgMgr Standard {@link JcrPackageManager} object associated with the current user session
-     * @return True or false
-     * @throws RepositoryException in case {@code JcrPackageManager} could not enumerated existing packages
-     *                             or retrieve a packages's info
-     */
-    private boolean isPkgExists(final JcrPackageManager pkgMgr,
-                                final String path) throws RepositoryException {
-        List<JcrPackage> packages = pkgMgr.listPackages();
-        for (JcrPackage jcrpackage : packages) {
-            Node packageNode = jcrpackage.getNode();
-            if (packageNode != null) {
-                String packagePath = packageNode.getPath();
-                if (packagePath.equals(path)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
      * Generates package identifier string for the specified package own name, group name, and version
      *
      * @param pkgGroupName String representing package group name to check
@@ -819,6 +778,27 @@ public class PackageServiceImpl implements PackageService {
         } catch (RepositoryException e) {
             LOGGER.error("A repository exception occurred: ", e);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean packageExists(ResourceResolver resourceResolver, PackageInfoModel packageInfoModel) {
+        final Session session = resourceResolver.adaptTo(Session.class);
+        final JcrPackageManager pkgMgr = getPackageManager(session);
+        try {
+            List<Node> nodes = pkgMgr.listPackages().stream().map(JcrPackage::getNode)
+                    .filter(Objects::nonNull).collect(Collectors.toList());
+            for (Node node : nodes) {
+                if (node.getPath().equals(packageInfoModel.getPackagePath())) {
+                    return true;
+                }
+            }
+        } catch (RepositoryException e) {
+            LOGGER.error(String.format(PACKAGE_DOES_NOT_EXIST_MESSAGE, packageInfoModel.getPackagePath()));
+        }
+        return false;
     }
 
     /**

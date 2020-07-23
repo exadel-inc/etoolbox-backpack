@@ -29,7 +29,9 @@ $(function () {
         $testBuildButton = $('#testBuildButton'),
         $downloadBtn = $('#downloadBtn'),
         $buildLog = $('#buildLog'),
-        $buildLogWrapper = $('#build-log-wrapper');
+        $buildLogWrapper = $('#build-log-wrapper'),
+        $containerInner = $('.content-container-inner'),
+        $errorContainer = $('.content-error-container');
 
     if (path && $packageName.length !== 0) {
         disableAllActions();
@@ -79,6 +81,10 @@ $(function () {
 
             initFilters();
             initReferencedResources();
+        }, function (data) {
+            $errorContainer.removeAttr('hidden');
+            $containerInner.attr('hidden', true);
+            $('#error').find('h3').text('Package at path ' + path + ' does not exist');
         });
     }
 
@@ -194,11 +200,12 @@ $(function () {
         })
     }
 
-    function getPackageInfo(packagePath, updateFunction) {
+    function getPackageInfo(packagePath, updateFunction, errorFunction) {
         $.ajax({
             url: '/services/backpack/packageInfo',
             data: {path: packagePath},
-            success: updateFunction
+            success: updateFunction,
+            statusCode: {404: errorFunction}
         });
     }
 
