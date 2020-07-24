@@ -13,7 +13,7 @@
  */
 
 $(function () {
-    $('#indexSearchForm #indexTypeSelect').change(function() {
+    $('#indexTypeSelect').change(function() {
         $(this).closest('form').submit();
     })
 });
