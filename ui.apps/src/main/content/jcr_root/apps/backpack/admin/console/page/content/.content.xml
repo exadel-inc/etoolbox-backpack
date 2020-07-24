@@ -59,7 +59,6 @@
                             granite:id="indexSearchForm"
                             jcr:primaryType="nt:unstructured"
                             sling:resourceType="granite/ui/components/coral/foundation/form"
-                            autosubmitForm="{Boolean}true"
                             style="vertical">
                         <items jcr:primaryType="nt:unstructured">
                             <group_select
