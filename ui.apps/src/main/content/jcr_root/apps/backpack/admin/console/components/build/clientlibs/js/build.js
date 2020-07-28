@@ -161,7 +161,7 @@ $(function () {
                 packageBuiltDate.hourOfDay,
                 packageBuiltDate.minute,
                 packageBuiltDate.second).toISOString();
-        } else if (typeof packageBuiltDate === 'string') {
+        } else if (packageBuiltDate && typeof packageBuiltDate === 'string') {
             return new Date(packageBuiltDate).toISOString();
         }
         return 'never';
