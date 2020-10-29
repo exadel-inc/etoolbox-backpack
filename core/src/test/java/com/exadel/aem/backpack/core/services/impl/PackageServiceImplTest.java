@@ -292,14 +292,13 @@ public class PackageServiceImplTest {
         }
 
         @Test
-        public void shouldReturnNonExistingPackageInfo() {
+        public void shouldReturnNullWithNonExistingPackage() {
             PackageInfoModel packageInfoModel = new PackageInfoModel();
             packageInfoModel.setPackagePath(TEST_ZIP);
 
             PackageInfo result = packageService.getPackageInfo(resourceResolver, packageInfoModel);
 
-            assertEquals(PackageStatus.ERROR, result.getPackageStatus());
-            assertEquals("ERROR: Package by this path " + TEST_ZIP + " doesn't exist in the repository.", result.getLog().get(0));
+            assertNull(result.getPackageStatus());
         }
 
         @Test
@@ -520,6 +519,36 @@ public class PackageServiceImplTest {
 
             assertEquals(PackageStatus.ERROR, result.getPackageStatus());
             assertEquals("ERROR: Package by this path " + PACKAGE_PATH + " doesn't exist in the repository.", result.getLog().get(0));
+        }
+    }
+
+    public static class packageExists extends Base {
+
+        private static final String PACKAGE_PATH = "/etc/packages/backpack/testPackage-1.zip";
+
+        @Test
+        public void shouldReturnFalseWithNonExistingPackage() {
+            PackageInfoModel packageInfoModel = new PackageInfoModel();
+            packageInfoModel.setPackagePath(TEST_PACKAGE);
+
+            boolean result = packageService.packageExists(resourceResolver, packageInfoModel);
+
+            assertFalse(result);
+        }
+
+        @Test
+        public void shouldReturnTrueWithExistingPackage() throws IOException, RepositoryException {
+            PackageInfo packageInfo = getDefaultPackageInfo();
+            DefaultWorkspaceFilter defaultWorkspaceFilter = new DefaultWorkspaceFilter();
+            defaultWorkspaceFilter.add(new PathFilterSet(PAGE_1));
+            createPackage(packageInfo, defaultWorkspaceFilter);
+
+            PackageInfoModel packageInfoModel = new PackageInfoModel();
+            packageInfoModel.setPackagePath(PACKAGE_PATH);
+
+            boolean result = packageService.packageExists(resourceResolver, packageInfoModel);
+
+            assertTrue(result);
         }
     }
 }

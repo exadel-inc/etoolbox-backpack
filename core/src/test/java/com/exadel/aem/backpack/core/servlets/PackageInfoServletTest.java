@@ -18,11 +18,14 @@ import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
 import com.exadel.aem.backpack.core.services.PackageService;
 import com.exadel.aem.backpack.core.servlets.model.PackageInfoModel;
+import com.exadel.aem.backpack.core.util.CalendarAdapter;
 import com.exadel.aem.backpack.request.RequestAdapter;
 import com.exadel.aem.backpack.request.impl.RequestAdapterImpl;
 import com.exadel.aem.backpack.request.validator.ValidatorResponse;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.wcm.testing.mock.aem.junit.AemContext;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
 import org.junit.Rule;
@@ -30,6 +33,7 @@ import org.junit.Test;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
@@ -55,7 +59,7 @@ public class PackageInfoServletTest {
         context.registerService(PackageService.class, packageServiceMock);
         context.registerService(RequestAdapter.class, new RequestAdapterImpl());
         servlet = context.registerInjectActivateService(new PackageInfoServlet());
-        GSON = new Gson();
+        GSON = new GsonBuilder().registerTypeHierarchyAdapter(Calendar.class, new CalendarAdapter()).create();
     }
 
     @Test
@@ -67,16 +71,6 @@ public class PackageInfoServletTest {
 
         assertEquals(HttpServletResponse.SC_BAD_REQUEST, context.response().getStatus());
         assertEquals(GSON.toJson(validatorResponse), context.response().getOutputAsString());
-    }
-
-    @Test
-    public void shouldReturnOkWithExistingPathParameter() throws IOException {
-        context.request().addRequestParameter(PATH_PARAM, PACKAGE_PATH);
-
-        servlet.doGet(context.request(), context.response());
-
-        assertEquals(HttpServletResponse.SC_OK, context.response().getStatus());
-        assertEquals(GSON.toJson(packageInfo), context.response().getOutputAsString());
     }
 
     private PackageInfo getPackageInfo() {

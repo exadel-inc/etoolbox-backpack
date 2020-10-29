@@ -13,7 +13,8 @@
  */
 
 $(function () {
-    var path = window.location.href.split('.html')[1];
+    var path = new URL(window.location.href).searchParams.get('path')
+                || (window.location.href.indexOf('.html/') ? window.location.href.split('.html').pop() : '');
     var BUILT = 'BUILT',
         BUILD_IN_PROGRESS = 'BUILD_IN_PROGRESS';
     var $packageName = $('#packageName'),
@@ -28,7 +29,9 @@ $(function () {
         $testBuildButton = $('#testBuildButton'),
         $downloadBtn = $('#downloadBtn'),
         $buildLog = $('#buildLog'),
-        $buildLogWrapper = $('#build-log-wrapper');
+        $buildLogWrapper = $('#build-log-wrapper'),
+        $containerInner = $('.content-container-inner'),
+        $errorContainer = $('.content-error-container');
 
     if (path && $packageName.length !== 0) {
         disableAllActions();
@@ -41,13 +44,7 @@ $(function () {
                 packageCreated();
             }
 
-            $packageName.html('Package name: ' + data.packageName);
-            $name.text(data.packageNodeName);
-            $version.text('Package version: ' + data.version);
-            $lastBuilt.val(getLastBuiltDate(data.packageBuilt));
-            if (data.dataSize) {
-                $packageSize.text('Package size: ' + bytesToSize(data.dataSize));
-            }
+            updatePackageDisplayInfo(data);
 
             function initFilters() {
                 if (data.paths) {
@@ -84,6 +81,10 @@ $(function () {
 
             initFilters();
             initReferencedResources();
+        }, function (data) {
+            $errorContainer.removeAttr('hidden');
+            $containerInner.attr('hidden', true);
+            $('#error').find('h3').text('Package at path ' + path + ' does not exist');
         });
     }
 
@@ -153,13 +154,15 @@ $(function () {
     }
 
     function getLastBuiltDate(packageBuiltDate) {
-        if (packageBuiltDate) {
+        if (packageBuiltDate && typeof packageBuiltDate === 'object') {
             return new Date(packageBuiltDate.year,
                 packageBuiltDate.month,
                 packageBuiltDate.dayOfMonth,
                 packageBuiltDate.hourOfDay,
                 packageBuiltDate.minute,
                 packageBuiltDate.second).toISOString();
+        } else if (packageBuiltDate && typeof packageBuiltDate === 'string') {
+            return new Date(packageBuiltDate).toISOString();
         }
         return 'never';
     }
@@ -180,7 +183,6 @@ $(function () {
                     $.each(data.log, function (index, value) {
                         $buildLog.append('<div>' + value + '</div>');
                     });
-                    console.log(logIndex);
                     logIndex = logIndex + data.log.length;
 
                     scrollLog();
@@ -192,16 +194,18 @@ $(function () {
 
                 } else if (data.packageStatus === BUILT) {
                     packageBuilt();
+                    updatePackageDisplayInfo(data);
                 }
             }
         })
     }
 
-    function getPackageInfo(packagePath, updateFunction) {
+    function getPackageInfo(packagePath, updateFunction, errorFunction) {
         $.ajax({
             url: '/services/backpack/packageInfo',
             data: {path: packagePath},
-            success: updateFunction
+            success: updateFunction,
+            statusCode: {404: errorFunction}
         });
     }
 
@@ -210,5 +214,15 @@ $(function () {
             scrollTop: $buildLogWrapper[0].scrollHeight
         }, 800);
         $buildLogWrapper[0].scrollIntoView();
+    }
+
+    function updatePackageDisplayInfo(data) {
+        $packageName.html('Package name: ' + data.packageName);
+        $name.text(data.packageNodeName);
+        $version.text('Package version: ' + data.version);
+        $lastBuilt.val(getLastBuiltDate(data.packageBuilt));
+        if (data.dataSize) {
+            $packageSize.text('Package size: ' + bytesToSize(data.dataSize));
+        }
     }
 });

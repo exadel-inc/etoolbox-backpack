@@ -18,9 +18,11 @@ import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.services.PackageService;
 import com.exadel.aem.backpack.core.servlets.model.BuildPackageModel;
 import com.exadel.aem.backpack.core.servlets.model.LatestPackageInfoModel;
+import com.exadel.aem.backpack.core.util.CalendarAdapter;
 import com.exadel.aem.backpack.request.RequestAdapter;
 import com.exadel.aem.backpack.request.validator.ValidatorResponse;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
@@ -30,6 +32,7 @@ import org.osgi.service.component.annotations.Reference;
 import javax.servlet.Servlet;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Calendar;
 
 /**
  * Serves as the network endpoint for user requests that trigger start of package building or else poll information
@@ -49,7 +52,7 @@ import java.io.IOException;
 public class BuildPackageServlet extends SlingAllMethodsServlet {
     private static final long serialVersionUID = 1L;
 
-    private static final Gson GSON = new Gson();
+    private static final Gson GSON = new GsonBuilder().registerTypeHierarchyAdapter(Calendar.class, new CalendarAdapter()).create();
     static final String APPLICATION_JSON = "application/json";
 
     @Reference

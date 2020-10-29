@@ -12,20 +12,8 @@
  * limitations under the License.
  */
 
-.content-container-inner {
-    width: 960px;
-    margin: 0 auto;
-}
-.scrollable-section, .info-section {
-    max-height: 300px;
-    overflow-y: auto;
-}
-.content-error-container {
-    padding-top: 1em;
-    text-align: center;
-    margin: 0 auto;
-}
-
-.content-error-container, #error {
-    margin-bottom: 1em;
-}
+$(function () {
+    $('#indexTypeSelect').change(function() {
+        $(this).closest('form').submit();
+    })
+});

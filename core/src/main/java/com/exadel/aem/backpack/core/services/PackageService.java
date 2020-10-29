@@ -70,4 +70,12 @@ public interface PackageService {
      * @return {@link PackageInfo} instance
      */
     PackageInfo getLatestPackageBuildInfo(LatestPackageInfoModel latestPackageInfoModel);
+
+    /**
+     * Gets information about current state of package node.
+     * @param resourceResolver {@code ResourceResolver} instance used to build the package
+     * @param packageInfoModel {@link PackageInfoModel} instance containing requisites of the required package
+     * @return {@code boolean} reporting package existence
+     */
+    boolean packageExists(ResourceResolver resourceResolver, PackageInfoModel packageInfoModel);
 }
