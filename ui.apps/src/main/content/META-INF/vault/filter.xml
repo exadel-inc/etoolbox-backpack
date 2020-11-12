@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<workspaceFilter version="1.0">
-    <filter root="/apps/backpack"/>
-    <filter root="/apps/cq/core/content/nav/tools/deployment/backpack"/>
-    <filter root="/etc/packages/backpack">
-        <exclude pattern="/etc/packages/backpack/.*" />
-    </filter>
-    <filter root="/home/users/system/backpack"/>
-</workspaceFilter>
