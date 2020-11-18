@@ -2,7 +2,7 @@ This branch hosts signatures to the Contributor Licence Agreement
  
 # Contributor License Agreement
 
-Thank you for your interest in contributing to the AEM Authoring Toolkit ("Material") by Exadel, Inc. ("We" or "Us"). The present Contributor License Agreement ("CLA") is for your protection as a Contributor as well as the protection of Us; it does not change your rights to use your own Contributions for any other purpose.  
+Thank you for your interest in contributing to the AEM BackPack ("Material") by Exadel, Inc. ("We" or "Us"). The present Contributor License Agreement ("CLA") is for your protection as a Contributor as well as the protection of Us; it does not change your rights to use your own Contributions for any other purpose.  
 
 You must agree to the terms of this CLA before making a Contribution to the Material. This CLA covers any and all Contributions that You, now or in the future, submit to the Material. This CLA shall come into effect upon Your acceptance of its terms and conditions.
 
