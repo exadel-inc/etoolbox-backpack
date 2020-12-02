@@ -20,6 +20,7 @@ package com.exadel.aem.backpack.core.dto.response;
  */
 public enum PackageStatus {
     CREATED,
+    MODIFIED,
     BUILD_IN_PROGRESS,
     BUILT,
     ERROR

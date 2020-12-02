@@ -16,10 +16,13 @@ package com.exadel.aem.backpack.core.services;
 
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.servlets.model.BuildPackageModel;
-import com.exadel.aem.backpack.core.servlets.model.CreatePackageModel;
+import com.exadel.aem.backpack.core.servlets.model.PackageModel;
 import com.exadel.aem.backpack.core.servlets.model.LatestPackageInfoModel;
 import com.exadel.aem.backpack.core.servlets.model.PackageInfoModel;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+
+import java.util.List;
 
 /**
  * Represents a service running in an AEM instance responsible for managing packages and reporting packages's status info
@@ -41,10 +44,10 @@ public interface PackageService {
     /**
      * Triggers operations needed to create a content package in JCR according to options specified, and reports the results
      * @param resourceResolver {@code ResourceResolver} instance used to create the package
-     * @param createPackageModel {@link CreatePackageModel} instance containing user-set options for the package creation
+     * @param packageModel {@link PackageModel} instance containing user-set options for the package creation
      * @return {@link PackageInfo} instance reporting the current package status
      */
-    PackageInfo createPackage(ResourceResolver resourceResolver, CreatePackageModel createPackageModel);
+    PackageInfo createPackage(ResourceResolver resourceResolver, PackageModel packageModel);
 
     /**
      * Triggers operations needed to build a content package specified in the request, and reports the results
@@ -78,4 +81,28 @@ public interface PackageService {
      * @return {@code boolean} reporting package existence
      */
     boolean packageExists(ResourceResolver resourceResolver, PackageInfoModel packageInfoModel);
+
+    /**
+     * Gets the basic information about the existing package by its path
+     * @param packagePath {@code String} path of existing package
+     * @param resourceResolver {@code ResourceResolver} instance used to build the package
+     * @return {@link PackageModel} instance
+     */
+    PackageModel getPackageModelByPath(String packagePath, ResourceResolver resourceResolver);
+
+    /**
+     * Triggers package modification. In the case of package name, group or version modification, package also will be moved to the new location
+     * @param resourceResolver {@code ResourceResolver} instance used to build the package
+     * @param model {@link PackageModel} with package modification data
+     * @return  {@link PackageInfo} instance
+     */
+    PackageInfo editPackage(ResourceResolver resourceResolver, PackageModel model);
+
+    /**
+     * Method collect all folders under <i>/etc/packages</i> node
+     * @param resourceResolver {@code ResourceResolver} instance used to find folders
+     * @return {@code List} of folder resources
+     */
+    List<Resource> getPackageFolders(ResourceResolver resourceResolver);
+
 }

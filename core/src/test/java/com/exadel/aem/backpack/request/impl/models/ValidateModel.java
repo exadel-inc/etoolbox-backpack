@@ -14,11 +14,14 @@
 
 package com.exadel.aem.backpack.request.impl.models;
 
+import com.exadel.aem.backpack.request.annotations.FieldType;
 import com.exadel.aem.backpack.request.annotations.RequestMapping;
 import com.exadel.aem.backpack.request.annotations.RequestParam;
 import com.exadel.aem.backpack.request.annotations.Validate;
 import com.exadel.aem.backpack.request.validator.impl.RequiredValidator;
 import com.exadel.aem.backpack.request.validator.impl.WholeNumberValidator;
+
+import java.util.List;
 
 @RequestMapping
 @SuppressWarnings("UnusedDeclaration") // contains directly injected fields
@@ -34,11 +37,23 @@ public class ValidateModel {
             invalidMessages = {"Field must be whole number!"})
     private int wholeNumber;
 
+
+    @RequestParam(type = FieldType.MULTIFIELD)
+    @Validate(validator = {RequiredValidator.class},
+            invalidMessages = {"mutifieldProperties is required"})
+    private List<NestedModel> multifieldProperties;
+
+
     public String getRequiredString() {
         return requiredString;
     }
 
     public int getWholeNumber() {
         return wholeNumber;
+    }
+
+
+    public List<NestedModel> getMultifieldProperties() {
+        return multifieldProperties;
     }
 }

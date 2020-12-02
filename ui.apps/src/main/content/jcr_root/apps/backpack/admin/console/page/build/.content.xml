@@ -19,7 +19,7 @@
             jcr:mixinTypes="[sling:VanityPath]"
             jcr:primaryType="nt:unstructured"
             jcr:title="Build package"
-            backHref="/backpack.html/etc/packages/backpack"
+            backHref="/backpack.html/?group=/etc/packages/backpack"
             sling:redirect="{Boolean}false"
             sling:resourceType="granite/ui/components/shell/propertiespage"
             sling:vanityOrder="{Long}1200"
