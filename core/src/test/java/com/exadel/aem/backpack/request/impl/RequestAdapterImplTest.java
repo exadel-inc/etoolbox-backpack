@@ -87,15 +87,21 @@ public class RequestAdapterImplTest {
 
     @Test
     public void shouldAdaptDataStructuresTypes() {
+        initMultifieldProperties(parameterMap);
+        request.setParameterMap(parameterMap);
         final DataStructureModel dataStructureModel = requestAdapter.adapt(request.getParameterMap(), DataStructureModel.class);
 
         assertEquals(Arrays.asList("String one", "String two"), dataStructureModel.getList());
         assertArrayEquals(new Integer[]{123, 567457657}, dataStructureModel.getIntegers());
+        assertEquals("String one required", dataStructureModel.getMultifieldProperties().get(0).getRequiredString());
+        assertEquals("String one not required", dataStructureModel.getMultifieldProperties().get(0).getNotRequiredString());
+        assertEquals("String two required", dataStructureModel.getMultifieldProperties().get(1).getRequiredString());
+        assertNull(dataStructureModel.getMultifieldProperties().get(1).getNotRequiredString());
     }
 
     @Test
     public void shouldReturnInvalidMessages() {
-        parameterMap.put("wholeNumber", "-12");
+        parameterMap.put("intNumber", "-12");
         request.setParameterMap(parameterMap);
         final ValidatorResponse<ValidateModel> response = requestAdapter.adaptValidate(request.getParameterMap(), ValidateModel.class);
 
@@ -103,21 +109,27 @@ public class RequestAdapterImplTest {
 
         final List<String> log = response.getLog();
         assertEquals("String field is required", log.get(0));
-        assertEquals("Field must be whole number!", log.get(1));
+        assertEquals("Field must be integer number!", log.get(1));
+        assertEquals("mutifieldProperties is required", log.get(2));
     }
 
     @Test
     public void shouldReturnValidModel() {
         parameterMap.put("requiredString", "String");
-        parameterMap.put("wholeNumber", "12");
+        parameterMap.put("intNumber", "12");
+        initMultifieldProperties(parameterMap);
         request.setParameterMap(parameterMap);
 
         final ValidatorResponse<ValidateModel> response = requestAdapter.adaptValidate(request.getParameterMap(), ValidateModel.class);
 
         assertTrue(response.isValid());
 
-        assertEquals("String", response.getModel().getRequiredString());
-        assertEquals(12, response.getModel().getWholeNumber());
+        ValidateModel model = response.getModel();
+        assertEquals("String", model.getRequiredString());
+        assertEquals(12, model.getIntNumber());
+        assertEquals("String one required", model.getMultifieldProperties().get(0).getRequiredString());
+        assertEquals("String one not required", model.getMultifieldProperties().get(0).getNotRequiredString());
+        assertEquals("String two required", model.getMultifieldProperties().get(1).getRequiredString());
     }
 
     private void initStrings(final HashMap<String, Object> parameterMap) {
@@ -139,5 +151,11 @@ public class RequestAdapterImplTest {
     private void initDataStructures(final HashMap<String, Object> parameterMap) {
         parameterMap.put("listOfStrings", new String[]{"String one", "String two"});
         parameterMap.put("arrayOfIntegers", new String[]{"123", "567457657"});
+    }
+
+    private void initMultifieldProperties(final HashMap<String, Object> parameterMap) {
+        parameterMap.put("multifieldProperties/item0/requiredString", new String[]{"String one required"});
+        parameterMap.put("multifieldProperties/item0/notRequiredString", new String[]{"String one not required"});
+        parameterMap.put("multifieldProperties/item1/requiredString", new String[]{"String two required"});
     }
 }

@@ -14,11 +14,14 @@
 
 package com.exadel.aem.backpack.request.impl.models;
 
+import com.exadel.aem.backpack.request.annotations.FieldType;
 import com.exadel.aem.backpack.request.annotations.RequestMapping;
 import com.exadel.aem.backpack.request.annotations.RequestParam;
 import com.exadel.aem.backpack.request.annotations.Validate;
 import com.exadel.aem.backpack.request.validator.impl.RequiredValidator;
-import com.exadel.aem.backpack.request.validator.impl.WholeNumberValidator;
+import com.exadel.aem.backpack.request.validator.impl.IntNumberValidator;
+
+import java.util.List;
 
 @RequestMapping
 @SuppressWarnings("UnusedDeclaration") // contains directly injected fields
@@ -30,15 +33,27 @@ public class ValidateModel {
     private String requiredString;
 
     @RequestParam
-    @Validate(validator = {WholeNumberValidator.class},
-            invalidMessages = {"Field must be whole number!"})
-    private int wholeNumber;
+    @Validate(validator = {IntNumberValidator.class},
+            invalidMessages = {"Field must be integer number!"})
+    private int intNumber;
+
+
+    @RequestParam(type = FieldType.MULTIFIELD)
+    @Validate(validator = {RequiredValidator.class},
+            invalidMessages = {"mutifieldProperties is required"})
+    private List<NestedModel> multifieldProperties;
+
 
     public String getRequiredString() {
         return requiredString;
     }
 
-    public int getWholeNumber() {
-        return wholeNumber;
+    public int getIntNumber() {
+        return intNumber;
+    }
+
+
+    public List<NestedModel> getMultifieldProperties() {
+        return multifieldProperties;
     }
 }

@@ -88,8 +88,8 @@
 
     if (resource != null && hasPermission(acm, resource, Privilege.JCR_READ)) {
 %>
-    <coral-quickactions-item icon="edit" class="foundation-collection-action" data-foundation-collection-action='{"action": "cq.wcm.open", "data": {"cookiePath":"<%= request.getContextPath() %>/","href":"/crx/packmgr/index.jsp#<%= xssAPI.getValidHref(path) %>"}}'
-    ><%= xssAPI.encodeForHTML(i18n.get("Open")) %></coral-quickactions-item><%
+    <coral-quickactions-item icon="edit" class="foundation-collection-action" data-foundation-collection-action='{"action":"foundation.dialog","data":{"nesting":"hide","src":"/mnt/overlay/backpack/admin/console/page/content/editpagedialog.html?packagePath=<%= xssAPI.getValidHref(path) %>"}}'
+    ><%= xssAPI.encodeForHTML(i18n.get("Edit")) %></coral-quickactions-item><%
     }
 
     if (hasPermission(acm, resource, Privilege.JCR_REMOVE_NODE)) {

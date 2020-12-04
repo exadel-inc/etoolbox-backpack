@@ -1,0 +1,18 @@
+<sly data-sly-call="${autocompleteTemplate}"/>
+
+<template data-sly-template.autocompleteTemplate="${@ selectedPackagePath}">
+    <sly data-sly-use.groupsModel="com.exadel.aem.backpack.core.model.PackageGroups"></sly>
+    <div class="coral-Form-fieldwrapper">
+        <label class="coral-Form-fieldlabel">Group</label>
+        <coral-autocomplete class="coral-Form-field granite-autocomplete" name="group">
+            <sly data-sly-list.option="${groupsModel.options}">
+                <coral-autocomplete-item
+                        selected="${option.value == selectedPackagePath ? 'true' : ''}"
+                        value="${option.value}">
+                    ${option.text}
+                </coral-autocomplete-item>
+            </sly>
+        </coral-autocomplete>
+    </div>
+
+</template>

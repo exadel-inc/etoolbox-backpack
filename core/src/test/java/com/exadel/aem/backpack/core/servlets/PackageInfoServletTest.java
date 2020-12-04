@@ -25,7 +25,6 @@ import com.exadel.aem.backpack.request.validator.ValidatorResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.wcm.testing.mock.aem.junit.AemContext;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
 import org.junit.Rule;

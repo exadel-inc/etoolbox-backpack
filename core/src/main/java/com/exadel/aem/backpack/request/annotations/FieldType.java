@@ -12,16 +12,11 @@
  * limitations under the License.
  */
 
-package com.exadel.aem.backpack.core.dto.response;
+package com.exadel.aem.backpack.request.annotations;
 
 /**
- * Enumerates possible package statuses as reported by {@link PackageInfo} objects
- * @see com.exadel.aem.backpack.core.services.PackageService
+ * Representation of different field types
  */
-public enum PackageStatus {
-    CREATED,
-    MODIFIED,
-    BUILD_IN_PROGRESS,
-    BUILT,
-    ERROR
+public enum FieldType {
+    DEFAULT, MULTIFIELD
 }

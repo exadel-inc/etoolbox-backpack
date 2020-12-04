@@ -32,4 +32,6 @@ public @interface RequestParam {
      * @return String value, or an empty string
      */
     String name() default "";
+
+    FieldType type() default FieldType.DEFAULT;
 }

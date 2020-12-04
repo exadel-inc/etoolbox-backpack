@@ -47,7 +47,7 @@
     Config dsCfg = new Config(resource.getChild(Config.DATASOURCE));
 
     String parentPath = ex.getString(dsCfg.get("path", String.class));
-    if (StringUtils.isEmpty(parentPath) || parentPath.equals("/")) {
+    if (StringUtils.isBlank(parentPath) || parentPath.equals("/")) {
         parentPath = ETC_PACKAGES + "backpack";
     }
 

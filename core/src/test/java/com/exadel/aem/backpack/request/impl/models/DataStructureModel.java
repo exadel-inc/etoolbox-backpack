@@ -14,6 +14,7 @@
 
 package com.exadel.aem.backpack.request.impl.models;
 
+import com.exadel.aem.backpack.request.annotations.FieldType;
 import com.exadel.aem.backpack.request.annotations.RequestMapping;
 import com.exadel.aem.backpack.request.annotations.RequestParam;
 
@@ -29,11 +30,18 @@ public class DataStructureModel {
     @RequestParam(name = "arrayOfIntegers")
     private Integer[] integers;
 
+    @RequestParam(type = FieldType.MULTIFIELD)
+    private List<NestedModel> multifieldProperties;
+
     public List<String> getList() {
         return list;
     }
 
     public Integer[] getIntegers() {
         return integers;
+    }
+
+    public List<NestedModel> getMultifieldProperties() {
+        return multifieldProperties;
     }
 }
