@@ -32,6 +32,8 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.Function;
 
+import static com.exadel.aem.backpack.request.annotations.FieldType.MULTIFIELD;
+
 /**
  * Implements {@link RequestAdapter} to adapt user-defined {@code SlingHttpServletRequest} parameters to a data model object
  * which is then used in operations by {@link com.exadel.aem.backpack.core.services.PackageService}
@@ -42,6 +44,7 @@ public class RequestAdapterImpl implements RequestAdapter {
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestAdapterImpl.class);
 
     private static final Map<Class<?>, Function<String, Object>> SUPPORTED_TYPES;
+    protected static final String MULTIFIELD_PARAM_SEPARATOR = "/";
 
     static {
         SUPPORTED_TYPES = new HashMap<>();
@@ -75,21 +78,34 @@ public class RequestAdapterImpl implements RequestAdapter {
         if (tClazz.isAnnotationPresent(RequestMapping.class)) {
             newObject = createDefaultObject(tClazz);
             if (newObject != null) {
-                Field[] fields = tClazz.getDeclaredFields();
-                for (Field field : fields) {
-                    if (field.isAnnotationPresent(RequestParam.class)) {
-                        RequestParam annotation = field.getAnnotation(RequestParam.class);
-                        String parameterName = annotation.name();
-                        if (StringUtils.isBlank(parameterName)) {
-                            parameterName = field.getName();
-                        }
-                        initField(newObject, parameterMap.get(parameterName), field);
-                        callPostConstructMethods(tClazz, newObject);
-                    }
-                }
+                initFields(parameterMap, newObject, getAllFields(new ArrayList<>(), tClazz));
+                callPostConstructMethods(tClazz, newObject);
             }
         }
         return newObject;
+    }
+
+    /**
+     * Instantiate fields from passed parameter map
+     *
+     * @param parameterMap {@code Map} representing parameters of a request
+     * @param newObject    instance of the object for fields initialization
+     * @param allFields    {@code List<Field>} fields of the object
+     * @param <T>          {@code <T>}-typed data object
+     */
+    private <T> void initFields(final Map<?, ?> parameterMap, final T newObject, final List<Field> allFields) {
+        for (Field field : allFields) {
+
+            if (field.isAnnotationPresent(RequestParam.class)) {
+                RequestParam requestParamAnnotation = field.getAnnotation(RequestParam.class);
+                String parameterName = getParameterName(field);
+                if (MULTIFIELD.equals(requestParamAnnotation.type())) {
+                    initMultifield(parameterMap, newObject, field, null, false);
+                } else {
+                    initField(newObject, parameterMap.get(parameterName), field);
+                }
+            }
+        }
     }
 
     /**
@@ -120,9 +136,9 @@ public class RequestAdapterImpl implements RequestAdapter {
     /**
      * Find and call all methods without arguments and with {@link PostConstruct} annotation
      *
-     * @param tClazz class object
+     * @param tClazz    class object
      * @param newObject the object on which the method will be called
-     * @param <T> type of the class
+     * @param <T>       type of the class
      */
     private <T> void callPostConstructMethods(final Class<T> tClazz, final T newObject) {
         final List<Method> methodsAnnotatedWith = getMethodsAnnotatedWith(tClazz, PostConstruct.class);
@@ -157,19 +173,144 @@ public class RequestAdapterImpl implements RequestAdapter {
         for (Field field : allFields) {
             if (field.isAnnotationPresent(RequestParam.class)) {
                 RequestParam requestParamAnnotation = field.getAnnotation(RequestParam.class);
-                String parameterName = requestParamAnnotation.name();
-                if (StringUtils.isBlank(parameterName)) {
-                    parameterName = field.getName();
-                }
-                boolean fieldValid = isParameterValid(parameterMap.get(parameterName), validationMessages, field);
-                if (fieldValid) {
-                    initField(newObject, parameterMap.get(parameterName), field);
+                String parameterName = getParameterName(field);
+                boolean fieldValid;
+                if (MULTIFIELD.equals(requestParamAnnotation.type())) {
+                    fieldValid = initMultifield(parameterMap, newObject, field, validationMessages, true);
+                } else {
+                    fieldValid = isParameterValid(parameterMap.get(parameterName), validationMessages, field);
+                    if (fieldValid) {
+                        initField(newObject, parameterMap.get(parameterName), field);
+                    }
                 }
                 objectValid &= fieldValid;
             }
         }
         return objectValid;
     }
+
+    /**
+     * Instantiate field with {@code List} of complex objects from passed parameter map
+     *
+     * @param parameterMap       Parameters taken from a {@code SlingHttpRequest}
+     * @param newObject          Reference to the {@code <T>}-typed adaptation object instance
+     * @param field              Field for instantiation
+     * @param validationMessages Reference to the collection of warnings produced by validation routines
+     * @param validationNeeded   Is validation needed or not
+     * @param <T>                Type of the adaptation object instance
+     * @return True when the adaptation object has been successfully populated with validated data; otherwise, false
+     */
+    private <T> boolean initMultifield(final Map<?, ?> parameterMap,
+                                       T newObject,
+                                       final Field field,
+                                       final List<String> validationMessages,
+                                       final boolean validationNeeded) {
+        Type type = field.getGenericType();
+        boolean multifieldValid = false;
+        if (type instanceof ParameterizedType) {
+            ParameterizedType genericTypes = (ParameterizedType) type;
+            Type genericType = genericTypes.getActualTypeArguments()[0];
+            if (genericType instanceof Class) {
+                List<Object> objectsList = new ArrayList<>();
+
+                multifieldValid = initMultifieldList(parameterMap, field, validationMessages, validationNeeded, (Class<?>) genericType, objectsList);
+
+                //validate multifield parameter when it's already instantiated
+                if (validationNeeded && multifieldValid) {
+                    if (isParameterValid(objectsList, validationMessages, field)) {
+                        setFieldValue(newObject, field, objectsList);
+                        return true;
+                    }
+                } else {
+                    setFieldValue(newObject, field, objectsList);
+                }
+            }
+        }
+        return multifieldValid;
+    }
+
+    /**
+     * Instantiate list of complex objects from passed parameter map
+     *
+     * @param parameterMap       Parameters taken from a {@code SlingHttpRequest}
+     * @param field              Field for instantiation
+     * @param validationMessages Reference to the collection of warnings produced by validation routines
+     * @param validationNeeded   Is validation needed or not
+     * @param genericType        Type of the object to instantiate
+     * @param objectsList        list of objects for multifield
+     * @return True when the List of objects has been successfully populated with validated data; otherwise, false
+     */
+    private boolean initMultifieldList(final Map<?, ?> parameterMap,
+                                       final Field field,
+                                       final List<String> validationMessages,
+                                       final boolean validationNeeded,
+                                       final Class<?> genericType,
+                                       final List<Object> objectsList) {
+        List<Field> objectFields = getAllFields(new ArrayList<>(), genericType);
+        String parameterName = getParameterName(field);
+
+        Map<String, Map<?, ?>> multfieldItems = extractMultifieldParameter(parameterMap, parameterName);
+
+        //instantiate list of objects from multifield properties
+        boolean currentObjectValid = true;
+        for (Map.Entry<String, Map<?, ?>> entry : multfieldItems.entrySet()) {
+            Object nestedObject = createDefaultObject(genericType);
+            if (validationNeeded) {
+                currentObjectValid = initValidateFields(entry.getValue(), nestedObject, validationMessages, objectFields);
+                if (currentObjectValid) {
+                    objectsList.add(nestedObject);
+                } else {
+                    currentObjectValid = false;
+                    break;
+                }
+            } else {
+                initFields(entry.getValue(), nestedObject, objectFields);
+                objectsList.add(nestedObject);
+            }
+        }
+        return currentObjectValid;
+    }
+
+    /**
+     * Gets the multifield parameter items from the request parameter map.
+     *
+     * @param parameterMap  {@code Map} with multifield parameters items
+     * @param parameterName Name of the root parameter
+     * @return Map with parameter properties and values
+     */
+    private Map<String, Map<?, ?>> extractMultifieldParameter(final Map<?, ?> parameterMap, final String parameterName) {
+        Map<String, Map<?, ?>> multfieldItems = new HashMap<>();
+        for (Map.Entry<?, ?> entry : parameterMap.entrySet()) {
+            if ((((String) entry.getKey()).startsWith(parameterName + MULTIFIELD_PARAM_SEPARATOR)
+                    && ((String) entry.getKey()).split(MULTIFIELD_PARAM_SEPARATOR).length == 3)) {
+                Object[] params = ((String) entry.getKey()).split(MULTIFIELD_PARAM_SEPARATOR);
+                Map nameValueMap = multfieldItems.get(params[1]);
+                if (nameValueMap == null) {
+                    nameValueMap = new HashMap<>();
+                    multfieldItems.put((String) params[1], nameValueMap);
+                }
+                nameValueMap.put(params[2], entry.getValue());
+            }
+        }
+        return multfieldItems;
+    }
+
+
+    /**
+     * Gets the name of the parameter based on the annotation property if its present or by field name itself
+     *
+     * @param field {@code Field to get the parameter name}
+     * @return Name of the parameter
+     */
+    private String getParameterName(final Field field) {
+        RequestParam requestParamAnnotation = field.getAnnotation(RequestParam.class);
+        String parameterName = requestParamAnnotation.name();
+        if (StringUtils.isBlank(parameterName)) {
+            parameterName = field.getName();
+        }
+        return parameterName;
+    }
+
 
     /**
      * Called by {@link RequestAdapterImpl#adaptValidate(Map, Class)} to get a collection of declared fields
@@ -192,12 +333,13 @@ public class RequestAdapterImpl implements RequestAdapter {
 
     /**
      * Find all methods without arguments from the class by specific annotation
-     * @param type class object
+     *
+     * @param type       class object
      * @param annotation search annotation
      * @return list of found methods
      */
     private List<Method> getMethodsAnnotatedWith(final Class<?> type, final Class<? extends Annotation> annotation) {
-        final List<Method> methods = new ArrayList<Method>();
+        final List<Method> methods = new ArrayList<>();
         Class<?> clazz = type;
         while (clazz != Object.class) {
             for (final Method method : clazz.getDeclaredMethods()) {
@@ -369,7 +511,11 @@ public class RequestAdapterImpl implements RequestAdapter {
      */
     private static <T> T createDefaultObject(final Class<T> tClazz) {
         try {
-            return tClazz.getConstructor().newInstance();
+            T newInstance = tClazz.getConstructor().newInstance();
+            if (newInstance == null) {
+                throw new IllegalStateException("No default constructor found for the class: " + tClazz);
+            }
+            return newInstance;
         } catch (Exception e) {
             LOGGER.error("Object instantiation exception", e);
         }

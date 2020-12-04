@@ -34,7 +34,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class CreatePackageServletTest {
+public class EditPackageServletTest {
 
     private static final String APPLICATION_JSON = "application/json";
     private static final String PAGE_1 = "/content/site/pages/page1";
@@ -45,17 +45,17 @@ public class CreatePackageServletTest {
     @Rule
     public final AemContext context = new AemContext();
     private final PackageService packageServiceMock = mock(PackageService.class);
-    private CreatePackageServlet servlet;
-    private PackageInfo packageInfoWithCreatedStatus;
+    private EditPackageServlet servlet;
+    private PackageInfo packageInfoWithModifiedStatus;
     private PackageInfo packageInfoWithErrorStatus;
 
     @Before
     public void beforeTest() {
-        packageInfoWithCreatedStatus = getPackageInfoWithCreatedStatus();
+        packageInfoWithModifiedStatus = getPackageInfoWithModifiedStatus();
         packageInfoWithErrorStatus = getPackageInfoWithErrorStatus();
         context.registerService(PackageService.class, packageServiceMock);
         context.registerService(RequestAdapter.class, new RequestAdapterImpl());
-        servlet = context.registerInjectActivateService(new CreatePackageServlet());
+        servlet = context.registerInjectActivateService(new EditPackageServlet());
 
         context.create().page(PAGE_1);
     }
@@ -71,7 +71,7 @@ public class CreatePackageServletTest {
     @Test
     public void shouldReturnOkWhenRequestIsValid() throws IOException {
         createBaseRequest();
-        when(packageServiceMock.createPackage(any(ResourceResolver.class), any(PackageModel.class))).thenReturn(packageInfoWithCreatedStatus);
+        when(packageServiceMock.editPackage(any(ResourceResolver.class), any(PackageModel.class))).thenReturn(packageInfoWithModifiedStatus);
 
         servlet.doPost(context.request(), context.response());
 
@@ -82,7 +82,7 @@ public class CreatePackageServletTest {
     @Test
     public void shouldReturnConflictWhenPackageAlreadyExist() throws IOException {
         createBaseRequest();
-        when(packageServiceMock.createPackage(any(ResourceResolver.class), any(PackageModel.class))).thenReturn(packageInfoWithErrorStatus);
+        when(packageServiceMock.editPackage(any(ResourceResolver.class), any(PackageModel.class))).thenReturn(packageInfoWithErrorStatus);
 
         servlet.doPost(context.request(), context.response());
 
@@ -101,9 +101,9 @@ public class CreatePackageServletTest {
         return packageInfo;
     }
 
-    private PackageInfo getPackageInfoWithCreatedStatus() {
+    private PackageInfo getPackageInfoWithModifiedStatus() {
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.setPackageStatus(PackageStatus.CREATED);
+        packageInfo.setPackageStatus(PackageStatus.MODIFIED);
         return packageInfo;
     }
 }

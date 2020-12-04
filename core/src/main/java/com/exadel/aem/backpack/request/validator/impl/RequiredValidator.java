@@ -18,6 +18,8 @@ import com.exadel.aem.backpack.request.validator.Validator;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.List;
+
 /**
  * Implements {@link Validator} to test an HTTP request {@code ParameterMap} value expected to a non-blank {@code String}
  */
@@ -31,6 +33,9 @@ public class RequiredValidator implements Validator {
         if (parameter instanceof String[]) {
             String[] arrayParams = (String[]) parameter;
             return ArrayUtils.isNotEmpty(arrayParams) && StringUtils.isNotBlank(arrayParams[0]);
+        } else if (parameter instanceof List) {
+            List<?> multifieldObject = (List) parameter;
+            return !multifieldObject.isEmpty();
         }
         return false;
     }

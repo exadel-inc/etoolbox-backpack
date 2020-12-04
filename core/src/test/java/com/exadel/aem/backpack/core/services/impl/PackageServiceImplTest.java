@@ -19,14 +19,12 @@ import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
 import com.exadel.aem.backpack.core.services.PackageService;
 import com.exadel.aem.backpack.core.services.ReferenceService;
-import com.exadel.aem.backpack.core.servlets.model.BuildPackageModel;
-import com.exadel.aem.backpack.core.servlets.model.CreatePackageModel;
-import com.exadel.aem.backpack.core.servlets.model.LatestPackageInfoModel;
-import com.exadel.aem.backpack.core.servlets.model.PackageInfoModel;
+import com.exadel.aem.backpack.core.servlets.model.*;
 import com.google.common.cache.Cache;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.wcm.testing.mock.aem.junit.AemContext;
+import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
 import org.apache.jackrabbit.vault.fs.api.WorkspaceFilter;
 import org.apache.jackrabbit.vault.fs.config.DefaultWorkspaceFilter;
@@ -34,7 +32,9 @@ import org.apache.jackrabbit.vault.packaging.JcrPackage;
 import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
 import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
 import org.apache.jackrabbit.vault.packaging.PackagingService;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
 import org.junit.Rule;
@@ -48,6 +48,7 @@ import javax.jcr.Session;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.exadel.aem.backpack.core.dto.response.PackageStatus.*;
 import static org.junit.Assert.*;
@@ -56,14 +57,20 @@ import static org.mockito.Mockito.*;
 @RunWith(Enclosed.class)
 public class PackageServiceImplTest {
     private static final String PAGE_1 = "/content/site/pages/page1";
+    private static final String PAGE_2 = "/content/site/pages/page2";
+
     private static final String PICTURE_1 = "/content/dam/picture1.jpg";
     private static final String PICTURE_2 = "/content/dam/picture2.png";
-    private static final String THUMBNAIL = "/content/dam/thumbnail.jpg";
+    private static final String PICTURE_3 = "/content/dam/picture3.jpg";
+    private static final String PACKAGE_PATH = "/etc/packages/testGroup/testPackage-1.zip";
+    private static final String THUMBNAIL = "/content/dam/thumbnail.png";
     private static final String IMAGE_JPEG = "image/jpeg";
     private static final String IMAGE_PNG = "image/png";
     private static final String BACKPACK = "backpack";
     private static final String TEST_PACKAGE = "testPackage";
     private static final String PACKAGE_VERSION = "1";
+    private static final String PACKAGE_VERSION_2 = "2";
+
     private static final String TEST_GROUP = "testGroup";
 
     private static final String REFERENCED_RESOURCES = "referencedResources";
@@ -73,6 +80,7 @@ public class PackageServiceImplTest {
 
     public abstract static class Base {
 
+        protected static final String INITIAL_FILTERS = "initialFilters";
         @Rule
         public AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
         PackageService packageService;
@@ -98,6 +106,7 @@ public class PackageServiceImplTest {
             packageService = context.registerInjectActivateService(new PackageServiceImpl());
 
             context.create().page(PAGE_1);
+            context.create().page(PAGE_2);
             context.create().asset(PICTURE_1, 100, 100, IMAGE_JPEG);
             context.create().asset(PICTURE_2, 100, 100, IMAGE_PNG);
             resourceResolver = context.resourceResolver();
@@ -116,7 +125,8 @@ public class PackageServiceImplTest {
         }
 
         JcrPackage createPackage(final PackageInfo packageInfo,
-                                           final DefaultWorkspaceFilter filter) throws RepositoryException, IOException {
+                                 final List<PathModel> pathModels,
+                                 final DefaultWorkspaceFilter filter) throws RepositoryException, IOException {
             JcrPackage jcrPackage = null;
             try {
                 jcrPackage = packMgr.create(packageInfo.getGroupName(), packageInfo.getPackageName(), packageInfo.getVersion());
@@ -124,7 +134,11 @@ public class PackageServiceImplTest {
                 if (jcrPackageDefinition != null) {
                     jcrPackageDefinition.set(REFERENCED_RESOURCES, GSON.toJson(packageInfo.getReferencedResources()), true);
                     jcrPackageDefinition.set(GENERAL_RESOURCES, GSON.toJson(packageInfo.getPaths()), true);
+                    if (pathModels != null) {
+                        jcrPackageDefinition.set(INITIAL_FILTERS, GSON.toJson(pathModels), true);
+                    }
                     jcrPackageDefinition.setFilter(filter, true);
+
 
                     Node packageNode = jcrPackage.getNode();
                     if (packageNode != null) {
@@ -141,12 +155,16 @@ public class PackageServiceImplTest {
 
 
         void verifyPackageFilters(final Node packageNode,
-                                            final List<String> expectedPaths,
-                                            final Map<String, List<String>> expectedReferencedResources) throws RepositoryException {
+                                  final List<String> expectedPaths,
+                                  final List<PathModel> expectedInitialFiltersModels,
+                                  final Map<String, List<String>> expectedReferencedResources) throws RepositoryException {
             JcrPackage jcrPackage = null;
             Type listType = new TypeToken<List<String>>() {
             }.getType();
             Type mapType = new TypeToken<Map<String, List<String>>>() {
+            }.getType();
+
+            Type patModelListType = new TypeToken<List<PathModel>>() {
             }.getType();
             try {
                 jcrPackage = Objects.requireNonNull(packMgr.open(packageNode));
@@ -154,12 +172,19 @@ public class PackageServiceImplTest {
                 WorkspaceFilter filter = Objects.requireNonNull(definition.getMetaInf().getFilter());
                 List<String> pkgGeneralResources = Objects.requireNonNull(GSON.fromJson(definition.get(GENERAL_RESOURCES), listType));
                 Map<String, List<String>> pkgReferencedResources = Objects.requireNonNull(GSON.fromJson(definition.get(REFERENCED_RESOURCES), mapType));
+                List<PathModel> initialFiltersModels = Objects.requireNonNull(GSON.fromJson(definition.get(INITIAL_FILTERS), patModelListType));
 
                 pkgReferencedResources.forEach((key, value) -> {
                     List<String> expectedPath = expectedReferencedResources.get(key);
                     expectedPath.forEach(s -> assertTrue("Referenced resources from the package metadata must be as expected map",
                             value.contains(s)));
                 });
+
+                for (int i = 0; i < initialFiltersModels.size(); i++) {
+                    assertEquals("Initial path must be as in expected list", expectedInitialFiltersModels.get(i).getPath(), initialFiltersModels.get(i).getPath());
+                    assertEquals("Initial excludeChildren flag must be as in expected list", expectedInitialFiltersModels.get(i).isExcludeChildren(), initialFiltersModels.get(i).isExcludeChildren());
+
+                }
 
                 List<PathFilterSet> filterSets = filter.getFilterSets();
 
@@ -183,52 +208,54 @@ public class PackageServiceImplTest {
     }
 
     public static class CreatePackage extends Base {
+
+        private List<PathModel> expectedInitialFiltersModels = Collections.singletonList(new PathModel(PAGE_1, false));
+
+
         @Test
         public void shouldCreatePackage() throws RepositoryException {
-            CreatePackageModel createPackageModel = new CreatePackageModel();
+            PackageModel packageModel = new PackageModel();
 
-            initBasePackageInfo(createPackageModel, Collections.singletonList(PAGE_1));
-            createPackageModel.setGroup(TEST_GROUP);
+            initBasePackageInfo(packageModel, Collections.singletonList(PAGE_1), false);
+            packageModel.setGroup(TEST_GROUP);
             resourceResolver = context.resourceResolver();
-            PackageInfo aPackage = packageService.createPackage(resourceResolver, createPackageModel);
+            PackageInfo aPackage = packageService.createPackage(resourceResolver, packageModel);
 
             assertEquals(CREATED, aPackage.getPackageStatus());
             assertNotNull("testPackage-1.zip", aPackage.getPackageNodeName());
             assertNotNull(resourceResolver.getResource("/etc/packages/testGroup/testPackage-1.zip"));
             Node packageNode = session.getNode("/etc/packages/testGroup/testPackage-1.zip");
             assertNotNull(packageNode);
-            verifyPackageFilters(packageNode, Collections.singletonList(PAGE_1), referencedResources);
+            verifyPackageFilters(packageNode, Collections.singletonList(PAGE_1), expectedInitialFiltersModels, referencedResources);
         }
 
         @Test
         public void shouldCreatePackageWithJcrContentInCaseOfExcludedChildren() throws RepositoryException {
-            CreatePackageModel createPackageModel = new CreatePackageModel();
+            PackageModel packageModel = new PackageModel();
 
-            initBasePackageInfo(createPackageModel, Collections.singletonList(PAGE_1));
-            createPackageModel.setGroup(TEST_GROUP);
-            createPackageModel.setExcludeChildren(true);
+            initBasePackageInfo(packageModel, Collections.singletonList(PAGE_1), true);
+            packageModel.setGroup(TEST_GROUP);
 
-            PackageInfo aPackage = packageService.createPackage(resourceResolver, createPackageModel);
+            PackageInfo aPackage = packageService.createPackage(resourceResolver, packageModel);
 
             assertEquals(CREATED, aPackage.getPackageStatus());
             assertNotNull("testPackage-1.zip", aPackage.getPackageNodeName());
             Node packageNode = session.getNode("/etc/packages/testGroup/testPackage-1.zip");
             assertNotNull(packageNode);
-            verifyPackageFilters(packageNode, Collections.singletonList(PAGE_1 + "/jcr:content"), referencedResources);
+            verifyPackageFilters(packageNode, Collections.singletonList(PAGE_1 + "/jcr:content"), Collections.singletonList(new PathModel(PAGE_1, true)), referencedResources);
         }
 
         @Test
         public void shouldCreatePackageWithDefaultGroup() throws RepositoryException {
-            CreatePackageModel createPackageModel = new CreatePackageModel();
-            initBasePackageInfo(createPackageModel, Collections.singletonList(PAGE_1));
-            PackageInfo aPackage = packageService.createPackage(resourceResolver, createPackageModel);
+            PackageModel packageModel = new PackageModel();
+            initBasePackageInfo(packageModel, Collections.singletonList(PAGE_1), false);
+            PackageInfo aPackage = packageService.createPackage(resourceResolver, packageModel);
 
             assertEquals(CREATED, aPackage.getPackageStatus());
             assertNotNull("testPackage-1.zip", aPackage.getPackageNodeName());
-            assertNotNull(resourceResolver.getResource("/etc/packages/backpack/testPackage-1.zip"));
             Node packageNode = session.getNode("/etc/packages/backpack/testPackage-1.zip");
             assertNotNull(packageNode);
-            verifyPackageFilters(packageNode, Collections.singletonList(PAGE_1), referencedResources);
+            verifyPackageFilters(packageNode, Collections.singletonList(PAGE_1), expectedInitialFiltersModels, referencedResources);
 
         }
 
@@ -240,11 +267,11 @@ public class PackageServiceImplTest {
             packageInfo.setVersion(PACKAGE_VERSION);
             packageInfo.setReferencedResources(new HashMap<>());
             packageInfo.setPaths(new ArrayList<>());
-            createPackage(packageInfo, new DefaultWorkspaceFilter());
+            createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, false)), new DefaultWorkspaceFilter());
 
-            CreatePackageModel createPackageModel = new CreatePackageModel();
-            initBasePackageInfo(createPackageModel, Collections.singletonList(PAGE_1));
-            PackageInfo aPackage = packageService.createPackage(resourceResolver, createPackageModel);
+            PackageModel packageModel = new PackageModel();
+            initBasePackageInfo(packageModel, Collections.singletonList(PAGE_1), false);
+            PackageInfo aPackage = packageService.createPackage(resourceResolver, packageModel);
 
             assertEquals(PackageStatus.ERROR, aPackage.getPackageStatus());
             assertEquals("ERROR: Package with such name already exists in the backpack group.", aPackage.getLog().get(0));
@@ -254,19 +281,207 @@ public class PackageServiceImplTest {
 
         @Test
         public void shouldNotCreatePackageWithoutFilters() {
-            CreatePackageModel createPackageModel = new CreatePackageModel();
-            initBasePackageInfo(createPackageModel, Collections.emptyList());
-            PackageInfo aPackage = packageService.createPackage(resourceResolver, createPackageModel);
+            PackageModel packageModel = new PackageModel();
+            initBasePackageInfo(packageModel, Collections.emptyList(), false);
+            PackageInfo aPackage = packageService.createPackage(resourceResolver, packageModel);
 
             assertEquals(PackageStatus.ERROR, aPackage.getPackageStatus());
             assertEquals("ERROR: Package does not contain any valid filters.", aPackage.getLog().get(0));
         }
 
-        private void initBasePackageInfo(final CreatePackageModel model, final List<String> strings) {
-            model.setPaths(strings);
+        private void initBasePackageInfo(final PackageModel model, final List<String> strings, final boolean excludeChildren) {
+            model.setPaths(strings.stream().map(s -> new PathModel(s, excludeChildren)).collect(Collectors.toList()));
             model.setPackageName(TEST_PACKAGE);
             model.setThumbnailPath(THUMBNAIL);
             model.setVersion(PACKAGE_VERSION);
+        }
+    }
+
+    public static class EditPackage extends Base {
+        private static final String TEST_GROUP_2 = "testGroup2";
+        private static final String TEST_PACKAGE_2 = "testPackage2";
+        private JcrPackage aPackage;
+        private List<PathModel> expectedInitialFiltersModels = Collections.singletonList(new PathModel(PAGE_1, false));
+
+        private PackageInfo packageInfo;
+
+        @Before
+        public void before() throws IOException, RepositoryException {
+            packageInfo = new PackageInfo();
+            packageInfo.setGroupName(TEST_GROUP);
+            packageInfo.setPackageName(TEST_PACKAGE);
+            packageInfo.setVersion(PACKAGE_VERSION);
+            packageInfo.setReferencedResources(referencedResources);
+            packageInfo.setPaths(Collections.singletonList(PAGE_1));
+            packageInfo.setPackagePath(PACKAGE_PATH);
+            aPackage = createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, false)), new DefaultWorkspaceFilter());
+            resourceResolver = context.resourceResolver();
+        }
+
+
+        @Test
+        public void shouldEditPackage() throws RepositoryException {
+            PackageModel packageModel = new PackageModel();
+            HashSet<AssetReferencedItem> assetReferenceItems = new HashSet<>();
+            assetReferenceItems.add(new AssetReferencedItem(PICTURE_3, IMAGE_JPEG));
+            when(referenceServiceMock.getAssetReferences(any(ResourceResolver.class), any(String.class))).thenReturn(assetReferenceItems);
+
+            Map<String, List<String>> modifiedReferencedResources = new HashMap<>();
+            modifiedReferencedResources.put(IMAGE_JPEG, Collections.singletonList(PICTURE_3));
+
+            initBasePackageModel(packageModel, Collections.singletonList(PAGE_2), false);
+
+
+            PackageInfo aPackage = packageService.editPackage(resourceResolver, packageModel);
+
+
+            assertEquals(MODIFIED, aPackage.getPackageStatus());
+            assertNotNull("testPackage2-2.zip", aPackage.getPackageNodeName());
+            Node packageNode = session.getNode("/etc/packages/testGroup2/testPackage2-2.zip");
+            assertNotNull(packageNode);
+            verifyPackageFilters(packageNode, Collections.singletonList(PAGE_2), Collections.singletonList(new PathModel(PAGE_2, false)), modifiedReferencedResources);
+        }
+
+        @Test
+        public void shouldSkipPackageEditingIfSuchPackageAlreadyExist() throws RepositoryException, IOException {
+            packageInfo.setGroupName(TEST_GROUP_2);
+            packageInfo.setPackageName(TEST_PACKAGE_2);
+            packageInfo.setVersion(PACKAGE_VERSION_2);
+            createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, false)), new DefaultWorkspaceFilter());
+            PackageModel packageModel = new PackageModel();
+            initBasePackageModel(packageModel, Collections.singletonList(PAGE_2), false);
+
+            PackageInfo aPackage = packageService.editPackage(resourceResolver, packageModel);
+
+            assertEquals(ERROR, aPackage.getPackageStatus());
+            assertEquals("ERROR: Package with such name already exists in the testGroup2 group.", aPackage.getLog().get(0));
+        }
+
+        @Test
+        public void shouldModifyPackageFilters() throws RepositoryException {
+            PackageModel packageModel = new PackageModel();
+
+            initBasePackageModel(packageModel, Collections.singletonList(PAGE_1), true);
+
+            PackageInfo aPackage = packageService.editPackage(resourceResolver, packageModel);
+
+            assertEquals(MODIFIED, aPackage.getPackageStatus());
+            assertNotNull("testPackage2-2.zip", aPackage.getPackageNodeName());
+            Node packageNode = session.getNode("/etc/packages/testGroup2/testPackage2-2.zip");
+            assertNotNull(packageNode);
+            verifyPackageFilters(packageNode, Collections.singletonList(PAGE_1 + "/jcr:content"), Collections.singletonList(new PathModel(PAGE_1, true)), referencedResources);
+        }
+
+        @Test
+        public void shouldNotModifyPackageWithoutFilters() {
+            PackageModel packageModel = new PackageModel();
+            initBasePackageModel(packageModel, Collections.emptyList(), false);
+            PackageInfo aPackage = packageService.editPackage(resourceResolver, packageModel);
+
+            assertEquals(PackageStatus.ERROR, aPackage.getPackageStatus());
+            assertEquals("ERROR: Package does not contain any valid filters.", aPackage.getLog().get(0));
+        }
+
+        private void initBasePackageModel(final PackageModel model, final List<String> strings, final boolean excludeChildren) {
+            model.setPaths(strings.stream().map(s -> new PathModel(s, excludeChildren)).collect(Collectors.toList()));
+            model.setPackageName(TEST_PACKAGE_2);
+            model.setGroup(TEST_GROUP_2);
+            model.setThumbnailPath(THUMBNAIL);
+            model.setVersion(PACKAGE_VERSION_2);
+            model.setPackagePath("/etc/packages/testGroup/testPackage-1.zip");
+        }
+    }
+
+    public static class GetPackageModelByPath extends Base {
+
+        private JcrPackage aPackage;
+        private JcrPackageManager jcrPackageManagerMock;
+
+        private PackageServiceImpl packageServiceSpy;
+        private PackageInfo packageInfo;
+
+        @Before
+        public void before() throws IOException, RepositoryException {
+            packageInfo = new PackageInfo();
+            packageInfo.setGroupName(TEST_GROUP);
+            packageInfo.setPackageName(TEST_PACKAGE);
+            packageInfo.setVersion(PACKAGE_VERSION);
+            packageInfo.setReferencedResources(referencedResources);
+            packageInfo.setPaths(Collections.singletonList(PAGE_1));
+            packageInfo.setPackagePath(PACKAGE_PATH);
+            aPackage = createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, true)), new DefaultWorkspaceFilter());
+
+        }
+
+        @Test
+        public void shouldReturnPackageModelByPath() {
+            PackageModel packageModelByPath = packageService.getPackageModelByPath(PACKAGE_PATH, resourceResolver);
+
+            assertEquals(TEST_PACKAGE, packageModelByPath.getPackageName());
+            assertEquals(PACKAGE_VERSION, packageModelByPath.getVersion());
+            assertEquals(TEST_GROUP, packageModelByPath.getGroup());
+            packageModelByPath.getPaths().forEach(pathModel -> {
+                assertEquals(PAGE_1, pathModel.getPath());
+                assertEquals(true, pathModel.isExcludeChildren());
+            });
+        }
+
+        @Test
+        public void shouldReturnDefaultFiltersWhenInitialNotSpecified() throws IOException, RepositoryException {
+            packageInfo.setVersion(PACKAGE_VERSION_2);
+            aPackage = createPackage(packageInfo, null, new DefaultWorkspaceFilter());
+
+            PackageModel packageModelByPath = packageService.getPackageModelByPath("/etc/packages/testGroup/testPackage-2.zip", resourceResolver);
+
+
+            assertEquals(TEST_PACKAGE, packageModelByPath.getPackageName());
+            assertEquals(PACKAGE_VERSION_2, packageModelByPath.getVersion());
+            assertEquals(TEST_GROUP, packageModelByPath.getGroup());
+            packageModelByPath.getPaths().forEach(pathModel -> {
+                assertEquals(PAGE_1, pathModel.getPath());
+                assertEquals(false, pathModel.isExcludeChildren());
+            });
+        }
+
+        @Test
+        public void shouldReturnNullWhenPackageNotExist() throws IOException, RepositoryException {
+            PackageModel packageModelByPath = packageService.getPackageModelByPath("/etc/packages/testGroup/testPackage-3.zip", resourceResolver);
+
+            assertNull(packageModelByPath);
+        }
+
+    }
+
+    public static class GetPackageGroups extends Base {
+
+
+        private PackageServiceImpl packageServiceSpy;
+        private Node rootNode;
+        private List<String> expectedPath;
+
+
+        @Before
+        public void before() throws  RepositoryException {
+
+            rootNode = context.create().resource("/etc/packages").adaptTo(Node.class);
+            Node slingFolder = rootNode.addNode("slingFolder", JcrResourceConstants.NT_SLING_FOLDER);
+            Node nestedFolder = slingFolder.addNode("nestedFolder", JcrConstants.NT_FOLDER);
+            Node slingOrderedFolder = rootNode.addNode("slingOrderedFolder", JcrResourceConstants.NT_SLING_ORDERED_FOLDER);
+            rootNode.addNode(".snapshot", JcrResourceConstants.NT_SLING_ORDERED_FOLDER);
+            expectedPath = new ArrayList<>();
+            expectedPath.add(slingFolder.getPath());
+            expectedPath.add(nestedFolder.getPath());
+            expectedPath.add(slingOrderedFolder.getPath());
+        }
+
+        @Test
+        public void shouldReturnAppropriateGroups() {
+            List<Resource> packageGroups = packageService.getPackageFolders(resourceResolver);
+
+            assertEquals(expectedPath.size(), packageGroups.size());
+            for (int i = 0; i < packageGroups.size(); i++) {
+                assertEquals(expectedPath.get(i), packageGroups.get(i).getPath());
+            }
         }
     }
 
@@ -307,7 +522,7 @@ public class PackageServiceImplTest {
             PackageInfo packageInfo = getDefaultPackageInfo();
             DefaultWorkspaceFilter defaultWorkspaceFilter = new DefaultWorkspaceFilter();
             defaultWorkspaceFilter.add(new PathFilterSet(PAGE_1));
-            createPackage(packageInfo, defaultWorkspaceFilter);
+            createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, false)), defaultWorkspaceFilter);
 
             PackageInfoModel packageInfoModel = new PackageInfoModel();
             packageInfoModel.setPackagePath(PACKAGE_PATH);
@@ -330,7 +545,7 @@ public class PackageServiceImplTest {
             PackageInfo packageInfo = getDefaultPackageInfo();
             DefaultWorkspaceFilter defaultWorkspaceFilter = new DefaultWorkspaceFilter();
             defaultWorkspaceFilter.add(new PathFilterSet(PAGE_1));
-            createPackage(packageInfo, defaultWorkspaceFilter);
+            createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, false)), defaultWorkspaceFilter);
 
             PackageInfoModel packageInfoModel = new PackageInfoModel();
             packageInfoModel.setPackagePath(PACKAGE_PATH);
@@ -339,7 +554,7 @@ public class PackageServiceImplTest {
 
             packMgr.remove(packMgr.listPackages().get(0));
             defaultWorkspaceFilter.add(new PathFilterSet(PICTURE_1));
-            createPackage(packageInfo, defaultWorkspaceFilter);
+            createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, false)), defaultWorkspaceFilter);
 
             PackageInfo result2 = packageService.getPackageInfo(resourceResolver, packageInfoModel);
 
@@ -413,7 +628,7 @@ public class PackageServiceImplTest {
             packageInfo.setVersion(PACKAGE_VERSION);
             packageInfo.setReferencedResources(referencedResources);
             packageInfo.setPaths(Collections.singletonList(PAGE_1));
-            createPackage(packageInfo, new DefaultWorkspaceFilter());
+            createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, false)), new DefaultWorkspaceFilter());
         }
     }
 
@@ -436,7 +651,7 @@ public class PackageServiceImplTest {
             packageInfo.setReferencedResources(referencedResources);
             packageInfo.setPaths(Collections.singletonList(PAGE_1));
             packageInfo.setPackagePath(PACKAGE_PATH);
-            aPackage = spy(createPackage(packageInfo, new DefaultWorkspaceFilter()));
+            aPackage = spy(createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, false)), new DefaultWorkspaceFilter()));
 
 
             packageServiceSpy = (PackageServiceImpl) spy(packageService);
@@ -483,7 +698,7 @@ public class PackageServiceImplTest {
             latestPackageInfoModel.setLatestLogIndex(LATEST_INDEX);
 
             @SuppressWarnings("UnstableApiUsage") // sticking to Guava Cache version bundled in uber-jar; still safe to use
-            Cache<String, PackageInfo> packageInfos = ((PackageServiceImpl) packageService).getPackageInfos();
+                    Cache<String, PackageInfo> packageInfos = ((PackageServiceImpl) packageService).getPackageInfos();
             PackageInfo packageInfo = new PackageInfo();
 
             packageInfo.addLogMessage(TEST);
@@ -501,7 +716,7 @@ public class PackageServiceImplTest {
             latestPackageInfoModel.setPackagePath(PACKAGE_PATH);
 
             @SuppressWarnings("UnstableApiUsage") // sticking to Guava Cache version bundled in uber-jar; still safe to use
-            Cache<String, PackageInfo> packageInfos = ((PackageServiceImpl) packageService).getPackageInfos();
+                    Cache<String, PackageInfo> packageInfos = ((PackageServiceImpl) packageService).getPackageInfos();
             PackageInfo packageInfo = new PackageInfo();
             packageInfos.put(PACKAGE_PATH, packageInfo);
 
@@ -522,7 +737,7 @@ public class PackageServiceImplTest {
         }
     }
 
-    public static class packageExists extends Base {
+    public static class PackageExists extends Base {
 
         private static final String PACKAGE_PATH = "/etc/packages/backpack/testPackage-1.zip";
 
@@ -541,7 +756,7 @@ public class PackageServiceImplTest {
             PackageInfo packageInfo = getDefaultPackageInfo();
             DefaultWorkspaceFilter defaultWorkspaceFilter = new DefaultWorkspaceFilter();
             defaultWorkspaceFilter.add(new PathFilterSet(PAGE_1));
-            createPackage(packageInfo, defaultWorkspaceFilter);
+            createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, false)), defaultWorkspaceFilter);
 
             PackageInfoModel packageInfoModel = new PackageInfoModel();
             packageInfoModel.setPackagePath(PACKAGE_PATH);

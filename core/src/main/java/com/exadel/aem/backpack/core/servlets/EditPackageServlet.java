@@ -34,21 +34,22 @@ import java.io.IOException;
 import static com.exadel.aem.backpack.core.servlets.BuildPackageServlet.APPLICATION_JSON;
 
 /**
- * Serves as the network endpoint for user requests that trigger package creation<br><br>
+ * Serves as the network endpoint for user requests that trigger package modification<br><br>
  * <p>
  * See also:<br>
  * {@link BuildPackageServlet} - endpoint for requests for building of created package and reporting package status<br>
  * {@link PackageInfoServlet} - endpoint for requests for information on previously built packages
+ * {@link CreatePackageServlet} - endpoint for requests for package creation
  */
 @Component(
         service = Servlet.class,
         property = {
-                "sling.servlet.paths=/services/backpack/createPackage",
+                "sling.servlet.paths=/services/backpack/editPackage",
                 "sling.servlet.methods=post"
         })
 @SuppressWarnings("PackageAccessibility")
 // because Servlet and HttpServletResponse classes reported as a non-bundle dependency
-public class CreatePackageServlet extends SlingAllMethodsServlet {
+public class EditPackageServlet extends SlingAllMethodsServlet {
 
     private static final long serialVersionUID = 1L;
 
@@ -64,7 +65,7 @@ public class CreatePackageServlet extends SlingAllMethodsServlet {
     private transient PackageService packageService;
 
     /**
-     * Processes {@code POST} requests to the current endpoint. Attempts to create a package for a consequential build
+     * Processes {@code POST} requests to the current endpoint. Attempts to edit a package for a consequential build
      * according to the request parameters.
      * Request parameters are parsed to a {@link PackageModel} which is validated and passed
      * to the corresponding {@link PackageService} routine if proven valid; otherwise, the {@code HTTP status 400} reported
@@ -82,12 +83,12 @@ public class CreatePackageServlet extends SlingAllMethodsServlet {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write(GSON.toJson(validatorResponse));
         } else {
-            final PackageInfo packageInfo = packageService.createPackage(
+            final PackageInfo packageInfo = packageService.editPackage(
                     request.getResourceResolver(),
                     validatorResponse.getModel()
             );
             response.getWriter().write(GSON.toJson(packageInfo));
-            if (!PackageStatus.CREATED.equals(packageInfo.getPackageStatus())) {
+            if (!PackageStatus.MODIFIED.equals(packageInfo.getPackageStatus())) {
                 response.setStatus(HttpServletResponse.SC_CONFLICT);
             }
         }

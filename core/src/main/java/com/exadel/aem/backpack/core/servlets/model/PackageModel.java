@@ -14,6 +14,7 @@
 
 package com.exadel.aem.backpack.core.servlets.model;
 
+import com.exadel.aem.backpack.request.annotations.FieldType;
 import com.exadel.aem.backpack.request.annotations.RequestMapping;
 import com.exadel.aem.backpack.request.annotations.RequestParam;
 import com.exadel.aem.backpack.request.annotations.Validate;
@@ -24,11 +25,11 @@ import java.util.List;
 
 /**
  * Represents the set of user-defined options for a request to build a package. Upon initialization, passed
- * as a parameter to the {@link com.exadel.aem.backpack.core.services.PackageService#createPackage(ResourceResolver, CreatePackageModel)}
+ * as a parameter to the {@link com.exadel.aem.backpack.core.services.PackageService#createPackage(ResourceResolver, PackageModel)}
  * @see com.exadel.aem.backpack.core.servlets.CreatePackageServlet
  */
 @RequestMapping
-public class CreatePackageModel {
+public class PackageModel {
 
     @RequestParam
     @Validate(validator = RequiredValidator.class,
@@ -44,13 +45,13 @@ public class CreatePackageModel {
     @RequestParam
     private String version;
 
-    @RequestParam
-    private boolean excludeChildren;
-
-    @RequestParam
+    @RequestParam(type = FieldType.MULTIFIELD)
     @Validate(validator = RequiredValidator.class,
             invalidMessages = "Resource filter(s) is required")
-    private List<String> paths;
+    private List<PathModel> paths;
+
+    @RequestParam
+    private String packagePath;
 
     /**
      * Gets the name of the current package
@@ -84,19 +85,12 @@ public class CreatePackageModel {
         return version;
     }
 
-    /**
-     * Gets whether child resource(-s) should be excluded from the current package build-up
-     * @return True or false
-     */
-    public boolean isExcludeChildren() {
-        return excludeChildren;
-    }
 
     /**
      * Gets the collection of JCR paths indicating separate resources (resource trees) to be included in this package
-     * @return True or false
+     * @return {@code List} of {@link PathModel}
      */
-    public List<String> getPaths() {
+    public List<PathModel> getPaths() {
         return paths;
     }
 
@@ -133,19 +127,27 @@ public class CreatePackageModel {
     }
 
     /**
-     * Sets a flag indicating whether child resource(-s) should be excluded from the current package build-up
-     * @param excludeChildren Boolean value
-     */
-    public void setExcludeChildren(final boolean excludeChildren) {
-        this.excludeChildren = excludeChildren;
-    }
-
-    /**
      * Assigns to the current instance the collection of JCR paths indicating separate resources (resource trees)
      * to be included in the package
      * @param paths {@code List<String>} object, non-empty list expected
      */
-    public void setPaths(final List<String> paths) {
+    public void setPaths(final List<PathModel> paths) {
         this.paths = paths;
+    }
+
+    /**
+     * Gets the package path
+     * @return String value
+     */
+    public String getPackagePath() {
+        return packagePath;
+    }
+
+    /**
+     * Assigns package path to the current instance
+     * @param packagePath current package path to assign
+     */
+    public void setPackagePath(final String packagePath) {
+        this.packagePath = packagePath;
     }
 }
