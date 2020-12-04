@@ -99,7 +99,7 @@ public interface PackageService {
     PackageInfo editPackage(ResourceResolver resourceResolver, PackageModel model);
 
     /**
-     * Method collect all folders under <i>/etc/packages</i> node
+     * The method to collect all folders under <i>/etc/packages</i> node
      * @param resourceResolver {@code ResourceResolver} instance used to find folders
      * @return {@code List} of folder resources
      */

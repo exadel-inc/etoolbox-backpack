@@ -77,6 +77,7 @@ public class PackageServiceImplTest {
     private static final String GENERAL_RESOURCES = "generalResources";
 
     private static final Gson GSON = new Gson();
+    protected static final String PACKAGE_2_2_ZIP = "testPackage2-2.zip";
 
     public abstract static class Base {
 
@@ -163,7 +164,6 @@ public class PackageServiceImplTest {
             }.getType();
             Type mapType = new TypeToken<Map<String, List<String>>>() {
             }.getType();
-
             Type patModelListType = new TypeToken<List<PathModel>>() {
             }.getType();
             try {
@@ -274,7 +274,7 @@ public class PackageServiceImplTest {
             PackageInfo aPackage = packageService.createPackage(resourceResolver, packageModel);
 
             assertEquals(PackageStatus.ERROR, aPackage.getPackageStatus());
-            assertEquals("ERROR: Package with such name already exists in the backpack group.", aPackage.getLog().get(0));
+            assertEquals("ERROR: Package with this name already exists in the backpack group.", aPackage.getLog().get(0));
 
             session.removeItem("/etc/packages/backpack/testPackage-1.zip");
         }
@@ -336,7 +336,7 @@ public class PackageServiceImplTest {
 
 
             assertEquals(MODIFIED, aPackage.getPackageStatus());
-            assertNotNull("testPackage2-2.zip", aPackage.getPackageNodeName());
+            assertNotNull(PACKAGE_2_2_ZIP, aPackage.getPackageNodeName());
             Node packageNode = session.getNode("/etc/packages/testGroup2/testPackage2-2.zip");
             assertNotNull(packageNode);
             verifyPackageFilters(packageNode, Collections.singletonList(PAGE_2), Collections.singletonList(new PathModel(PAGE_2, false)), modifiedReferencedResources);
@@ -354,7 +354,7 @@ public class PackageServiceImplTest {
             PackageInfo aPackage = packageService.editPackage(resourceResolver, packageModel);
 
             assertEquals(ERROR, aPackage.getPackageStatus());
-            assertEquals("ERROR: Package with such name already exists in the testGroup2 group.", aPackage.getLog().get(0));
+            assertEquals("ERROR: Package with this name already exists in the testGroup2 group.", aPackage.getLog().get(0));
         }
 
         @Test
@@ -366,7 +366,7 @@ public class PackageServiceImplTest {
             PackageInfo aPackage = packageService.editPackage(resourceResolver, packageModel);
 
             assertEquals(MODIFIED, aPackage.getPackageStatus());
-            assertNotNull("testPackage2-2.zip", aPackage.getPackageNodeName());
+            assertNotNull(PACKAGE_2_2_ZIP, aPackage.getPackageNodeName());
             Node packageNode = session.getNode("/etc/packages/testGroup2/testPackage2-2.zip");
             assertNotNull(packageNode);
             verifyPackageFilters(packageNode, Collections.singletonList(PAGE_1 + "/jcr:content"), Collections.singletonList(new PathModel(PAGE_1, true)), referencedResources);
@@ -461,7 +461,7 @@ public class PackageServiceImplTest {
 
 
         @Before
-        public void before() throws  RepositoryException {
+        public void before() throws RepositoryException {
 
             rootNode = context.create().resource("/etc/packages").adaptTo(Node.class);
             Node slingFolder = rootNode.addNode("slingFolder", JcrResourceConstants.NT_SLING_FOLDER);
