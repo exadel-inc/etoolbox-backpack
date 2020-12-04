@@ -14,10 +14,14 @@
 
 $(function () {
     var path = new URL(window.location.href).searchParams.get('path')
-                || (window.location.href.indexOf('.html/') ? window.location.href.split('.html').pop() : '');
+        || (window.location.href.indexOf('.html/') ? window.location.href.split('.html').pop() : ''),
+        packageGroupPath,
+        packageName,
+        goBackLink;
     var BUILT = 'BUILT',
-        BUILD_IN_PROGRESS = 'BUILD_IN_PROGRESS';
-    var $packageName = $('#packageName'),
+        BUILD_IN_PROGRESS = 'BUILD_IN_PROGRESS',
+        COMMAND_URL = Granite.HTTP.externalize("/bin/wcmcommand");
+    $packageName = $('#packageName'),
         $name = $('#name'),
         $version = $('#version'),
         $lastBuilt = $('#lastBuilt-time'),
@@ -28,11 +32,25 @@ $(function () {
         $referencedResourcesList = $('#referencedResourcesList'),
         $testBuildButton = $('#testBuildButton'),
         $downloadBtn = $('#downloadBtn'),
+        $deleteButton = $("#deleteButton"),
         $buildLog = $('#buildLog'),
         $buildLogWrapper = $('#build-log-wrapper'),
         $containerInner = $('.content-container-inner'),
-        $errorContainer = $('.content-error-container');
-
+        $errorContainer = $('.content-error-container'),
+        $closeLink = $('#shell-propertiespage-closeactivator'),
+        $goBackSection = $('#goBackLink');
+    if (path) {
+        var lastIndex = path.lastIndexOf('/');
+        packageName = path.substring(lastIndex + 1);
+        packageGroupPath = path.substring(0, lastIndex);
+        if (packageGroupPath) {
+            goBackLink = "/backpack.html/?group=" + packageGroupPath;
+        } else {
+            goBackLink = "/backpack.html/?group=/etc/packages/backpack";
+        }
+        $closeLink.attr('href', goBackLink);
+        $goBackSection.find('a').attr('href', goBackLink);
+    }
     if (path && $packageName.length !== 0) {
         disableAllActions();
         getPackageInfo(path, function (data) {
@@ -141,6 +159,7 @@ $(function () {
         $testBuildButton.prop('disabled', true);
         $buildButton.prop('disabled', true);
     }
+
     function packageBuilt() {
         $buildButton.text('Rebuild');
         $downloadBtn.prop('disabled', false);
@@ -225,4 +244,64 @@ $(function () {
             $packageSize.text('Package size: ' + bytesToSize(data.dataSize));
         }
     }
+
+
+    $deleteButton.click(function () {
+        if (!path) {
+            return;
+        }
+
+        var ui = $(window).adaptTo("foundation-ui");
+        var message = createEl("div");
+        var intro = createEl("p").appendTo(message);
+
+        intro.text(Granite.I18n.get("You are going to delete the following package:"));
+        createEl("p").html(createEl("b")).text(packageName).appendTo(message);
+        ui.prompt(Granite.I18n.get("Delete"), message.html(), "notice", [{
+            text: Granite.I18n.get("Cancel")
+        }, {
+            text: Granite.I18n.get("Delete"),
+            warning: true,
+            handler: function () {
+                deleteAction();
+            }
+        }]);
+
+    });
+
+
+    function deleteAction() {
+
+        var data = {
+            _charset_: "UTF-8",
+            cmd: "deletePage",
+            path: path,
+            force: true
+        };
+
+        $.post(COMMAND_URL, data).done(function () {
+            showAlert("Package deleted", "Delete", function () {
+                window.location.href = goBackLink;
+            });
+        });
+    }
+
+    function showAlert(message, title, callback) {
+        var fui = $(window).adaptTo("foundation-ui"),
+            options = [{
+                id: "ok",
+                text: "OK",
+                primary: true
+            }];
+
+        message = message || "Unknown Error";
+        title = title || "Error";
+
+        fui.prompt(title, message, "warning", options, callback);
+    }
+
+    function createEl(name) {
+        return $(document.createElement(name));
+    }
+
 });
