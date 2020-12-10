@@ -329,6 +329,12 @@
                 <version>2.1.6</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <artifactId>geronimo-atinject_1.0_spec</artifactId>
+                <version>1.0</version>
+                <groupId>org.apache.geronimo.specs</groupId>
+                <scope>provided</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>

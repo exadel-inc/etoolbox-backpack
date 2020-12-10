@@ -14,7 +14,9 @@
 
 package com.exadel.aem.backpack.core.services.impl;
 
+import acscommons.io.jsonwebtoken.lang.Assert;
 import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
+import com.exadel.aem.backpack.core.dto.response.JcrPackageWrapper;
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
 import com.exadel.aem.backpack.core.services.PackageService;
@@ -47,10 +49,13 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.exadel.aem.backpack.core.dto.response.PackageStatus.*;
+import static javax.servlet.http.HttpServletResponse.SC_CONFLICT;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -461,7 +466,7 @@ public class PackageServiceImplTest {
 
 
         @Before
-        public void before() throws  RepositoryException {
+        public void before() throws RepositoryException {
 
             rootNode = context.create().resource("/etc/packages").adaptTo(Node.class);
             Node slingFolder = rootNode.addNode("slingFolder", JcrResourceConstants.NT_SLING_FOLDER);
@@ -764,6 +769,107 @@ public class PackageServiceImplTest {
             boolean result = packageService.packageExists(resourceResolver, packageInfoModel);
 
             assertTrue(result);
+        }
+
+        @Test
+        public void shouldReturnJcrPackageWrapperWithEmptyJcrPackage_whenByteArrayEmptyOfZipFile() {
+
+            JcrPackageWrapper jcrPackageWrapper = packageService.uploadPackage(session, "".getBytes(), false);
+
+            Assert.notNull(jcrPackageWrapper);
+            assertEquals("zip file is empty", jcrPackageWrapper.getMessage());
+            assertEquals(SC_CONFLICT, jcrPackageWrapper.getStatusCode());
+        }
+
+        @Test
+        public void shouldReturnJcrPackageWrapperWithEmptyJcrPackage_whenByteArrayNullOfZipFile() {
+
+            JcrPackageWrapper jcrPackageWrapper = packageService.uploadPackage(session, null, false);
+
+            Assert.notNull(jcrPackageWrapper);
+            assertEquals("An incorrect value of parameter(s)", jcrPackageWrapper.getMessage());
+            assertEquals(SC_CONFLICT, jcrPackageWrapper.getStatusCode());
+        }
+
+        @Test
+        public void shouldReturnJcrPackageWrapperWithEmptyJcrPackage_whenByteArrayNullOfZipFileAndSessionNull() {
+
+            JcrPackageWrapper jcrPackageWrapper = packageService.uploadPackage(null, null, false);
+
+            Assert.notNull(jcrPackageWrapper);
+            assertEquals("An incorrect value of parameter(s)", jcrPackageWrapper.getMessage());
+            assertEquals(SC_CONFLICT, jcrPackageWrapper.getStatusCode());
+        }
+
+        @Test
+        public void shouldReturnJcrPackageWrapperWithJcrPackage_whenByteArrayNoEmptyAndZipFileValid() throws IOException, RepositoryException {
+            byte[] bytes = PackageServiceImplTest.readByteArrayFromFile("/com/exadel/aem/backpack/core/services/impl/test_back_pack.zip");
+            JcrPackageWrapper jcrPackageWrapper = packageService.uploadPackage(session, bytes, false);
+
+            Assert.notNull(jcrPackageWrapper);
+            assertEquals(0, jcrPackageWrapper.getStatusCode());
+            assertEquals("{\"statusCode\":0}", jcrPackageWrapper.getJson());
+            Assert.isNull(jcrPackageWrapper.getMessage());
+
+            JcrPackage jcrPackage = jcrPackageWrapper.getJcrPackage();
+            Assert.notNull(jcrPackage);
+            assertEquals("test_back_pack", jcrPackage.getPackage().getId().getName());
+            assertEquals("backpack", jcrPackage.getPackage().getId().getGroup());
+        }
+
+        @Test
+        public void shouldReturnPackageInfoWithJcrPackage_whenByteArrayNoEmptyAndZipFileValid() {
+            byte[] bytes = PackageServiceImplTest.readByteArrayFromFile("/com/exadel/aem/backpack/core/services/impl/test_back_pack.zip");
+            JcrPackageWrapper jcrPackageWrapper = packageService.uploadPackage(session, bytes, false);
+
+            Assert.notNull(jcrPackageWrapper);
+            Assert.isNull(jcrPackageWrapper.getMessage());
+
+            PackageInfo packageInfo = packageService.getPackageInfo(jcrPackageWrapper.getJcrPackage());
+
+            String packageInfoJson = GSON.toJson(packageInfo);
+            assertEquals("{\"packageName\":\"test_back_pack\",\"packageNodeName\":\"test_back_pack.zip\",\"groupName\":\"backpack\",\"version\":\"\",\"packageBuilt\":{\"year\":2020,\"month\":11,\"dayOfMonth\":7,\"hourOfDay\":15,\"minute\":43,\"second\":45},\"packageStatus\":\"BUILT\",\"packagePath\":\"/etc/packages/backpack/test_back_pack.zip\",\"paths\":[\"/content/we-retail/ca/en/about-us\"],\"referencedResources\":{\"image/jpeg\":[\"/content/dam/we-retail/en/activities/hiking-camping/trekker-ama-dablam.jpg\"]},\"log\":[],\"dataSize\":22283}", packageInfoJson);
+        }
+
+        @Test
+        public void shouldReturnWrapperWithErrorMsgPackageAlreadyExist_whenUploadArchiveTwiceWithForceUpdateFalse() {
+            byte[] bytes = PackageServiceImplTest.readByteArrayFromFile("/com/exadel/aem/backpack/core/services/impl/test_back_pack.zip");
+            JcrPackageWrapper jcrPackageWrapper = packageService.uploadPackage(session, bytes, false);
+
+            Assert.notNull(jcrPackageWrapper);
+            Assert.isNull(jcrPackageWrapper.getMessage());
+
+            JcrPackageWrapper jcrPackageWrapper2 = packageService.uploadPackage(session, bytes, false);
+
+            assertEquals("Package already exists: /etc/packages/backpack/test_back_pack.zip", jcrPackageWrapper2.getMessage());
+            assertEquals(SC_CONFLICT, jcrPackageWrapper2.getStatusCode());
+
+        }
+
+        @Test
+        public void shouldReturnRewritePackage_whenUploadArchiveTwiceWithForceUpdateTrue() {
+            byte[] bytes = PackageServiceImplTest.readByteArrayFromFile("/com/exadel/aem/backpack/core/services/impl/test_back_pack.zip");
+            JcrPackageWrapper jcrPackageWrapper = packageService.uploadPackage(session, bytes, false);
+
+            Assert.notNull(jcrPackageWrapper);
+            Assert.isNull(jcrPackageWrapper.getMessage());
+
+            JcrPackageWrapper jcrPackageWrapper2 = packageService.uploadPackage(session, bytes, true);
+
+            PackageInfo packageInfo2 = packageService.getPackageInfo(jcrPackageWrapper2.getJcrPackage());
+
+            String packageInfoJson = GSON.toJson(packageInfo2);
+            assertEquals("{\"packageName\":\"test_back_pack\",\"packageNodeName\":\"test_back_pack.zip\",\"groupName\":\"backpack\",\"version\":\"\",\"packageBuilt\":{\"year\":2020,\"month\":11,\"dayOfMonth\":7,\"hourOfDay\":15,\"minute\":43,\"second\":45},\"packageStatus\":\"BUILT\",\"packagePath\":\"/etc/packages/backpack/test_back_pack.zip\",\"paths\":[\"/content/we-retail/ca/en/about-us\"],\"referencedResources\":{\"image/jpeg\":[\"/content/dam/we-retail/en/activities/hiking-camping/trekker-ama-dablam.jpg\"]},\"log\":[],\"dataSize\":22283}", packageInfoJson);
+
+        }
+    }
+
+    public static byte[] readByteArrayFromFile(final String classpathResource) {
+        String filePath = "src/test/resources".concat(classpathResource);
+        try {
+            return Files.readAllBytes(Paths.get(filePath));
+        } catch (IOException var11) {
+            return null;
         }
     }
 }

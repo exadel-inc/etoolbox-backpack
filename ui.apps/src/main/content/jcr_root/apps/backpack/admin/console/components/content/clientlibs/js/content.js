@@ -13,7 +13,50 @@
  */
 
 $(function () {
-    $('#indexTypeSelect').change(function() {
+    $('#indexTypeSelect').change(function () {
         $(this).closest('form').submit();
     })
 });
+
+(function (window, $, URITemplate) {
+    'use strict';
+
+    $(window).adaptTo('foundation-registry').register('foundation.form.response.ui.success', {
+        name: 'backpack.prompt.open',
+        handler: function (form, config, data, textStatus, xhr) {
+            function errorPopup(ui, dataJson) {
+                $(window).adaptTo('foundation-ui').prompt(Granite.I18n.get('Error'), dataJson.message, 'error', [{
+                    text: Granite.I18n.get('Cancel'),
+                    handler: function () {
+                        open(URITemplate.expand(config.redirect, {}));
+                    }
+                }]);
+            }
+
+            function successPopup(ui, dataJson) {
+                ui.prompt(config.title, config.message, 'success', [{
+                    text: Granite.I18n.get('Done'),
+                    handler: function () {
+                        open(URITemplate.expand(config.redirect, dataJson));
+                    }
+                }, {
+                    text: Granite.I18n.get('Open'),
+                    primary: true,
+                    handler: function () {
+                        open(URITemplate.expand(config.open, dataJson), true);
+                        open(URITemplate.expand(config.redirect, dataJson));
+                    }
+                }]);
+            }
+
+            var ui = $(window).adaptTo('foundation-ui'),
+                dataJson = JSON.parse(data);
+
+            if (dataJson && !!dataJson.statusCode) {
+                errorPopup(ui, dataJson);
+            } else {
+                successPopup(ui, dataJson);
+            }
+        }
+    });
+})(window, Granite.$, Granite.URITemplate);

@@ -129,6 +129,27 @@
                             path="${requestPathInfo.suffix}"
                             privileges="jcr:addChildNodes"/>
                 </create>
+                <upload
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/pulldown"
+                        text="Upload"
+                        variant="primary">
+                    <items jcr:primaryType="nt:unstructured">
+                        <createpackage
+                                granite:rel="cq-backpack-uploadpackage"
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
+                                action="foundation.dialog"
+                                icon="experience"
+                                target=".screens-dcc-collection-resources"
+                                text="Package">
+                            <data
+                                    jcr:primaryType="nt:unstructured"
+                                    nesting="hide"
+                                    src.uritemplate="/apps/backpack/admin/console/page/content/uploadpackagedialog.html"/>
+                        </createpackage>
+                    </items>
+                </upload>
             </secondary>
         </actions>
     </jcr:content>
@@ -147,6 +168,7 @@
                 <successresponse
                         jcr:primaryType="nt:unstructured"
                         jcr:title="Success"
+                        jcr:titleError="Error"
                         sling:resourceType="granite/ui/components/coral/foundation/form/responses/openprompt"
                         open="/backpack/buildPackage.html?path={packagePath}"
                         redirect="/backpack.html${granite:encodeURIPath(requestPathInfo.suffix)}"
@@ -224,6 +246,68 @@
             </form>
         </items>
     </createpagedialog>
+    <uploadpackagedialog
+            jcr:primaryType="nt:unstructured"
+            jcr:title="Upload package"
+            sling:resourceType="granite/ui/components/coral/foundation/dialog">
+        <items jcr:primaryType="nt:unstructured">
+            <form
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/form"
+                    action="/services/backpack/uploadPackage"
+                    foundationForm="{Boolean}true"
+                    maximized="{Boolean}true"
+                    method="post"
+                    enctype="multipart/form-data"
+                    style="vertical">
+                <successresponse
+                        jcr:primaryType="nt:unstructured"
+                        jcr:title="Success"
+                        sling:resourceType="backpack/admin/console/components/openprompt"
+                        open="/backpack/buildPackage.html?path={packagePath}"
+                        redirect="/backpack.html${granite:encodeURIPath(requestPathInfo.suffix)}"
+                        text="Your package has been uploaded."/>
+                <items jcr:primaryType="nt:unstructured">
+                    <content jcr:primaryType="nt:unstructured"
+                             jcr:title="Package setup"
+                             sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns">
+                        <items jcr:primaryType="nt:unstructured">
+                            <column
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container">
+                                <items jcr:primaryType="nt:unstructured">
+                                    <fileupload
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/fileupload"
+                                            fieldLabel="Package"
+                                            mimeTypes="[application/zip,application/x-zip-compressed,application/x-compressed]"
+                                            multiple="{Boolean}false"
+                                            name="fileupload"
+                                            required="{Boolean}true"
+                                            text="Select package..."/>
+                                    <forceUpload
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
+                                            fieldDescription="Check to overwrite existing packages"
+                                            name="forceUpdate"
+                                            text="Force Upload:"
+                                            uncheckedValue="false"
+                                            variant="primary"
+                                            value="true"/>
+                                    <upload
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                                            text="Upload"
+                                            type="submit"
+                                            variant="primary"/>
+                                </items>
+                            </column>
+                        </items>
+                    </content>
+                </items>
+            </form>
+        </items>
+    </uploadpackagedialog>
     <editpagedialog
             jcr:primaryType="nt:unstructured"
             sling:resourceType="backpack/admin/console/components/editDialog">
