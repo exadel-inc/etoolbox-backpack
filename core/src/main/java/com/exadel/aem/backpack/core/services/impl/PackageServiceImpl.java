@@ -1112,10 +1112,13 @@ public class PackageServiceImpl implements PackageService {
     }
 
     private File getFile(final byte[] fileUpload) throws IOException {
-        File tmpFile = allocateTmpFile();
-        FileOutputStream out = new FileOutputStream(tmpFile);
-        out.write(fileUpload);
-        out.close();
+        File tmpFile = null;
+        tmpFile = allocateTmpFile();
+        try (FileOutputStream out = new FileOutputStream(tmpFile)) {
+            out.write(fileUpload);
+        } catch (IOException e) {
+            LOGGER.error("Cannot create temp archive.", e);
+        }
 
         return tmpFile;
     }

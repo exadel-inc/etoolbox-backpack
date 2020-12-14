@@ -25,6 +25,8 @@ import org.apache.sling.models.annotations.injectorspecific.Self;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+
 /**
  * Represents the open prompt props.
  */
@@ -38,27 +40,27 @@ public class OpenPromptModel {
     private transient Resource resource;
 
     @Inject
-    @Default(values = "")
+    @Default(values = EMPTY)
     private String open;
 
     @Inject
-    @Default(values = "")
+    @Default(values = EMPTY)
     private String redirect;
 
     @Inject
-    @Default(values = "")
+    @Default(values = EMPTY)
     @Named("jcr:title")
     private String title;
 
     @Inject
-    @Default(values = "")
+    @Default(values = EMPTY)
     @Named("text")
     private String message;
 
     /**
      * Gets name of open-promp foundation-registry
      *
-     * @return String
+     * @return String value
      */
     public String getName() {
         return name;
@@ -67,7 +69,7 @@ public class OpenPromptModel {
     /**
      * Gets the URI Template to open the newly created resource
      *
-     * @return String
+     * @return String value
      */
     public String getOpen() {
         return open;
@@ -76,7 +78,7 @@ public class OpenPromptModel {
     /**
      * Gets the URI Template to redirect to
      *
-     * @return String
+     * @return String value
      */
     public String getRedirect() {
         return redirect;
@@ -85,7 +87,7 @@ public class OpenPromptModel {
     /**
      * Gets the title of the prompt
      *
-     * @return String
+     * @return String value
      */
     public String getTitle() {
         return title;
@@ -94,7 +96,7 @@ public class OpenPromptModel {
     /**
      * Gets the message of the prompt
      *
-     * @return String
+     * @return String value
      */
     public String getMessage() {
         return message;
@@ -103,7 +105,7 @@ public class OpenPromptModel {
     /**
      * Gets JSON representation of current object
      *
-     * @return String
+     * @return String value
      */
     public String getJson() {
         Gson gson = new Gson();
