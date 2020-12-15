@@ -7,7 +7,6 @@ import com.exadel.aem.backpack.core.services.PackageService;
 import com.exadel.aem.backpack.request.RequestAdapter;
 import com.exadel.aem.backpack.request.impl.RequestAdapterImpl;
 import io.wcm.testing.mock.aem.junit.AemContext;
-import org.apache.jackrabbit.vault.packaging.JcrPackage;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -27,7 +26,6 @@ public class UploadPackageServletTest {
 
     @Rule
     public final AemContext context = new AemContext();
-    private final JcrPackage jcrPackage = mock(JcrPackage.class);
     private final PackageService packageServiceMock = mock(PackageService.class);
     private UploadPackageServlet servlet;
 
@@ -46,13 +44,12 @@ public class UploadPackageServletTest {
 
         assertEquals(HttpServletResponse.SC_OK, context.response().getStatus());
         assertEquals("application/json;charset=UTF-8", context.response().getContentType());
-        assertEquals("{\"message\":\"Something went wrong! Please ask administrator for assistance.\",\"statusCode\":409}", context.response().getOutputAsString());
+        assertEquals("{\"packageName\":\"some-name.zip\",\"version\":\"some-version\",\"packageStatus\":\"BUILT\",\"packagePath\":\"/some/path\",\"referencedResources\":{},\"log\":[]}", context.response().getOutputAsString());
     }
 
     @Test
     public void shouldReturnSuccessRequest() throws IOException {
         when(packageServiceMock.uploadPackage(null, null, false)).thenReturn(getSuccessJcrPackageWrapper());
-        when(packageServiceMock.getPackageInfo(jcrPackage)).thenReturn(getPackageInfoObj());
 
         servlet.doPost(context.request(), context.response());
 
@@ -82,10 +79,11 @@ public class UploadPackageServletTest {
     }
 
     private JcrPackageWrapper getSuccessJcrPackageWrapper() {
+
         JcrPackageWrapper jcrPackageWrapper = new JcrPackageWrapper();
         jcrPackageWrapper.setMessage("An incorrect value of parameter(s)");
         jcrPackageWrapper.setStatusCode(SC_CONFLICT);
-        jcrPackageWrapper.setJcrPackage(jcrPackage);
+        jcrPackageWrapper.setPackageInfo(getPackageInfoObj());
 
         return jcrPackageWrapper;
     }

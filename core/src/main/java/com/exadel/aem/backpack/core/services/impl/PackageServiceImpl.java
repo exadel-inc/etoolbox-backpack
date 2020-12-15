@@ -1081,6 +1081,7 @@ public class PackageServiceImpl implements PackageService {
                                            final boolean forceUpdate) {
         JcrPackageWrapper jcrPackageWrapper = new JcrPackageWrapper();
         File fileUpload = null;
+        JcrPackage uploadedPackage = null;
 
         if (session != null && fileUploadBytesArray != null) {
             JcrPackageManager packageManager = getPackageManager(session);
@@ -1090,8 +1091,8 @@ public class PackageServiceImpl implements PackageService {
                 final boolean isTempFile = true;
                 final boolean strict = true;
 
-                JcrPackage upload = packageManager.upload(fileUpload, isTempFile, forceUpdate, nameHint, strict);
-                jcrPackageWrapper.setJcrPackage(upload);
+                uploadedPackage = packageManager.upload(fileUpload, isTempFile, forceUpdate, nameHint, strict);
+                jcrPackageWrapper.setPackageInfo(getPackageInfo(uploadedPackage));
 
                 return jcrPackageWrapper;
             } catch (Exception e) {
@@ -1101,6 +1102,10 @@ public class PackageServiceImpl implements PackageService {
             } finally {
                 if (fileUpload != null) {
                     fileUpload.delete();
+                }
+
+                if (uploadedPackage != null) {
+                    uploadedPackage.close();
                 }
             }
         } else {

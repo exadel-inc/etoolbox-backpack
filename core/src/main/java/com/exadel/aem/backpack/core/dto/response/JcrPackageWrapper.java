@@ -15,27 +15,28 @@
 package com.exadel.aem.backpack.core.dto.response;
 
 import com.google.gson.Gson;
-import org.apache.jackrabbit.vault.packaging.JcrPackage;
 
 /**
  * Represents the package modification info.
  */
 public class JcrPackageWrapper {
 
-    private transient JcrPackage jcrPackage;
+    private transient PackageInfo packageInfo;
     private String message;
     private int statusCode;
 
     /**
-     * Sets JcrPackage object
-     * @param jcrPackage {@link JcrPackage} value
+     * Sets PackageInfo object
+     *
+     * @param packageInfo {@link PackageInfo} value
      */
-    public void setJcrPackage(final JcrPackage jcrPackage) {
-        this.jcrPackage = jcrPackage;
+    public void setPackageInfo(final PackageInfo packageInfo) {
+        this.packageInfo = packageInfo;
     }
 
     /**
      * Sets error msg value
+     *
      * @param message {@link String} value
      */
     public void setMessage(final String message) {
@@ -44,6 +45,7 @@ public class JcrPackageWrapper {
 
     /**
      * Sets http(s) status code
+     *
      * @param statusCode {@link int} value
      */
     public void setStatusCode(final int statusCode) {
@@ -51,12 +53,12 @@ public class JcrPackageWrapper {
     }
 
     /**
-     * Gets JcrPackage object
+     * Gets PackageInfo object
      *
-     * @return JcrPackage object
+     * @return PackageInfo object
      */
-    public JcrPackage getJcrPackage() {
-        return jcrPackage;
+    public PackageInfo getPackageInfo() {
+        return packageInfo;
     }
 
     /**
@@ -78,12 +80,12 @@ public class JcrPackageWrapper {
     }
 
     /**
-     * Checks jcr-package object is exist
+     * Checks package-info object is exist
      *
      * @return true or false value
      */
     public boolean isExist() {
-        return jcrPackage != null;
+        return packageInfo != null;
     }
 
     /**

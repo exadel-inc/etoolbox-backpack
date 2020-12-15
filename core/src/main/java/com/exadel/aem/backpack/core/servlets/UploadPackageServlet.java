@@ -33,7 +33,6 @@ import java.io.PrintWriter;
 import static com.exadel.aem.backpack.core.servlets.BuildPackageServlet.APPLICATION_JSON;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static javax.servlet.http.HttpServletResponse.SC_CONFLICT;
 
 /**
  * Serves as the network endpoint for user requests that trigger package creation<br><br>
@@ -95,13 +94,10 @@ public class UploadPackageServlet extends SlingAllMethodsServlet {
         response.setContentType(APPLICATION_JSON);
         response.setCharacterEncoding(UTF_8.name());
         if (jcrPackageWrapper.isExist()) {
-            PackageInfo packageInfo = packageService.getPackageInfo(jcrPackageWrapper.getJcrPackage());
+            PackageInfo packageInfo = jcrPackageWrapper.getPackageInfo();
             if (packageInfo != null) {
                 writeSuccess(response, packageInfo);
                 return;
-            } else {
-                jcrPackageWrapper.setStatusCode(SC_CONFLICT);
-                jcrPackageWrapper.setMessage("Something went wrong! Please ask administrator for assistance.");
             }
         }
 

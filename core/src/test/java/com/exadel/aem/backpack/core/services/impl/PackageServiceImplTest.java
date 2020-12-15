@@ -811,10 +811,10 @@ public class PackageServiceImplTest {
             assertEquals("{\"statusCode\":0}", jcrPackageWrapper.getJson());
             Assert.isNull(jcrPackageWrapper.getMessage());
 
-            JcrPackage jcrPackage = jcrPackageWrapper.getJcrPackage();
-            Assert.notNull(jcrPackage);
-            assertEquals("test_back_pack", jcrPackage.getPackage().getId().getName());
-            assertEquals("backpack", jcrPackage.getPackage().getId().getGroup());
+            PackageInfo packageInfo = jcrPackageWrapper.getPackageInfo();
+            Assert.notNull(packageInfo);
+            assertEquals("test_back_pack", packageInfo.getPackageName());
+            assertEquals("backpack", packageInfo.getGroupName());
         }
 
         @Test
@@ -825,7 +825,7 @@ public class PackageServiceImplTest {
             Assert.notNull(jcrPackageWrapper);
             Assert.isNull(jcrPackageWrapper.getMessage());
 
-            PackageInfo packageInfo = packageService.getPackageInfo(jcrPackageWrapper.getJcrPackage());
+            PackageInfo packageInfo = jcrPackageWrapper.getPackageInfo();
 
             String packageInfoJson = GSON.toJson(packageInfo);
             assertEquals("{\"packageName\":\"test_back_pack\",\"packageNodeName\":\"test_back_pack.zip\",\"groupName\":\"backpack\",\"version\":\"\",\"packageBuilt\":{\"year\":2020,\"month\":11,\"dayOfMonth\":7,\"hourOfDay\":15,\"minute\":43,\"second\":45},\"packageStatus\":\"BUILT\",\"packagePath\":\"/etc/packages/backpack/test_back_pack.zip\",\"paths\":[\"/content/we-retail/ca/en/about-us\"],\"referencedResources\":{\"image/jpeg\":[\"/content/dam/we-retail/en/activities/hiking-camping/trekker-ama-dablam.jpg\"]},\"log\":[],\"dataSize\":22283}", packageInfoJson);
@@ -856,7 +856,7 @@ public class PackageServiceImplTest {
 
             JcrPackageWrapper jcrPackageWrapper2 = packageService.uploadPackage(session, bytes, true);
 
-            PackageInfo packageInfo2 = packageService.getPackageInfo(jcrPackageWrapper2.getJcrPackage());
+            PackageInfo packageInfo2 = jcrPackageWrapper2.getPackageInfo();
 
             String packageInfoJson = GSON.toJson(packageInfo2);
             assertEquals("{\"packageName\":\"test_back_pack\",\"packageNodeName\":\"test_back_pack.zip\",\"groupName\":\"backpack\",\"version\":\"\",\"packageBuilt\":{\"year\":2020,\"month\":11,\"dayOfMonth\":7,\"hourOfDay\":15,\"minute\":43,\"second\":45},\"packageStatus\":\"BUILT\",\"packagePath\":\"/etc/packages/backpack/test_back_pack.zip\",\"paths\":[\"/content/we-retail/ca/en/about-us\"],\"referencedResources\":{\"image/jpeg\":[\"/content/dam/we-retail/en/activities/hiking-camping/trekker-ama-dablam.jpg\"]},\"log\":[],\"dataSize\":22283}", packageInfoJson);
