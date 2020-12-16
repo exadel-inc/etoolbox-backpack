@@ -18,6 +18,7 @@ import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.dam.api.Asset;
 import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
+import com.exadel.aem.backpack.core.dto.response.JcrPackageWrapper;
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
 import com.exadel.aem.backpack.core.services.PackageService;
@@ -55,6 +56,8 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.SimpleCredentials;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.*;
@@ -62,6 +65,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import static javax.servlet.http.HttpServletResponse.SC_CONFLICT;
 
 /**
  * Implements {@link PackageService} to facilitate routines for managing packages and reporting packages' status info
@@ -583,6 +588,26 @@ public class PackageServiceImpl implements PackageService {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PackageInfo getPackageInfo(final JcrPackage jcrPackage) {
+        PackageInfo packageInfo = new PackageInfo();
+        try {
+            if (jcrPackage != null) {
+                getPackageInfo(packageInfo, jcrPackage, jcrPackage.getNode());
+
+                return packageInfo;
+            }
+        } catch (RepositoryException e) {
+            addExceptionToLog(packageInfo, e);
+            LOGGER.error("Error during package opening", e);
+        }
+
+        return null;
+    }
+
+    /**
      * Called by {@link PackageServiceImpl#getPackageInfo(ResourceResolver, PackageInfoModel)} to populate a preliminarily
      * initialized {@link PackageInfo} object as it represents an <i>actual</i> storage item, with information on
      * package specifics
@@ -1011,7 +1036,7 @@ public class PackageServiceImpl implements PackageService {
      * Called from {@link PackageServiceImpl#getPackageFolders(ResourceResolver)} for getting folder resources recursively )}
      *
      * @param packageGroups {@code List} of folder resources
-     * @param resource {@code Resource} under which search occur
+     * @param resource      {@code Resource} under which search occur
      * @return {@code List} of folder resources
      */
     private List<Resource> getFolderResources(final List<Resource> packageGroups, final Resource resource) {
@@ -1047,4 +1072,63 @@ public class PackageServiceImpl implements PackageService {
         return packageInfos;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public JcrPackageWrapper uploadPackage(final Session session,
+                                           final byte[] fileUploadBytesArray,
+                                           final boolean forceUpdate) {
+        JcrPackageWrapper jcrPackageWrapper = new JcrPackageWrapper();
+        File fileUpload = null;
+        JcrPackage uploadedPackage = null;
+
+        if (session != null && fileUploadBytesArray != null) {
+            JcrPackageManager packageManager = getPackageManager(session);
+            try {
+                fileUpload = getFile(fileUploadBytesArray);
+                String nameHint = "uploaded_package_name";
+                final boolean isTempFile = true;
+                final boolean strict = true;
+
+                uploadedPackage = packageManager.upload(fileUpload, isTempFile, forceUpdate, nameHint, strict);
+                jcrPackageWrapper.setPackageInfo(getPackageInfo(uploadedPackage));
+
+                return jcrPackageWrapper;
+            } catch (Exception e) {
+                LOGGER.error("Cannot upload package: {}", e.getMessage(), e);
+                jcrPackageWrapper.setMessage(e.getMessage());
+                jcrPackageWrapper.setStatusCode(SC_CONFLICT);
+            } finally {
+                if (fileUpload != null) {
+                    fileUpload.delete();
+                }
+
+                if (uploadedPackage != null) {
+                    uploadedPackage.close();
+                }
+            }
+        } else {
+            jcrPackageWrapper.setMessage("An incorrect value of parameter(s)");
+            jcrPackageWrapper.setStatusCode(SC_CONFLICT);
+        }
+
+        return jcrPackageWrapper;
+    }
+
+    private File getFile(final byte[] fileUpload) throws IOException {
+        File tmpFile = null;
+        tmpFile = allocateTmpFile();
+        try (FileOutputStream out = new FileOutputStream(tmpFile)) {
+            out.write(fileUpload);
+        } catch (IOException e) {
+            LOGGER.error("Cannot create temp archive.", e);
+        }
+
+        return tmpFile;
+    }
+
+    private File allocateTmpFile() throws IOException {
+        return File.createTempFile("crx_backpack__", ".zip");
+    }
 }

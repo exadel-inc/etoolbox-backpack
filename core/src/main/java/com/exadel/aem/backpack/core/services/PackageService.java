@@ -14,14 +14,17 @@
 
 package com.exadel.aem.backpack.core.services;
 
+import com.exadel.aem.backpack.core.dto.response.JcrPackageWrapper;
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.servlets.model.BuildPackageModel;
 import com.exadel.aem.backpack.core.servlets.model.PackageModel;
 import com.exadel.aem.backpack.core.servlets.model.LatestPackageInfoModel;
 import com.exadel.aem.backpack.core.servlets.model.PackageInfoModel;
+import org.apache.jackrabbit.vault.packaging.JcrPackage;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
+import javax.jcr.Session;
 import java.util.List;
 
 /**
@@ -66,6 +69,15 @@ public interface PackageService {
      */
     PackageInfo testBuildPackage(ResourceResolver resourceResolver, BuildPackageModel buildPackageModel);
 
+
+    /**
+     * Gets structured information about a package specified in a jcr-package object. This information can be subsequently serialized
+     * to a JSON-coded HTTP response
+     * @param jcrPackage {@code JcrPackage} instance containing requisites of the required package
+     * @return {@link PackageInfo} instance
+     */
+    PackageInfo getPackageInfo(JcrPackage jcrPackage);
+
     /**
      * Gets a chunk of rolling package building process update according to options specified in the HTTP request
      * @param latestPackageInfoModel {@link LatestPackageInfoModel} containing requisites of of required log information
@@ -104,5 +116,14 @@ public interface PackageService {
      * @return {@code List} of folder resources
      */
     List<Resource> getPackageFolders(ResourceResolver resourceResolver);
+
+    /**
+     * Method upload package by byte[] array representation
+     * @param session {@code Session} instance used to adapt to JcrPackageManager object.
+     * @param fileUploadBytesArray {@code byte[]} instance used provides the content of the package.
+     * @param forceUpdate {@code boolean} if true existing packages will be replaced
+     * @return {@code JcrPackageWrapper} the jcr-package with additional information
+     */
+    JcrPackageWrapper uploadPackage(Session session, byte[] fileUploadBytesArray, boolean forceUpdate);
 
 }
