@@ -15,6 +15,7 @@
 package com.exadel.aem.backpack.core.services.impl;
 
 import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
+import com.exadel.aem.backpack.core.dto.repository.ReferencedItem;
 import com.exadel.aem.backpack.core.services.ReferenceService;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -68,19 +69,19 @@ public class ReferenceServiceImplTest {
 
     @Test
     public void shouldGetAssetReferences() {
-        Set<AssetReferencedItem> referencedItems = referenceService.getAssetReferences(resourceResolver, PAGE_1);
+        Set<ReferencedItem> referencedItems = referenceService.getReferences(resourceResolver, PAGE_1);
         assertEquals(expectedReferencedItems, referencedItems);
     }
 
     @Test
     public void shouldGetNoReferencesPageWithNoAssets() {
-        Set<AssetReferencedItem> referencedItems = referenceService.getAssetReferences(resourceResolver, PAGE_2);
+        Set<ReferencedItem> referencedItems = referenceService.getReferences(resourceResolver, PAGE_2);
         assertEquals(Collections.EMPTY_SET, referencedItems);
     }
 
     @Test
     public void shouldGetNoReferencesForNonExistingResource() {
-        Set<AssetReferencedItem> referencedItems = referenceService.getAssetReferences(resourceResolver, PAGE_NON_EXISTING);
+        Set<ReferencedItem> referencedItems = referenceService.getReferences(resourceResolver, PAGE_NON_EXISTING);
         assertEquals(Collections.EMPTY_SET, referencedItems);
     }
 }
