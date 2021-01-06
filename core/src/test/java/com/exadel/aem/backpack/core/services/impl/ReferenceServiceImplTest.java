@@ -69,19 +69,19 @@ public class ReferenceServiceImplTest {
 
     @Test
     public void shouldGetAssetReferences() {
-        Set<ReferencedItem> referencedItems = referenceService.getReferences(resourceResolver, PAGE_1);
+        Set<AssetReferencedItem> referencedItems = referenceService.getAssetReferences(resourceResolver, PAGE_1);
         assertEquals(expectedReferencedItems, referencedItems);
     }
 
     @Test
     public void shouldGetNoReferencesPageWithNoAssets() {
-        Set<ReferencedItem> referencedItems = referenceService.getReferences(resourceResolver, PAGE_2);
+        Set<AssetReferencedItem> referencedItems = referenceService.getAssetReferences(resourceResolver, PAGE_2);
         assertEquals(Collections.EMPTY_SET, referencedItems);
     }
 
     @Test
     public void shouldGetNoReferencesForNonExistingResource() {
-        Set<ReferencedItem> referencedItems = referenceService.getReferences(resourceResolver, PAGE_NON_EXISTING);
+        Set<AssetReferencedItem> referencedItems = referenceService.getAssetReferences(resourceResolver, PAGE_NON_EXISTING);
         assertEquals(Collections.EMPTY_SET, referencedItems);
     }
 }
