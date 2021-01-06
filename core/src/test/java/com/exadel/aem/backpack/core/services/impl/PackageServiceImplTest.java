@@ -14,8 +14,9 @@
 
 package com.exadel.aem.backpack.core.services.impl;
 
-import acscommons.io.jsonwebtoken.lang.Assert;
+
 import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
+import com.exadel.aem.backpack.core.dto.repository.ReferencedItem;
 import com.exadel.aem.backpack.core.dto.response.JcrPackageWrapper;
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
@@ -38,6 +39,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -101,11 +103,11 @@ public class PackageServiceImplTest {
             referencedResources.put(IMAGE_JPEG, Collections.singletonList(PICTURE_1));
             referencedResources.put(IMAGE_PNG, Collections.singletonList(PICTURE_2));
 
-            HashSet<AssetReferencedItem> assetReferenceItems = new HashSet<>();
+            HashSet<ReferencedItem> assetReferenceItems = new HashSet<>();
             assetReferenceItems.add(new AssetReferencedItem(PICTURE_1, IMAGE_JPEG));
             assetReferenceItems.add(new AssetReferencedItem(PICTURE_2, IMAGE_PNG));
             referenceServiceMock = mock(ReferenceService.class);
-            when(referenceServiceMock.getAssetReferences(any(ResourceResolver.class), any(String.class))).thenReturn(assetReferenceItems);
+            when(referenceServiceMock.getReferences(any(ResourceResolver.class), any(String.class))).thenReturn(assetReferenceItems);
 
             context.registerService(ReferenceService.class, referenceServiceMock);
             packageService = context.registerInjectActivateService(new PackageServiceImpl());
@@ -327,9 +329,9 @@ public class PackageServiceImplTest {
         @Test
         public void shouldEditPackage() throws RepositoryException {
             PackageModel packageModel = new PackageModel();
-            HashSet<AssetReferencedItem> assetReferenceItems = new HashSet<>();
+            HashSet<ReferencedItem> assetReferenceItems = new HashSet<>();
             assetReferenceItems.add(new AssetReferencedItem(PICTURE_3, IMAGE_JPEG));
-            when(referenceServiceMock.getAssetReferences(any(ResourceResolver.class), any(String.class))).thenReturn(assetReferenceItems);
+            when(referenceServiceMock.getReferences(any(ResourceResolver.class), any(String.class))).thenReturn(assetReferenceItems);
 
             Map<String, List<String>> modifiedReferencedResources = new HashMap<>();
             modifiedReferencedResources.put(IMAGE_JPEG, Collections.singletonList(PICTURE_3));
@@ -776,7 +778,7 @@ public class PackageServiceImplTest {
 
             JcrPackageWrapper jcrPackageWrapper = packageService.uploadPackage(session, "".getBytes(), false);
 
-            Assert.notNull(jcrPackageWrapper);
+            Assert.assertNotNull(jcrPackageWrapper);
             assertEquals("zip file is empty", jcrPackageWrapper.getMessage());
             assertEquals(SC_CONFLICT, jcrPackageWrapper.getStatusCode());
         }
@@ -786,7 +788,7 @@ public class PackageServiceImplTest {
 
             JcrPackageWrapper jcrPackageWrapper = packageService.uploadPackage(session, null, false);
 
-            Assert.notNull(jcrPackageWrapper);
+            Assert.assertNotNull(jcrPackageWrapper);
             assertEquals("An incorrect value of parameter(s)", jcrPackageWrapper.getMessage());
             assertEquals(SC_CONFLICT, jcrPackageWrapper.getStatusCode());
         }
@@ -796,7 +798,7 @@ public class PackageServiceImplTest {
 
             JcrPackageWrapper jcrPackageWrapper = packageService.uploadPackage(null, null, false);
 
-            Assert.notNull(jcrPackageWrapper);
+            Assert.assertNotNull(jcrPackageWrapper);
             assertEquals("An incorrect value of parameter(s)", jcrPackageWrapper.getMessage());
             assertEquals(SC_CONFLICT, jcrPackageWrapper.getStatusCode());
         }
@@ -806,13 +808,13 @@ public class PackageServiceImplTest {
             byte[] bytes = PackageServiceImplTest.readByteArrayFromFile("/com/exadel/aem/backpack/core/services/impl/test_back_pack.zip");
             JcrPackageWrapper jcrPackageWrapper = packageService.uploadPackage(session, bytes, false);
 
-            Assert.notNull(jcrPackageWrapper);
+            Assert.assertNotNull(jcrPackageWrapper);
             assertEquals(0, jcrPackageWrapper.getStatusCode());
             assertEquals("{\"statusCode\":0}", jcrPackageWrapper.getJson());
-            Assert.isNull(jcrPackageWrapper.getMessage());
+            Assert.assertNull(jcrPackageWrapper.getMessage());
 
             PackageInfo packageInfo = jcrPackageWrapper.getPackageInfo();
-            Assert.notNull(packageInfo);
+            Assert.assertNotNull(packageInfo);
             assertEquals("test_back_pack", packageInfo.getPackageName());
             assertEquals("backpack", packageInfo.getGroupName());
         }
@@ -822,8 +824,8 @@ public class PackageServiceImplTest {
             byte[] bytes = PackageServiceImplTest.readByteArrayFromFile("/com/exadel/aem/backpack/core/services/impl/test_back_pack.zip");
             JcrPackageWrapper jcrPackageWrapper = packageService.uploadPackage(session, bytes, false);
 
-            Assert.notNull(jcrPackageWrapper);
-            Assert.isNull(jcrPackageWrapper.getMessage());
+            Assert.assertNotNull(jcrPackageWrapper);
+            Assert.assertNull(jcrPackageWrapper.getMessage());
 
             PackageInfo packageInfo = jcrPackageWrapper.getPackageInfo();
 
@@ -836,8 +838,8 @@ public class PackageServiceImplTest {
             byte[] bytes = PackageServiceImplTest.readByteArrayFromFile("/com/exadel/aem/backpack/core/services/impl/test_back_pack.zip");
             JcrPackageWrapper jcrPackageWrapper = packageService.uploadPackage(session, bytes, false);
 
-            Assert.notNull(jcrPackageWrapper);
-            Assert.isNull(jcrPackageWrapper.getMessage());
+            Assert.assertNotNull(jcrPackageWrapper);
+            Assert.assertNull(jcrPackageWrapper.getMessage());
 
             JcrPackageWrapper jcrPackageWrapper2 = packageService.uploadPackage(session, bytes, false);
 
@@ -851,8 +853,8 @@ public class PackageServiceImplTest {
             byte[] bytes = PackageServiceImplTest.readByteArrayFromFile("/com/exadel/aem/backpack/core/services/impl/test_back_pack.zip");
             JcrPackageWrapper jcrPackageWrapper = packageService.uploadPackage(session, bytes, false);
 
-            Assert.notNull(jcrPackageWrapper);
-            Assert.isNull(jcrPackageWrapper.getMessage());
+            Assert.assertNotNull(jcrPackageWrapper);
+            Assert.assertNull(jcrPackageWrapper.getMessage());
 
             JcrPackageWrapper jcrPackageWrapper2 = packageService.uploadPackage(session, bytes, true);
 
