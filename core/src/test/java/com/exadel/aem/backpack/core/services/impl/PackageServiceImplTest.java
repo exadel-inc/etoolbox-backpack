@@ -103,11 +103,11 @@ public class PackageServiceImplTest {
             referencedResources.put(IMAGE_JPEG, Collections.singletonList(PICTURE_1));
             referencedResources.put(IMAGE_PNG, Collections.singletonList(PICTURE_2));
 
-            HashSet<ReferencedItem> assetReferenceItems = new HashSet<>();
+            HashSet<AssetReferencedItem> assetReferenceItems = new HashSet<>();
             assetReferenceItems.add(new AssetReferencedItem(PICTURE_1, IMAGE_JPEG));
             assetReferenceItems.add(new AssetReferencedItem(PICTURE_2, IMAGE_PNG));
             referenceServiceMock = mock(ReferenceService.class);
-            when(referenceServiceMock.getReferences(any(ResourceResolver.class), any(String.class))).thenReturn(assetReferenceItems);
+            when(referenceServiceMock.getAssetReferences(any(ResourceResolver.class), any(String.class))).thenReturn(assetReferenceItems);
 
             context.registerService(ReferenceService.class, referenceServiceMock);
             packageService = context.registerInjectActivateService(new PackageServiceImpl());
@@ -329,9 +329,9 @@ public class PackageServiceImplTest {
         @Test
         public void shouldEditPackage() throws RepositoryException {
             PackageModel packageModel = new PackageModel();
-            HashSet<ReferencedItem> assetReferenceItems = new HashSet<>();
+            HashSet<AssetReferencedItem> assetReferenceItems = new HashSet<>();
             assetReferenceItems.add(new AssetReferencedItem(PICTURE_3, IMAGE_JPEG));
-            when(referenceServiceMock.getReferences(any(ResourceResolver.class), any(String.class))).thenReturn(assetReferenceItems);
+            when(referenceServiceMock.getAssetReferences(any(ResourceResolver.class), any(String.class))).thenReturn(assetReferenceItems);
 
             Map<String, List<String>> modifiedReferencedResources = new HashMap<>();
             modifiedReferencedResources.put(IMAGE_JPEG, Collections.singletonList(PICTURE_3));
