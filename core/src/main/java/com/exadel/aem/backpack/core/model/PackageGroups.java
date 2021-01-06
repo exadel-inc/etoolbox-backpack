@@ -80,8 +80,8 @@ public class PackageGroups {
 
 
     /**
-     * Called from {@link PackageGroups#createDataOption(Resource, String)} for option text retrieve
-     * Option text is create from <i>jcr:title</i> property by default. In the case when property is missed option text
+     * Called from {@link PackageGroups#createDataOption(Resource, String)} for option text retrieval
+     * Option text is created from <i>jcr:title</i> property by default. In the case when property is missing option text
      * will be created from node name
      *
      * @param resource {@code Resource} to get option text from
@@ -102,7 +102,7 @@ public class PackageGroups {
     /**
      * Gets the package group options
      *
-     * @return list of options
+     * @return List of options
      */
     public List<Option> getOptions() {
         return options;

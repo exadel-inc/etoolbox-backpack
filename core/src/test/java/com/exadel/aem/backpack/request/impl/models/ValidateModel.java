@@ -19,7 +19,7 @@ import com.exadel.aem.backpack.request.annotations.RequestMapping;
 import com.exadel.aem.backpack.request.annotations.RequestParam;
 import com.exadel.aem.backpack.request.annotations.Validate;
 import com.exadel.aem.backpack.request.validator.impl.RequiredValidator;
-import com.exadel.aem.backpack.request.validator.impl.WholeNumberValidator;
+import com.exadel.aem.backpack.request.validator.impl.IntNumberValidator;
 
 import java.util.List;
 
@@ -33,9 +33,9 @@ public class ValidateModel {
     private String requiredString;
 
     @RequestParam
-    @Validate(validator = {WholeNumberValidator.class},
-            invalidMessages = {"Field must be whole number!"})
-    private int wholeNumber;
+    @Validate(validator = {IntNumberValidator.class},
+            invalidMessages = {"Field must be integer number!"})
+    private int intNumber;
 
 
     @RequestParam(type = FieldType.MULTIFIELD)
@@ -48,8 +48,8 @@ public class ValidateModel {
         return requiredString;
     }
 
-    public int getWholeNumber() {
-        return wholeNumber;
+    public int getIntNumber() {
+        return intNumber;
     }
 
 
