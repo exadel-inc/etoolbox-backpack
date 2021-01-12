@@ -16,7 +16,6 @@ package com.exadel.aem.backpack.core.services.impl;
 
 
 import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
-import com.exadel.aem.backpack.core.dto.repository.ReferencedItem;
 import com.exadel.aem.backpack.core.dto.response.JcrPackageWrapper;
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
