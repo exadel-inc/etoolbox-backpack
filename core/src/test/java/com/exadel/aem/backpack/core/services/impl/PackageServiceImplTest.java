@@ -14,7 +14,7 @@
 
 package com.exadel.aem.backpack.core.services.impl;
 
-import acscommons.io.jsonwebtoken.lang.Assert;
+
 import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
 import com.exadel.aem.backpack.core.dto.response.JcrPackageWrapper;
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
@@ -38,6 +38,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -776,7 +777,7 @@ public class PackageServiceImplTest {
 
             JcrPackageWrapper jcrPackageWrapper = packageService.uploadPackage(session, "".getBytes(), false);
 
-            Assert.notNull(jcrPackageWrapper);
+            Assert.assertNotNull(jcrPackageWrapper);
             assertEquals("zip file is empty", jcrPackageWrapper.getMessage());
             assertEquals(SC_CONFLICT, jcrPackageWrapper.getStatusCode());
         }
@@ -786,7 +787,7 @@ public class PackageServiceImplTest {
 
             JcrPackageWrapper jcrPackageWrapper = packageService.uploadPackage(session, null, false);
 
-            Assert.notNull(jcrPackageWrapper);
+            Assert.assertNotNull(jcrPackageWrapper);
             assertEquals("An incorrect value of parameter(s)", jcrPackageWrapper.getMessage());
             assertEquals(SC_CONFLICT, jcrPackageWrapper.getStatusCode());
         }
@@ -796,7 +797,7 @@ public class PackageServiceImplTest {
 
             JcrPackageWrapper jcrPackageWrapper = packageService.uploadPackage(null, null, false);
 
-            Assert.notNull(jcrPackageWrapper);
+            Assert.assertNotNull(jcrPackageWrapper);
             assertEquals("An incorrect value of parameter(s)", jcrPackageWrapper.getMessage());
             assertEquals(SC_CONFLICT, jcrPackageWrapper.getStatusCode());
         }
@@ -806,13 +807,13 @@ public class PackageServiceImplTest {
             byte[] bytes = PackageServiceImplTest.readByteArrayFromFile("/com/exadel/aem/backpack/core/services/impl/test_back_pack.zip");
             JcrPackageWrapper jcrPackageWrapper = packageService.uploadPackage(session, bytes, false);
 
-            Assert.notNull(jcrPackageWrapper);
+            Assert.assertNotNull(jcrPackageWrapper);
             assertEquals(0, jcrPackageWrapper.getStatusCode());
             assertEquals("{\"statusCode\":0}", jcrPackageWrapper.getJson());
-            Assert.isNull(jcrPackageWrapper.getMessage());
+            Assert.assertNull(jcrPackageWrapper.getMessage());
 
             PackageInfo packageInfo = jcrPackageWrapper.getPackageInfo();
-            Assert.notNull(packageInfo);
+            Assert.assertNotNull(packageInfo);
             assertEquals("test_back_pack", packageInfo.getPackageName());
             assertEquals("backpack", packageInfo.getGroupName());
         }
@@ -822,8 +823,8 @@ public class PackageServiceImplTest {
             byte[] bytes = PackageServiceImplTest.readByteArrayFromFile("/com/exadel/aem/backpack/core/services/impl/test_back_pack.zip");
             JcrPackageWrapper jcrPackageWrapper = packageService.uploadPackage(session, bytes, false);
 
-            Assert.notNull(jcrPackageWrapper);
-            Assert.isNull(jcrPackageWrapper.getMessage());
+            Assert.assertNotNull(jcrPackageWrapper);
+            Assert.assertNull(jcrPackageWrapper.getMessage());
 
             PackageInfo packageInfo = jcrPackageWrapper.getPackageInfo();
 
@@ -836,8 +837,8 @@ public class PackageServiceImplTest {
             byte[] bytes = PackageServiceImplTest.readByteArrayFromFile("/com/exadel/aem/backpack/core/services/impl/test_back_pack.zip");
             JcrPackageWrapper jcrPackageWrapper = packageService.uploadPackage(session, bytes, false);
 
-            Assert.notNull(jcrPackageWrapper);
-            Assert.isNull(jcrPackageWrapper.getMessage());
+            Assert.assertNotNull(jcrPackageWrapper);
+            Assert.assertNull(jcrPackageWrapper.getMessage());
 
             JcrPackageWrapper jcrPackageWrapper2 = packageService.uploadPackage(session, bytes, false);
 
@@ -851,8 +852,8 @@ public class PackageServiceImplTest {
             byte[] bytes = PackageServiceImplTest.readByteArrayFromFile("/com/exadel/aem/backpack/core/services/impl/test_back_pack.zip");
             JcrPackageWrapper jcrPackageWrapper = packageService.uploadPackage(session, bytes, false);
 
-            Assert.notNull(jcrPackageWrapper);
-            Assert.isNull(jcrPackageWrapper.getMessage());
+            Assert.assertNotNull(jcrPackageWrapper);
+            Assert.assertNull(jcrPackageWrapper.getMessage());
 
             JcrPackageWrapper jcrPackageWrapper2 = packageService.uploadPackage(session, bytes, true);
 
