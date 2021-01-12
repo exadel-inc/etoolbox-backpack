@@ -126,7 +126,7 @@
                     <granite:rendercondition
                             jcr:primaryType="nt:unstructured"
                             sling:resourceType="granite/ui/components/coral/foundation/renderconditions/privilege"
-                            path="${requestPathInfo.suffix}"
+                            path="${param.group != null ? param.group : '/etc/packages/backpack'}"
                             privileges="jcr:addChildNodes"/>
                 </create>
                 <upload
