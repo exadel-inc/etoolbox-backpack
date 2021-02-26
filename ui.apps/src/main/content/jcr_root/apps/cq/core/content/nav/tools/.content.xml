@@ -23,8 +23,7 @@
                   sling:orderBefore="forms"
                   href="/backpack.html"
                   id="cq-backpack"
-                  icon="gift"
-                  sling:resourceType="crx/core/components/welcome/tool">
+                  icon="gift">
         </backpack>
     </deployment>
 </jcr:root>

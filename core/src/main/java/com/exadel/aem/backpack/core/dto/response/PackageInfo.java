@@ -24,14 +24,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 
+import com.exadel.aem.backpack.core.dto.repository.ReferencedItem;
+import com.exadel.aem.backpack.core.services.PackageService;
 import org.apache.commons.lang3.StringUtils;
 
 import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
 
 /**
  * Data model containing comprehensive data required to manage a package
- * via multiple {@link com.exadel.aem.backpack.core.services.PackageService} operations and prepare response to the frontend
- * @see com.exadel.aem.backpack.core.services.PackageService
+ * via multiple {@link PackageService} operations and prepare response to the frontend
+ * @see PackageService
  * @see com.exadel.aem.backpack.core.servlets.CreatePackageServlet
  * @see com.exadel.aem.backpack.core.servlets.BuildPackageServlet
  */
@@ -177,15 +179,15 @@ public class PackageInfo {
     }
 
     /**
-     * Appends path to a referenced asset to the current {@link PackageInfo}
+     * Appends a path to a referenced asset to the current {@link PackageInfo}
      * @param item {@link AssetReferencedItem} object containing asset's MIME type and path
      */
-    public void addAssetReferencedItem(final AssetReferencedItem item) {
+    public void addAssetReferencedItem(final ReferencedItem item) {
         if (referencedResources == null) {
             referencedResources = new TreeMap<>();
         }
-        if (StringUtils.isNotBlank(item.getPath()) && StringUtils.isNotBlank(item.getMimeType())) {
-            List<String> assetsPaths = referencedResources.computeIfAbsent(item.getMimeType(), k -> new ArrayList<>());
+        if (StringUtils.isNotBlank(item.getPath()) && StringUtils.isNotBlank(item.getType())) {
+            List<String> assetsPaths = referencedResources.computeIfAbsent(item.getType(), k -> new ArrayList<>());
             assetsPaths.add(item.getPath());
         }
     }

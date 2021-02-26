@@ -20,7 +20,7 @@ import java.util.Objects;
  * Data model representing a digital asset
  * @see ReferencedItem
  */
-public class AssetReferencedItem extends ReferencedItem {
+public class  AssetReferencedItem extends ReferencedItem {
 
     private final String mimeType;
     private Long size;
@@ -31,7 +31,7 @@ public class AssetReferencedItem extends ReferencedItem {
      * @param mimeType String value representing MIME type of the current JCR storage item
      */
     public AssetReferencedItem(final String path, final String mimeType) {
-        super(path);
+        super(path, mimeType);
         this.mimeType = mimeType;
     }
 

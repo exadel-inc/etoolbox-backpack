@@ -18,6 +18,7 @@ import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.dam.api.Asset;
 import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
+import com.exadel.aem.backpack.core.dto.repository.ReferencedItem;
 import com.exadel.aem.backpack.core.dto.response.JcrPackageWrapper;
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
@@ -166,6 +167,7 @@ public class PackageServiceImpl implements PackageService {
             packageNode = session.getNode(requestInfo.getPackagePath());
 
             if (packageNode != null) {
+                long start = System.currentTimeMillis();
                 jcrPackage = packMgr.open(packageNode);
                 if (jcrPackage != null) {
                     JcrPackageDefinition definition = jcrPackage.getDefinition();
@@ -173,13 +175,19 @@ public class PackageServiceImpl implements PackageService {
                         packageInfo.addLogMessage(ERROR + " package definition is null");
                         return packageInfo;
                     }
-                    includeGeneralResources(definition, s -> packageInfo.addLogMessage("A " + s));
+                    includeGeneralResources(definition, s -> {
+                        packageInfo.addLogMessage("A " + s);
+                        totalSize.addAndGet(getAssetSize(resourceResolver, s));
+                    });
                     includeReferencedResources(requestInfo.getReferencedResources(), definition, s -> {
                         packageInfo.addLogMessage("A " + s);
                         totalSize.addAndGet(getAssetSize(resourceResolver, s));
                     });
                     packageInfo.setDataSize(totalSize.get());
                     packageInfo.setPackageBuilt(definition.getLastWrapped());
+                    long finish = System.currentTimeMillis();
+                    packageInfo.addLogMessage(StringUtils.EMPTY);
+                    packageInfo.addLogMessage("Package test built in " + (finish - start) + " milliseconds");
                 }
             }
         } catch (RepositoryException e) {
@@ -311,7 +319,7 @@ public class PackageServiceImpl implements PackageService {
             return packageInfo;
         }
 
-        Set<AssetReferencedItem> referencedAssets = getReferencedAssets(resourceResolver, packageInfo.getPaths());
+        Set<ReferencedItem> referencedAssets = getReferencedResources(resourceResolver, packageInfo.getPaths());
         Collection<String> resultingPaths = initAssets(packageInfo.getPaths(), referencedAssets, packageInfo);
         DefaultWorkspaceFilter filter = getWorkspaceFilter(resultingPaths);
         createPackage(session, packageInfo, packageModel.getPaths(), filter);
@@ -394,7 +402,7 @@ public class PackageServiceImpl implements PackageService {
             return packageInfo;
         }
 
-        Set<AssetReferencedItem> referencedAssets = getReferencedAssets(resourceResolver, packageInfo.getPaths());
+        Set<ReferencedItem> referencedAssets = getReferencedResources(resourceResolver, packageInfo.getPaths());
         Collection<String> resultingPaths = initAssets(packageInfo.getPaths(), referencedAssets, packageInfo);
         DefaultWorkspaceFilter filter = getWorkspaceFilter(resultingPaths);
         modifyPackage(session, modificationPackageModel.getPackagePath(), packageInfo, modificationPackageModel.getPaths(), filter);
@@ -671,10 +679,10 @@ public class PackageServiceImpl implements PackageService {
      * @return {@code List<String>} object containing paths of package entries
      */
     private Collection<String> initAssets(final Collection<String> initialPaths,
-                                          final Set<AssetReferencedItem> referencedAssets,
+                                          final Set<ReferencedItem> referencedAssets,
                                           final PackageInfo packageInfo) {
-        Collection<String> resultingPaths = new ArrayList<>(initialPaths);
         referencedAssets.forEach(packageInfo::addAssetReferencedItem);
+        Collection<String> resultingPaths = new ArrayList<>(initialPaths);
         return resultingPaths;
     }
 
@@ -715,38 +723,39 @@ public class PackageServiceImpl implements PackageService {
      * Called from {@link PackageServiceImpl#buildPackage(ResourceResolver, BuildPackageModel)}.
      * Encapsulates building package in a separate execution thread
      *
-     * @param userId                  User ID per the effective {@code ResourceResolver}
-     * @param packageBuildInfo        {@link PackageInfo} object to store package building status information in
-     * @param referencedResourceTypes Collection of strings representing resource types to be embedded
-     *                                in the resulting package
+     * @param userId              User ID per the effective {@code ResourceResolver}
+     * @param packageBuildInfo    {@link PackageInfo} object to store package building status information in
+     * @param referencedResources Collection of strings representing resource types to be embedded
+     *                            in the resulting package
      */
     private void buildPackageAsync(final String userId,
                                    final PackageInfo packageBuildInfo,
-                                   final List<String> referencedResourceTypes) {
-        new Thread(() -> buildPackage(userId, packageBuildInfo, referencedResourceTypes)).start();
+                                   final String referencedResources) {
+        new Thread(() -> buildPackage(userId, packageBuildInfo, referencedResources)).start();
     }
 
     /**
      * Performs the internal package building procedure and stores status information
      *
-     * @param userId                  User ID per the effective {@code ResourceResolver}
-     * @param packageBuildInfo        {@link PackageInfo} object to store package building status information in
-     * @param referencedResourceTypes Collection of strings representing resource types to be embedded
-     *                                in the resulting package
+     * @param userId              User ID per the effective {@code ResourceResolver}
+     * @param packageBuildInfo    {@link PackageInfo} object to store package building status information in
+     * @param referencedResources JSON string representing resources to be embedded
+     *                            in the resulting package
      */
     void buildPackage(final String userId,
                       final PackageInfo packageBuildInfo,
-                      final List<String> referencedResourceTypes) {
+                      final String referencedResources) {
         Session userSession = null;
         try {
             userSession = getUserImpersonatedSession(userId);
             JcrPackageManager packMgr = getPackageManager(userSession);
             JcrPackage jcrPackage = packMgr.open(userSession.getNode(packageBuildInfo.getPackagePath()));
             if (jcrPackage != null) {
+                long start = System.currentTimeMillis();
                 JcrPackageDefinition definition = Objects.requireNonNull(jcrPackage.getDefinition());
                 DefaultWorkspaceFilter filter = new DefaultWorkspaceFilter();
                 includeGeneralResources(definition, s -> filter.add(new PathFilterSet(s)));
-                includeReferencedResources(referencedResourceTypes, definition, s -> filter.add(new PathFilterSet(s)));
+                includeReferencedResources(referencedResources, definition, s -> filter.add(new PathFilterSet(s)));
                 definition.setFilter(filter, true);
                 String thumbnailPath = StringUtils.defaultIfBlank(packageBuildInfo.getThumbnailPath(), getDefaultThumbnailPath(false));
                 addThumbnail(definition.getNode(), thumbnailPath, userSession);
@@ -766,6 +775,9 @@ public class PackageServiceImpl implements PackageService {
                 packageBuildInfo.setPackageStatus(PackageStatus.BUILT);
                 packageBuildInfo.setDataSize(jcrPackage.getSize());
                 packageBuildInfo.setPaths(filter.getFilterSets().stream().map(pathFilterSet -> pathFilterSet.seal().getRoot()).collect(Collectors.toList()));
+                long finish = System.currentTimeMillis();
+                packageBuildInfo.addLogMessage(StringUtils.EMPTY);
+                packageBuildInfo.addLogMessage("Package built in " + (finish - start) + " milliseconds");
             } else {
                 packageBuildInfo.setPackageStatus(PackageStatus.ERROR);
                 packageBuildInfo.addLogMessage(ERROR + String.format(PACKAGE_DOES_NOT_EXIST_MESSAGE, packageBuildInfo.getPackagePath()));
@@ -780,7 +792,7 @@ public class PackageServiceImpl implements PackageService {
     }
 
     /**
-     * Called by {@link PackageServiceImpl#buildPackage(String, PackageInfo, List)} to get the {@code Session} instance
+     * Called by {@link PackageServiceImpl#buildPackage(String, PackageInfo, String)} to get the {@code Session} instance
      * with required rights for package creation
      *
      * @param userId User ID per the effective {@code ResourceResolver}
@@ -838,30 +850,30 @@ public class PackageServiceImpl implements PackageService {
      * {@link PackageServiceImpl#testBuildPackage(ResourceResolver, BuildPackageModel)} to facilitate including referenced
      * resources (assets) into the current package
      *
-     * @param referencedResourceTypes Collection of strings representing resource types to be embedded
-     *                                in the resulting package
-     * @param definition              {@code JcrPackageDefinition} object
-     * @param pathConsumer            A routine executed over each resources' path value (mainly for logging purposes
-     *                                and statistics gathering)
+     * @param includeReferencedResources JSON string representing resources to be embedded
+     *                                   in the resulting package
+     * @param definition                 {@code JcrPackageDefinition} object
+     * @param pathConsumer               A routine executed over each resources' path value (mainly for logging purposes
+     *                                   and statistics gathering)
      */
-    private void includeReferencedResources(final Collection<String> referencedResourceTypes,
+    private void includeReferencedResources(final String includeReferencedResources,
                                             final JcrPackageDefinition definition,
                                             final Consumer<String> pathConsumer) {
         Type mapType = new TypeToken<Map<String, List<String>>>() {
         }.getType();
         Map<String, List<String>> packageReferencedResources = GSON.fromJson(definition.get(REFERENCED_RESOURCES), mapType);
-
-        if (packageReferencedResources != null && referencedResourceTypes != null) {
-            List<String> includeResources = referencedResourceTypes.stream()
-                    .map(packageReferencedResources::get)
-                    .flatMap(List::stream)
-                    .collect(Collectors.toList());
-            includeResources.forEach(pathConsumer);
+        Map<String, List<String>> includeResources = GSON.fromJson(includeReferencedResources, mapType);
+        if (packageReferencedResources != null && includeResources != null) {
+            for (Map.Entry<String, List<String>> entry : includeResources.entrySet()) {
+                List<String> packageResourceList = packageReferencedResources.get(entry.getKey());
+                List<String> includeResourceList = entry.getValue();
+                includeResourceList.stream().filter(s -> packageResourceList.contains(s)).forEach(pathConsumer);
+            }
         }
     }
 
     /**
-     * Called from {@link PackageServiceImpl#buildPackage(String, PackageInfo, List)} to perform impersonated session
+     * Called from {@link PackageServiceImpl#buildPackage(String, PackageInfo, String)} to perform impersonated session
      * closing
      *
      * @param userSession {@code Session} object used for package building
@@ -873,17 +885,17 @@ public class PackageServiceImpl implements PackageService {
     }
 
     /**
-     * Gets the collection of unique {@link AssetReferencedItem}s matching the collection of provided resource paths
+     * Gets the collection of unique {@link ReferencedItem}s matching the collection of provided resource paths
      * applying for the {@link ReferenceService} instance
      *
      * @param resourceResolver {@code ResourceResolver} used to collect assets details
      * @param paths            Collection of JCR paths of resources to gather references for
-     * @return {@code Set<AssetReferencedItem>} object
+     * @return {@code Set<ReferencedItem>} object
      */
-    private Set<AssetReferencedItem> getReferencedAssets(final ResourceResolver resourceResolver, final Collection<String> paths) {
-        Set<AssetReferencedItem> assetLinks = new HashSet<>();
+    private Set<ReferencedItem> getReferencedResources(final ResourceResolver resourceResolver, final Collection<String> paths) {
+        Set<ReferencedItem> assetLinks = new HashSet<>();
         paths.forEach(path -> {
-            Set<AssetReferencedItem> assetReferences = referenceService.getAssetReferences(resourceResolver, path);
+            Set<ReferencedItem> assetReferences = referenceService.getReferences(resourceResolver, path);
             assetLinks.addAll(assetReferences);
         });
         return assetLinks;
@@ -977,7 +989,7 @@ public class PackageServiceImpl implements PackageService {
     }
 
     /**
-     * Encapsulates JCr operations needed to embed a thumbnail resource to the package
+     * Encapsulates JCR operations needed to embed a thumbnail resource to the package
      *
      * @param packageNode      {@code Node} representing content package as a JCR storage item
      * @param thumbnailPath    Path to the thumbnail in JCR

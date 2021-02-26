@@ -21,13 +21,14 @@ import java.util.Objects;
  */
 public class ReferencedItem {
     private final String path;
-
+    private final String type;
     /**
      * Basic constructor
      * @param path String value representing path to a JCR storage item
      */
-    ReferencedItem(String path) {
+    public ReferencedItem(String path, String type) {
         this.path = path;
+        this.type = type;
     }
 
     /**
@@ -36,6 +37,10 @@ public class ReferencedItem {
      */
     public String getPath() {
         return path;
+    }
+
+    public String getType() {
+        return type;
     }
 
     /**

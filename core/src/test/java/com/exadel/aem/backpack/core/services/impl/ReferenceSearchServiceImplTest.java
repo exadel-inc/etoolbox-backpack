@@ -15,7 +15,9 @@
 package com.exadel.aem.backpack.core.services.impl;
 
 import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
+import com.exadel.aem.backpack.core.dto.repository.PageReferencedItem;
 import com.exadel.aem.backpack.core.dto.repository.ReferencedItem;
+import com.exadel.aem.backpack.core.dto.repository.TagReferencedItem;
 import com.exadel.aem.backpack.core.services.ReferenceService;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -25,12 +27,13 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 
-public class ReferenceServiceImplTest {
+public class ReferenceSearchServiceImplTest {
 
     private static final String PAGE_1 = "/content/site/pages/page1";
     private static final String PAGE_2 = "/content/site/pages/page2";
@@ -45,7 +48,7 @@ public class ReferenceServiceImplTest {
     @Rule
     public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
     private ReferenceService referenceService;
-    private Set<AssetReferencedItem> expectedReferencedItems;
+    private Set<ReferencedItem> expectedReferencedItems;
     private ResourceResolver resourceResolver;
 
     @Before
@@ -53,14 +56,18 @@ public class ReferenceServiceImplTest {
         // load resources
         context.load().json("/com/exadel/aem/backpack/core/services/impl/page1.json", PAGE_1);
         context.load().json("/com/exadel/aem/backpack/core/services/impl/page2.json", PAGE_2);
+        context.create().tag("test:topics/test-tag");
         context.create().asset(ASSET_1, "/com/exadel/aem/backpack/core/services/impl/asset.png", MINE_TYPE_PNG);
         context.create().asset(ASSET_2, "/com/exadel/aem/backpack/core/services/impl/asset.pdf", MINE_TYPE_PDF);
 
         //register services
+        context.registerInjectActivateService(new PageReferenceSearchServiceImpl());
         referenceService = context.registerInjectActivateService(new ReferenceServiceImpl());
 
         //setup expected references
-        expectedReferencedItems = new HashSet<>();
+        expectedReferencedItems = new LinkedHashSet<>();
+        expectedReferencedItems.add(new TagReferencedItem("/etc/tags/test/topics/test-tag"));
+        expectedReferencedItems.add(new PageReferencedItem(PAGE_2 + "/jcr:content"));
         expectedReferencedItems.add(new AssetReferencedItem(ASSET_1, MINE_TYPE_PNG));
         expectedReferencedItems.add(new AssetReferencedItem(ASSET_2, MINE_TYPE_PDF));
 
@@ -69,19 +76,21 @@ public class ReferenceServiceImplTest {
 
     @Test
     public void shouldGetAssetReferences() {
-        Set<AssetReferencedItem> referencedItems = referenceService.getAssetReferences(resourceResolver, PAGE_1);
-        assertEquals(expectedReferencedItems, referencedItems);
+        Set<ReferencedItem> referencedItems = referenceService.getReferences(resourceResolver, PAGE_1);
+
+        assertEquals(expectedReferencedItems.size(), referencedItems.size());
+        assertTrue(expectedReferencedItems.containsAll(referencedItems));
     }
 
     @Test
     public void shouldGetNoReferencesPageWithNoAssets() {
-        Set<AssetReferencedItem> referencedItems = referenceService.getAssetReferences(resourceResolver, PAGE_2);
+        Set<ReferencedItem> referencedItems = referenceService.getReferences(resourceResolver, PAGE_2);
         assertEquals(Collections.EMPTY_SET, referencedItems);
     }
 
     @Test
     public void shouldGetNoReferencesForNonExistingResource() {
-        Set<AssetReferencedItem> referencedItems = referenceService.getAssetReferences(resourceResolver, PAGE_NON_EXISTING);
+        Set<ReferencedItem> referencedItems = referenceService.getReferences(resourceResolver, PAGE_NON_EXISTING);
         assertEquals(Collections.EMPTY_SET, referencedItems);
     }
 }

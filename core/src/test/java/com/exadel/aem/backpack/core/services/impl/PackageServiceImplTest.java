@@ -16,6 +16,7 @@ package com.exadel.aem.backpack.core.services.impl;
 
 
 import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
+import com.exadel.aem.backpack.core.dto.repository.ReferencedItem;
 import com.exadel.aem.backpack.core.dto.response.JcrPackageWrapper;
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
@@ -86,6 +87,7 @@ public class PackageServiceImplTest {
     protected static final String PACKAGE_2_2_ZIP = "testPackage2-2.zip";
 
     public abstract static class Base {
+        protected Gson gson = new Gson();
 
         protected static final String INITIAL_FILTERS = "initialFilters";
         @Rule
@@ -103,11 +105,11 @@ public class PackageServiceImplTest {
             referencedResources.put(IMAGE_JPEG, Collections.singletonList(PICTURE_1));
             referencedResources.put(IMAGE_PNG, Collections.singletonList(PICTURE_2));
 
-            HashSet<AssetReferencedItem> assetReferenceItems = new HashSet<>();
+            HashSet<ReferencedItem> assetReferenceItems = new HashSet<>();
             assetReferenceItems.add(new AssetReferencedItem(PICTURE_1, IMAGE_JPEG));
             assetReferenceItems.add(new AssetReferencedItem(PICTURE_2, IMAGE_PNG));
             referenceServiceMock = mock(ReferenceService.class);
-            when(referenceServiceMock.getAssetReferences(any(ResourceResolver.class), any(String.class))).thenReturn(assetReferenceItems);
+            when(referenceServiceMock.getReferences(any(ResourceResolver.class), any(String.class))).thenReturn(assetReferenceItems);
 
             context.registerService(ReferenceService.class, referenceServiceMock);
             packageService = context.registerInjectActivateService(new PackageServiceImpl());
@@ -328,9 +330,9 @@ public class PackageServiceImplTest {
         @Test
         public void shouldEditPackage() throws RepositoryException {
             PackageModel packageModel = new PackageModel();
-            HashSet<AssetReferencedItem> assetReferenceItems = new HashSet<>();
+            HashSet<ReferencedItem> assetReferenceItems = new HashSet<>();
             assetReferenceItems.add(new AssetReferencedItem(PICTURE_3, IMAGE_JPEG));
-            when(referenceServiceMock.getAssetReferences(any(ResourceResolver.class), any(String.class))).thenReturn(assetReferenceItems);
+            when(referenceServiceMock.getReferences(any(ResourceResolver.class), any(String.class))).thenReturn(assetReferenceItems);
 
             Map<String, List<String>> modifiedReferencedResources = new HashMap<>();
             modifiedReferencedResources.put(IMAGE_JPEG, Collections.singletonList(PICTURE_3));
@@ -586,7 +588,7 @@ public class PackageServiceImplTest {
             PackageInfo aPackage = packageService.testBuildPackage(resourceResolver, buildPackageModel);
 
             assertEquals((Long) 0L, aPackage.getDataSize());
-            assertEquals(Collections.singletonList("A " + PAGE_1), aPackage.getLog());
+            assertEquals("A " + PAGE_1, aPackage.getLog().get(0));
             assertNull(aPackage.getPackageBuilt());
         }
 
@@ -595,12 +597,16 @@ public class PackageServiceImplTest {
             BuildPackageModel buildPackageModel = new BuildPackageModel();
 
             buildPackageModel.setPackagePath(PACKAGE_PATH);
-            buildPackageModel.setReferencedResources(Collections.singletonList(IMAGE_JPEG));
+            Map<String, List<String>> referencedResourceTypes = new HashMap<>();
+            referencedResourceTypes.put(IMAGE_JPEG, Arrays.asList(PICTURE_1));
+            buildPackageModel.setReferencedResources(gson.toJson(referencedResourceTypes));
+            buildPackageModel.setReferencedResources(gson.toJson(referencedResourceTypes));
 
             PackageInfo aPackage = packageService.testBuildPackage(resourceResolver, buildPackageModel);
 
             assertNotEquals((Long) 0L, aPackage.getDataSize());
-            assertEquals(Arrays.asList("A " + PAGE_1, "A " + PICTURE_1), aPackage.getLog());
+            assertEquals("A " + PAGE_1,  aPackage.getLog().get(0));
+            assertEquals("A " + PICTURE_1, aPackage.getLog().get(1));
             assertNull(aPackage.getPackageBuilt());
         }
 
@@ -609,19 +615,27 @@ public class PackageServiceImplTest {
             BuildPackageModel buildPackageModel = new BuildPackageModel();
 
             buildPackageModel.setPackagePath(PACKAGE_PATH);
-            buildPackageModel.setReferencedResources(Collections.singletonList(IMAGE_JPEG));
+            Map<String, List<String>> referencedResourceTypes = new HashMap<>();
+            referencedResourceTypes.put(IMAGE_JPEG, Arrays.asList(PICTURE_1));
+            buildPackageModel.setReferencedResources(gson.toJson(referencedResourceTypes));
 
             PackageInfo firstPackage = packageService.testBuildPackage(resourceResolver, buildPackageModel);
 
-            buildPackageModel.setReferencedResources(Arrays.asList(IMAGE_JPEG, IMAGE_PNG));
+            Map<String, List<String>> referencedResourceTypes2 = new LinkedHashMap<>();
+            referencedResourceTypes2.put(IMAGE_JPEG, Arrays.asList(PICTURE_1));
+            referencedResourceTypes2.put(IMAGE_PNG, Arrays.asList(PICTURE_2));
+            buildPackageModel.setReferencedResources(gson.toJson(referencedResourceTypes2));
 
             PackageInfo secondPackage = packageService.testBuildPackage(resourceResolver, buildPackageModel);
 
             assertNotEquals((Long) 0L, firstPackage.getDataSize());
             assertNotEquals((Long) 0L, secondPackage.getDataSize());
             assertNotEquals(firstPackage.getDataSize(), secondPackage.getDataSize());
-            assertEquals(Arrays.asList("A " + PAGE_1, "A " + PICTURE_1), firstPackage.getLog());
-            assertEquals(Arrays.asList("A " + PAGE_1, "A " + PICTURE_1, "A " + PICTURE_2), secondPackage.getLog());
+            assertEquals("A " + PAGE_1, firstPackage.getLog().get(0));
+            assertEquals("A " + PICTURE_1, firstPackage.getLog().get(1));
+            assertEquals("A " + PAGE_1, secondPackage.getLog().get(0));
+            assertEquals("A " + PICTURE_1, secondPackage.getLog().get(1));
+            assertEquals("A " + PICTURE_2, secondPackage.getLog().get(2));
             assertNull(firstPackage.getPackageBuilt());
             assertNull(secondPackage.getPackageBuilt());
         }
@@ -639,7 +653,6 @@ public class PackageServiceImplTest {
     }
 
     public static class BuildPackage extends Base {
-
 
         private static final String PACKAGE_PATH = "/etc/packages/testGroup/testPackage-1.zip";
         private PackageServiceImpl packageServiceSpy;
@@ -671,9 +684,10 @@ public class PackageServiceImplTest {
             doReturn(aPackage).when(jcrPackageManagerMock).open(any(Node.class));
             doReturn(100L).when(aPackage).getSize();
 
-            List<String> referencedResourceTypes = Arrays.asList(IMAGE_JPEG, IMAGE_PNG);
+            Map<String, List<String>> referencedResourceTypes = new HashMap<>();
+            referencedResourceTypes.put(IMAGE_JPEG, new ArrayList<>());
 
-            packageServiceSpy.buildPackage("admin", packageInfo, referencedResourceTypes);
+            packageServiceSpy.buildPackage("admin", packageInfo, gson.toJson(referencedResourceTypes));
 
             assertEquals(BUILT, packageInfo.getPackageStatus());
             assertNotNull(packageInfo.getPackageBuilt());
@@ -681,9 +695,10 @@ public class PackageServiceImplTest {
 
         @Test
         public void shouldHandleError() {
-            List<String> referencedResourceTypes = Arrays.asList(IMAGE_JPEG, IMAGE_PNG);
+            Map<String, List<String>> referencedResourceTypes = new HashMap<>();
+            referencedResourceTypes.put(IMAGE_JPEG, new ArrayList<>());
 
-            packageServiceSpy.buildPackage("admin", packageInfo, referencedResourceTypes);
+            packageServiceSpy.buildPackage("admin", packageInfo, gson.toJson(referencedResourceTypes));
 
             assertEquals(ERROR, packageInfo.getPackageStatus());
             assertEquals("ERROR: Package by this path /etc/packages/testGroup/testPackage-1.zip doesn't exist in the repository.", packageInfo.getLog().get(0));

@@ -14,6 +14,7 @@
 
 package com.exadel.aem.backpack.request.impl;
 
+import com.exadel.aem.backpack.core.services.PackageService;
 import com.exadel.aem.backpack.request.RequestAdapter;
 import com.exadel.aem.backpack.request.annotations.RequestMapping;
 import com.exadel.aem.backpack.request.annotations.RequestParam;
@@ -36,7 +37,7 @@ import static com.exadel.aem.backpack.request.annotations.FieldType.MULTIFIELD;
 
 /**
  * Implements {@link RequestAdapter} to adapt user-defined {@code SlingHttpServletRequest} parameters to a data model object
- * which is then used in operations by {@link com.exadel.aem.backpack.core.services.PackageService}
+ * which is then used in operations by {@link PackageService}
  */
 @Component(service = RequestAdapter.class)
 public class RequestAdapterImpl implements RequestAdapter {
