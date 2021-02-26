@@ -18,16 +18,18 @@ import java.util.Objects;
 
 /**
  * Data model representing a digital asset
+ *
  * @see ReferencedItem
  */
-public class  AssetReferencedItem extends ReferencedItem {
+public class AssetReferencedItem extends ReferencedItem {
 
     private final String mimeType;
     private Long size;
 
     /**
      * Basic constructor
-     * @param path String value representing path to a JCR storage item
+     *
+     * @param path     String value representing path to a JCR storage item
      * @param mimeType String value representing MIME type of the current JCR storage item
      */
     public AssetReferencedItem(final String path, final String mimeType) {
@@ -37,6 +39,7 @@ public class  AssetReferencedItem extends ReferencedItem {
 
     /**
      * Gets the MIME type of this item
+     *
      * @return String value
      */
     public String getMimeType() {
@@ -45,6 +48,7 @@ public class  AssetReferencedItem extends ReferencedItem {
 
     /**
      * Gets the size of this item
+     *
      * @return Long value
      */
     @SuppressWarnings("unused")
@@ -54,6 +58,7 @@ public class  AssetReferencedItem extends ReferencedItem {
 
     /**
      * Sets the size of this item
+     *
      * @param size Long value
      */
     @SuppressWarnings("unused")
@@ -63,6 +68,7 @@ public class  AssetReferencedItem extends ReferencedItem {
 
     /**
      * Overrides the standard {@code equals()} routine to implement items comparison by their path amd MIME type requisites
+     *
      * @param o Object to test for equality with the current object
      * @return True or false
      */
@@ -76,6 +82,7 @@ public class  AssetReferencedItem extends ReferencedItem {
 
     /**
      * Overrides the standard {@code hashCode()} routine to accompany {@link AssetReferencedItem#equals(Object)}
+     *
      * @return Integer value
      */
     @Override

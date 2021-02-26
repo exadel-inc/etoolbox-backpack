@@ -31,7 +31,7 @@ public interface PageReferenceSearchService {
      *
      * @param resourceResolver {@code ResourceResolver} used to access JCR resources.
      * @param searchPath String value representing root path containing resources to gather references for.
-     * @return {@code Set<Page>} object, or an empty {@code Set.
+     * @return {@code Set<Page>} object, or an empty {@code Set}.
      */
     Set<Page> findPageReferences(ResourceResolver resourceResolver, String searchPath);
 }
