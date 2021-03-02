@@ -101,7 +101,7 @@ public class RequestAdapterImplTest {
 
     @Test
     public void shouldReturnInvalidMessages() {
-        parameterMap.put("wholeNumber", "-12");
+        parameterMap.put("intNumber", "-12");
         request.setParameterMap(parameterMap);
         final ValidatorResponse<ValidateModel> response = requestAdapter.adaptValidate(request.getParameterMap(), ValidateModel.class);
 
@@ -109,14 +109,14 @@ public class RequestAdapterImplTest {
 
         final List<String> log = response.getLog();
         assertEquals("String field is required", log.get(0));
-        assertEquals("Field must be whole number!", log.get(1));
+        assertEquals("Field must be integer number!", log.get(1));
         assertEquals("mutifieldProperties is required", log.get(2));
     }
 
     @Test
     public void shouldReturnValidModel() {
         parameterMap.put("requiredString", "String");
-        parameterMap.put("wholeNumber", "12");
+        parameterMap.put("intNumber", "12");
         initMultifieldProperties(parameterMap);
         request.setParameterMap(parameterMap);
 
@@ -126,7 +126,7 @@ public class RequestAdapterImplTest {
 
         ValidateModel model = response.getModel();
         assertEquals("String", model.getRequiredString());
-        assertEquals(12, model.getWholeNumber());
+        assertEquals(12, model.getIntNumber());
         assertEquals("String one required", model.getMultifieldProperties().get(0).getRequiredString());
         assertEquals("String one not required", model.getMultifieldProperties().get(0).getNotRequiredString());
         assertEquals("String two required", model.getMultifieldProperties().get(1).getRequiredString());

@@ -2,8 +2,11 @@
   "jcr:primaryType": "cq:Page",
   "jcr:content": {
     "jcr:primaryType": "cq:PageContent",
-    "jcr:title": "testPage2",
-    "cq:template": "/conf/test/template3",
+    "jcr:title": "testPage1",
+    "cq:tags": [
+      "test:topics/test-tag"
+    ],
+    "cq:template": "/conf/test/template2",
     "sling:resourceType": "site/components/pages/test-page",
     "par": {
       "jcr:primaryType": "nt:unstructured",
@@ -13,7 +16,12 @@
         "sling:resourceType": "site/components/content/comp1",
         "card": {
           "jcr:primaryType": "nt:unstructured",
-          "contentReference": "/content/site/page2",
+          "contentReference": "/content/site/pages/page2",
+          "multiplePropReference": [
+            "/content/site/pages/page3.html",
+            "/content/site/pages/page4.html"
+          ],
+          "richTextReference": "<h4>Market access requirements</h4> <h4>&nbsp;</h4> <ul> <li></li> <li><a href=\"/content/site/pages/page5.html#EPEAT\"><i></i>EPEAT</a></li> <li></li> <li></li> </ul>\n",
           "title": "Test Component Title",
           "sling:resourceType": "site/components/content/card"
         }

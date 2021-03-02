@@ -14,6 +14,7 @@
 
 package com.exadel.aem.backpack.request.impl;
 
+import com.exadel.aem.backpack.core.services.PackageService;
 import com.exadel.aem.backpack.request.RequestAdapter;
 import com.exadel.aem.backpack.request.annotations.RequestMapping;
 import com.exadel.aem.backpack.request.annotations.RequestParam;
@@ -36,7 +37,7 @@ import static com.exadel.aem.backpack.request.annotations.FieldType.MULTIFIELD;
 
 /**
  * Implements {@link RequestAdapter} to adapt user-defined {@code SlingHttpServletRequest} parameters to a data model object
- * which is then used in operations by {@link com.exadel.aem.backpack.core.services.PackageService}
+ * which is then used in operations by {@link PackageService}
  */
 @Component(service = RequestAdapter.class)
 public class RequestAdapterImpl implements RequestAdapter {
@@ -44,7 +45,7 @@ public class RequestAdapterImpl implements RequestAdapter {
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestAdapterImpl.class);
 
     private static final Map<Class<?>, Function<String, Object>> SUPPORTED_TYPES;
-    protected static final String MULTIFIELD_PARAM_SEPARATOR = "/";
+    private static final String MULTIFIELD_PARAM_SEPARATOR = "/";
 
     static {
         SUPPORTED_TYPES = new HashMap<>();
@@ -89,7 +90,7 @@ public class RequestAdapterImpl implements RequestAdapter {
      * Instantiate fields from passed parameter map
      *
      * @param parameterMap {@code Map} representing parameters of a request
-     * @param newObject    instance of the object for fields initialization
+     * @param newObject    Instance of the object for fields initialization
      * @param allFields    {@code List<Field>} fields of the object
      * @param <T>          {@code <T>}-typed data object
      */
@@ -136,9 +137,9 @@ public class RequestAdapterImpl implements RequestAdapter {
     /**
      * Find and call all methods without arguments and with {@link PostConstruct} annotation
      *
-     * @param tClazz    class object
-     * @param newObject the object on which the method will be called
-     * @param <T>       type of the class
+     * @param tClazz    Class object
+     * @param newObject The object on which the method will be called
+     * @param <T>       Type of the class
      */
     private <T> void callPostConstructMethods(final Class<T> tClazz, final T newObject) {
         final List<Method> methodsAnnotatedWith = getMethodsAnnotatedWith(tClazz, PostConstruct.class);
@@ -201,7 +202,7 @@ public class RequestAdapterImpl implements RequestAdapter {
      * @return True when the adaptation object has been successfully populated with validated data; otherwise, false
      */
     private <T> boolean initMultifield(final Map<?, ?> parameterMap,
-                                       T newObject,
+                                       final T newObject,
                                        final Field field,
                                        final List<String> validationMessages,
                                        final boolean validationNeeded) {
@@ -237,7 +238,7 @@ public class RequestAdapterImpl implements RequestAdapter {
      * @param validationMessages Reference to the collection of warnings produced by validation routines
      * @param validationNeeded   Is validation needed or not
      * @param genericType        Type of the object to instantiate
-     * @param objectsList        list of objects for multifield
+     * @param objectsList        List of objects for multifield
      * @return True when the List of objects has been successfully populated with validated data; otherwise, false
      */
     private boolean initMultifieldList(final Map<?, ?> parameterMap,
@@ -260,7 +261,6 @@ public class RequestAdapterImpl implements RequestAdapter {
                 if (currentObjectValid) {
                     objectsList.add(nestedObject);
                 } else {
-                    currentObjectValid = false;
                     break;
                 }
             } else {
@@ -283,7 +283,7 @@ public class RequestAdapterImpl implements RequestAdapter {
         for (Map.Entry<?, ?> entry : parameterMap.entrySet()) {
             if ((((String) entry.getKey()).startsWith(parameterName + MULTIFIELD_PARAM_SEPARATOR)
                     && ((String) entry.getKey()).split(MULTIFIELD_PARAM_SEPARATOR).length == 3)) {
-                Object[] params = ((String) entry.getKey()).split(MULTIFIELD_PARAM_SEPARATOR);
+                String[] params = ((String) entry.getKey()).split(MULTIFIELD_PARAM_SEPARATOR);
                 Map nameValueMap = multfieldItems.get(params[1]);
                 if (nameValueMap == null) {
                     nameValueMap = new HashMap<>();
@@ -297,9 +297,9 @@ public class RequestAdapterImpl implements RequestAdapter {
 
 
     /**
-     * Gets the name of the parameter based on the annotation property if its present or by field name itself
+     * Gets the name of the parameter based on the annotation property if it is present or by field name itself
      *
-     * @param field {@code Field to get the parameter name}
+     * @param field {@code Field} to get the parameter name
      * @return Name of the parameter
      */
     private String getParameterName(final Field field) {
@@ -334,9 +334,9 @@ public class RequestAdapterImpl implements RequestAdapter {
     /**
      * Find all methods without arguments from the class by specific annotation
      *
-     * @param type       class object
-     * @param annotation search annotation
-     * @return list of found methods
+     * @param type       Class object
+     * @param annotation Search annotation
+     * @return List of found methods
      */
     private List<Method> getMethodsAnnotatedWith(final Class<?> type, final Class<? extends Annotation> annotation) {
         final List<Method> methods = new ArrayList<>();
@@ -509,13 +509,9 @@ public class RequestAdapterImpl implements RequestAdapter {
      * @param <T>    Type of the instance to create
      * @return {@code <T>}-typed object, or null
      */
-    private static <T> T createDefaultObject(final Class<T> tClazz) {
+    private <T> T createDefaultObject(final Class<T> tClazz) {
         try {
-            T newInstance = tClazz.getConstructor().newInstance();
-            if (newInstance == null) {
-                throw new IllegalStateException("No default constructor found for the class: " + tClazz);
-            }
-            return newInstance;
+            return tClazz.getConstructor().newInstance();
         } catch (Exception e) {
             LOGGER.error("Object instantiation exception", e);
         }

@@ -12,18 +12,20 @@
  * limitations under the License.
  */
 
-package com.exadel.aem.backpack.core.dto.response;
+package com.exadel.aem.backpack.core.dto.repository;
 
-import com.exadel.aem.backpack.core.services.PackageService;
+import com.day.cq.wcm.api.Page;
 
 /**
- * Enumerates possible package statuses as reported by {@link PackageInfo} objects
- * @see PackageService
+ * Data model representing a {@link Page} item accessible by its path
  */
-public enum PackageStatus {
-    CREATED,
-    MODIFIED,
-    BUILD_IN_PROGRESS,
-    BUILT,
-    ERROR
+public class PageReferencedItem extends ReferencedItem {
+    /**
+     * Basic constructor
+     *
+     * @param path String value representing path to a JCR storage item
+     */
+    public PageReferencedItem(final String path) {
+        super(path, "Pages");
+    }
 }

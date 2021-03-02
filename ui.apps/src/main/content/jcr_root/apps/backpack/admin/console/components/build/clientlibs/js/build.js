@@ -28,7 +28,6 @@ $(function () {
         $filters = $('#filters'),
         $packageSize = $('#packageSize'),
         $buildButton = $('#buildButton'),
-        $referencedResources = $('#referencedResources').find('div'),
         $referencedResourcesList = $('#referencedResourcesList'),
         $testBuildButton = $('#testBuildButton'),
         $downloadBtn = $('#downloadBtn'),
@@ -76,22 +75,57 @@ $(function () {
 
             function initReferencedResources() {
                 if (data.referencedResources) {
-                    $.each(data.referencedResources, function (key, referencedValue) {
-                        var checkbox = new Coral.Checkbox().set({
-                            label: {
-                                innerHTML: key
-                            },
-                            value: key,
-                            name: 'referencedResources'
-                        });
-                        $referencedResources.append(checkbox);
 
-                        var listItem = '<li><h4>' + key + '</h4>';
+                    var accordion = new Coral.Accordion();
+
+                    $.each(data.referencedResources, function (key, referencedValue) {
+                        var checkbox = '<coral-checkbox coral-interactive="true" name="referencedResources" value="' + key + '">' +
+                            key + ' (' + referencedValue.length + ')' +
+                            '</coral-checkbox>';
+
+                        var listItem = '';
                         $.each(referencedValue, function (index, value) {
-                            listItem += '<div>' + value + '</div>'
+                            var itemCheckbox = '<coral-checkbox name="referencedResourcesItem" value="' + value + '">' + value + '</coral-checkbox>'
+                            listItem += '<div>' + itemCheckbox + '</div>'
                         });
-                        listItem += '</li>';
-                        $referencedResourcesList.append(listItem)
+                        accordion.items.add({
+                            label: {
+                                innerHTML: checkbox
+                            },
+                            content: {
+                                innerHTML: listItem
+                            },
+                            disabled: false
+                        });
+                    });
+                    $referencedResourcesList.append(accordion.outerHTML);
+
+                    $(document).on("change", '[name ="referencedResources"]', function (e) {
+                        if (this.checked) {
+                            $(this).closest('coral-accordion-item').find('[name ="referencedResourcesItem"]').each(function (index, innerInput) {
+                                innerInput.checked = true;
+                            });
+                        } else {
+                            $(this).closest('coral-accordion-item').find('[name ="referencedResourcesItem"]').each(function (index, innerInput) {
+                                innerInput.checked = false;
+                            });
+                        }
+                    });
+
+                    $(document).on("change", '[name ="referencedResourcesItem"]', function (e) {
+                        var currentCheckboxVal = this.checked;
+                        var indeterminate = false;
+                        $(this).closest('coral-accordion-item').find('[name ="referencedResourcesItem"]').each(function (index, innerInput) {
+                            if (innerInput.checked !== currentCheckboxVal) {
+                                indeterminate = true;
+                                return false;
+                            }
+                        });
+                        var referencedResourcesTypeCheckbox = $(this).closest('coral-accordion-item').find('coral-checkbox[name ="referencedResources"]');
+                        if (referencedResourcesTypeCheckbox.length === 1) {
+                            referencedResourcesTypeCheckbox[0].checked = indeterminate ? true : currentCheckboxVal;
+                            referencedResourcesTypeCheckbox[0].indeterminate = indeterminate;
+                        }
                     });
                 }
 
@@ -125,16 +159,21 @@ $(function () {
     }
 
     function buildPackage(testBuild) {
-        var referencedResources = [];
+        var referencedResources = {};
         $('input[name="referencedResources"]:checked').each(function () {
-            referencedResources.push(this.value);
+            var resources = [];
+            var currentResourceType = this.value;
+            $(this).closest('coral-accordion-item').find('input[name="referencedResourcesItem"]:checked').each(function () {
+                resources.push(this.value);
+            });
+            referencedResources[currentResourceType] = resources;
         });
         $.ajax({
             type: 'POST',
             url: '/services/backpack/buildPackage',
             data: {
                 path: path,
-                referencedResources: referencedResources,
+                referencedResources: JSON.stringify(referencedResources),
                 testBuild: testBuild
             }, success: function (data) {
                 $buildLog.empty();
@@ -143,7 +182,7 @@ $(function () {
                         $.each(data.log, function (index, value) {
                             $buildLog.append('<div>' + value + '</div>');
                         });
-                        $buildLog.append('<h4>Approximate referenced resources size: ' + bytesToSize(data.dataSize) + '</h4>');
+                        $buildLog.append('<h4>Approximate size of the assets in the package: ' + bytesToSize(data.dataSize) + '</h4>');
                         scrollLog();
                     }
                 } else {

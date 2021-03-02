@@ -14,15 +14,14 @@
 
 package com.exadel.aem.backpack.core.servlets.model;
 
+import com.exadel.aem.backpack.core.services.PackageService;
 import com.exadel.aem.backpack.request.annotations.RequestMapping;
 import com.exadel.aem.backpack.request.annotations.RequestParam;
 import org.apache.sling.api.resource.ResourceResolver;
 
-import java.util.List;
-
 /**
  * Represents the set of user-defined options for a request to build a package. Upon initialization, passed
- * as a parameter to the {@link com.exadel.aem.backpack.core.services.PackageService#buildPackage(ResourceResolver, BuildPackageModel)}
+ * as a parameter to the {@link PackageService#buildPackage(ResourceResolver, BuildPackageModel)}
  * @see com.exadel.aem.backpack.core.servlets.BuildPackageServlet
  */
 @RequestMapping
@@ -33,7 +32,7 @@ public class BuildPackageModel extends PackageInfoModel {
     private boolean testBuild;
 
     @RequestParam
-    private List<String> referencedResources;
+    private String referencedResources;
 
     /**
      * Gets whether this request is for a test build (a dry-run build without assembling actual package file)
@@ -45,16 +44,16 @@ public class BuildPackageModel extends PackageInfoModel {
 
     /**
      * Gets collection of paths to JCR resources that must be included in the current package
-     * @return {@code List<String>} object storing collection of paths
+     * @return {@code String} object storing collection of paths
      */
-    public List<String> getReferencedResources() {
+    public String getReferencedResources() {
         return referencedResources;
     }
 
     /**
-     * Assigns to this instance a collection of paths to JCR resources that must be included in the current package
+     * Assigns to this instance a String JSON representation of JCR resources that must be included in the current package
      */
-    public void setReferencedResources(final List<String> referencedResources) {
+    public void setReferencedResources(final String referencedResources) {
         this.referencedResources = referencedResources;
     }
 }

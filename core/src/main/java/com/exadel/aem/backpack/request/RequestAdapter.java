@@ -14,13 +14,14 @@
 
 package com.exadel.aem.backpack.request;
 
+import com.exadel.aem.backpack.core.services.PackageService;
 import com.exadel.aem.backpack.request.validator.ValidatorResponse;
 
 import java.util.Map;
 
 /**
  * Represents a service used to adapt user-defined {@code SlingHttpServletRequest} parameters to a data model object
- * which is then used in operations by {@link com.exadel.aem.backpack.core.services.PackageService}.
+ * which is then used in operations by {@link PackageService}.
  * The data model can be subsequently validated by a specific routine as required
  */
 @SuppressWarnings("unused") // exposes methods as part of public API

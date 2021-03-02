@@ -18,6 +18,7 @@ import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.dam.api.Asset;
 import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
+import com.exadel.aem.backpack.core.dto.repository.ReferencedItem;
 import com.exadel.aem.backpack.core.dto.response.JcrPackageWrapper;
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
@@ -88,9 +89,10 @@ public class PackageServiceImpl implements PackageService {
     private static final String REFERENCED_RESOURCES = "referencedResources";
     private static final String GENERAL_RESOURCES = "generalResources";
     private static final String PACKAGE_DOES_NOT_EXIST_MESSAGE = "Package by this path %s doesn't exist in the repository.";
+    protected static final String SNAPSHOT_FOLDER = ".snapshot";
     protected static final String INITIAL_FILTERS = "initialFilters";
     public static final String PACKAGES_ROOT_PATH = "/etc/packages";
-    protected static final String SNAPSHOT_FOLDER = ".snapshot";
+
 
     @Reference
     @SuppressWarnings("UnusedDeclaration") // value injected by Sling
@@ -165,6 +167,7 @@ public class PackageServiceImpl implements PackageService {
             packageNode = session.getNode(requestInfo.getPackagePath());
 
             if (packageNode != null) {
+                long start = System.currentTimeMillis();
                 jcrPackage = packMgr.open(packageNode);
                 if (jcrPackage != null) {
                     JcrPackageDefinition definition = jcrPackage.getDefinition();
@@ -172,13 +175,19 @@ public class PackageServiceImpl implements PackageService {
                         packageInfo.addLogMessage(ERROR + " package definition is null");
                         return packageInfo;
                     }
-                    includeGeneralResources(definition, s -> packageInfo.addLogMessage("A " + s));
+                    includeGeneralResources(definition, s -> {
+                        packageInfo.addLogMessage("A " + s);
+                        totalSize.addAndGet(getAssetSize(resourceResolver, s));
+                    });
                     includeReferencedResources(requestInfo.getReferencedResources(), definition, s -> {
                         packageInfo.addLogMessage("A " + s);
                         totalSize.addAndGet(getAssetSize(resourceResolver, s));
                     });
                     packageInfo.setDataSize(totalSize.get());
                     packageInfo.setPackageBuilt(definition.getLastWrapped());
+                    long finish = System.currentTimeMillis();
+                    packageInfo.addLogMessage(StringUtils.EMPTY);
+                    packageInfo.addLogMessage("Package test built in " + (finish - start) + " milliseconds");
                 }
             }
         } catch (RepositoryException e) {
@@ -276,12 +285,12 @@ public class PackageServiceImpl implements PackageService {
         packageInfo.setVersion(packageModel.getVersion());
         packageInfo.setThumbnailPath(packageModel.getThumbnailPath());
 
-        String pkgGroupName = DEFAULT_PACKAGE_GROUP;
+        String packageGroupName = DEFAULT_PACKAGE_GROUP;
 
         if (StringUtils.isNotBlank(packageModel.getGroup())) {
-            pkgGroupName = packageModel.getGroup();
+            packageGroupName = packageModel.getGroup();
         }
-        packageInfo.setGroupName(pkgGroupName);
+        packageInfo.setGroupName(packageGroupName);
         return packageInfo;
     }
 
@@ -296,8 +305,8 @@ public class PackageServiceImpl implements PackageService {
 
         try {
             JcrPackageManager packMgr = getPackageManager(session);
-            if (isPkgExists(packMgr, packageModel.getPackageName(), packageInfo.getGroupName(), packageModel.getVersion())) {
-                String packageExistMsg = "Package with such name already exists in the " + packageInfo.getGroupName() + " group.";
+            if (isPackageExist(packMgr, packageModel.getPackageName(), packageInfo.getGroupName(), packageModel.getVersion())) {
+                String packageExistMsg = "Package with this name already exists in the " + packageInfo.getGroupName() + " group.";
 
                 packageInfo.addLogMessage(ERROR + packageExistMsg);
                 packageInfo.setPackageStatus(PackageStatus.ERROR);
@@ -310,7 +319,7 @@ public class PackageServiceImpl implements PackageService {
             return packageInfo;
         }
 
-        Set<AssetReferencedItem> referencedAssets = getReferencedAssets(resourceResolver, packageInfo.getPaths());
+        Set<ReferencedItem> referencedAssets = getReferencedResources(resourceResolver, packageInfo.getPaths());
         Collection<String> resultingPaths = initAssets(packageInfo.getPaths(), referencedAssets, packageInfo);
         DefaultWorkspaceFilter filter = getWorkspaceFilter(resultingPaths);
         createPackage(session, packageInfo, packageModel.getPaths(), filter);
@@ -320,131 +329,6 @@ public class PackageServiceImpl implements PackageService {
         }
 
         return packageInfo;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public PackageInfo editPackage(final ResourceResolver resourceResolver, final PackageModel modificationPackageModel) {
-        final Session session = resourceResolver.adaptTo(Session.class);
-
-        PackageInfo packageInfo = getPackageInfo(resourceResolver, modificationPackageModel);
-
-        PackageModel oldPackageModel = getPackageModelByPath(modificationPackageModel.getPackagePath(), resourceResolver);
-        try {
-            JcrPackageManager packMgr = getPackageManager(session);
-            if (isPackageLocationUpdated(modificationPackageModel, oldPackageModel)
-                    && isPkgExists(packMgr, packageInfo.getPackageName(), packageInfo.getGroupName(), packageInfo.getVersion())) {
-                String packageExistMsg = "Package with such name already exists in the " + packageInfo.getGroupName() + " group.";
-
-                packageInfo.addLogMessage(ERROR + packageExistMsg);
-                packageInfo.setPackageStatus(PackageStatus.ERROR);
-                LOGGER.error(packageExistMsg);
-                return packageInfo;
-            }
-        } catch (RepositoryException e) {
-            addExceptionToLog(packageInfo, e);
-            LOGGER.error("Error during existing packages check", e);
-            return packageInfo;
-        }
-
-        Set<AssetReferencedItem> referencedAssets = getReferencedAssets(resourceResolver, packageInfo.getPaths());
-        Collection<String> resultingPaths = initAssets(packageInfo.getPaths(), referencedAssets, packageInfo);
-        DefaultWorkspaceFilter filter = getWorkspaceFilter(resultingPaths);
-        modifyPackage(session, modificationPackageModel.getPackagePath(), packageInfo, modificationPackageModel.getPaths(), filter);
-
-        if (PackageStatus.MODIFIED.equals(packageInfo.getPackageStatus())) {
-            packageInfos.asMap().remove(modificationPackageModel.getPackagePath());
-            packageInfos.asMap().put(packageInfo.getPackagePath(), packageInfo);
-        }
-
-        return packageInfo;
-    }
-
-    /**
-     * Called from {@link PackageService#editPackage(ResourceResolver, PackageModel)} to check whether
-     * properties that affect package location were updated during modification
-     *
-     * @param newPkg {@link PackageModel} model with package modification info
-     * @param oldPkg {@link PackageModel} model with existing package info
-     * @return {@code boolean}
-     */
-    private boolean isPackageLocationUpdated(final PackageModel newPkg, final PackageModel oldPkg) {
-        return !oldPkg.getPackageName().equals(newPkg.getPackageName()) ||
-                !oldPkg.getGroup().equals(newPkg.getGroup()) ||
-                (StringUtils.isNotBlank(oldPkg.getVersion()) && StringUtils.isNotBlank(newPkg.getVersion()) && !oldPkg.getVersion().equals(newPkg.getVersion()));
-    }
-
-    /**
-     * Called from {@link PackageServiceImpl#editPackage(ResourceResolver, PackageModel)} in order to update package location and information
-     *
-     * @param userSession Current user {@code Session} as adapted from the acting {@code ResourceResolver}
-     * @param packagePath Modified package path
-     * @param packageInfo {@code PackageInfo} object to store status information in
-     * @param paths       {@code List} of {@code PathModel} will be stored in package metadata information and used in future package modifications
-     * @param filter      {@code DefaultWorkspaceFilter} instance representing resource selection mechanism for the package
-     */
-    private void modifyPackage(final Session userSession,
-                               final String packagePath,
-                               final PackageInfo packageInfo,
-                               final List<PathModel> paths, final DefaultWorkspaceFilter filter) {
-        JcrPackage jcrPackage = null;
-        try {
-            JcrPackageManager packMgr = PackagingService.getPackageManager(userSession);
-            if (!filter.getFilterSets().isEmpty()) {
-                Node packageNode = userSession.getNode(packagePath);
-                if (packageNode != null) {
-                    jcrPackage = packMgr.open(packageNode);
-                    jcrPackage = packMgr.rename(jcrPackage, packageInfo.getGroupName(), packageInfo.getPackageName(), packageInfo.getVersion());
-                    JcrPackageDefinition jcrPackageDefinition = jcrPackage.getDefinition();
-                    if (jcrPackageDefinition != null) {
-                        setPackageInfo(userSession, packageInfo, paths, filter, jcrPackageDefinition);
-                        packageInfo.setPackageStatus(PackageStatus.MODIFIED);
-                        packageNode = jcrPackage.getNode();
-                        if (packageNode != null) {
-                            packageInfo.setPackageNodeName(packageNode.getName());
-                            packageInfo.setPackagePath(packageNode.getPath());
-                        }
-                    }
-                }
-            } else {
-                packageInfo.setPackageStatus(PackageStatus.ERROR);
-                packageInfo.addLogMessage(ERROR + "Package does not contain any valid filters.");
-            }
-        } catch (RepositoryException | PackageException e) {
-            packageInfo.setPackageStatus(PackageStatus.ERROR);
-            addExceptionToLog(packageInfo, e);
-            LOGGER.error("Error during package modification", e);
-        } finally {
-            if (jcrPackage != null) {
-                jcrPackage.close();
-            }
-        }
-    }
-
-    /**
-     * Called from {@link PackageServiceImpl#modifyPackage(Session, String, PackageInfo, List, DefaultWorkspaceFilter)}
-     * and {@link PackageServiceImpl#createPackage(Session, PackageInfo, List, DefaultWorkspaceFilter)} in order to fill general package information
-     *
-     * @param userSession          Current user {@code Session} as adapted from the acting {@code ResourceResolver}
-     * @param packageInfo          {@code PackageInfo} object to store status information in
-     * @param paths                {@code List} of {@code PathModel} will be stored in package metadata information and used in future package modifications
-     * @param filter               {@code DefaultWorkspaceFilter} instance representing resource selection mechanism for the package
-     * @param jcrPackageDefinition {@code JcrPackageDefinition}
-     */
-    private void setPackageInfo(final Session userSession,
-                                final PackageInfo packageInfo,
-                                final List<PathModel> paths,
-                                final DefaultWorkspaceFilter filter,
-                                final JcrPackageDefinition jcrPackageDefinition) {
-        jcrPackageDefinition.set(REFERENCED_RESOURCES, GSON.toJson(packageInfo.getReferencedResources()), true);
-        jcrPackageDefinition.set(GENERAL_RESOURCES, GSON.toJson(packageInfo.getPaths()), true);
-        jcrPackageDefinition.set(INITIAL_FILTERS, GSON.toJson(paths), true);
-        jcrPackageDefinition.setFilter(filter, true);
-
-        String thumbnailPath = StringUtils.defaultIfBlank(packageInfo.getThumbnailPath(), getDefaultThumbnailPath(true));
-        addThumbnail(jcrPackageDefinition.getNode(), thumbnailPath, userSession);
     }
 
     /**
@@ -458,7 +342,8 @@ public class PackageServiceImpl implements PackageService {
      */
     private void createPackage(final Session userSession,
                                final PackageInfo packageInfo,
-                               final List<PathModel> paths, final DefaultWorkspaceFilter filter) {
+                               final List<PathModel> paths,
+                               final DefaultWorkspaceFilter filter) {
         JcrPackage jcrPackage = null;
         try {
             JcrPackageManager packMgr = PackagingService.getPackageManager(userSession);
@@ -466,7 +351,7 @@ public class PackageServiceImpl implements PackageService {
                 jcrPackage = packMgr.create(packageInfo.getGroupName(), packageInfo.getPackageName(), packageInfo.getVersion());
                 JcrPackageDefinition jcrPackageDefinition = jcrPackage.getDefinition();
                 if (jcrPackageDefinition != null) {
-                    setPackageInfo(userSession, packageInfo, paths, filter, jcrPackageDefinition);
+                    setPackageInfo(jcrPackageDefinition, userSession, packageInfo, paths, filter);
                     packageInfo.setPackageStatus(PackageStatus.CREATED);
                     Node packageNode = jcrPackage.getNode();
                     if (packageNode != null) {
@@ -489,6 +374,139 @@ public class PackageServiceImpl implements PackageService {
         }
     }
 
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PackageInfo editPackage(final ResourceResolver resourceResolver, final PackageModel modificationPackageModel) {
+        final Session session = resourceResolver.adaptTo(Session.class);
+
+        PackageInfo packageInfo = getPackageInfo(resourceResolver, modificationPackageModel);
+
+        PackageModel oldPackageModel = getPackageModelByPath(modificationPackageModel.getPackagePath(), resourceResolver);
+        try {
+            JcrPackageManager packMgr = getPackageManager(session);
+            if (isPackageLocationUpdated(modificationPackageModel, oldPackageModel)
+                    && isPackageExist(packMgr, packageInfo.getPackageName(), packageInfo.getGroupName(), packageInfo.getVersion())) {
+                String packageExistMsg = "Package with this name already exists in the " + packageInfo.getGroupName() + " group.";
+
+                packageInfo.addLogMessage(ERROR + packageExistMsg);
+                packageInfo.setPackageStatus(PackageStatus.ERROR);
+                LOGGER.error(packageExistMsg);
+                return packageInfo;
+            }
+        } catch (RepositoryException e) {
+            addExceptionToLog(packageInfo, e);
+            LOGGER.error("Error during existing packages check", e);
+            return packageInfo;
+        }
+
+        Set<ReferencedItem> referencedAssets = getReferencedResources(resourceResolver, packageInfo.getPaths());
+        Collection<String> resultingPaths = initAssets(packageInfo.getPaths(), referencedAssets, packageInfo);
+        DefaultWorkspaceFilter filter = getWorkspaceFilter(resultingPaths);
+        modifyPackage(session, modificationPackageModel.getPackagePath(), packageInfo, modificationPackageModel.getPaths(), filter);
+
+        if (PackageStatus.MODIFIED.equals(packageInfo.getPackageStatus())) {
+            packageInfos.asMap().remove(modificationPackageModel.getPackagePath());
+            packageInfos.asMap().put(packageInfo.getPackagePath(), packageInfo);
+        }
+
+        return packageInfo;
+    }
+
+    /**
+     * Called from {@link PackageService#editPackage(ResourceResolver, PackageModel)} to check whether
+     * properties that affect package location were updated during modification
+     *
+     * @param newPackage {@link PackageModel} model with package modification info
+     * @param oldPackage {@link PackageModel} model with existing package info
+     * @return {@code boolean}
+     */
+    private boolean isPackageLocationUpdated(final PackageModel newPackage, final PackageModel oldPackage) {
+        return !StringUtils.equals(oldPackage.getPackageName(), newPackage.getPackageName()) ||
+                !StringUtils.equals(oldPackage.getGroup(), newPackage.getGroup()) ||
+                !StringUtils.equals(oldPackage.getVersion(), newPackage.getVersion());
+    }
+
+    /**
+     * Called from {@link PackageServiceImpl#editPackage(ResourceResolver, PackageModel)} in order to update package location and information
+     *
+     * @param userSession Current user {@code Session} as adapted from the acting {@code ResourceResolver}
+     * @param packagePath Modified package path
+     * @param packageInfo {@code PackageInfo} object to store status information in
+     * @param paths       {@code List} of {@code PathModel} will be stored in package metadata information and used in future package modifications
+     * @param filter      {@code DefaultWorkspaceFilter} instance representing resource selection mechanism for the package
+     */
+    private void modifyPackage(final Session userSession,
+                               final String packagePath,
+                               final PackageInfo packageInfo,
+                               final List<PathModel> paths,
+                               final DefaultWorkspaceFilter filter) {
+
+        if (filter.getFilterSets().isEmpty()) {
+            packageInfo.setPackageStatus(PackageStatus.ERROR);
+            packageInfo.addLogMessage(ERROR + "Package does not contain any valid filters.");
+            return;
+
+        }
+        JcrPackage jcrPackage = null;
+
+        try {
+            JcrPackageManager packMgr = PackagingService.getPackageManager(userSession);
+            Node packageNode = userSession.getNode(packagePath);
+            if (packageNode != null) {
+                jcrPackage = packMgr.open(packageNode);
+                jcrPackage = packMgr.rename(jcrPackage, packageInfo.getGroupName(), packageInfo.getPackageName(), packageInfo.getVersion());
+                JcrPackageDefinition jcrPackageDefinition = jcrPackage.getDefinition();
+                if (jcrPackageDefinition != null) {
+                    setPackageInfo(jcrPackageDefinition, userSession, packageInfo, paths, filter);
+                    packageInfo.setPackageStatus(PackageStatus.MODIFIED);
+                    Node movedPackageNode = jcrPackage.getNode();
+                    if (movedPackageNode != null) {
+                        packageInfo.setPackageNodeName(movedPackageNode.getName());
+                        packageInfo.setPackagePath(movedPackageNode.getPath());
+                    }
+                }
+            }
+        } catch (RepositoryException | PackageException e) {
+            packageInfo.setPackageStatus(PackageStatus.ERROR);
+            addExceptionToLog(packageInfo, e);
+            LOGGER.error("Error during package modification", e);
+        } finally {
+            if (jcrPackage != null) {
+                jcrPackage.close();
+            }
+        }
+
+    }
+
+    /**
+     * Called from {@link PackageServiceImpl#modifyPackage(Session, String, PackageInfo, List, DefaultWorkspaceFilter)}
+     * and {@link PackageServiceImpl#createPackage(Session, PackageInfo, List, DefaultWorkspaceFilter)} in order to fill general package information
+     * <p>
+     *
+     * @param jcrPackageDefinition {@code JcrPackageDefinition} Definition of the package to update
+     * @param userSession          Current user {@code Session} as adapted from the acting {@code ResourceResolver}
+     * @param packageInfo          {@code PackageInfo} object to store status information in
+     * @param paths                {@code List} of {@code PathModel} will be stored in package metadata information and used in future package modifications
+     * @param filter               {@code DefaultWorkspaceFilter} instance representing resource selection mechanism for the package
+     */
+    private void setPackageInfo(final JcrPackageDefinition jcrPackageDefinition,
+                                final Session userSession,
+                                final PackageInfo packageInfo,
+                                final List<PathModel> paths,
+                                final DefaultWorkspaceFilter filter) {
+        jcrPackageDefinition.set(REFERENCED_RESOURCES, GSON.toJson(packageInfo.getReferencedResources()), true);
+        jcrPackageDefinition.set(GENERAL_RESOURCES, GSON.toJson(packageInfo.getPaths()), true);
+        jcrPackageDefinition.set(INITIAL_FILTERS, GSON.toJson(paths), true);
+        jcrPackageDefinition.setFilter(filter, true);
+
+        String thumbnailPath = StringUtils.defaultIfBlank(packageInfo.getThumbnailPath(), getDefaultThumbnailPath(true));
+        addThumbnail(jcrPackageDefinition.getNode(), thumbnailPath, userSession);
+    }
+
+
     /**
      * {@inheritDoc}
      */
@@ -498,15 +516,17 @@ public class PackageServiceImpl implements PackageService {
         JcrPackageManager packMgr = getPackageManager(session);
 
         JcrPackage jcrPackage = null;
-
+        if (session == null) {
+            return null;
+        }
         try {
-            if (session != null) {
-                Node packageNode = session.getNode(packagePath);
-                if (packageNode != null) {
-                    jcrPackage = packMgr.open(packageNode);
-                    return getPackageModel(jcrPackage);
-                }
+
+            Node packageNode = session.getNode(packagePath);
+            if (packageNode != null) {
+                jcrPackage = packMgr.open(packageNode);
+                return getPackageModel(jcrPackage);
             }
+
         } catch (RepositoryException e) {
             LOGGER.error("Error during package opening", e);
         } finally {
@@ -521,7 +541,7 @@ public class PackageServiceImpl implements PackageService {
      * Called by {@link PackageServiceImpl#createPackage#getPackageModelByPath(String, ResourceResolver)} to get
      * {@link PackageModel} from repository
      *
-     * @param jcrPackage {@code JcrPackage}
+     * @param jcrPackage {@code JcrPackage} package object used for {@link PackageModel} generation
      * @return {@link PackageModel} instance
      * @throws RepositoryException in case {@code JcrPackageManager} could not  retrieve a packages's info
      */
@@ -659,10 +679,10 @@ public class PackageServiceImpl implements PackageService {
      * @return {@code List<String>} object containing paths of package entries
      */
     private Collection<String> initAssets(final Collection<String> initialPaths,
-                                          final Set<AssetReferencedItem> referencedAssets,
+                                          final Set<ReferencedItem> referencedAssets,
                                           final PackageInfo packageInfo) {
-        Collection<String> resultingPaths = new ArrayList<>(initialPaths);
         referencedAssets.forEach(packageInfo::addAssetReferencedItem);
+        Collection<String> resultingPaths = new ArrayList<>(initialPaths);
         return resultingPaths;
     }
 
@@ -703,38 +723,39 @@ public class PackageServiceImpl implements PackageService {
      * Called from {@link PackageServiceImpl#buildPackage(ResourceResolver, BuildPackageModel)}.
      * Encapsulates building package in a separate execution thread
      *
-     * @param userId                  User ID per the effective {@code ResourceResolver}
-     * @param packageBuildInfo        {@link PackageInfo} object to store package building status information in
-     * @param referencedResourceTypes Collection of strings representing resource types to be embedded
-     *                                in the resulting package
+     * @param userId              User ID per the effective {@code ResourceResolver}
+     * @param packageBuildInfo    {@link PackageInfo} object to store package building status information in
+     * @param referencedResources Collection of strings representing resource types to be embedded
+     *                            in the resulting package
      */
     private void buildPackageAsync(final String userId,
                                    final PackageInfo packageBuildInfo,
-                                   final List<String> referencedResourceTypes) {
-        new Thread(() -> buildPackage(userId, packageBuildInfo, referencedResourceTypes)).start();
+                                   final String referencedResources) {
+        new Thread(() -> buildPackage(userId, packageBuildInfo, referencedResources)).start();
     }
 
     /**
      * Performs the internal package building procedure and stores status information
      *
-     * @param userId                  User ID per the effective {@code ResourceResolver}
-     * @param packageBuildInfo        {@link PackageInfo} object to store package building status information in
-     * @param referencedResourceTypes Collection of strings representing resource types to be embedded
-     *                                in the resulting package
+     * @param userId              User ID per the effective {@code ResourceResolver}
+     * @param packageBuildInfo    {@link PackageInfo} object to store package building status information in
+     * @param referencedResources JSON string representing resources to be embedded
+     *                            in the resulting package
      */
     void buildPackage(final String userId,
                       final PackageInfo packageBuildInfo,
-                      final List<String> referencedResourceTypes) {
+                      final String referencedResources) {
         Session userSession = null;
         try {
             userSession = getUserImpersonatedSession(userId);
             JcrPackageManager packMgr = getPackageManager(userSession);
             JcrPackage jcrPackage = packMgr.open(userSession.getNode(packageBuildInfo.getPackagePath()));
             if (jcrPackage != null) {
+                long start = System.currentTimeMillis();
                 JcrPackageDefinition definition = Objects.requireNonNull(jcrPackage.getDefinition());
                 DefaultWorkspaceFilter filter = new DefaultWorkspaceFilter();
                 includeGeneralResources(definition, s -> filter.add(new PathFilterSet(s)));
-                includeReferencedResources(referencedResourceTypes, definition, s -> filter.add(new PathFilterSet(s)));
+                includeReferencedResources(referencedResources, definition, s -> filter.add(new PathFilterSet(s)));
                 definition.setFilter(filter, true);
                 String thumbnailPath = StringUtils.defaultIfBlank(packageBuildInfo.getThumbnailPath(), getDefaultThumbnailPath(false));
                 addThumbnail(definition.getNode(), thumbnailPath, userSession);
@@ -754,6 +775,9 @@ public class PackageServiceImpl implements PackageService {
                 packageBuildInfo.setPackageStatus(PackageStatus.BUILT);
                 packageBuildInfo.setDataSize(jcrPackage.getSize());
                 packageBuildInfo.setPaths(filter.getFilterSets().stream().map(pathFilterSet -> pathFilterSet.seal().getRoot()).collect(Collectors.toList()));
+                long finish = System.currentTimeMillis();
+                packageBuildInfo.addLogMessage(StringUtils.EMPTY);
+                packageBuildInfo.addLogMessage("Package built in " + (finish - start) + " milliseconds");
             } else {
                 packageBuildInfo.setPackageStatus(PackageStatus.ERROR);
                 packageBuildInfo.addLogMessage(ERROR + String.format(PACKAGE_DOES_NOT_EXIST_MESSAGE, packageBuildInfo.getPackagePath()));
@@ -768,7 +792,7 @@ public class PackageServiceImpl implements PackageService {
     }
 
     /**
-     * Called by {@link PackageServiceImpl#buildPackage(String, PackageInfo, List)} to get the {@code Session} instance
+     * Called by {@link PackageServiceImpl#buildPackage(String, PackageInfo, String)} to get the {@code Session} instance
      * with required rights for package creation
      *
      * @param userId User ID per the effective {@code ResourceResolver}
@@ -815,9 +839,9 @@ public class PackageServiceImpl implements PackageService {
     private void includeGeneralResources(final JcrPackageDefinition definition, final Consumer<String> pathConsumer) {
         Type listType = new TypeToken<List<String>>() {
         }.getType();
-        List<String> pkgGeneralResources = GSON.fromJson(definition.get(GENERAL_RESOURCES), listType);
-        if (pkgGeneralResources != null) {
-            pkgGeneralResources.forEach(pathConsumer);
+        List<String> packageGeneralResources = GSON.fromJson(definition.get(GENERAL_RESOURCES), listType);
+        if (packageGeneralResources != null) {
+            packageGeneralResources.forEach(pathConsumer);
         }
     }
 
@@ -826,30 +850,30 @@ public class PackageServiceImpl implements PackageService {
      * {@link PackageServiceImpl#testBuildPackage(ResourceResolver, BuildPackageModel)} to facilitate including referenced
      * resources (assets) into the current package
      *
-     * @param referencedResourceTypes Collection of strings representing resource types to be embedded
-     *                                in the resulting package
-     * @param definition              {@code JcrPackageDefinition} object
-     * @param pathConsumer            A routine executed over each resources' path value (mainly for logging purposes
-     *                                and statistics gathering)
+     * @param includeReferencedResources JSON string representing resources to be embedded
+     *                                   in the resulting package
+     * @param definition                 {@code JcrPackageDefinition} object
+     * @param pathConsumer               A routine executed over each resources' path value (mainly for logging purposes
+     *                                   and statistics gathering)
      */
-    private void includeReferencedResources(final Collection<String> referencedResourceTypes,
+    private void includeReferencedResources(final String includeReferencedResources,
                                             final JcrPackageDefinition definition,
                                             final Consumer<String> pathConsumer) {
         Type mapType = new TypeToken<Map<String, List<String>>>() {
         }.getType();
-        Map<String, List<String>> pkgReferencedResources = GSON.fromJson(definition.get(REFERENCED_RESOURCES), mapType);
-
-        if (pkgReferencedResources != null && referencedResourceTypes != null) {
-            List<String> includeResources = referencedResourceTypes.stream()
-                    .map(pkgReferencedResources::get)
-                    .flatMap(List::stream)
-                    .collect(Collectors.toList());
-            includeResources.forEach(pathConsumer);
+        Map<String, List<String>> packageReferencedResources = GSON.fromJson(definition.get(REFERENCED_RESOURCES), mapType);
+        Map<String, List<String>> includeResources = GSON.fromJson(includeReferencedResources, mapType);
+        if (packageReferencedResources != null && includeResources != null) {
+            for (Map.Entry<String, List<String>> entry : includeResources.entrySet()) {
+                List<String> packageResourceList = packageReferencedResources.get(entry.getKey());
+                List<String> includeResourceList = entry.getValue();
+                includeResourceList.stream().filter(s -> packageResourceList.contains(s)).forEach(pathConsumer);
+            }
         }
     }
 
     /**
-     * Called from {@link PackageServiceImpl#buildPackage(String, PackageInfo, List)} to perform impersonated session
+     * Called from {@link PackageServiceImpl#buildPackage(String, PackageInfo, String)} to perform impersonated session
      * closing
      *
      * @param userSession {@code Session} object used for package building
@@ -861,17 +885,17 @@ public class PackageServiceImpl implements PackageService {
     }
 
     /**
-     * Gets the collection of unique {@link AssetReferencedItem}s matching the collection of provided resource paths
+     * Gets the collection of unique {@link ReferencedItem}s matching the collection of provided resource paths
      * applying for the {@link ReferenceService} instance
      *
      * @param resourceResolver {@code ResourceResolver} used to collect assets details
      * @param paths            Collection of JCR paths of resources to gather references for
-     * @return {@code Set<AssetReferencedItem>} object
+     * @return {@code Set<ReferencedItem>} object
      */
-    private Set<AssetReferencedItem> getReferencedAssets(final ResourceResolver resourceResolver, final Collection<String> paths) {
-        Set<AssetReferencedItem> assetLinks = new HashSet<>();
+    private Set<ReferencedItem> getReferencedResources(final ResourceResolver resourceResolver, final Collection<String> paths) {
+        Set<ReferencedItem> assetLinks = new HashSet<>();
         paths.forEach(path -> {
-            Set<AssetReferencedItem> assetReferences = referenceService.getAssetReferences(resourceResolver, path);
+            Set<ReferencedItem> assetReferences = referenceService.getReferences(resourceResolver, path);
             assetLinks.addAll(assetReferences);
         });
         return assetLinks;
@@ -897,24 +921,24 @@ public class PackageServiceImpl implements PackageService {
      * Called from {@link PackageServiceImpl#createPackage(ResourceResolver, PackageModel)} to get whether
      * a package with specified own name, group name, and version exists
      *
-     * @param pkgMgr       Standard {@link JcrPackageManager} object associated with the current user session
-     * @param newPkgName   String representing package name to check
-     * @param pkgGroupName String representing package group name to check
-     * @param version      String representing package version to check
+     * @param packageMgr       Standard {@link JcrPackageManager} object associated with the current user session
+     * @param newPackageName   String representing package name to check
+     * @param packageGroupName String representing package group name to check
+     * @param version          String representing package version to check
      * @return True or false
      * @throws RepositoryException in case {@code JcrPackageManager} could not enumerated existing packages
      *                             or retrieve a packages's info
      */
-    private boolean isPkgExists(final JcrPackageManager pkgMgr,
-                                final String newPkgName,
-                                final String pkgGroupName,
-                                final String version) throws RepositoryException {
-        List<JcrPackage> packages = pkgMgr.listPackages(pkgGroupName, false);
+    private boolean isPackageExist(final JcrPackageManager packageMgr,
+                                   final String newPackageName,
+                                   final String packageGroupName,
+                                   final String version) throws RepositoryException {
+        List<JcrPackage> packages = packageMgr.listPackages(packageGroupName, false);
         for (JcrPackage jcrpackage : packages) {
             JcrPackageDefinition definition = jcrpackage.getDefinition();
             if (definition != null) {
                 String packageName = definition.getId().toString();
-                if (packageName.equalsIgnoreCase(getPackageId(pkgGroupName, newPkgName, version))) {
+                if (packageName.equalsIgnoreCase(getPackageId(packageGroupName, newPackageName, version))) {
                     return true;
                 }
             }
@@ -925,13 +949,13 @@ public class PackageServiceImpl implements PackageService {
     /**
      * Generates package identifier string for the specified package own name, group name, and version
      *
-     * @param pkgGroupName String representing package group name to check
-     * @param packageName  String representing package name to check
-     * @param version      String representing package version to check
+     * @param packageGroupName String representing package group name to check
+     * @param packageName      String representing package name to check
+     * @param version          String representing package version to check
      * @return Package identifier string
      */
-    private String getPackageId(final String pkgGroupName, final String packageName, final String version) {
-        return pkgGroupName + ":" + packageName + (StringUtils.isNotBlank(version) ? ":" + version : StringUtils.EMPTY);
+    private String getPackageId(final String packageGroupName, final String packageName, final String version) {
+        return packageGroupName + ":" + packageName + (StringUtils.isNotBlank(version) ? ":" + version : StringUtils.EMPTY);
     }
 
     /**
@@ -965,7 +989,7 @@ public class PackageServiceImpl implements PackageService {
     }
 
     /**
-     * Encapsulates JCr operations needed to embed a thumbnail resource to the package
+     * Encapsulates JCR operations needed to embed a thumbnail resource to the package
      *
      * @param packageNode      {@code Node} representing content package as a JCR storage item
      * @param thumbnailPath    Path to the thumbnail in JCR
@@ -1007,9 +1031,9 @@ public class PackageServiceImpl implements PackageService {
     @Override
     public boolean packageExists(ResourceResolver resourceResolver, PackageInfoModel packageInfoModel) {
         final Session session = resourceResolver.adaptTo(Session.class);
-        final JcrPackageManager pkgMgr = getPackageManager(session);
+        final JcrPackageManager packageMgr = getPackageManager(session);
         try {
-            List<Node> nodes = pkgMgr.listPackages().stream().map(JcrPackage::getNode)
+            List<Node> nodes = packageMgr.listPackages().stream().map(JcrPackage::getNode)
                     .filter(Objects::nonNull).collect(Collectors.toList());
             for (Node node : nodes) {
                 if (node.getPath().equals(packageInfoModel.getPackagePath())) {
@@ -1033,7 +1057,7 @@ public class PackageServiceImpl implements PackageService {
     }
 
     /**
-     * Called from {@link PackageServiceImpl#getPackageFolders(ResourceResolver)} for getting folder resources recursively )}
+     * Called from {@link PackageServiceImpl#getPackageFolders(ResourceResolver)} for getting folder resources recursively
      *
      * @param packageGroups {@code List} of folder resources
      * @param resource      {@code Resource} under which search occur

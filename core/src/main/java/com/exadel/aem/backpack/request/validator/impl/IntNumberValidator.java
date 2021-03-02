@@ -21,8 +21,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Implements {@link Validator} to test an HTTP request {@code ParameterMap} value expected to be a number
  */
-public class WholeNumberValidator implements Validator {
-    private static final Logger LOGGER = LoggerFactory.getLogger(WholeNumberValidator.class);
+public class IntNumberValidator implements Validator {
+    private static final Logger LOGGER = LoggerFactory.getLogger(IntNumberValidator.class);
 
     /**
      * {@inheritDoc}

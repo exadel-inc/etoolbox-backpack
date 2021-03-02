@@ -14,6 +14,7 @@
 
 package com.exadel.aem.backpack.core.servlets.model;
 
+import com.exadel.aem.backpack.core.services.PackageService;
 import com.exadel.aem.backpack.request.annotations.FieldType;
 import com.exadel.aem.backpack.request.annotations.RequestMapping;
 import com.exadel.aem.backpack.request.annotations.RequestParam;
@@ -25,7 +26,7 @@ import java.util.List;
 
 /**
  * Represents the set of user-defined options for a request to build a package. Upon initialization, passed
- * as a parameter to the {@link com.exadel.aem.backpack.core.services.PackageService#createPackage(ResourceResolver, PackageModel)}
+ * as a parameter to the {@link PackageService#createPackage(ResourceResolver, PackageModel)}
  * @see com.exadel.aem.backpack.core.servlets.CreatePackageServlet
  */
 @RequestMapping

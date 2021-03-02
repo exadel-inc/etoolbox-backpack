@@ -14,23 +14,24 @@
 
 package com.exadel.aem.backpack.core.servlets.model;
 
+import com.exadel.aem.backpack.core.services.PackageService;
 import com.exadel.aem.backpack.request.annotations.RequestMapping;
 import com.exadel.aem.backpack.request.annotations.RequestParam;
 import com.exadel.aem.backpack.request.annotations.Validate;
 import com.exadel.aem.backpack.request.validator.impl.RequiredValidator;
-import com.exadel.aem.backpack.request.validator.impl.WholeNumberValidator;
+import com.exadel.aem.backpack.request.validator.impl.IntNumberValidator;
 
 /**
  * Represents user-defined options supplied to a request for a rolling package build status information.
- * Upon initialization, passed as a parameter to the {@link com.exadel.aem.backpack.core.services.PackageService#getLatestPackageBuildInfo(LatestPackageInfoModel)}
+ * Upon initialization, passed as a parameter to the {@link PackageService#getLatestPackageBuildInfo(LatestPackageInfoModel)}
  * @see com.exadel.aem.backpack.core.servlets.BuildPackageServlet
  */
 @RequestMapping
 public class LatestPackageInfoModel extends PackageInfoModel {
 
     @RequestParam
-    @Validate(validator = {RequiredValidator.class, WholeNumberValidator.class},
-            invalidMessages = {"Latest log index field is required", "Latest log index must be whole number!"})
+    @Validate(validator = {RequiredValidator.class, IntNumberValidator.class},
+            invalidMessages = {"Latest log index field is required", "Latest log index must be integer number!"})
     private int latestLogIndex;
 
     /**
