@@ -16,7 +16,7 @@ package com.exadel.aem.backpack.core.servlets;
 
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
-import com.exadel.aem.backpack.core.services.PackageService;
+import com.exadel.aem.backpack.core.services.pckg.CreatePackageService;
 import com.exadel.aem.backpack.core.servlets.model.PackageModel;
 import com.exadel.aem.backpack.request.RequestAdapter;
 import com.exadel.aem.backpack.request.impl.RequestAdapterImpl;
@@ -44,7 +44,7 @@ public class CreatePackageServletTest {
 
     @Rule
     public final AemContext context = new AemContext();
-    private final PackageService packageServiceMock = mock(PackageService.class);
+    private final CreatePackageService createPackageServiceMock = mock(CreatePackageService.class);
     private CreatePackageServlet servlet;
     private PackageInfo packageInfoWithCreatedStatus;
     private PackageInfo packageInfoWithErrorStatus;
@@ -53,7 +53,7 @@ public class CreatePackageServletTest {
     public void beforeTest() {
         packageInfoWithCreatedStatus = getPackageInfoWithCreatedStatus();
         packageInfoWithErrorStatus = getPackageInfoWithErrorStatus();
-        context.registerService(PackageService.class, packageServiceMock);
+        context.registerService(CreatePackageService.class, createPackageServiceMock);
         context.registerService(RequestAdapter.class, new RequestAdapterImpl());
         servlet = context.registerInjectActivateService(new CreatePackageServlet());
 
@@ -71,7 +71,7 @@ public class CreatePackageServletTest {
     @Test
     public void shouldReturnOkWhenRequestIsValid() throws IOException {
         createBaseRequest();
-        when(packageServiceMock.createPackage(any(ResourceResolver.class), any(PackageModel.class))).thenReturn(packageInfoWithCreatedStatus);
+        when(createPackageServiceMock.createPackage(any(ResourceResolver.class), any(PackageModel.class))).thenReturn(packageInfoWithCreatedStatus);
 
         servlet.doPost(context.request(), context.response());
 
@@ -82,7 +82,7 @@ public class CreatePackageServletTest {
     @Test
     public void shouldReturnConflictWhenPackageAlreadyExist() throws IOException {
         createBaseRequest();
-        when(packageServiceMock.createPackage(any(ResourceResolver.class), any(PackageModel.class))).thenReturn(packageInfoWithErrorStatus);
+        when(createPackageServiceMock.createPackage(any(ResourceResolver.class), any(PackageModel.class))).thenReturn(packageInfoWithErrorStatus);
 
         servlet.doPost(context.request(), context.response());
 

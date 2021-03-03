@@ -14,7 +14,7 @@
 
 package com.exadel.aem.backpack.core.servlets.model;
 
-import com.exadel.aem.backpack.core.services.PackageService;
+import com.exadel.aem.backpack.core.services.pckg.CreatePackageService;
 import com.exadel.aem.backpack.request.annotations.FieldType;
 import com.exadel.aem.backpack.request.annotations.RequestMapping;
 import com.exadel.aem.backpack.request.annotations.RequestParam;
@@ -26,7 +26,8 @@ import java.util.List;
 
 /**
  * Represents the set of user-defined options for a request to build a package. Upon initialization, passed
- * as a parameter to the {@link PackageService#createPackage(ResourceResolver, PackageModel)}
+ * as a parameter to the {@link CreatePackageService#createPackage(ResourceResolver, PackageModel)}
+ *
  * @see com.exadel.aem.backpack.core.servlets.CreatePackageServlet
  */
 @RequestMapping
@@ -56,6 +57,7 @@ public class PackageModel {
 
     /**
      * Gets the name of the current package
+     *
      * @return String value
      */
     public String getPackageName() {
@@ -64,6 +66,7 @@ public class PackageModel {
 
     /**
      * Gets path to the image asset serving as the thumbnail image for the current package
+     *
      * @return String value
      */
     public String getThumbnailPath() {
@@ -72,6 +75,7 @@ public class PackageModel {
 
     /**
      * Gets the name of the current package's group
+     *
      * @return String value
      */
     public String getGroup() {
@@ -80,6 +84,7 @@ public class PackageModel {
 
     /**
      * Gets the version of the current package
+     *
      * @return String value
      */
     public String getVersion() {
@@ -89,6 +94,7 @@ public class PackageModel {
 
     /**
      * Gets the collection of JCR paths indicating separate resources (resource trees) to be included in this package
+     *
      * @return {@code List} of {@link PathModel}
      */
     public List<PathModel> getPaths() {
@@ -97,6 +103,7 @@ public class PackageModel {
 
     /**
      * Assigns package name value to the current instance
+     *
      * @param packageName String value, non-blank string expected
      */
     public void setPackageName(final String packageName) {
@@ -105,6 +112,7 @@ public class PackageModel {
 
     /**
      * Assigns thumbnail path value to the current instance
+     *
      * @param thumbnailPath String value
      */
     public void setThumbnailPath(final String thumbnailPath) {
@@ -113,6 +121,7 @@ public class PackageModel {
 
     /**
      * Assigns group name value to the current instance
+     *
      * @param group String value
      */
     public void setGroup(final String group) {
@@ -121,6 +130,7 @@ public class PackageModel {
 
     /**
      * Assigns version value to the current instance
+     *
      * @param version String value
      */
     public void setVersion(final String version) {
@@ -130,6 +140,7 @@ public class PackageModel {
     /**
      * Assigns to the current instance the collection of JCR paths indicating separate resources (resource trees)
      * to be included in the package
+     *
      * @param paths {@code List<String>} object, non-empty list expected
      */
     public void setPaths(final List<PathModel> paths) {
@@ -138,6 +149,7 @@ public class PackageModel {
 
     /**
      * Gets the package path
+     *
      * @return String value
      */
     public String getPackagePath() {
@@ -146,6 +158,7 @@ public class PackageModel {
 
     /**
      * Assigns package path to the current instance
+     *
      * @param packagePath current package path to assign
      */
     public void setPackagePath(final String packagePath) {

@@ -14,7 +14,7 @@
 
 package com.exadel.aem.backpack.core.model;
 
-import com.exadel.aem.backpack.core.services.PackageService;
+import com.exadel.aem.backpack.core.services.pckg.PackageInfoService;
 import com.exadel.aem.backpack.core.servlets.model.PackageModel;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -25,7 +25,7 @@ import org.apache.sling.models.annotations.injectorspecific.Self;
 
 import javax.annotation.PostConstruct;
 
-import static com.exadel.aem.backpack.core.services.impl.PackageServiceImpl.PACKAGES_ROOT_PATH;
+import static com.exadel.aem.backpack.core.services.pckg.impl.BasePackageServiceImpl.PACKAGES_ROOT_PATH;
 
 /**
  * Represents the package modification info.
@@ -37,7 +37,7 @@ public class EditPackageModel {
     private SlingHttpServletRequest request;
 
     @OSGiService
-    private PackageService packageService;
+    private PackageInfoService packageInfoService;
 
     private String packagePath;
     private PackageModel packageModel;
@@ -49,7 +49,7 @@ public class EditPackageModel {
     public void init() {
         packagePath = request.getParameter("packagePath");
         if (StringUtils.isNotBlank(packagePath)) {
-            packageModel = packageService.getPackageModelByPath(packagePath, request.getResourceResolver());
+            packageModel = packageInfoService.getPackageModelByPath(packagePath, request.getResourceResolver());
         }
     }
 

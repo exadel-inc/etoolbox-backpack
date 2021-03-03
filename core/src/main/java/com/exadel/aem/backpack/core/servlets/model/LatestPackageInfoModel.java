@@ -14,16 +14,17 @@
 
 package com.exadel.aem.backpack.core.servlets.model;
 
-import com.exadel.aem.backpack.core.services.PackageService;
+import com.exadel.aem.backpack.core.services.pckg.PackageInfoService;
 import com.exadel.aem.backpack.request.annotations.RequestMapping;
 import com.exadel.aem.backpack.request.annotations.RequestParam;
 import com.exadel.aem.backpack.request.annotations.Validate;
-import com.exadel.aem.backpack.request.validator.impl.RequiredValidator;
 import com.exadel.aem.backpack.request.validator.impl.IntNumberValidator;
+import com.exadel.aem.backpack.request.validator.impl.RequiredValidator;
 
 /**
  * Represents user-defined options supplied to a request for a rolling package build status information.
- * Upon initialization, passed as a parameter to the {@link PackageService#getLatestPackageBuildInfo(LatestPackageInfoModel)}
+ * Upon initialization, passed as a parameter to the {@link PackageInfoService#getLatestPackageBuildInfo(LatestPackageInfoModel)}
+ *
  * @see com.exadel.aem.backpack.core.servlets.BuildPackageServlet
  */
 @RequestMapping
@@ -36,6 +37,7 @@ public class LatestPackageInfoModel extends PackageInfoModel {
 
     /**
      * Gets position in log flow to start output from
+     *
      * @return Integer value, non-negative
      */
     public int getLatestLogIndex() {
@@ -44,6 +46,7 @@ public class LatestPackageInfoModel extends PackageInfoModel {
 
     /**
      * Sets position in log flow to start output from
+     *
      * @param latestLogIndex Integer value, non-negative number expected
      */
     public void setLatestLogIndex(final int latestLogIndex) {

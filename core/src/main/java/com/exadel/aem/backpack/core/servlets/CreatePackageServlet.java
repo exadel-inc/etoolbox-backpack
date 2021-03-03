@@ -16,7 +16,7 @@ package com.exadel.aem.backpack.core.servlets;
 
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
-import com.exadel.aem.backpack.core.services.PackageService;
+import com.exadel.aem.backpack.core.services.pckg.CreatePackageService;
 import com.exadel.aem.backpack.core.servlets.model.PackageModel;
 import com.exadel.aem.backpack.request.RequestAdapter;
 import com.exadel.aem.backpack.request.validator.ValidatorResponse;
@@ -61,13 +61,13 @@ public class CreatePackageServlet extends SlingAllMethodsServlet {
 
     @Reference
     @SuppressWarnings("UnusedDeclaration") // value injected by Sling
-    private transient PackageService packageService;
+    private transient CreatePackageService createPackageService;
 
     /**
      * Processes {@code POST} requests to the current endpoint. Attempts to create a package for a consequential build
      * according to the request parameters.
      * Request parameters are parsed to a {@link PackageModel} which is validated and passed
-     * to the corresponding {@link PackageService} routine if proven valid; otherwise, the {@code HTTP status 400} reported
+     * to the corresponding {@link CreatePackageService} routine if proven valid; otherwise, the {@code HTTP status 400} reported
      *
      * @param request  {@code SlingHttpServletRequest} instance
      * @param response {@code SlingHttpServletResponse} instance
@@ -82,7 +82,7 @@ public class CreatePackageServlet extends SlingAllMethodsServlet {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write(GSON.toJson(validatorResponse));
         } else {
-            final PackageInfo packageInfo = packageService.createPackage(
+            final PackageInfo packageInfo = createPackageService.createPackage(
                     request.getResourceResolver(),
                     validatorResponse.getModel()
             );

@@ -14,7 +14,7 @@
 
 package com.exadel.aem.backpack.core.servlets.model;
 
-import com.exadel.aem.backpack.core.services.PackageService;
+import com.exadel.aem.backpack.core.services.pckg.PackageInfoService;
 import com.exadel.aem.backpack.request.annotations.RequestMapping;
 import com.exadel.aem.backpack.request.annotations.RequestParam;
 import com.exadel.aem.backpack.request.annotations.Validate;
@@ -31,7 +31,8 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * Represents the set of user-defined options supplied to a request for information about a previously created/built
- * package. Upon initialization, passed as a parameter to the {@link PackageService#getPackageInfo(ResourceResolver, PackageInfoModel)}
+ * package. Upon initialization, passed as a parameter to the {@link PackageInfoService#getPackageInfo(ResourceResolver, PackageInfoModel)}
+ *
  * @see com.exadel.aem.backpack.core.servlets.PackageInfoServlet
  */
 @RequestMapping
@@ -45,6 +46,7 @@ public class PackageInfoModel {
 
     /**
      * Gets the package path in JCR
+     *
      * @return String value, non-blank
      */
     public String getPackagePath() {
@@ -53,6 +55,7 @@ public class PackageInfoModel {
 
     /**
      * Assigns the value of package path in JCR to the current instance
+     *
      * @param packagePath String value, non-blank string expected
      */
     public void setPackagePath(final String packagePath) {

@@ -15,7 +15,8 @@
 package com.exadel.aem.backpack.core.servlets;
 
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
-import com.exadel.aem.backpack.core.services.PackageService;
+import com.exadel.aem.backpack.core.services.pckg.BuildPackageService;
+import com.exadel.aem.backpack.core.services.pckg.PackageInfoService;
 import com.exadel.aem.backpack.core.servlets.model.BuildPackageModel;
 import com.exadel.aem.backpack.core.servlets.model.LatestPackageInfoModel;
 import com.exadel.aem.backpack.core.util.CalendarAdapter;
@@ -57,7 +58,11 @@ public class BuildPackageServlet extends SlingAllMethodsServlet {
 
     @Reference
     @SuppressWarnings("UnusedDeclaration") // value injected by Sling
-    private transient PackageService packageService;
+    private transient BuildPackageService buildPackageService;
+
+    @Reference
+    @SuppressWarnings("UnusedDeclaration") // value injected by Sling
+    private transient PackageInfoService packageInfoService;
 
     @Reference
     @SuppressWarnings("UnusedDeclaration") // value injected by Sling
@@ -66,7 +71,7 @@ public class BuildPackageServlet extends SlingAllMethodsServlet {
     /**
      * Processes {@code POST} requests to the current endpoint. Attempts to build a package according to the request parameters.
      * Request parameters are parsed to a {@link BuildPackageModel} which is validated and passed
-     * to the corresponding {@link PackageService} routine if proven valid; otherwise, the {@code HTTP status 400} reported
+     * to the corresponding {@link BuildPackageService} routine if proven valid; otherwise, the {@code HTTP status 400} reported
      * @param request {@code SlingHttpServletRequest} instance
      * @param response {@code SlingHttpServletResponse} instance
      * @throws IOException in case writing data to the {@code SlingHttpServletResponse} fails
@@ -83,9 +88,9 @@ public class BuildPackageServlet extends SlingAllMethodsServlet {
             PackageInfo packageInfo;
             BuildPackageModel model = validatorResponse.getModel();
             if (model.isTestBuild()) {
-                packageInfo = packageService.testBuildPackage(request.getResourceResolver(), model);
+                packageInfo = buildPackageService.testBuildPackage(request.getResourceResolver(), model);
             } else {
-                packageInfo = packageService.buildPackage(request.getResourceResolver(), model);
+                packageInfo = buildPackageService.buildPackage(request.getResourceResolver(), model);
             }
             response.getWriter().write(GSON.toJson(packageInfo));
         }
@@ -94,7 +99,7 @@ public class BuildPackageServlet extends SlingAllMethodsServlet {
     /**
      * Processes {@code GET} requests to the current endpoint. Reports information on the latest package build status.
      * Request parameters are parsed to a {@link LatestPackageInfoModel} which is validated and passed
-     * to the corresponding {@link PackageService} routine if proven valid; otherwise, the {@code HTTP status 400} reported
+     * to the corresponding {@link PackageInfoService} routine if proven valid; otherwise, the {@code HTTP status 400} reported
      * @param request {@code SlingHttpServletRequest} instance
      * @param response {@code SlingHttpServletResponse} instance
      * @throws IOException in case writing data to the {@code SlingHttpServletResponse} fails
@@ -110,7 +115,7 @@ public class BuildPackageServlet extends SlingAllMethodsServlet {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write(GSON.toJson(validatorResponse));
         } else {
-            final PackageInfo latestPackageBuildInfo = packageService.getLatestPackageBuildInfo(validatorResponse.getModel());
+            final PackageInfo latestPackageBuildInfo = packageInfoService.getLatestPackageBuildInfo(validatorResponse.getModel());
             response.getWriter().write(GSON.toJson(latestPackageBuildInfo));
         }
     }

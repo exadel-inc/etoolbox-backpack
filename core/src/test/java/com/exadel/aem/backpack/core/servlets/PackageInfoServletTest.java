@@ -16,7 +16,7 @@ package com.exadel.aem.backpack.core.servlets;
 
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
-import com.exadel.aem.backpack.core.services.PackageService;
+import com.exadel.aem.backpack.core.services.pckg.PackageInfoService;
 import com.exadel.aem.backpack.core.servlets.model.PackageInfoModel;
 import com.exadel.aem.backpack.core.util.CalendarAdapter;
 import com.exadel.aem.backpack.request.RequestAdapter;
@@ -43,19 +43,18 @@ import static org.mockito.Mockito.when;
 public class PackageInfoServletTest {
 
     private static final String PACKAGE_PATH = "/etc/package/test/package-1";
-    private static final String PATH_PARAM = "path";
 
     @Rule
     public final AemContext context = new AemContext();
-    private final PackageService packageServiceMock = mock(PackageService.class);
+    private final PackageInfoService packageInfoServiceMock = mock(PackageInfoService.class);
     private final PackageInfo packageInfo = getPackageInfo();
     private PackageInfoServlet servlet;
     private Gson GSON;
 
     @Before
     public void beforeTest() {
-        when(packageServiceMock.getPackageInfo(any(ResourceResolver.class), any(PackageInfoModel.class))).thenReturn(packageInfo);
-        context.registerService(PackageService.class, packageServiceMock);
+        when(packageInfoServiceMock.getPackageInfo(any(ResourceResolver.class), any(PackageInfoModel.class))).thenReturn(packageInfo);
+        context.registerService(PackageInfoService.class, packageInfoServiceMock);
         context.registerService(RequestAdapter.class, new RequestAdapterImpl());
         servlet = context.registerInjectActivateService(new PackageInfoServlet());
         GSON = new GsonBuilder().registerTypeHierarchyAdapter(Calendar.class, new CalendarAdapter()).create();

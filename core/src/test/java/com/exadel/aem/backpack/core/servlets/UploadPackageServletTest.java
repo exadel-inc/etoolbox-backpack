@@ -3,7 +3,10 @@ package com.exadel.aem.backpack.core.servlets;
 import com.exadel.aem.backpack.core.dto.response.JcrPackageWrapper;
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
-import com.exadel.aem.backpack.core.services.PackageService;
+import com.exadel.aem.backpack.core.services.pckg.PackageInfoService;
+import com.exadel.aem.backpack.core.services.pckg.UploadPackageService;
+import com.exadel.aem.backpack.core.services.pckg.impl.PackageInfoServiceImpl;
+import com.exadel.aem.backpack.core.services.pckg.impl.UploadPackageServiceImpl;
 import com.exadel.aem.backpack.request.RequestAdapter;
 import com.exadel.aem.backpack.request.impl.RequestAdapterImpl;
 import io.wcm.testing.mock.aem.junit.AemContext;
@@ -26,19 +29,19 @@ public class UploadPackageServletTest {
 
     @Rule
     public final AemContext context = new AemContext();
-    private final PackageService packageServiceMock = mock(PackageService.class);
+    private final UploadPackageServiceImpl uploadPackageService = mock(UploadPackageServiceImpl.class);
     private UploadPackageServlet servlet;
 
     @Before
     public void beforeTest() {
-        context.registerService(PackageService.class, packageServiceMock);
+        context.registerService(UploadPackageService.class, uploadPackageService);
         context.registerService(RequestAdapter.class, new RequestAdapterImpl());
         servlet = context.registerInjectActivateService(new UploadPackageServlet());
     }
 
     @Test
     public void shouldReturnBadRequest_whenPackageServiceGetPackageInfoReturnNull() throws IOException {
-        when(packageServiceMock.uploadPackage(null, null, false)).thenReturn(getSuccessJcrPackageWrapper());
+        when(uploadPackageService.uploadPackage(null, null, false)).thenReturn(getSuccessJcrPackageWrapper());
 
         servlet.doPost(context.request(), context.response());
 
@@ -49,7 +52,7 @@ public class UploadPackageServletTest {
 
     @Test
     public void shouldReturnSuccessRequest() throws IOException {
-        when(packageServiceMock.uploadPackage(null, null, false)).thenReturn(getSuccessJcrPackageWrapper());
+        when(uploadPackageService.uploadPackage(null, null, false)).thenReturn(getSuccessJcrPackageWrapper());
 
         servlet.doPost(context.request(), context.response());
 
@@ -61,7 +64,7 @@ public class UploadPackageServletTest {
 
     @Test
     public void shouldReturnBadRequest_whenRequestIsEmpty() throws IOException {
-        when(packageServiceMock.uploadPackage(null, null, false)).thenReturn(getErrorJcrPackageWrapper());
+        when(uploadPackageService.uploadPackage(null, null, false)).thenReturn(getErrorJcrPackageWrapper());
 
         servlet.doPost(context.request(), context.response());
 

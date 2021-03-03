@@ -16,7 +16,14 @@ package com.exadel.aem.backpack.core.servlets;
 
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
-import com.exadel.aem.backpack.core.services.PackageService;
+import com.exadel.aem.backpack.core.services.ReferenceService;
+import com.exadel.aem.backpack.core.services.impl.ReferenceServiceImpl;
+import com.exadel.aem.backpack.core.services.pckg.BasePackageService;
+import com.exadel.aem.backpack.core.services.pckg.BuildPackageService;
+import com.exadel.aem.backpack.core.services.pckg.PackageInfoService;
+import com.exadel.aem.backpack.core.services.pckg.impl.Base;
+import com.exadel.aem.backpack.core.services.pckg.impl.BasePackageServiceImpl;
+import com.exadel.aem.backpack.core.services.pckg.impl.PackageInfoServiceImpl;
 import com.exadel.aem.backpack.core.servlets.model.BuildPackageModel;
 import com.exadel.aem.backpack.core.util.CalendarAdapter;
 import com.exadel.aem.backpack.request.RequestAdapter;
@@ -26,6 +33,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -34,6 +42,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -47,8 +57,8 @@ public class BuildPackageServletTest {
     private static final String PATH_PARAM = "path";
 
     @Rule
-    public final AemContext context = new AemContext();
-    private final PackageService packageServiceMock = mock(PackageService.class);
+    public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
+    private final BuildPackageService buildPackageServiceMock = mock(BuildPackageService.class);
     private BuildPackageServlet servlet;
     private PackageInfo packageInfoTestBuilt;
     private PackageInfo packageInfoWithBuiltStatus;
@@ -56,8 +66,13 @@ public class BuildPackageServletTest {
 
     @Before
     public void beforeTest() {
-        context.registerService(PackageService.class, packageServiceMock);
+        context.registerService(BuildPackageService.class, buildPackageServiceMock);
         context.registerService(RequestAdapter.class, new RequestAdapterImpl());
+        context.registerService(ReferenceService.class, new ReferenceServiceImpl());
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("buildInfoTTL", 1);
+        context.registerInjectActivateService(new BasePackageServiceImpl(), properties);
+        context.registerInjectActivateService(new PackageInfoServiceImpl());
         servlet = context.registerInjectActivateService(new BuildPackageServlet());
         packageInfoTestBuilt = getTestBuildPackageInfo();
         packageInfoWithBuiltStatus = getPackageInfoWithBuiltStatus();
@@ -94,7 +109,7 @@ public class BuildPackageServletTest {
     @Test
     public void doPostShouldReturnOkWhenTestBuildPackage() throws IOException {
         createBaseRequest();
-        when(packageServiceMock.testBuildPackage(any(ResourceResolver.class), any(BuildPackageModel.class))).thenReturn(packageInfoTestBuilt);
+        when(buildPackageServiceMock.testBuildPackage(any(ResourceResolver.class), any(BuildPackageModel.class))).thenReturn(packageInfoTestBuilt);
 
         context.request().addRequestParameter("testBuild", "true");
 
@@ -108,7 +123,7 @@ public class BuildPackageServletTest {
     @Test
     public void doPostShouldReturnOkWhenRequestIsValid() throws IOException {
         createBaseRequest();
-        when(packageServiceMock.buildPackage(any(ResourceResolver.class), any(BuildPackageModel.class))).thenReturn(packageInfoWithBuiltStatus);
+        when(buildPackageServiceMock.buildPackage(any(ResourceResolver.class), any(BuildPackageModel.class))).thenReturn(packageInfoWithBuiltStatus);
 
         servlet.doPost(context.request(), context.response());
 
