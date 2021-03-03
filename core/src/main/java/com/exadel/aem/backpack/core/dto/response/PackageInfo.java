@@ -14,26 +14,15 @@
 
 package com.exadel.aem.backpack.core.dto.response;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.TreeMap;
-
+import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
 import com.exadel.aem.backpack.core.dto.repository.ReferencedItem;
-import com.exadel.aem.backpack.core.services.PackageService;
 import org.apache.commons.lang3.StringUtils;
 
-import com.exadel.aem.backpack.core.dto.repository.AssetReferencedItem;
+import java.util.*;
 
 /**
- * Data model containing comprehensive data required to manage a package
- * via multiple {@link PackageService} operations and prepare response to the frontend
- * @see PackageService
+ * Data model containing comprehensive data required to manage a package.
+ *
  * @see com.exadel.aem.backpack.core.servlets.CreatePackageServlet
  * @see com.exadel.aem.backpack.core.servlets.BuildPackageServlet
  */
@@ -71,6 +60,7 @@ public class PackageInfo {
 
     /**
      * Cloning constructor
+     *
      * @param packageInfo The {@code PackageInfo} object to make a clone
      */
     public PackageInfo(final PackageInfo packageInfo) {
@@ -93,6 +83,7 @@ public class PackageInfo {
 
     /**
      * Gets the name of the current package
+     *
      * @return String value
      */
     public String getPackageName() {
@@ -101,6 +92,7 @@ public class PackageInfo {
 
     /**
      * Gets the group name of the current package
+     *
      * @return String value
      */
     public String getGroupName() {
@@ -109,6 +101,7 @@ public class PackageInfo {
 
     /**
      * Gets the version of the current package
+     *
      * @return String value
      */
     public String getVersion() {
@@ -117,6 +110,7 @@ public class PackageInfo {
 
     /**
      * Gets the collection of paths representing resources to be included in the current package
+     *
      * @return {@code Collection<String>} object, read-only
      */
     public Collection<String> getPaths() {
@@ -125,6 +119,7 @@ public class PackageInfo {
 
     /**
      * Gets the collection of paths representing assets to be embedded in the current package, grouped by their MIME types
+     *
      * @return {@code Collection<String>} object, read-only
      */
     public Map<String, List<String>> getReferencedResources() {
@@ -133,6 +128,7 @@ public class PackageInfo {
 
     /**
      * Gets the collection of log entries for the current package
+     *
      * @return {@code List<String>} object, read-only
      */
     public List<String> getLog() {
@@ -141,6 +137,7 @@ public class PackageInfo {
 
     /**
      * Gets the collection of log entries for the current package
+     *
      * @param log {@code List<String>} object
      */
     public void setLog(final List<String> log) {
@@ -149,6 +146,7 @@ public class PackageInfo {
 
     /**
      * Gets the value representing when the package was built
+     *
      * @return {@code Calendar} instance
      */
     public Calendar getPackageBuilt() {
@@ -157,6 +155,7 @@ public class PackageInfo {
 
     /**
      * Gets the collection of log entries for the current package starting from the specified position
+     *
      * @param latestLogIndex Position to start log output from
      * @return {@code List<String>} object, read-only
      */
@@ -180,6 +179,7 @@ public class PackageInfo {
 
     /**
      * Appends a path to a referenced asset to the current {@link PackageInfo}
+     *
      * @param item {@link AssetReferencedItem} object containing asset's MIME type and path
      */
     public void addAssetReferencedItem(final ReferencedItem item) {
@@ -194,6 +194,7 @@ public class PackageInfo {
 
     /**
      * Gets build status of the current package
+     *
      * @return {@link PackageStatus} value
      */
     public PackageStatus getPackageStatus() {
@@ -202,6 +203,7 @@ public class PackageInfo {
 
     /**
      * Sets build status of the current package
+     *
      * @param packageStatus {@link PackageStatus} value
      */
     public void setPackageStatus(final PackageStatus packageStatus) {
@@ -210,6 +212,7 @@ public class PackageInfo {
 
     /**
      * Sets the value representing when the package was built
+     *
      * @param packageBuilt {@code Calendar} instance
      */
     public void setPackageBuilt(final Calendar packageBuilt) {
@@ -218,6 +221,7 @@ public class PackageInfo {
 
     /**
      * Sets the path of this package as a JCR storage item
+     *
      * @param packagePath String value
      */
     public void setPackagePath(final String packagePath) {
@@ -226,6 +230,7 @@ public class PackageInfo {
 
     /**
      * Gets the path of this package as a JCR storage item
+     *
      * @return String value
      */
     public String getPackagePath() {
@@ -234,6 +239,7 @@ public class PackageInfo {
 
     /**
      * Sets the {@code Node} name of this package as a JCR storage item
+     *
      * @param packageNodeName String value
      */
     public void setPackageNodeName(final String packageNodeName) {
@@ -242,6 +248,7 @@ public class PackageInfo {
 
     /**
      * Gets the {@code Node} name of this package as a JCR storage item
+     *
      * @return String value
      */
     public String getPackageNodeName() {
@@ -250,6 +257,7 @@ public class PackageInfo {
 
     /**
      * Sets the name of the current package
+     *
      * @param packageName String value
      */
     public void setPackageName(final String packageName) {
@@ -258,6 +266,7 @@ public class PackageInfo {
 
     /**
      * Sets the group name of the current package
+     *
      * @param groupName String value
      */
     public void setGroupName(final String groupName) {
@@ -266,6 +275,7 @@ public class PackageInfo {
 
     /**
      * Sets the version of the current package
+     *
      * @param version String value
      */
     public void setVersion(final String version) {
@@ -274,6 +284,7 @@ public class PackageInfo {
 
     /**
      * Sets path to the thumbnail of the current package
+     *
      * @param thumbnailPath String value
      */
     public void setThumbnailPath(final String thumbnailPath) {
@@ -282,6 +293,7 @@ public class PackageInfo {
 
     /**
      * Sets the collection of paths representing resources to be included in the current package
+     *
      * @param paths {@code Collection<String>} object
      */
     public void setPaths(final Collection<String> paths) {
@@ -290,6 +302,7 @@ public class PackageInfo {
 
     /**
      * Sets the collection of paths representing assets to be embedded in the current package, grouped by their MIME types
+     *
      * @param referencedResources {@code Collection<String>} object
      */
     public void setReferencedResources(final Map<String, List<String>> referencedResources) {
@@ -298,6 +311,7 @@ public class PackageInfo {
 
     /**
      * Gets the path to the thumbnail of the current package
+     *
      * @return String value
      */
     public String getThumbnailPath() {
@@ -306,16 +320,18 @@ public class PackageInfo {
 
     /**
      * Appends a {@code String} message to this package's building log
+     *
      * @param message String value, non-blank
      */
     public void addLogMessage(final String message) {
-        if (log != null && StringUtils.isNotBlank(message)) {
+        if (log != null) {
             log.add(message);
         }
     }
 
     /**
      * Gets the computed size of the current package
+     *
      * @return Long value
      */
     public Long getDataSize() {
@@ -324,6 +340,7 @@ public class PackageInfo {
 
     /**
      * Sets the computed size of the current package
+     *
      * @param dataSize Long value
      */
     public void setDataSize(final Long dataSize) {
@@ -333,6 +350,7 @@ public class PackageInfo {
     /**
      * Overrides the standard {@code equals()} routine to implement packages comparison by their name and group name
      * requisites
+     *
      * @param o Object to test for equality with the current object
      * @return True or false
      */
@@ -347,6 +365,7 @@ public class PackageInfo {
 
     /**
      * Overrides the standard {@code hashCode()} routine to accompany {@link PackageInfo#equals(Object)}
+     *
      * @return Integer value
      */
     @Override

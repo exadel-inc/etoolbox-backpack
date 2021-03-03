@@ -14,14 +14,15 @@
 
 package com.exadel.aem.backpack.core.servlets.model;
 
-import com.exadel.aem.backpack.core.services.PackageService;
+import com.exadel.aem.backpack.core.services.pckg.BuildPackageService;
 import com.exadel.aem.backpack.request.annotations.RequestMapping;
 import com.exadel.aem.backpack.request.annotations.RequestParam;
 import org.apache.sling.api.resource.ResourceResolver;
 
 /**
  * Represents the set of user-defined options for a request to build a package. Upon initialization, passed
- * as a parameter to the {@link PackageService#buildPackage(ResourceResolver, BuildPackageModel)}
+ * as a parameter to the {@link BuildPackageService#buildPackage(ResourceResolver, BuildPackageModel)}
+ *
  * @see com.exadel.aem.backpack.core.servlets.BuildPackageServlet
  */
 @RequestMapping
@@ -36,6 +37,7 @@ public class BuildPackageModel extends PackageInfoModel {
 
     /**
      * Gets whether this request is for a test build (a dry-run build without assembling actual package file)
+     *
      * @return True or false
      */
     public boolean isTestBuild() {
@@ -44,6 +46,7 @@ public class BuildPackageModel extends PackageInfoModel {
 
     /**
      * Gets collection of paths to JCR resources that must be included in the current package
+     *
      * @return {@code String} object storing collection of paths
      */
     public String getReferencedResources() {

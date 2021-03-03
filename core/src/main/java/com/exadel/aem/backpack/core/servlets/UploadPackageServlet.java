@@ -16,7 +16,7 @@ package com.exadel.aem.backpack.core.servlets;
 
 import com.exadel.aem.backpack.core.dto.response.JcrPackageWrapper;
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
-import com.exadel.aem.backpack.core.services.PackageService;
+import com.exadel.aem.backpack.core.services.pckg.UploadPackageService;
 import com.exadel.aem.backpack.core.servlets.model.PackageModel;
 import com.google.gson.Gson;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -58,13 +58,13 @@ public class UploadPackageServlet extends SlingAllMethodsServlet {
 
     @Reference
     @SuppressWarnings("UnusedDeclaration") // value injected by Sling
-    private transient PackageService packageService;
+    private transient UploadPackageService uploadPackageService;
 
     /**
      * Processes {@code POST} requests to the current endpoint. Attempts to create a package for a consequential build
      * according to the request parameters.
      * Request parameters are parsed to a {@link PackageModel} which is validated and passed
-     * to the corresponding {@link PackageService} routine if proven valid; otherwise, the {@code HTTP status 400} reported
+     * to the corresponding {@link UploadPackageService} routine if proven valid; otherwise, the {@code HTTP status 400} reported
      *
      * @param request  {@code SlingHttpServletRequest} instance
      * @param response {@code SlingHttpServletResponse} instance
@@ -77,7 +77,7 @@ public class UploadPackageServlet extends SlingAllMethodsServlet {
         byte[] fileUploadBytesArray = getFileUploadBytesArray(request);
         boolean forceUpdate = getForceUpdate(request);
 
-        JcrPackageWrapper jcrPackageWrapper = packageService.uploadPackage(session, fileUploadBytesArray, forceUpdate);
+        JcrPackageWrapper jcrPackageWrapper = uploadPackageService.uploadPackage(session, fileUploadBytesArray, forceUpdate);
 
         writeResponse(response, jcrPackageWrapper);
     }

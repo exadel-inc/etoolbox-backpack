@@ -21,7 +21,7 @@ import java.util.Set;
 
 /**
  * Represents a service running in an AEM instance responsible for gathering information on resources referenced by pages
- * of the current package (under specified JCR path). This is mainly invoked from the {@link PackageService}
+ * of the current package (under specified JCR path).
  */
 public interface ReferenceService {
 

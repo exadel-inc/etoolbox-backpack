@@ -40,7 +40,7 @@ import static com.exadel.aem.backpack.core.services.config.PageReferenceSearchCo
  * Implements {@link PageReferenceSearchService} to facilitate getting a collection of pages used by resources
  * under specified JCR path
  */
-@Component(name = "Page Reference Search", service = PageReferenceSearchService.class)
+@Component(name = "Page Reference Search", service = PageReferenceSearchService.class, immediate = true)
 @Designate(ocd = PageReferenceSearchConfig.class)
 public class PageReferenceSearchServiceImpl implements PageReferenceSearchService {
 

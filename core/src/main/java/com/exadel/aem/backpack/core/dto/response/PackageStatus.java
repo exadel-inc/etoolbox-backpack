@@ -14,11 +14,8 @@
 
 package com.exadel.aem.backpack.core.dto.response;
 
-import com.exadel.aem.backpack.core.services.PackageService;
-
 /**
  * Enumerates possible package statuses as reported by {@link PackageInfo} objects
- * @see PackageService
  */
 public enum PackageStatus {
     CREATED,

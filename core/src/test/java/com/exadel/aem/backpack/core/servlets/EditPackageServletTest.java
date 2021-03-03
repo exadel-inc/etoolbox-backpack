@@ -16,7 +16,7 @@ package com.exadel.aem.backpack.core.servlets;
 
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
-import com.exadel.aem.backpack.core.services.PackageService;
+import com.exadel.aem.backpack.core.services.pckg.EditPackageService;
 import com.exadel.aem.backpack.core.servlets.model.PackageModel;
 import com.exadel.aem.backpack.request.RequestAdapter;
 import com.exadel.aem.backpack.request.impl.RequestAdapterImpl;
@@ -44,7 +44,7 @@ public class EditPackageServletTest {
 
     @Rule
     public final AemContext context = new AemContext();
-    private final PackageService packageServiceMock = mock(PackageService.class);
+    private final EditPackageService editPackageServiceMock = mock(EditPackageService.class);
     private EditPackageServlet servlet;
     private PackageInfo packageInfoWithModifiedStatus;
     private PackageInfo packageInfoWithErrorStatus;
@@ -53,7 +53,7 @@ public class EditPackageServletTest {
     public void beforeTest() {
         packageInfoWithModifiedStatus = getPackageInfoWithModifiedStatus();
         packageInfoWithErrorStatus = getPackageInfoWithErrorStatus();
-        context.registerService(PackageService.class, packageServiceMock);
+        context.registerService(EditPackageService.class, editPackageServiceMock);
         context.registerService(RequestAdapter.class, new RequestAdapterImpl());
         servlet = context.registerInjectActivateService(new EditPackageServlet());
 
@@ -71,7 +71,7 @@ public class EditPackageServletTest {
     @Test
     public void shouldReturnOkWhenRequestIsValid() throws IOException {
         createBaseRequest();
-        when(packageServiceMock.editPackage(any(ResourceResolver.class), any(PackageModel.class))).thenReturn(packageInfoWithModifiedStatus);
+        when(editPackageServiceMock.editPackage(any(ResourceResolver.class), any(PackageModel.class))).thenReturn(packageInfoWithModifiedStatus);
 
         servlet.doPost(context.request(), context.response());
 
@@ -82,7 +82,7 @@ public class EditPackageServletTest {
     @Test
     public void shouldReturnConflictWhenPackageAlreadyExist() throws IOException {
         createBaseRequest();
-        when(packageServiceMock.editPackage(any(ResourceResolver.class), any(PackageModel.class))).thenReturn(packageInfoWithErrorStatus);
+        when(editPackageServiceMock.editPackage(any(ResourceResolver.class), any(PackageModel.class))).thenReturn(packageInfoWithErrorStatus);
 
         servlet.doPost(context.request(), context.response());
 

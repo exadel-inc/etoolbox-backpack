@@ -16,7 +16,7 @@ package com.exadel.aem.backpack.core.servlets;
 
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
 import com.exadel.aem.backpack.core.dto.response.PackageStatus;
-import com.exadel.aem.backpack.core.services.PackageService;
+import com.exadel.aem.backpack.core.services.pckg.EditPackageService;
 import com.exadel.aem.backpack.core.servlets.model.PackageModel;
 import com.exadel.aem.backpack.request.RequestAdapter;
 import com.exadel.aem.backpack.request.validator.ValidatorResponse;
@@ -62,13 +62,13 @@ public class EditPackageServlet extends SlingAllMethodsServlet {
 
     @Reference
     @SuppressWarnings("UnusedDeclaration") // value injected by Sling
-    private transient PackageService packageService;
+    private transient EditPackageService editPackageService;
 
     /**
      * Processes {@code POST} requests to the current endpoint. Attempts to edit a package for a consequential build
      * according to the request parameters.
      * Request parameters are parsed to a {@link PackageModel} which is validated and passed
-     * to the corresponding {@link PackageService} routine if proven valid; otherwise, the {@code HTTP status 400} reported
+     * to the corresponding {@link EditPackageService} routine if proven valid; otherwise, the {@code HTTP status 400} reported
      *
      * @param request  {@code SlingHttpServletRequest} instance
      * @param response {@code SlingHttpServletResponse} instance
@@ -83,7 +83,7 @@ public class EditPackageServlet extends SlingAllMethodsServlet {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write(GSON.toJson(validatorResponse));
         } else {
-            final PackageInfo packageInfo = packageService.editPackage(
+            final PackageInfo packageInfo = editPackageService.editPackage(
                     request.getResourceResolver(),
                     validatorResponse.getModel()
             );

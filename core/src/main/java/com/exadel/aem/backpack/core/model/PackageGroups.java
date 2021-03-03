@@ -15,7 +15,7 @@
 package com.exadel.aem.backpack.core.model;
 
 import com.day.cq.commons.jcr.JcrConstants;
-import com.exadel.aem.backpack.core.services.PackageService;
+import com.exadel.aem.backpack.core.services.pckg.PackageInfoService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
@@ -44,7 +44,7 @@ public class PackageGroups {
     private SlingHttpServletRequest request;
 
     @OSGiService
-    private PackageService packageService;
+    private PackageInfoService packageInfoService;
 
     private List<Option> options;
 
@@ -54,7 +54,7 @@ public class PackageGroups {
     @PostConstruct
     public void init() {
         ResourceResolver resolver = request.getResourceResolver();
-        List<Resource> results = packageService.getPackageFolders(resolver);
+        List<Resource> results = packageInfoService.getPackageFolders(resolver);
         String groupParam = request.getParameter("group");
 
         options = results.stream()

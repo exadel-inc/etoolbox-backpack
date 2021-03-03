@@ -15,7 +15,7 @@
 package com.exadel.aem.backpack.core.servlets;
 
 import com.exadel.aem.backpack.core.dto.response.PackageInfo;
-import com.exadel.aem.backpack.core.services.PackageService;
+import com.exadel.aem.backpack.core.services.pckg.PackageInfoService;
 import com.exadel.aem.backpack.core.servlets.model.PackageInfoModel;
 import com.exadel.aem.backpack.core.util.CalendarAdapter;
 import com.exadel.aem.backpack.request.RequestAdapter;
@@ -62,12 +62,12 @@ public class PackageInfoServlet extends SlingSafeMethodsServlet {
 
     @Reference
     @SuppressWarnings("UnusedDeclaration") // value injected by Sling
-    private transient PackageService packageService;
+    private transient PackageInfoService packageInfoService;
 
     /**
      * Processes {@code GET} requests to the current endpoint. Reports information on the specified previously
      * created/built package. Request parameters are parsed to a {@link PackageInfoModel} which is validated and passed
-     * to the corresponding {@link PackageService} routine if proven valid; otherwise, the {@code HTTP status 400} reported
+     * to the corresponding {@link PackageInfoService} routine if proven valid; otherwise, the {@code HTTP status 400} reported
      * @param request {@code SlingHttpServletRequest} instance
      * @param response {@code SlingHttpServletResponse} instance
      * @throws IOException in case writing data to the {@code SlingHttpServletResponse} fails
@@ -82,10 +82,10 @@ public class PackageInfoServlet extends SlingSafeMethodsServlet {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write(GSON.toJson(validatorResponse));
         } else {
-            if (!packageService.packageExists(request.getResourceResolver(), validatorResponse.getModel())) {
+            if (!packageInfoService.packageExists(request.getResourceResolver(), validatorResponse.getModel())) {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             } else {
-                PackageInfo packageInfo = packageService.getPackageInfo(request.getResourceResolver(), validatorResponse.getModel());
+                PackageInfo packageInfo = packageInfoService.getPackageInfo(request.getResourceResolver(), validatorResponse.getModel());
                 response.getWriter().write(GSON.toJson(packageInfo));
             }
         }
