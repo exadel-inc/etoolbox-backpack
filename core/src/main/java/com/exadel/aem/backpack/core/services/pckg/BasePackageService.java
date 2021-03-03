@@ -107,12 +107,12 @@ public interface BasePackageService {
     void addExceptionToLog(PackageInfo packageInfo, Exception e);
 
     /**
-     * Gets the collection of unique {@link AssetReferencedItem}s matching the collection of provided resource paths
+     * Gets the collection of unique {@link ReferencedItem}s matching the collection of provided resource paths
      * applying for the {@link ReferenceService} instance
      *
      * @param resourceResolver {@code ResourceResolver} used to collect assets details
      * @param paths            Collection of JCR paths of resources to gather references for
-     * @return {@code Set<AssetReferencedItem>} object
+     * @return {@code Set<ReferencedItem>} object
      */
     Set<ReferencedItem> getReferencedResources(ResourceResolver resourceResolver, Collection<String> paths);
 

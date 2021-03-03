@@ -324,7 +324,7 @@ public class PackageInfo {
      * @param message String value, non-blank
      */
     public void addLogMessage(final String message) {
-        if (log != null && StringUtils.isNotBlank(message)) {
+        if (log != null) {
             log.add(message);
         }
     }

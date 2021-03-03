@@ -97,6 +97,7 @@ public class BuildPackageImpl implements BuildPackageService {
             packageNode = session.getNode(requestInfo.getPackagePath());
 
             if (packageNode != null) {
+                long start = System.currentTimeMillis();
                 jcrPackage = packMgr.open(packageNode);
                 if (jcrPackage != null) {
                     JcrPackageDefinition definition = jcrPackage.getDefinition();
@@ -114,6 +115,8 @@ public class BuildPackageImpl implements BuildPackageService {
                     });
                     packageInfo.setDataSize(totalSize.get());
                     packageInfo.setPackageBuilt(definition.getLastWrapped());
+                    long finish = System.currentTimeMillis();
+                    packageInfo.addLogMessage("Package test built in " + (finish - start) + " milliseconds");
                 }
             }
         } catch (RepositoryException e) {
@@ -132,8 +135,7 @@ public class BuildPackageImpl implements BuildPackageService {
      *
      * @param userId              User ID per the effective {@code ResourceResolver}
      * @param packageBuildInfo    {@link PackageInfo} object to store package building status information in
-     * @param referencedResources Collection of strings representing resource types to be embedded
-     *                            in the resulting package
+     * @param referencedResources JSON string representing resources to be embedded in the resulting package
      */
 
     void buildPackage(final String userId,
@@ -145,6 +147,7 @@ public class BuildPackageImpl implements BuildPackageService {
             JcrPackageManager packMgr = basePackageService.getPackageManager(userSession);
             JcrPackage jcrPackage = packMgr.open(userSession.getNode(packageBuildInfo.getPackagePath()));
             if (jcrPackage != null) {
+                long start = System.currentTimeMillis();
                 JcrPackageDefinition definition = Objects.requireNonNull(jcrPackage.getDefinition());
                 DefaultWorkspaceFilter filter = new DefaultWorkspaceFilter();
                 includeGeneralResources(definition, s -> filter.add(new PathFilterSet(s)));
@@ -168,6 +171,8 @@ public class BuildPackageImpl implements BuildPackageService {
                 packageBuildInfo.setPackageStatus(PackageStatus.BUILT);
                 packageBuildInfo.setDataSize(jcrPackage.getSize());
                 packageBuildInfo.setPaths(filter.getFilterSets().stream().map(pathFilterSet -> pathFilterSet.seal().getRoot()).collect(Collectors.toList()));
+                long finish = System.currentTimeMillis();
+                packageBuildInfo.addLogMessage("Package built in " + (finish - start) + " milliseconds");
             } else {
                 packageBuildInfo.setPackageStatus(PackageStatus.ERROR);
                 packageBuildInfo.addLogMessage(ERROR + String.format(PACKAGE_DOES_NOT_EXIST_MESSAGE, packageBuildInfo.getPackagePath()));
@@ -205,8 +210,7 @@ public class BuildPackageImpl implements BuildPackageService {
      *
      * @param userId              User ID per the effective {@code ResourceResolver}
      * @param packageBuildInfo    {@link PackageInfo} object to store package building status information in
-     * @param referencedResources Collection of strings representing resource types to be embedded
-     *                            in the resulting package
+     * @param referencedResources JSON string representing resources to be embedded in the resulting package
      */
 
     private void buildPackageAsync(final String userId,
@@ -248,8 +252,7 @@ public class BuildPackageImpl implements BuildPackageService {
      * {@link BuildPackageImpl#testBuildPackage(ResourceResolver, BuildPackageModel)} to facilitate including referenced
      * resources (assets) into the current package
      *
-     * @param includeReferencedResources Collection of strings representing resource types to be embedded
-     *                                   in the resulting package
+     * @param includeReferencedResources JSON string representing resources to be embedded in the resulting package
      * @param definition                 {@code JcrPackageDefinition} object
      * @param pathConsumer               A routine executed over each resources' path value (mainly for logging purposes
      *                                   and statistics gathering)
