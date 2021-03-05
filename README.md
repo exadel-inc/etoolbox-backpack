@@ -1,6 +1,6 @@
 ![BackPack Logo](https://github.com/exadel-inc/aem-backpack/raw/master/ui.apps/src/main/content/jcr_root/apps/backpack/assets/backpack_full.png)
 
-# AEM BackPack
+# AEMBox BackPack
 
 A tool for easily creating, handling and distributing content packages across Adobe Experience Manager (AEM) ecosystem.
 

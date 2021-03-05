@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workspaceFilter version="1.0">
-    <filter root="/apps/backpack"/>
-    <filter root="/apps/cq/core/content/nav/tools/deployment/backpack"/>
-    <filter root="/etc/packages/backpack">
-        <exclude pattern="/etc/packages/backpack/.*" />
+    <filter root="/apps/aembox-backpack"/>
+    <filter root="/apps/cq/core/content/nav/tools/aembox/backpack"/>
+    <filter root="/etc/packages/AEMBox_BackPack">
+        <exclude pattern="/etc/packages/AEMBox_BackPack/.*" />
     </filter>
     <filter root="/home/users/system/backpack"/>
 </workspaceFilter>
