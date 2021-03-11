@@ -6,15 +6,15 @@
     <packaging>content-package</packaging>
 
     <parent>
-        <groupId>com.exadel.aem</groupId>
-        <artifactId>aem-backpack</artifactId>
-        <version>1.1.0</version>
+        <groupId>com.exadel.aembox</groupId>
+        <artifactId>aembox-backpack</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>aem-backpack-content</artifactId>
+    <artifactId>aembox-backpack.content</artifactId>
 
-    <name>AEM BackPack Tool - UI</name>
-    <description>Contains static assets and webpage-rendering logic required to facilitate AEM BackPack browser
+    <name>AEMBox BackPack - UI</name>
+    <description>Contains static assets and webpage-rendering logic required to facilitate AEMBox BackPack browser
         functionality
     </description>
 
@@ -49,9 +49,9 @@
                 <configuration>
                     <embeddeds>
                         <embedded>
-                            <groupId>com.exadel.aem</groupId>
-                            <artifactId>aem-backpack-core</artifactId>
-                            <target>/apps/backpack/install</target>
+                            <groupId>com.exadel.aembox</groupId>
+                            <artifactId>aembox-backpack.core</artifactId>
+                            <target>/apps/aembox-backpack/install</target>
                         </embedded>
                     </embeddeds>
                 </configuration>
@@ -92,8 +92,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.exadel.aem</groupId>
-            <artifactId>aem-backpack-core</artifactId>
+            <groupId>com.exadel.aembox</groupId>
+            <artifactId>aembox-backpack.core</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
     </dependencies>

@@ -6,15 +6,15 @@
     <packaging>bundle</packaging>
 
     <parent>
-        <groupId>com.exadel.aem</groupId>
-        <artifactId>aem-backpack</artifactId>
-        <version>1.1.0</version>
+        <groupId>com.exadel.aembox</groupId>
+        <artifactId>aembox-backpack</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>aem-backpack-core</artifactId>
+    <artifactId>aembox-backpack.core</artifactId>
 
-    <name>AEM BackPack Tool - Bundle</name>
-    <description>Contains classes and interfaces required to facilitate AEM BackPack server-side functionality</description>
+    <name>AEMBox BackPack - Bundle</name>
+    <description>Contains classes and interfaces required to facilitate AEMBox BackPack server-side functionality</description>
 
     <properties>
         <sonar.java.binaries>target/classes</sonar.java.binaries>

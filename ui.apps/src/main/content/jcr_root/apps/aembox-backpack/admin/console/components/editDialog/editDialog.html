@@ -1,0 +1,155 @@
+<coral-dialog class="foundation-toggleable" closable="on" backdrop="static">
+    <sly data-sly-use.model="com.exadel.aembox.backpack.core.model.EditPackageModel"
+         data-sly-use.groupsModel="com.exadel.aembox.backpack.core.model.PackageGroups"></sly>
+
+    <coral-dialog-header>Edit package</coral-dialog-header>
+    <coral-dialog-content>
+        <form action="/services/backpack/editPackage" method="post"
+              class="coral-Form coral-Form--vertical foundation-layout-util-maximized-container foundation-form"
+              data-foundation-form-ajax="true" data-foundation-form-loadingmask="true">
+            <meta class="foundation-form-response-ui-success"
+                  data-foundation-form-response-ui-success='{"name":"foundation.prompt.open","open":"/tools/aembox/backpack/buildPackage.html?path={packagePath}","redirect":"/tools/aembox/backpack.html/?group=/etc/packages/{groupName}","title":"Success","message":"Your package has been created."}'>
+            <div class="coral-FixedColumn">
+                <div class="coral-FixedColumn-column">
+                    <div class="coral-Form-fieldwrapper">
+                        <label class="coral-Form-fieldlabel">Package Name *</label>
+                        <input class="coral-Form-field" type="text" name="packageName"
+                               value="${model.packageModel.packageName}"
+                               aria-required="true"
+                               data-foundation-validation
+                               data-validation
+                               is="coral-textfield">
+                    </div>
+                    <div class="coral-Form-fieldwrapper">
+                        <label class="coral-Form-fieldlabel">Package Version</label>
+                        <input class="coral-Form-field" type="text"
+                               name="version"
+                               data-foundation-validation
+                               data-validation
+                               value="${model.packageModel.version}"
+                               is="coral-textfield">
+                    </div>
+                    <div class="coral-Form-fieldwrapper">
+                        <label class="coral-Form-fieldlabel">Filter Path *</label>
+                        <coral-multifield class="coral-Form-field"
+                                          aria-required="true"
+                                          data-granite-coral-multifield-name="paths"
+                                          data-granite-coral-multifield-composite>
+
+                            <sly data-sly-list.path="${model.packageModel.paths}">
+
+                                <coral-multifield-item>
+
+                                    <div class="coral-Form-fieldwrapper">
+                                        <label class="coral-Form-fieldlabel">Path *</label>
+                                        <foundation-autocomplete class="coral-Form-field"
+                                                                 name="path"
+                                                                 required
+                                                                 data-foundation-validation
+                                                                 pickersrc="/mnt/overlay/granite/ui/content/coral/foundation/form/pathfield/picker.html?_charset_=utf-8&amp;path={value}&amp;root=%2f&amp;filter=hierarchyNotFile&amp;selectionCount=single">
+                                            <coral-overlay foundation-autocomplete-suggestion
+                                                           class="foundation-picker-buttonlist"
+                                                           data-foundation-picker-buttonlist-src="/mnt/overlay/granite/ui/content/coral/foundation/form/pathfield/suggestion{.offset,limit}.html?_charset_=utf-8&amp;root=%2f&amp;filter=hierarchyNotFile{&amp;query}"></coral-overlay>
+                                            <coral-taglist foundation-autocomplete-value name="path">
+                                                <coral-tag value="${path.path}">
+                                                    ${path.path}
+                                                </coral-tag>
+                                            </coral-taglist>
+                                        </foundation-autocomplete>
+
+                                    </div>
+                                    <div class="coral-Form-fieldwrapper coral-Form-fieldwrapper--singleline">
+                                        <coral-checkbox name="excludeChildren" value="true"
+                                                        data-foundation-validation
+                                                        data-validation
+                                                        class="coral-Form-field" checked="${path.excludeChildren}">
+                                            <coral-checkbox-label>Exclude child pages?</coral-checkbox-label>
+                                        </coral-checkbox>
+                                        <coral-icon class="coral-Form-fieldinfo" icon="infoCircle" tabindex="0"
+                                                    alt="description"></coral-icon>
+                                        <coral-tooltip target="_prev" placement="right">
+                                            <coral-tooltip-content>Check to exclude child pages from package filter
+                                            </coral-tooltip-content>
+                                        </coral-tooltip>
+                                    </div>
+
+                                </coral-multifield-item>
+                            </sly>
+
+                            <button type="button" is="coral-button" coral-multifield-add>Add</button>
+                            <template coral-multifield-template="">
+                                <div>
+
+                                    <div class="coral-Form-fieldwrapper">
+                                        <label class="coral-Form-fieldlabel">Path *</label>
+
+                                        <foundation-autocomplete class="coral-Form-field"
+                                                                 name="path"
+                                                                 required
+                                                                 data-foundation-validation
+                                                                 pickersrc="/mnt/overlay/granite/ui/content/coral/foundation/form/pathfield/picker.html?_charset_=utf-8&amp;path={value}&amp;root=%2f&amp;filter=hierarchyNotFile&amp;selectionCount=single">
+                                            <coral-overlay foundation-autocomplete-suggestion
+                                                           class="foundation-picker-buttonlist"
+                                                           data-foundation-picker-buttonlist-src="/mnt/overlay/granite/ui/content/coral/foundation/form/pathfield/suggestion{.offset,limit}.html?_charset_=utf-8&amp;root=%2f&amp;filter=hierarchyNotFile{&amp;query}"></coral-overlay>
+                                            <coral-taglist foundation-autocomplete-value name="path">
+                                                <coral-tag value=""></coral-tag>
+                                            </coral-taglist>
+                                        </foundation-autocomplete>
+                                    </div>
+                                    <div class="coral-Form-fieldwrapper coral-Form-fieldwrapper--singleline">
+                                        <coral-checkbox name="excludeChildren" value="true"
+                                                        data-foundation-validation
+                                                        data-validation
+                                                        class="coral-Form-field">
+                                            <coral-checkbox-label>Exclude child pages?</coral-checkbox-label>
+                                        </coral-checkbox>
+                                        <coral-icon class="coral-Form-fieldinfo" icon="infoCircle" tabindex="0"
+                                                    alt="description"></coral-icon>
+                                        <coral-tooltip target="_prev" placement="right">
+                                            <coral-tooltip-content>Check to exclude child pages from package filter
+                                            </coral-tooltip-content>
+                                        </coral-tooltip>
+                                    </div>
+                                </div>
+                            </template>
+                        </coral-multifield>
+                    </div>
+
+                    <sly data-sly-use.template="/apps/aembox-backpack/admin/console/components/editDialog/groupAutocomplete/groupAutocomplete.html"
+                         data-sly-call="${template.autocompleteTemplate @ selectedPackageGroup = model.packageGroup}"/>
+
+                    <div class="coral-Form-fieldwrapper">
+                        <label class="coral-Form-fieldlabel">Thumbnail Path</label>
+                        <foundation-autocomplete class="coral-Form-field"
+                                                 data-regex=".png$"
+                                                 data-foundation-validation
+                                                 data-validation-message="Please choose a PNG image."
+                                                 name="thumbnailPath"
+                                                 pickersrc="/mnt/overlay/granite/ui/content/coral/foundation/form/pathfield/picker.html?_charset_=utf-8&amp;path={value}&amp;root=%2fcontent%2fdam&amp;filter=hierarchyNotFile&amp;selectionCount=single">
+                            <coral-overlay class="foundation-picker-buttonlist"
+                                           foundation-autocomplete-suggestion
+                                           data-foundation-picker-buttonlist-src="/mnt/overlay/granite/ui/content/coral/foundation/form/pathfield/suggestion{.offset,limit}.html?_charset_=utf-8&amp;root=%2fcontent%2fdam&amp;filter=hierarchyNotFile{&amp;query}"></coral-overlay>
+                            <coral-taglist foundation-autocomplete-value name="thumbnailPath">
+                                <coral-tag></coral-tag>
+                            </coral-taglist>
+                        </foundation-autocomplete>
+
+                        <coral-icon class="coral-Form-fieldinfo" icon="infoCircle" tabindex="0"
+                                    alt="description"></coral-icon>
+                        <coral-tooltip target="_prev" placement="left">
+                            <coral-tooltip-content>Provide path to thumbnail image in PNG format.
+                            </coral-tooltip-content>
+                        </coral-tooltip>
+                        <img src="/crx/packmgr/thumbnail.jsp?_charset_=utf-8&path=${model.packagePath}">
+
+                    </div>
+                    <input name="packagePath" value="${model.packagePath}" type="hidden">
+                    <button type="submit" autocomplete="off" is="coral-button" variant="primary"
+                            trackingelement="create" tracking="ON">
+                        Save
+                    </button>
+                </div>
+            </div>
+        </form>
+    </coral-dialog-content>
+</coral-dialog>

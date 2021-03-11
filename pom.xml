@@ -6,11 +6,11 @@
 
     <packaging>pom</packaging>
 
-    <groupId>com.exadel.aem</groupId>
-    <artifactId>aem-backpack</artifactId>
-    <version>1.1.0</version>
+    <groupId>com.exadel.aembox</groupId>
+    <artifactId>aembox-backpack</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
 
-    <name>AEM BackPack Tool</name>
+    <name>AEMBox BackPack</name>
     <description>Automates generating rich and responsive authoring interfaces for Adobe Experience Manager (TM) via Maven-powered build and deployment workflow</description>
     <url>https://github.com/exadel-inc/aem-backpack</url>
 
@@ -113,7 +113,7 @@
                         <verbose>true</verbose>
                         <failOnError>true</failOnError>
                         <failOnMissingEmbed>true</failOnMissingEmbed>
-                        <group>exadelAEM</group>
+                        <group>AEMBox</group>
                     </configuration>
                 </plugin>
                 <!-- Apache Felix Bundle Plugin -->
@@ -127,7 +127,7 @@
                         <exportScr>true</exportScr>
                         <instructions>
                             <Import-Package>javax.inject;javax.annotation;version=0.0.0,*</Import-Package>
-                            <Sling-Model-Packages>com.exadel.aem.backpack.core</Sling-Model-Packages>
+                            <Sling-Model-Packages>com.exadel.aembox.backpack.core</Sling-Model-Packages>
                             <exportScr>true</exportScr>
                             <_dsannotations>*</_dsannotations>
                             <_metatypeannotations>*</_metatypeannotations>
