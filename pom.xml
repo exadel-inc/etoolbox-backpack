@@ -11,7 +11,7 @@
     <version>2.0.0</version>
 
     <name>EToolbox BackPack</name>
-    <description>Automates generating rich and responsive authoring interfaces for Adobe Experience Manager (TM) via Maven-powered build and deployment workflow</description>
+    <description>A tool for easily creating, handling and distributing content packages across Adobe Experience Manager (AEM) ecosystem.</description>
     <url>https://github.com/exadel-inc/aem-backpack</url>
 
     <organization>
@@ -21,8 +21,8 @@
 
     <developers>
         <developer>
-            <id>edmtp</id>
-            <name>Exadel DMTP Team</name>
+            <id>MarTech</id>
+            <name>Exadel MarTech Team</name>
             <organization>Exadel, Inc.</organization>
             <organizationUrl>https://exadel.com</organizationUrl>
             <roles>
