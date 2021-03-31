@@ -1,6 +1,6 @@
 ![BackPack Logo](https://github.com/exadel-inc/aem-backpack/raw/master/ui.apps/src/main/content/jcr_root/apps/backpack/assets/backpack_full.png)
 
-# AEM BackPack
+# EToolbox BackPack
 
 A tool for easily creating, handling and distributing content packages across Adobe Experience Manager (AEM) ecosystem.
 
@@ -37,7 +37,7 @@ The project is developed and tested in *AEM 6.4.5* (*uber-jar* 6.3.0) with Java 
 
 ### Usage
 
-In your _Adobe Experience Manager_ console, navigate to _Tools_ section and choose _Deployment_ from the left menu rail. Click _"Backpack"_ in the right section.
+In your _Adobe Experience Manager_ console, navigate to _Tools_ section and choose _EToolbox_ from the left menu rail. Click _"Backpack"_ in the right section.
 
 TouchUI-compliant *Package Manager* interface opens. In the _"Group"_ dropdown to the left, you can choose a particular packages group, or see them all, if "All packages" option selected.
 
