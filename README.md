@@ -1,4 +1,4 @@
-![BackPack Logo](https://github.com/exadel-inc/aem-backpack/raw/master/ui.apps/src/main/content/jcr_root/apps/etoolbox-backpack/assets/backpack_full.png)
+![BackPack Logo](https://github.com/exadel-inc/aem-backpack/raw/master/ui.apps/src/main/content/jcr_root/apps/etoolbox-backpack/assets/backpack.png)
 
 # EToolbox BackPack
 
