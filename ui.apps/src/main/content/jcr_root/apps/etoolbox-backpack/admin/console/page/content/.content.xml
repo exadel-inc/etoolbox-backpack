@@ -198,11 +198,25 @@
                                                     sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
                                                     fieldLabel="Package Version"
                                                     name="version"/>
+                                    <switch
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="/libs/granite/ui/components/coral/foundation/form/switch"
+                                            uncheckedValue="false"
+                                            value="true"
+                                            name="name"
+                                            fieldLabel="SQL2 to package"
+                                            textOn="on"
+                                            onText="Path"
+                                            offText="SQL2"
+                                            granite:class="cq-dialog-switch-showhide">
+                                    </switch>
+
                                     <paths
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
                                             fieldLabel="Filter Path"
                                             composite="{Boolean}true"
+                                            granite:class="cq-dialog-switch-paths"
                                             required="{Boolean}true">
                                         <field
                                                 jcr:primaryType="nt:unstructured"
@@ -227,6 +241,15 @@
                                             </items>
                                         </field>
                                     </paths>
+                                    <query
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
+                                            fieldLabel="SQL2 query"
+                                            multiple="false"
+                                            required="{Boolean}true"
+                                            granite:class="cq-dialog-switch-query"
+                                            name="query"/>
+
                                     <group_select
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="etoolbox-backpack/admin/console/components/editDialog/groupAutocomplete">

@@ -17,6 +17,7 @@ package com.exadel.etoolbox.backpack.core.servlets;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
 import com.exadel.etoolbox.backpack.core.services.ReferenceService;
+import com.exadel.etoolbox.backpack.core.services.impl.QueryServiceImpl;
 import com.exadel.etoolbox.backpack.core.services.impl.ReferenceServiceImpl;
 import com.exadel.etoolbox.backpack.core.services.pckg.BuildPackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.impl.BasePackageServiceImpl;
@@ -63,6 +64,7 @@ public class BuildPackageServletTest {
 
     @Before
     public void beforeTest() {
+        context.registerInjectActivateService(new QueryServiceImpl());
         context.registerService(BuildPackageService.class, buildPackageServiceMock);
         context.registerService(RequestAdapter.class, new RequestAdapterImpl());
         context.registerService(ReferenceService.class, new ReferenceServiceImpl());

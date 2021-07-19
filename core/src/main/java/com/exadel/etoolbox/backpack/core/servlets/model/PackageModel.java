@@ -56,6 +56,9 @@ public class PackageModel {
     @RequestParam
     private String packagePath;
 
+    @RequestParam
+    private String query;
+
     /**
      * Gets the name of the current package
      *
@@ -164,5 +167,23 @@ public class PackageModel {
      */
     public void setPackagePath(final String packagePath) {
         this.packagePath = packagePath;
+    }
+
+    /**
+     * Gets the SQL2 query
+     *
+     * @return String value
+     */
+    public String getQuery() {
+        return query;
+    }
+
+    /**
+     * Assigns SQL2 query to the current instance
+     *
+     * @param query current SQL2 query to assign
+     */
+    public void setQuery(final String query) {
+        this.query = query;
     }
 }

@@ -29,9 +29,11 @@
                                value="${model.packageModel.version}"
                                is="coral-textfield">
                     </div>
+                    <label id="label-switch" class="coral-Form-fieldlabel">SQL2 to package</label>
+                    <coral-switch class="cq-dialog-switch-showhide" labelledby="label-switch"></coral-switch>
                     <div class="coral-Form-fieldwrapper">
                         <label class="coral-Form-fieldlabel">Filter Path *</label>
-                        <coral-multifield class="coral-Form-field"
+                        <coral-multifield class="coral-Form-field cq-dialog-switch-paths"
                                           aria-required="true"
                                           data-granite-coral-multifield-name="paths"
                                           data-granite-coral-multifield-composite>
@@ -113,6 +115,10 @@
                                 </div>
                             </template>
                         </coral-multifield>
+                    </div>
+                    <div>
+                        <label id="label-query" class="coral-Form-fieldlabel">SQL2 Query *</label>
+                        <textarea class="coral-Form-field cq-dialog-switch-query foundation-layout-util-resizable-none coral3-Textfield coral3-Textfield--multiline" name="query" rows="5" labelledby="label_ebcf8a3d-894d-46e0-81eb-bd59a8f8ea29" aria-required="true" data-foundation-validation data-validation is="coral-textarea" id="coral-id-35" aria-labelledby="label_ebcf8a3d-894d-46e0-81eb-bd59a8f8ea29" aria-invalid="false">${model.packageModel.query}</textarea>
                     </div>
 
                     <sly data-sly-use.template="/apps/etoolbox-backpack/admin/console/components/editDialog/groupAutocomplete/groupAutocomplete.html"
