@@ -51,11 +51,10 @@ public class PackageModel {
     @RequestParam(type = FieldType.MULTIFIELD)
     private List<PathModel> paths;
 
-    @RequestParam
-    private String packagePath;
+    private String query;
 
     @RequestParam
-    private String query;
+    private String packagePath;
 
     /**
      * Gets the name of the current package
@@ -103,12 +102,7 @@ public class PackageModel {
         return paths;
     }
 
-    /**
-     * Gets the string of JCR-SQL2 query indicating resources (resource trees) to be included in this package
-     *
-     * @return String value
-     */
-    public String getQuery() {
+    public List<QueryModel> getQuery() {
         return query;
     }
 
@@ -156,15 +150,6 @@ public class PackageModel {
      */
     public void setPaths(final List<PathModel> paths) {
         this.paths = paths;
-    }
-
-    /**
-     * Assigns to the current instance the JCR SQL2 Query Model
-     *
-     * @param query String value
-     */
-    public void setQuery(final String query) {
-        this.query = query;
     }
 
     /**
