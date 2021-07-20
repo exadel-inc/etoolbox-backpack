@@ -2,7 +2,7 @@
   "jcr:primaryType": "cq:Page",
   "jcr:content": {
     "jcr:primaryType": "cq:PageContent",
-    "jcr:title": "testPage1",
+    "jcr:title": "testPage3",
     "cq:tags": [
       "test:topics/test-tag"
     ],
