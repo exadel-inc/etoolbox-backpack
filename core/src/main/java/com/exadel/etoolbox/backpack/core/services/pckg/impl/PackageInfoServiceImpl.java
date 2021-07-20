@@ -226,7 +226,9 @@ public class PackageInfoServiceImpl implements PackageInfoService {
                     packageModel.setPackageName(definition.get(JcrPackageDefinition.PN_NAME));
                     packageModel.setGroup(definition.get(JcrPackageDefinition.PN_GROUP));
                     packageModel.setVersion(definition.get(JcrPackageDefinition.PN_VERSION));
-                    packageModel.setQuery(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.JCR_SQL2_QUERY), String.class));
+                    if (definition.get(BasePackageServiceImpl.QUERY) != null) {
+                        packageModel.setQuery(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.QUERY), String.class));
+                    }
                     if (definition.get(BasePackageServiceImpl.INITIAL_FILTERS) != null) {
                         packageModel.setPaths(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.INITIAL_FILTERS), listType));
                     } else {
@@ -270,6 +272,7 @@ public class PackageInfoServiceImpl implements PackageInfoService {
                     packageInfo.setQuery(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.JCR_SQL2_QUERY), String.class));
                     packageInfo.setDataSize(jcrPackage.getSize());
                     packageInfo.setPackageBuilt(definition.getLastWrapped());
+                    packageInfo.setQuery(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.QUERY), String.class));
                     if (definition.getLastWrapped() != null) {
                         packageInfo.setPackageStatus(PackageStatus.BUILT);
                     } else {

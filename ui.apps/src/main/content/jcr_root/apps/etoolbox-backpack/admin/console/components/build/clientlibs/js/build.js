@@ -39,6 +39,7 @@ $(function () {
         $closeLink = $('#shell-propertiespage-closeactivator'),
         $goBackSection = $('#goBackLink');
         $query = $('#query');
+
     if (path) {
         var lastIndex = path.lastIndexOf('/');
         packageName = path.substring(lastIndex + 1);
@@ -285,6 +286,11 @@ $(function () {
         }
         if (data.dataSize) {
             $packageSize.text('Package size: ' + bytesToSize(data.dataSize));
+        }
+        if (data.query == null) {
+            $('#packageQuery').hide();
+        } else {
+            $query.text('SQL2 query: ' + data.query);
         }
     }
 

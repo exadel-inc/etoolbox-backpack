@@ -56,6 +56,8 @@ public class PackageInfo {
 
     private Long dataSize;
 
+    private String query;
+
     /**
      * Default constructor
      */
@@ -369,6 +371,24 @@ public class PackageInfo {
      */
     public void setDataSize(final Long dataSize) {
         this.dataSize = dataSize;
+    }
+
+    /**
+     * Get the SQL2 query of the current package
+     *
+     * @return String value
+     */
+    public String getQuery() {
+        return query;
+    }
+
+    /**
+     * Sets the SQL2 query of the current package
+     *
+     * @param query String value
+     */
+    public void setQuery(String query) {
+        this.query = query;
     }
 
     /**
