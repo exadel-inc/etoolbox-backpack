@@ -206,7 +206,6 @@
                                                     jcr:primaryType="nt:unstructured"
                                                     sling:resourceType="granite/ui/components/foundation/form/switch"
                                                     fieldLabel=""
-                                                    fieldDescription="Select type Path Filter or JCR SQL2"
                                                     onText="Path Filter"
                                                     offText="SQL2"
                                                     name="./switch-name"
