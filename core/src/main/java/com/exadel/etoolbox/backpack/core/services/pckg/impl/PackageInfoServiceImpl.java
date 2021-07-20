@@ -17,10 +17,7 @@ import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
-import com.exadel.etoolbox.backpack.core.servlets.model.LatestPackageInfoModel;
-import com.exadel.etoolbox.backpack.core.servlets.model.PackageInfoModel;
-import com.exadel.etoolbox.backpack.core.servlets.model.PackageModel;
-import com.exadel.etoolbox.backpack.core.servlets.model.PathModel;
+import com.exadel.etoolbox.backpack.core.servlets.model.*;
 import com.google.gson.reflect.TypeToken;
 import org.apache.jackrabbit.vault.fs.api.FilterSet;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
@@ -229,7 +226,6 @@ public class PackageInfoServiceImpl implements PackageInfoService {
                     packageModel.setPackageName(definition.get(JcrPackageDefinition.PN_NAME));
                     packageModel.setGroup(definition.get(JcrPackageDefinition.PN_GROUP));
                     packageModel.setVersion(definition.get(JcrPackageDefinition.PN_VERSION));
-
                     if (definition.get(BasePackageServiceImpl.QUERY) != null) {
                         packageModel.setQuery(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.QUERY), String.class));
                     }
@@ -273,6 +269,7 @@ public class PackageInfoServiceImpl implements PackageInfoService {
                     packageInfo.setVersion(definition.get(JcrPackageDefinition.PN_VERSION));
                     packageInfo.setReferencedResources(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.REFERENCED_RESOURCES), mapType));
                     packageInfo.setPaths(filterSets.stream().map(FilterSet::getRoot).collect(Collectors.toList()));
+                    packageInfo.setQuery(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.JCR_SQL2_QUERY), String.class));
                     packageInfo.setDataSize(jcrPackage.getSize());
                     packageInfo.setPackageBuilt(definition.getLastWrapped());
                     packageInfo.setQuery(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.QUERY), String.class));

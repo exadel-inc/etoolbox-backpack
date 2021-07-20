@@ -64,6 +64,7 @@ public class PackageInfoServiceImplTest extends Base {
             packageInfo.setVersion(PACKAGE_VERSION);
             packageInfo.setReferencedResources(referencedResources);
             packageInfo.setPaths(Collections.singletonList(PAGE_1));
+            packageInfo.setQuery(QUERY_1);
             packageInfo.setPackagePath(PACKAGE_PATH);
             aPackage = createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, true)), new DefaultWorkspaceFilter());
 

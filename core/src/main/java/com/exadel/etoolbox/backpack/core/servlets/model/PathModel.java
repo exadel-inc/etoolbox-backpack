@@ -27,8 +27,8 @@ import com.exadel.etoolbox.backpack.request.validator.impl.RequiredValidator;
 public class PathModel {
 
     @RequestParam
-    @Validate(validator = RequiredValidator.class,
-            invalidMessages = "Path is required")
+//    @Validate(validator = RequiredValidator.class,
+//            invalidMessages = "Path is required")
     private String path;
 
     @RequestParam
