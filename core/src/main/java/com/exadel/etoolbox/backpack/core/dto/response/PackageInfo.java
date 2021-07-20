@@ -48,8 +48,6 @@ public class PackageInfo {
 
     private Collection<String> paths;
 
-    private String query;
-
     private Map<String, List<String>> referencedResources = new TreeMap<>();
 
     private List<String> log = new ArrayList<>();
@@ -122,15 +120,6 @@ public class PackageInfo {
      */
     public Collection<String> getPaths() {
         return Collections.unmodifiableCollection(paths);
-    }
-
-    /**
-     * Gets the JCR SQL2 Query expression
-     *
-     * @return String value
-     */
-    public String getQuery() {
-        return query;
     }
 
     /**
@@ -314,16 +303,6 @@ public class PackageInfo {
      */
     public void setPaths(final Collection<String> paths) {
         this.paths = paths;
-    }
-
-
-    /**
-     * Sets the JCR SQL2 Query expression
-     *
-     * @param query String value
-     */
-    public void setQuery(String query) {
-        this.query = query;
     }
 
     /**

@@ -101,7 +101,6 @@ public class CreatePackageServiceImplTest extends Base {
         packageInfo.setVersion(PACKAGE_VERSION);
         packageInfo.setReferencedResources(new HashMap<>());
         packageInfo.setPaths(new ArrayList<>());
-        packageInfo.setQuery(QUERY_1);
         createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, false)), new DefaultWorkspaceFilter());
 
         PackageModel packageModel = new PackageModel();
