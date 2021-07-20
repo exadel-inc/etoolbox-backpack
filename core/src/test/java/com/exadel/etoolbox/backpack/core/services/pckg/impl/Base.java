@@ -51,7 +51,6 @@ import static org.mockito.Mockito.when;
 public class Base {
     protected static final String PAGE_1 = "/content/site/pages/page1";
     protected static final String PAGE_2 = "/content/site/pages/page2";
-    protected static final String QUERY_1 = "SELECT * FROM [cq:Page]";
 
     protected static final String PICTURE_1 = "/content/dam/picture1.jpg";
     protected static final String PICTURE_2 = "/content/dam/picture2.png";
@@ -121,7 +120,6 @@ public class Base {
         packageInfo.setVersion(PACKAGE_VERSION);
         packageInfo.setReferencedResources(referencedResources);
         packageInfo.setPaths(Collections.singletonList(PAGE_1));
-        packageInfo.setQuery(QUERY_1);
         return packageInfo;
     }
 

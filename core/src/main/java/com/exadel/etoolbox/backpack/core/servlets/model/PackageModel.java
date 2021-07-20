@@ -51,8 +51,6 @@ public class PackageModel {
     @RequestParam(type = FieldType.MULTIFIELD)
     private List<PathModel> paths;
 
-    private String query;
-
     @RequestParam
     private String packagePath;
 
@@ -100,10 +98,6 @@ public class PackageModel {
      */
     public List<PathModel> getPaths() {
         return paths;
-    }
-
-    public List<QueryModel> getQuery() {
-        return query;
     }
 
     /**
