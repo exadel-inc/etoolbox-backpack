@@ -282,6 +282,8 @@ $(function () {
         $lastBuilt.val(getLastBuiltDate(data.packageBuilt));
         if (data.query) {
             $query.text('SQL2 Query: ' + data.query);
+        } else {
+            $query.hide();
         }
         if (data.dataSize) {
             $packageSize.text('Package size: ' + bytesToSize(data.dataSize));
