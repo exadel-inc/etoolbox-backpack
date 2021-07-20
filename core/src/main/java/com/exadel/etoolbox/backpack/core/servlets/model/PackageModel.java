@@ -49,6 +49,8 @@ public class PackageModel {
     private String version;
 
     @RequestParam(type = FieldType.MULTIFIELD)
+    @Validate(validator = RequiredValidator.class,
+            invalidMessages = "Resource filter(s) is required")
     private List<PathModel> paths;
 
     @RequestParam
