@@ -126,6 +126,7 @@ public class BuildPackageImplTest extends Base {
         packageInfo.setVersion(PACKAGE_VERSION);
         packageInfo.setReferencedResources(referencedResources);
         packageInfo.setPaths(Collections.singletonList(PAGE_1));
+        packageInfo.setQuery(QUERY_1);
         createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, false)), new DefaultWorkspaceFilter());
     }
 
@@ -139,6 +140,7 @@ public class BuildPackageImplTest extends Base {
         packageInfo.setReferencedResources(referencedResources);
         packageInfo.setPaths(Collections.singletonList(PAGE_1));
         packageInfo.setPackagePath(PACKAGE_PATH);
+        packageInfo.setQuery(QUERY_1);
         aPackage = spy(createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, false)), new DefaultWorkspaceFilter()));
 
 

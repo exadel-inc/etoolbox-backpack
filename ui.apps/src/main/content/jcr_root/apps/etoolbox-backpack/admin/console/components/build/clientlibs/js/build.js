@@ -38,6 +38,7 @@ $(function () {
         $errorContainer = $('.content-error-container'),
         $closeLink = $('#shell-propertiespage-closeactivator'),
         $goBackSection = $('#goBackLink');
+        $query = $('#query');
     if (path) {
         var lastIndex = path.lastIndexOf('/');
         packageName = path.substring(lastIndex + 1);
@@ -278,6 +279,7 @@ $(function () {
         $packageName.html('Package name: ' + data.packageName);
         $name.text(data.packageNodeName);
         $version.text('Package version: ' + data.version);
+        $query.text('SQL2 Query: ' + data.query)
         $lastBuilt.val(getLastBuiltDate(data.packageBuilt));
         if (data.dataSize) {
             $packageSize.text('Package size: ' + bytesToSize(data.dataSize));

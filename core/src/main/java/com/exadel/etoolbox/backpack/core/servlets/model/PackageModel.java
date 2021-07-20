@@ -49,12 +49,13 @@ public class PackageModel {
     private String version;
 
     @RequestParam(type = FieldType.MULTIFIELD)
-    @Validate(validator = RequiredValidator.class,
-            invalidMessages = "Resource filter(s) is required")
     private List<PathModel> paths;
 
     @RequestParam
     private String packagePath;
+
+    @RequestParam
+    private String query;
 
     /**
      * Gets the name of the current package
@@ -103,6 +104,15 @@ public class PackageModel {
     }
 
     /**
+     * Gets the string of JCR-SQL2 query indicating resources (resource trees) to be included in this package
+     *
+     * @return String value
+     */
+    public String getQuery() {
+        return query;
+    }
+
+    /**
      * Assigns package name value to the current instance
      *
      * @param packageName String value, non-blank string expected
@@ -146,6 +156,15 @@ public class PackageModel {
      */
     public void setPaths(final List<PathModel> paths) {
         this.paths = paths;
+    }
+
+    /**
+     * Assigns to the current instance the JCR SQL2 Query Model
+     *
+     * @param query String value
+     */
+    public void setQuery(final String query) {
+        this.query = query;
     }
 
     /**

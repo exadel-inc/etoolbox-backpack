@@ -52,6 +52,7 @@ public class EditPackageServiceTest extends Base {
         packageInfo.setVersion(PACKAGE_VERSION);
         packageInfo.setReferencedResources(referencedResources);
         packageInfo.setPaths(Collections.singletonList(PAGE_1));
+        packageInfo.setQuery(QUERY_1);
         packageInfo.setPackagePath(PACKAGE_PATH);
         resourceResolver = context.resourceResolver();
         createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, false)), new DefaultWorkspaceFilter());
@@ -86,6 +87,7 @@ public class EditPackageServiceTest extends Base {
         packageInfo.setGroupName(TEST_GROUP_2);
         packageInfo.setPackageName(TEST_PACKAGE_2);
         packageInfo.setVersion(PACKAGE_VERSION_2);
+        packageInfo.setQuery(QUERY_1);
         createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, false)), new DefaultWorkspaceFilter());
         PackageModel packageModel = new PackageModel();
         initBasePackageModel(packageModel, Collections.singletonList(PAGE_2), false);
