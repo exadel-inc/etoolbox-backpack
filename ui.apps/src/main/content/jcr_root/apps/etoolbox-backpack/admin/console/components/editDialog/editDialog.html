@@ -29,9 +29,25 @@
                                value="${model.packageModel.version}"
                                is="coral-textfield">
                     </div>
-                    <div class="coral-Form-fieldwrapper">
+
+                    <div class="coral-Well">
+                        <div class="coral-Form-fieldwrapper">
+                            <label id="label_73f59b0a-8723-4944-bacf-d014f20a809c" class="coral-Form-fieldlabel">Filter type</label>
+                            <span class="coral-Switch coral-Form-field">
+                                        <input id="enable" class="cq-dialog-checkbox-showhide coral-Switch-input" type="checkbox" name="./switch-name" value="true" data-validation="" checked="" data-cq-dialog-checkbox-showhide-target=".button-option-enable-showhide-target" role="button" aria-pressed="true" aria-invalid="false">
+                                        <span class="coral-Switch-offLabel" id="coral-5" role="presentation" aria-hidden="true">SQL2</span>
+                                        <span class="coral-Switch-onLabel" id="coral-6" role="presentation" aria-hidden="false">XPath</span>
+                                        <input type="hidden" name="./switch-name@Delete">
+                                        <input type="hidden" value="false" name="./switch-name@DefaultValue">
+                                        <input type="hidden" value="true" name="./switch-name@UseDefaultWhenMissing">
+                                    </span>
+                            <span class="coral-Form-fieldinfo coral-Icon coral-Icon--infoCircle coral-Icon--sizeS" tabindex="0" data-init="quicktip" data-quicktip-type="info" data-quicktip-arrow="right" data-quicktip-content="Select type XPath or JCR SQL2" aria-label="Select type XPath or JCR SQL2"></span>
+                        </div>
+                    </div>
+
+                    <div class="coral-Form-fieldwrapper path-option-enable-showhide-target">
                         <label class="coral-Form-fieldlabel">Filter Path *</label>
-                        <coral-multifield class="coral-Form-field"
+                        <coral-multifield class="coral-Form-field cq-dialog-xpath-option"
                                           aria-required="true"
                                           data-granite-coral-multifield-name="paths"
                                           data-granite-coral-multifield-composite>
@@ -42,7 +58,7 @@
 
                                     <div class="coral-Form-fieldwrapper">
                                         <label class="coral-Form-fieldlabel">Path *</label>
-                                        <foundation-autocomplete class="coral-Form-field"
+                                        <foundation-autocomplete class="coral-Form-field "
                                                                  name="path"
                                                                  required
                                                                  data-foundation-validation
@@ -113,6 +129,15 @@
                                 </div>
                             </template>
                         </coral-multifield>
+                    </div>
+
+                    <div class="sql2-option-enable-showhide-target" data-showhidetargetvalue="true" style="display: block;">
+                        <div class="coral-Well">
+                            <div class="coral-Form-fieldwrapper">
+                                <label id="label_53b9d6df-cb22-4f34-83ca-48913c62d081" class="coral-Form-fieldlabel" for="coral-id-18">SQL2 Query *</label>
+                                <textarea class="coral-Form-field foundation-layout-util-resizable-none coral3-Textfield coral3-Textfield--multiline" name="query" rows="5" labelledby="label_53b9d6df-cb22-4f34-83ca-48913c62d081" aria-required="true" data-foundation-validation="" data-validation="" is="coral-textarea" id="coral-id-18" aria-labelledby="label_53b9d6df-cb22-4f34-83ca-48913c62d081" aria-invalid="false">${model.packageModel.query}</textarea>
+                            </div>
+                        </div>
                     </div>
 
                     <sly data-sly-use.template="/apps/etoolbox-backpack/admin/console/components/editDialog/groupAutocomplete/groupAutocomplete.html"

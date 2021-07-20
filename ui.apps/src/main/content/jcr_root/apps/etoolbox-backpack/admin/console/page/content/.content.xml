@@ -266,7 +266,7 @@
                                                 <items jcr:primaryType="nt:unstructured">
                                                     <sqlQuery jcr:primaryType="nt:unstructured"
                                                               sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
-                                                              fieldLabel="SQL2 Expression"
+                                                              fieldLabel="SQL2 Query"
                                                               required="{Boolean}true"
                                                               name="query" />
                                                 </items>

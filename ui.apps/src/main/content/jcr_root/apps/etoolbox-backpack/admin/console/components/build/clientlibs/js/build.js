@@ -279,8 +279,10 @@ $(function () {
         $packageName.html('Package name: ' + data.packageName);
         $name.text(data.packageNodeName);
         $version.text('Package version: ' + data.version);
-        $query.text('SQL2 Query: ' + data.query)
         $lastBuilt.val(getLastBuiltDate(data.packageBuilt));
+        if (data.query) {
+            $query.text('SQL2 Query: ' + data.query);
+        }
         if (data.dataSize) {
             $packageSize.text('Package size: ' + bytesToSize(data.dataSize));
         }
