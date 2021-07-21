@@ -36,8 +36,6 @@
      * @param switchStatus Boolean value represents switcher status
      */
     function toggleFilterElements(switchStatus) {
-        console.log(switchStatus);
-
         var pathElement = $(".path-option-element-target");
         var sqlElement = $(".sql2-option-element-target");
 
