@@ -31,26 +31,17 @@
                     </div>
                     <div class="coral-Well">
                         <div class="coral-Form-fieldwrapper">
-                            <label id="label_73f59b0a-8723-4944-bacf-d014f20a809c" class="coral-Form-fieldlabel"></label>
-                            <span class="coral-Switch coral-Form-field">
-                                        <input id="enable" class="cq-dialog-checkbox-showhide coral-Switch-input" type="checkbox" name="./switch-name" value="true" data-validation="" checked="" data-cq-dialog-checkbox-showhide-target=".button-option-enable-showhide-target" role="button" aria-pressed="true" aria-invalid="false">
-                                        <span class="coral-Switch-offLabel" id="coral-5" role="presentation" aria-hidden="true">SQL2</span>
-                                        <span class="coral-Switch-onLabel" id="coral-6" role="presentation" aria-hidden="false">Path Filter</span>
-                                        <input type="hidden" name="./switch-name@Delete">
-                                        <input type="hidden" value="false" name="./switch-name@DefaultValue">
-                                        <input type="hidden" value="true" name="./switch-name@UseDefaultWhenMissing">
-                                    </span>
+                            <label id="label-switch" class="coral-Form-fieldlabel">SQL2 Query Package</label>
+                            <coral-switch class="cq-dialog-switch-toggle" name="switch" value="true" checked="" labelledby="label-switch"></coral-switch>
                         </div>
                     </div>
 
-                    <div class="coral-Form-fieldwrapper path-option-enable-showhide-target">
+                    <div class="coral-Form-fieldwrapper path-option-element-target">
                         <label class="coral-Form-fieldlabel">Filter Path *</label>
-                        <coral-multifield class="coral-Form-field cq-dialog-xpath-option"
-
+                        <coral-multifield class="coral-Form-field cq-dialog-path-filter-option"
                                           aria-required="true"
                                           data-granite-coral-multifield-name="paths"
                                           data-granite-coral-multifield-composite>
-
                             <sly data-sly-list.path="${model.packageModel.paths}">
 
                                 <coral-multifield-item>
@@ -129,7 +120,8 @@
                             </template>
                         </coral-multifield>
                     </div>
-                    <div class="sql2-option-enable-showhide-target" data-showhidetargetvalue="true" style="display: block;">
+
+                    <div class="sql2-option-element-target" data-showhidetargetvalue="true" style="display: block;">
                         <div class="coral-Well">
                             <div class="coral-Form-fieldwrapper">
                                 <label id="label_53b9d6df-cb22-4f34-83ca-48913c62d081" class="coral-Form-fieldlabel" for="coral-id-18">SQL2 Query *</label>
