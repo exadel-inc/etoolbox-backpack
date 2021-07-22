@@ -149,13 +149,13 @@ public class BasePackageServiceImpl implements BasePackageService {
     public PackageInfo getPackageInfo(final ResourceResolver resourceResolver, final PackageModel packageModel) {
         PackageInfo packageInfo = new PackageInfo();
         List<String> actualPaths;
-        if (packageModel.getPaths() != null) {
+        if (packageModel.isToggle()) {
+            actualPaths = queryService.getResourcesPathsFromQuery(resourceResolver, packageModel.getQuery(), packageInfo);
+        } else {
             actualPaths = packageModel.getPaths().stream()
                     .filter(s -> resourceResolver.getResource(s.getPath()) != null)
                     .map(path -> getActualPath(path.getPath(), path.isExcludeChildren(), resourceResolver))
                     .collect(Collectors.toList());
-        } else {
-            actualPaths = queryService.getResourcesPathsFromQuery(resourceResolver, packageModel.getQuery(), packageInfo);
         }
         packageInfo.setPackageName(packageModel.getPackageName());
         packageInfo.setPaths(actualPaths);
