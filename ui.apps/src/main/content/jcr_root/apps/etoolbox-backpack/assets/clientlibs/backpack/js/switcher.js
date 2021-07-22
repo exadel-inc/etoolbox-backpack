@@ -19,7 +19,7 @@
      * Component initialization
      */
     $(document).on("foundation-contentloaded", function() {
-        var switchStatus = $(".cq-dialog-switch-toggle").prop("checked") !== undefined ? $(this).prop("checked") : true;
+        var switchStatus = $(".cq-dialog-switch-toggle").attr("checked") !== undefined;
         toggleFilterElements(switchStatus);
     });
 
@@ -27,8 +27,7 @@
      * Listen to switcher changes
      */
     $(document).on("change", ".cq-dialog-switch-toggle", function() {
-        var switchStatus = $(this).prop("checked") !== undefined ? $(this).prop("checked") : true;
-        toggleFilterElements(switchStatus);
+        toggleFilterElements($(this).prop("checked"));
     });
 
     /**
