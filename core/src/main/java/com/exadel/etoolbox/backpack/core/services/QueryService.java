@@ -1,11 +1,12 @@
 package com.exadel.etoolbox.backpack.core.services;
 
+import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import org.apache.sling.api.resource.ResourceResolver;
 
 import java.util.List;
 
 /**
- *  Represents a service running in an AEM instance responsible for get Resources paths by SQL2 query String
+ *  Retrieves resources via a JCR-SQL2 query
  */
 public interface QueryService {
 
@@ -16,5 +17,5 @@ public interface QueryService {
      * @param queryString {@code String} SQL2 query
      * @return {@code List} of Resources paths
      */
-    List<String> getResourcesPathsFromQuery(ResourceResolver resourceResolver, String queryString);
+    List<String> getResourcesPathsFromQuery(ResourceResolver resourceResolver, String queryString, PackageInfo packageInfo);
 }

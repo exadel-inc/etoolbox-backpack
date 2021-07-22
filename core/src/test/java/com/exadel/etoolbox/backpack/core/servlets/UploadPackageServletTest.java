@@ -43,7 +43,7 @@ public class UploadPackageServletTest {
 
         assertEquals(HttpServletResponse.SC_OK, context.response().getStatus());
         assertEquals("application/json;charset=UTF-8", context.response().getContentType());
-        assertEquals("{\"packageName\":\"some-name.zip\",\"version\":\"some-version\",\"packageStatus\":\"BUILT\",\"packagePath\":\"/some/path\",\"referencedResources\":{},\"log\":[]}", context.response().getOutputAsString());
+        assertEquals("{\"packageName\":\"some-name.zip\",\"version\":\"some-version\",\"packageStatus\":\"BUILT\",\"packagePath\":\"/some/path\",\"referencedResources\":{},\"log\":[],\"toggle\":false}", context.response().getOutputAsString());
     }
 
     @Test
@@ -54,7 +54,7 @@ public class UploadPackageServletTest {
 
         assertEquals(HttpServletResponse.SC_OK, context.response().getStatus());
         assertEquals("application/json;charset=UTF-8", context.response().getContentType());
-        assertEquals("{\"packageName\":\"some-name.zip\",\"version\":\"some-version\",\"packageStatus\":\"BUILT\",\"packagePath\":\"/some/path\",\"referencedResources\":{},\"log\":[]}", context.response().getOutputAsString());
+        assertEquals("{\"packageName\":\"some-name.zip\",\"version\":\"some-version\",\"packageStatus\":\"BUILT\",\"packagePath\":\"/some/path\",\"referencedResources\":{},\"log\":[],\"toggle\":false}", context.response().getOutputAsString());
     }
 
 
@@ -66,7 +66,7 @@ public class UploadPackageServletTest {
 
         assertEquals(HttpServletResponse.SC_BAD_REQUEST, context.response().getStatus());
         assertEquals("application/json;charset=UTF-8", context.response().getContentType());
-        assertEquals("{\"packageStatus\":\"ERROR\",\"referencedResources\":{},\"log\":[]}", context.response().getOutputAsString());
+        assertEquals("{\"packageStatus\":\"ERROR\",\"referencedResources\":{},\"log\":[],\"toggle\":false}", context.response().getOutputAsString());
     }
 
     private PackageInfo getErrorPackageInfoObj() {

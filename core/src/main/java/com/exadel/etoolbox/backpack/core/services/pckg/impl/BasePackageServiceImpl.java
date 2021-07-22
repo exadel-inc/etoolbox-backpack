@@ -78,7 +78,7 @@ public class BasePackageServiceImpl implements BasePackageService {
     protected static final String INITIAL_FILTERS = "initialFilters";
     private static final String THUMBNAIL_PATH_TEMPLATE = DEFAULT_THUMBNAILS_LOCATION + "backpack_%s.png";
     public static final String PACKAGES_ROOT_PATH = "/etc/packages";
-    protected static final String QUERY = "query";
+    protected static final String QUERY_PARAMETER = "query";
 
 
     protected static final Gson GSON = new Gson();
@@ -147,6 +147,7 @@ public class BasePackageServiceImpl implements BasePackageService {
      */
     @Override
     public PackageInfo getPackageInfo(final ResourceResolver resourceResolver, final PackageModel packageModel) {
+        PackageInfo packageInfo = new PackageInfo();
         List<String> actualPaths;
         if (packageModel.getPaths() != null) {
             actualPaths = packageModel.getPaths().stream()
@@ -154,9 +155,8 @@ public class BasePackageServiceImpl implements BasePackageService {
                     .map(path -> getActualPath(path.getPath(), path.isExcludeChildren(), resourceResolver))
                     .collect(Collectors.toList());
         } else {
-            actualPaths = queryService.getResourcesPathsFromQuery(resourceResolver, packageModel.getQuery());
+            actualPaths = queryService.getResourcesPathsFromQuery(resourceResolver, packageModel.getQuery(), packageInfo);
         }
-        PackageInfo packageInfo = new PackageInfo();
         packageInfo.setPackageName(packageModel.getPackageName());
         packageInfo.setPaths(actualPaths);
         packageInfo.setVersion(packageModel.getVersion());
@@ -274,7 +274,7 @@ public class BasePackageServiceImpl implements BasePackageService {
         jcrPackageDefinition.set(REFERENCED_RESOURCES, GSON.toJson(packageInfo.getReferencedResources()), true);
         jcrPackageDefinition.set(GENERAL_RESOURCES, GSON.toJson(packageInfo.getPaths()), true);
         jcrPackageDefinition.set(INITIAL_FILTERS, GSON.toJson(paths), true);
-        jcrPackageDefinition.set(QUERY, GSON.toJson(packageInfo.getQuery()), true);
+        jcrPackageDefinition.set(QUERY_PARAMETER, GSON.toJson(packageInfo.getQuery()), true);
         jcrPackageDefinition.setFilter(filter, true);
 
         String thumbnailPath = StringUtils.defaultIfBlank(packageInfo.getThumbnailPath(), getDefaultThumbnailPath(true));

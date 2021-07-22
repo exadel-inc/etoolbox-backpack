@@ -1,6 +1,9 @@
 package com.exadel.etoolbox.backpack.core.services.impl;
 
+import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
+import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
 import com.exadel.etoolbox.backpack.core.services.QueryService;
+import com.exadel.etoolbox.backpack.core.services.pckg.impl.BasePackageServiceImpl;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
@@ -26,37 +29,15 @@ public class QueryServiceImpl implements QueryService {
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryServiceImpl.class);
 
     /**
-     * Called by {@link QueryService#getResourcesPathsFromQuery(ResourceResolver, String)} to get the {@code Query} instance
-     * from SQL2 query
-     * @param resourceResolver {@code ResourceResolver} instance used to build the package
-     * @param query {@code String} SQL2 query
-     * @return {@code Query} object
-     */
-    private Query getQuery(ResourceResolver resourceResolver, String query) {
-        try {
-            Session session = resourceResolver.adaptTo(Session.class);
-            if (session == null) {
-                throw new NoSuchElementException();
-            }
-            QueryManager queryManager = session.getWorkspace().getQueryManager();
-            return queryManager.createQuery(query, Query.JCR_SQL2);
-        } catch (InvalidQueryException e) {
-            LOGGER.error("cannot build query from {}", query, e);
-        } catch (RepositoryException e) {
-            LOGGER.error("cannot get QueryManager");
-        } catch (NoSuchElementException e) {
-            LOGGER.error("cannot get Session");
-        }
-        return null;
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
-    public List<String> getResourcesPathsFromQuery(ResourceResolver resourceResolver, String queryString) {
+    public List<String> getResourcesPathsFromQuery(ResourceResolver resourceResolver, String queryString, PackageInfo packageInfo) {
         Query query = getQuery(resourceResolver, queryString);
         if (query == null) {
+            packageInfo.setPackageStatus(PackageStatus.ERROR);
+            packageInfo.addLogMessage("ERROR: Query execution has not returned any results");
+            LOGGER.info("Execution query {} has not returned any results", queryString);
             return Collections.emptyList();
         }
         List<String> paths = new ArrayList<>();
@@ -66,8 +47,34 @@ public class QueryServiceImpl implements QueryService {
                 paths.add(nodes.nextNode().getPath());
             }
         } catch (RepositoryException e) {
-            LOGGER.error("cannot get resources");
+            packageInfo.setPackageStatus(PackageStatus.ERROR);
+            packageInfo.addLogMessage("ERROR: Query is not valid");
+            LOGGER.error("Cannot get resources");
         }
         return paths;
+    }
+
+    /**
+     * Called by {@link QueryService#getResourcesPathsFromQuery(ResourceResolver, String, PackageInfo)} to get the {@code Query} instance
+     * from SQL2 query
+     * @param resourceResolver {@code ResourceResolver} instance used to build the package
+     * @param query {@code String} SQL2 query
+     * @return {@code Query} object
+     */
+    private Query getQuery(ResourceResolver resourceResolver, String query) {
+        try {
+            Session session = resourceResolver.adaptTo(Session.class);
+            if (session == null) {
+                LOGGER.error("Cannot get Session");
+                return null;
+            }
+            QueryManager queryManager = session.getWorkspace().getQueryManager();
+            return queryManager.createQuery(query, Query.JCR_SQL2);
+        } catch (InvalidQueryException e) {
+            LOGGER.error("Cannot build query from {}", query, e);
+        } catch (RepositoryException e) {
+            LOGGER.error("Cannot get QueryManager", e);
+        }
+        return null;
     }
 }

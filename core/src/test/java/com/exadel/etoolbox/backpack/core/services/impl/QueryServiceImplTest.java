@@ -1,5 +1,6 @@
 package com.exadel.etoolbox.backpack.core.services.impl;
 
+import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import junit.framework.TestCase;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -39,7 +40,8 @@ public class QueryServiceImplTest {
 
     @Test
     public void shouldReturnListResourcesPath() {
-        List<String> resourcesPathsFromQuery = queryService.getResourcesPathsFromQuery(resourceResolver, QUERY);
+        PackageInfo packageInfo = new PackageInfo();
+        List<String> resourcesPathsFromQuery = queryService.getResourcesPathsFromQuery(resourceResolver, QUERY, packageInfo);
 
         assertEquals("resources paths size", 2 , resourcesPathsFromQuery.size());
         assertEquals("page3 path", "/content/site/pages/page3/jcr:content", resourcesPathsFromQuery.get(0));
@@ -48,7 +50,8 @@ public class QueryServiceImplTest {
 
     @Test
     public void shouldReturnEmptyListResourcesPath() {
-        List<String> resourcesPathsFromQuery = queryService.getResourcesPathsFromQuery(resourceResolver, QUERY.toUpperCase());
+        PackageInfo packageInfo = new PackageInfo();
+        List<String> resourcesPathsFromQuery = queryService.getResourcesPathsFromQuery(resourceResolver, QUERY.toUpperCase(), packageInfo);
 
         assertEquals("empty List with incorrect query", Collections.emptyList(), resourcesPathsFromQuery);
     }
