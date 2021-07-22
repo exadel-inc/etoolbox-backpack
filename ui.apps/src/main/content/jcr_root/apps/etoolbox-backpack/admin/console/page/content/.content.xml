@@ -208,7 +208,7 @@
                                                     uncheckedValue="false"
                                                     checked="true"
                                                     value="true"
-                                                    name="switch"
+                                                    name="toggle"
                                                     fieldLabel="SQL2 Query Package"
                                                     textOn="on"
                                                     granite:class="cq-dialog-switch-toggle">
