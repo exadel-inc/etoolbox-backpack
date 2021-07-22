@@ -162,6 +162,7 @@ public class BasePackageServiceImpl implements BasePackageService {
         packageInfo.setVersion(packageModel.getVersion());
         packageInfo.setThumbnailPath(packageModel.getThumbnailPath());
         packageInfo.setQuery(packageModel.getQuery());
+        packageInfo.setToggle(packageModel.isToggle());
 
         String packageGroupName = DEFAULT_PACKAGE_GROUP;
 
