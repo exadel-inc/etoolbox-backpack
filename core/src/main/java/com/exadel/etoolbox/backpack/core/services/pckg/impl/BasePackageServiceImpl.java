@@ -78,7 +78,7 @@ public class BasePackageServiceImpl implements BasePackageService {
     protected static final String INITIAL_FILTERS = "initialFilters";
     private static final String THUMBNAIL_PATH_TEMPLATE = DEFAULT_THUMBNAILS_LOCATION + "backpack_%s.png";
     public static final String PACKAGES_ROOT_PATH = "/etc/packages";
-    protected static final String QUERY_PARAMETER = "query";
+    protected static final String QUERY_PARAMETER = "queryPackage";
     protected static final String SWITCH_PARAMETER = "toggle";
 
     protected static final Gson GSON = new Gson();
