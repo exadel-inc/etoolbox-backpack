@@ -229,7 +229,7 @@ public class PackageInfoServiceImpl implements PackageInfoService {
                     packageModel.setPackageName(definition.get(JcrPackageDefinition.PN_NAME));
                     packageModel.setGroup(definition.get(JcrPackageDefinition.PN_GROUP));
                     packageModel.setVersion(definition.get(JcrPackageDefinition.PN_VERSION));
-
+                    packageModel.setToggle(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.SWITCH_PARAMETER), Boolean.class));
                     if (definition.get(BasePackageServiceImpl.QUERY_PARAMETER) != null) {
                         packageModel.setQuery(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.QUERY_PARAMETER), String.class));
                     }
