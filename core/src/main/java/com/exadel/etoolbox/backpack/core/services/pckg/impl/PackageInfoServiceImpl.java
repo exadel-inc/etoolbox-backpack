@@ -279,7 +279,7 @@ public class PackageInfoServiceImpl implements PackageInfoService {
                     packageInfo.setDataSize(jcrPackage.getSize());
                     packageInfo.setPackageBuilt(definition.getLastWrapped());
                     packageInfo.setQuery(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.QUERY_PARAMETER), String.class));
-                    if (definition.get(BasePackageServiceImpl.SWITCH_PARAMETER) != null) {
+                    if (StringUtils.isNotBlank(definition.get(BasePackageServiceImpl.SWITCH_PARAMETER))) {
                         packageInfo.setToggle(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.SWITCH_PARAMETER), Boolean.class));
                     }
                     if (definition.getLastWrapped() != null) {
