@@ -57,6 +57,9 @@ public class CreatePackageServiceImpl implements CreatePackageService {
         final Session session = resourceResolver.adaptTo(Session.class);
 
         PackageInfo packageInfo = basePackageService.getPackageInfo(resourceResolver, packageModel);
+        if (packageInfo.getPackageStatus() != null) {
+            return packageInfo;
+        }
 
         try {
             JcrPackageManager packMgr = basePackageService.getPackageManager(session);

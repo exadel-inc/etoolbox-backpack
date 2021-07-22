@@ -198,35 +198,70 @@
                                                     sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
                                                     fieldLabel="Package Version"
                                                     name="version"/>
-                                    <paths
+                                    <switch
                                             jcr:primaryType="nt:unstructured"
-                                            sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
-                                            fieldLabel="Filter Path"
-                                            composite="{Boolean}true"
-                                            required="{Boolean}true">
-                                        <field
-                                                jcr:primaryType="nt:unstructured"
-                                                name="paths"
-                                                sling:resourceType="granite/ui/components/coral/foundation/container">
-                                            <items jcr:primaryType="nt:unstructured">
-                                                <path
+                                            sling:resourceType="/libs/granite/ui/components/coral/foundation/form/switch"
+                                            uncheckedValue="false"
+                                            checked="false"
+                                            value="true"
+                                            name="toggle"
+                                            fieldLabel="SQL2 Query Package"
+                                            textOn="on"
+                                            granite:class="cq-dialog-switch-toggle">
+                                    </switch>
+
+                                    <pathContainer
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/foundation/container"
+                                            class="path-option-element-target"
+                                            showhidetargetvalue="true">
+                                        <items jcr:primaryType="nt:unstructured">
+                                            <paths
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
+                                                    fieldLabel="Filter Path"
+                                                    composite="{Boolean}true"
+                                                    required="{Boolean}true"
+                                                    granite:class="cq-dialog-path-filter-option">
+                                                <field
                                                         jcr:primaryType="nt:unstructured"
-                                                        sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
-                                                        allowBulkEdit="true"
-                                                        autocreateTag="true"
-                                                        fieldLabel="Path"
-                                                        multiple="false"
-                                                        required="{Boolean}true"
-                                                        name="path"/>
-                                                <excludeChildren jcr:primaryType="nt:unstructured"
-                                                                 fieldDescription="Check to exclude child pages from package filter"
-                                                                 name="excludeChildren"
-                                                                 text="Exclude child pages?"
-                                                                 uncheckedValue="false" value="true"
-                                                                 sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"/>
-                                            </items>
-                                        </field>
-                                    </paths>
+                                                        name="paths"
+                                                        sling:resourceType="granite/ui/components/coral/foundation/container">
+                                                    <items jcr:primaryType="nt:unstructured">
+                                                        <path
+                                                                jcr:primaryType="nt:unstructured"
+                                                                sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                                                                allowBulkEdit="true"
+                                                                autocreateTag="true"
+                                                                fieldLabel="Path"
+                                                                multiple="false"
+                                                                required="{Boolean}true"
+                                                                name="path"/>
+                                                        <excludeChildren jcr:primaryType="nt:unstructured"
+                                                                         fieldDescription="Check to exclude child pages from package filter"
+                                                                         name="excludeChildren"
+                                                                         text="Exclude child pages?"
+                                                                         uncheckedValue="false" value="true"
+                                                                         sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"/>
+                                                    </items>
+                                                </field>
+                                            </paths>
+                                        </items>
+                                    </pathContainer>
+
+                                    <sqlContainer jcr:primaryType="nt:unstructured"
+                                                  sling:resourceType="granite/ui/components/foundation/container"
+                                                  class="sql2-option-element-target"
+                                                  showhidetargetvalue="true">
+                                        <items jcr:primaryType="nt:unstructured">
+                                            <sqlQuery jcr:primaryType="nt:unstructured"
+                                                      sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
+                                                      fieldLabel="SQL2 Query"
+                                                      required="{Boolean}true"
+                                                      name="query"/>
+                                        </items>
+                                    </sqlContainer>
+
                                     <group_select
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="etoolbox-backpack/admin/console/components/editDialog/groupAutocomplete">

@@ -54,6 +54,10 @@ public class PackageInfo {
 
     private Long dataSize;
 
+    private String query;
+
+    private boolean toggle;
+
     /**
      * Default constructor
      */
@@ -81,6 +85,8 @@ public class PackageInfo {
         this.log = packageInfo.log;
         this.dataSize = packageInfo.dataSize;
         this.paths = packageInfo.paths;
+        this.query = packageInfo.query;
+        this.toggle = packageInfo.toggle;
     }
 
     /**
@@ -347,6 +353,42 @@ public class PackageInfo {
      */
     public void setDataSize(final Long dataSize) {
         this.dataSize = dataSize;
+    }
+
+    /**
+     * Gets the SQL2 query of the current package
+     *
+     * @return String value
+     */
+    public String getQuery() {
+        return query;
+    }
+
+    /**
+     * Sets the SQL2 query of the current package
+     *
+     * @param query String value
+     */
+    public void setQuery(String query) {
+        this.query = query;
+    }
+
+    /**
+     * Gets the toggle between SQL2 (true) and Path Filter (false)
+     *
+     * @return boolean value
+     */
+    public boolean isToggle() {
+        return toggle;
+    }
+
+    /**
+     * Sets the toggle between SQL2 (true) and Path Filter (false)
+     *
+     * @param toggle boolean value
+     */
+    public void setToggle(boolean toggle) {
+        this.toggle = toggle;
     }
 
     /**
