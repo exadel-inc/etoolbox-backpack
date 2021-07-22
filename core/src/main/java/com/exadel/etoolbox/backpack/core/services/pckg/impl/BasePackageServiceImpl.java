@@ -79,7 +79,7 @@ public class BasePackageServiceImpl implements BasePackageService {
     private static final String THUMBNAIL_PATH_TEMPLATE = DEFAULT_THUMBNAILS_LOCATION + "backpack_%s.png";
     public static final String PACKAGES_ROOT_PATH = "/etc/packages";
     protected static final String QUERY_PARAMETER = "query";
-
+    protected static final String SWITCH_PARAMETER = "toggle";
 
     protected static final Gson GSON = new Gson();
 
@@ -276,6 +276,7 @@ public class BasePackageServiceImpl implements BasePackageService {
         jcrPackageDefinition.set(GENERAL_RESOURCES, GSON.toJson(packageInfo.getPaths()), true);
         jcrPackageDefinition.set(INITIAL_FILTERS, GSON.toJson(paths), true);
         jcrPackageDefinition.set(QUERY_PARAMETER, GSON.toJson(packageInfo.getQuery()), true);
+        jcrPackageDefinition.set(SWITCH_PARAMETER, GSON.toJson(packageInfo.isToggle()), true);
         jcrPackageDefinition.setFilter(filter, true);
 
         String thumbnailPath = StringUtils.defaultIfBlank(packageInfo.getThumbnailPath(), getDefaultThumbnailPath(true));
