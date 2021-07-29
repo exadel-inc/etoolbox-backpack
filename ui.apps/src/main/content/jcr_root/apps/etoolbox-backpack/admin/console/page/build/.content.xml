@@ -30,7 +30,7 @@
             <clientlibs
                     jcr:primaryType="nt:unstructured"
                     sling:resourceType="granite/ui/components/coral/foundation/includeclientlibs"
-                    categories="[cq.common.wcm,cq.listview.coral.columns.personalization,cq.siteadmin.admin.page.row,cq.gui.coral.common.admin.references,cq.screens.dcc,backpack,backpackBuild]"/>
+                    categories="[cq.common.wcm,cq.listview.coral.columns.personalization,cq.siteadmin.admin.page.row,cq.gui.coral.common.admin.references,cq.screens.dcc,backpack,backpack.build]"/>
         </head>
         <content
                 jcr:primaryType="nt:unstructured"
