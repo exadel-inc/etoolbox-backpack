@@ -22,12 +22,15 @@
                     <!--/*dynamic content*/-->
                 </section>
                 <section class="coral-Well">
-                    <button is="coral-button" id="buildButton" class="coral-Form-field" variant="primary">Build</button>
-                    <button is="coral-button" id="testBuildButton" class="coral-Form-field" variant="primary">Test
-                        build
-                    </button>
-                    <button is="coral-button" id="downloadBtn" class="coral-Form-field" variant="SECONDARY" >Download</button>
-                    <button is="coral-button" id="deleteButton" icon="delete" class="coral-Form-field">Delete package</button>
+                    <div class="foundation-collection">
+                        <div class="foundation-collection-item">
+                            <button is="coral-button" class="foundation-collection-action" icon="edit" data-foundation-collection-action='{"action":"foundation.dialog","data":{"nesting":"hide","src":""}}'>Edit package</button>
+                            <button is="coral-button" id="buildButton" class="coral-Form-field" variant="primary">Build</button>
+                            <button is="coral-button" id="testBuildButton" class="coral-Form-field" variant="primary">Test build</button>
+                            <button is="coral-button" id="downloadBtn" class="coral-Form-field" variant="SECONDARY" >Download</button>
+                            <button is="coral-button" id="deleteButton" icon="delete" class="coral-Form-field">Delete package</button>
+                        </div>
+                    </div>
                 </section>
                 <section class="coral-Well scrollable-section" id="build-log-wrapper">
                     <h4 class="coral-Heading coral-Heading--4">Build log</h4>
