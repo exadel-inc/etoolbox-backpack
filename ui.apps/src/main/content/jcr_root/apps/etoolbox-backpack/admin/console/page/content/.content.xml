@@ -107,6 +107,7 @@
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
                         href="/crx/packmgr"
+                        x-cq-linkchecker="valid"
                         text="CRX Package Manager"
                         variant="actionBar">
                 </crxPM>
