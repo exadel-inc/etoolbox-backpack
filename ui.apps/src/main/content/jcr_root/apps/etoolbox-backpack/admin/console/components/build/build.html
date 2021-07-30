@@ -9,6 +9,7 @@
                         <li id="packageName">Package name:</li>
                         <li id="version">Package version:</li>
                         <li id="lastBuilt">Last built: <foundation-time id="lastBuilt-time"></foundation-time></li>
+                        <li id="lastInstalled">Last installed: <foundation-time id="lastInstalled-time"></foundation-time></li>
                         <li id="packageSize">Package size:</li>
                         <li id="query">SQL2 query:</li>
                         <li id="filters">Filters:
@@ -26,11 +27,12 @@
                     <button is="coral-button" id="testBuildButton" class="coral-Form-field" variant="primary">Test
                         build
                     </button>
+                    <button is="coral-button" id="installButton" class="coral-Form-field" variant="primary">Install</button>
                     <button is="coral-button" id="downloadBtn" class="coral-Form-field" variant="SECONDARY" >Download</button>
                     <button is="coral-button" id="deleteButton" icon="delete" class="coral-Form-field">Delete package</button>
                 </section>
                 <section class="coral-Well scrollable-section" id="build-log-wrapper">
-                    <h4 class="coral-Heading coral-Heading--4">Build log</h4>
+                    <h4 class="coral-Heading coral-Heading--4">Log</h4>
                     <div id="buildLog"></div>
                 </section>
             </div>
@@ -47,3 +49,4 @@
         </div>
     </div>
 </div>
+<sly data-sly-include="installDialog.html"></sly>
