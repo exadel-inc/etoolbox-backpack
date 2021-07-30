@@ -20,6 +20,9 @@ $(function () {
         goBackLink;
     var BUILT = 'BUILT',
         BUILD_IN_PROGRESS = 'BUILD_IN_PROGRESS',
+        COMMAND_URL = Granite.HTTP.externalize("/bin/wcmcommand"),
+        DIALOG_MODAL_URL = '/mnt/overlay/etoolbox-backpack/admin/console/page/content/editpackagedialog.html?packagePath=',
+        BUILD_PAGE_URL = '/tools/etoolbox/backpack/buildPackage.html?path=';
         INSTALL = 'INSTALL',
         INSTALL_IN_PROGRESS = 'INSTALL_IN_PROGRESS',
         COMMAND_URL = Granite.HTTP.externalize("/bin/wcmcommand");
@@ -154,6 +157,7 @@ $(function () {
     $testBuildButton.click(function () {
         buildPackage(true);
     });
+
 
     $buildButton.click(function () {
         disableAllActions();
@@ -366,13 +370,13 @@ $(function () {
         };
 
         $.post(COMMAND_URL, data).done(function () {
-            showAlert("Package deleted", "Delete", function () {
+            showAlert("Package deleted", "Delete", "warning", function () {
                 window.location.href = goBackLink;
             });
         });
     }
 
-    function showAlert(message, title, callback) {
+    function showAlert(message, title, type, callback) {
         var fui = $(window).adaptTo("foundation-ui"),
             options = [{
                 id: "ok",
@@ -383,11 +387,41 @@ $(function () {
         message = message || "Unknown Error";
         title = title || "Error";
 
-        fui.prompt(title, message, "warning", options, callback);
+        fui.prompt(title, message, type, options, callback);
     }
 
     function createEl(name) {
         return $(document.createElement(name));
     }
+
+    /**
+     * Registers new behaviour for Edit Dialog. Sets src according to the current Build page's Path variable.
+     * Handler returns false that indicates that current handler has been done and system can be proceed
+     * with next handler.
+     */
+    $(window).adaptTo("foundation-registry").register("foundation.collection.action.action", {
+        name: "foundation.dialog",
+        handler: function(name, el, config, collection, selections) {
+            if (path) {
+                config.data.src = DIALOG_MODAL_URL + path;
+            }
+            return false;
+        }
+    });
+
+    /**
+     * Registers new behaviour for the Edit Dialog's Success Dialog. Instead of default Success Dialog
+     * handler show custom dialog window specified especially for the Build page. Handler returns true
+     * that indicate that current handler will be last one.
+     */
+    $(window).adaptTo("foundation-registry").register("foundation.form.response.ui.success", {
+        name: "foundation.prompt.open",
+        handler: function(name, el, config, collection, selections) {
+            showAlert("Your package has been updated.", "Success", "success",function () {
+                window.location.href = BUILD_PAGE_URL + path;
+            });
+            return true;
+        }
+    });
 
 });
