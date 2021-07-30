@@ -39,7 +39,7 @@ import java.util.Set;
 public interface BasePackageService {
 
     /**
-     * Ruturn true in the case when exception stack trace should be enabled otherwise return false
+     * Return true in the case when exception stack trace should be enabled otherwise return false
      *
      * @return True or false
      */

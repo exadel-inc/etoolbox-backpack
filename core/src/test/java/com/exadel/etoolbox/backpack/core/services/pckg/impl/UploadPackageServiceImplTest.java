@@ -84,7 +84,7 @@ public class UploadPackageServiceImplTest extends Base {
 
         Assert.assertNotNull(packageInfo);
         String packageInfoJson = GSON.toJson(packageInfo);
-        assertEquals("{\"packageName\":\"test_back_pack\",\"packageNodeName\":\"test_back_pack.zip\",\"groupName\":\"EToolbox_BackPack\",\"version\":\"\",\"packageBuilt\":{\"year\":2020,\"month\":11,\"dayOfMonth\":7,\"hourOfDay\":15,\"minute\":43,\"second\":45},\"packageStatus\":\"BUILT\",\"packagePath\":\"/etc/packages/EToolbox_BackPack/test_back_pack.zip\",\"paths\":[\"/content/we-retail/ca/en/about-us\"],\"referencedResources\":{\"image/jpeg\":[\"/content/dam/we-retail/en/activities/hiking-camping/trekker-ama-dablam.jpg\"]},\"log\":[],\"dataSize\":22309}", packageInfoJson);
+        assertEquals("{\"packageName\":\"test_back_pack\",\"packageNodeName\":\"test_back_pack.zip\",\"groupName\":\"EToolbox_BackPack\",\"version\":\"\",\"packageBuilt\":{\"year\":2020,\"month\":11,\"dayOfMonth\":7,\"hourOfDay\":15,\"minute\":43,\"second\":45},\"packageStatus\":\"BUILT\",\"packagePath\":\"/etc/packages/EToolbox_BackPack/test_back_pack.zip\",\"paths\":[\"/content/we-retail/ca/en/about-us\"],\"referencedResources\":{\"image/jpeg\":[\"/content/dam/we-retail/en/activities/hiking-camping/trekker-ama-dablam.jpg\"]},\"log\":[],\"dataSize\":22309,\"toggle\":false}", packageInfoJson);
     }
 
     @Test
@@ -109,6 +109,6 @@ public class UploadPackageServiceImplTest extends Base {
 
         PackageInfo packageInfo2 = uploadPackage.uploadPackage(session, bytes, true);
         String packageInfoJson = GSON.toJson(packageInfo2);
-        assertEquals("{\"packageName\":\"test_back_pack\",\"packageNodeName\":\"test_back_pack.zip\",\"groupName\":\"EToolbox_BackPack\",\"version\":\"\",\"packageBuilt\":{\"year\":2020,\"month\":11,\"dayOfMonth\":7,\"hourOfDay\":15,\"minute\":43,\"second\":45},\"packageStatus\":\"BUILT\",\"packagePath\":\"/etc/packages/EToolbox_BackPack/test_back_pack.zip\",\"paths\":[\"/content/we-retail/ca/en/about-us\"],\"referencedResources\":{\"image/jpeg\":[\"/content/dam/we-retail/en/activities/hiking-camping/trekker-ama-dablam.jpg\"]},\"log\":[],\"dataSize\":22309}", packageInfoJson);
+        assertEquals("{\"packageName\":\"test_back_pack\",\"packageNodeName\":\"test_back_pack.zip\",\"groupName\":\"EToolbox_BackPack\",\"version\":\"\",\"packageBuilt\":{\"year\":2020,\"month\":11,\"dayOfMonth\":7,\"hourOfDay\":15,\"minute\":43,\"second\":45},\"packageStatus\":\"BUILT\",\"packagePath\":\"/etc/packages/EToolbox_BackPack/test_back_pack.zip\",\"paths\":[\"/content/we-retail/ca/en/about-us\"],\"referencedResources\":{\"image/jpeg\":[\"/content/dam/we-retail/en/activities/hiking-camping/trekker-ama-dablam.jpg\"]},\"log\":[],\"dataSize\":22309,\"toggle\":false}", packageInfoJson);
     }
 }

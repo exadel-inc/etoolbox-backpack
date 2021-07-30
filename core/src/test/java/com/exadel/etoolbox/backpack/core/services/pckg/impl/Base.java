@@ -17,6 +17,7 @@ import com.exadel.etoolbox.backpack.core.dto.repository.AssetReferencedItem;
 import com.exadel.etoolbox.backpack.core.dto.repository.ReferencedItem;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.services.ReferenceService;
+import com.exadel.etoolbox.backpack.core.services.impl.QueryServiceImpl;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
 import com.exadel.etoolbox.backpack.core.servlets.model.PathModel;
@@ -100,6 +101,7 @@ public class Base {
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("buildInfoTTL", 1);
+        context.registerInjectActivateService(new QueryServiceImpl());
         basePackageService = context.registerInjectActivateService(new BasePackageServiceImpl(), properties);
         packageInfoService = context.registerInjectActivateService(new PackageInfoServiceImpl());
 

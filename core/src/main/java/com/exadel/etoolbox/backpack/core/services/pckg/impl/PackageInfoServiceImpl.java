@@ -22,6 +22,7 @@ import com.exadel.etoolbox.backpack.core.servlets.model.PackageInfoModel;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageModel;
 import com.exadel.etoolbox.backpack.core.servlets.model.PathModel;
 import com.google.gson.reflect.TypeToken;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.vault.fs.api.FilterSet;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
 import org.apache.jackrabbit.vault.fs.api.WorkspaceFilter;
@@ -229,6 +230,12 @@ public class PackageInfoServiceImpl implements PackageInfoService {
                     packageModel.setPackageName(definition.get(JcrPackageDefinition.PN_NAME));
                     packageModel.setGroup(definition.get(JcrPackageDefinition.PN_GROUP));
                     packageModel.setVersion(definition.get(JcrPackageDefinition.PN_VERSION));
+                    if (StringUtils.isNotBlank(definition.get(BasePackageServiceImpl.SWITCH_PARAMETER))) {
+                        packageModel.setToggle(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.SWITCH_PARAMETER), Boolean.class));
+                    }
+                    if (definition.get(BasePackageServiceImpl.QUERY_PARAMETER) != null) {
+                        packageModel.setQuery(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.QUERY_PARAMETER), String.class));
+                    }
                     if (definition.get(BasePackageServiceImpl.INITIAL_FILTERS) != null) {
                         packageModel.setPaths(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.INITIAL_FILTERS), listType));
                     } else {
@@ -271,6 +278,10 @@ public class PackageInfoServiceImpl implements PackageInfoService {
                     packageInfo.setPaths(filterSets.stream().map(FilterSet::getRoot).collect(Collectors.toList()));
                     packageInfo.setDataSize(jcrPackage.getSize());
                     packageInfo.setPackageBuilt(definition.getLastWrapped());
+                    packageInfo.setQuery(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.QUERY_PARAMETER), String.class));
+                    if (StringUtils.isNotBlank(definition.get(BasePackageServiceImpl.SWITCH_PARAMETER))) {
+                        packageInfo.setToggle(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.SWITCH_PARAMETER), Boolean.class));
+                    }
                     if (definition.getLastWrapped() != null) {
                         packageInfo.setPackageStatus(PackageStatus.BUILT);
                     } else {
