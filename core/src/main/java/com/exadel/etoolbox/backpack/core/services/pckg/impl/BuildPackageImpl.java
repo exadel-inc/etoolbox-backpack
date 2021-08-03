@@ -15,6 +15,8 @@ package com.exadel.etoolbox.backpack.core.services.pckg.impl;
 
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
+import com.exadel.etoolbox.backpack.core.services.LoggerService;
+import com.exadel.etoolbox.backpack.core.services.SessionService;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.BuildPackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
@@ -70,8 +72,10 @@ public class BuildPackageImpl implements BuildPackageService {
     private BasePackageService basePackageService;
 
     @Reference
-    @SuppressWarnings("UnusedDeclaration") // value injected by Sling
-    protected SlingRepository slingRepository;
+    private SessionService sessionService;
+
+    @Reference
+    private LoggerService loggerService;
 
     /**
      * {@inheritDoc}
@@ -118,7 +122,7 @@ public class BuildPackageImpl implements BuildPackageService {
                 }
             }
         } catch (RepositoryException e) {
-            addExceptionToLog(packageInfo, e);
+            loggerService.addExceptionToLog(packageInfo, e);
             LOGGER.error("Error during package opening", e);
         } finally {
             if (jcrPackage != null) {
@@ -141,7 +145,7 @@ public class BuildPackageImpl implements BuildPackageService {
                       final String referencedResources) {
         Session userSession = null;
         try {
-            userSession = getUserImpersonatedSession(userId);
+            userSession = sessionService.getUserImpersonatedSession(userId);
             JcrPackageManager packMgr = basePackageService.getPackageManager(userSession);
             JcrPackage jcrPackage = packMgr.open(userSession.getNode(packageBuildInfo.getPackagePath()));
             if (jcrPackage != null) {
@@ -177,10 +181,10 @@ public class BuildPackageImpl implements BuildPackageService {
             }
         } catch (RepositoryException | PackageException | IOException e) {
             packageBuildInfo.setPackageStatus(PackageStatus.ERROR);
-            addExceptionToLog(packageBuildInfo, e);
+            loggerService.addExceptionToLog(packageBuildInfo, e);
             LOGGER.error("Error during package generation", e);
         } finally {
-            closeSession(userSession);
+            sessionService.closeSession(userSession);
         }
     }
 
@@ -192,7 +196,7 @@ public class BuildPackageImpl implements BuildPackageService {
     public PackageInfo buildPackage(final ResourceResolver resourceResolver,
                                     final BuildPackageModel requestInfo) {
         PackageInfo packageInfo = packageInfoService.getPackageInfo(resourceResolver, requestInfo);
-        if (!PackageStatus.BUILD_IN_PROGRESS.equals(packageInfo.getPackageStatus())) {
+        if (!PackageStatus.BUILD_IN_PROGRESS.equals(packageInfo.getPackageStatus()) && !PackageStatus.INSTALL_IN_PROGRESS.equals(packageInfo.getPackageStatus())) {
             packageInfo.setPackageStatus(PackageStatus.BUILD_IN_PROGRESS);
             packageInfo.clearLog();
             basePackageService.getPackageInfos().put(requestInfo.getPackagePath(), packageInfo);
@@ -215,34 +219,6 @@ public class BuildPackageImpl implements BuildPackageService {
                                    final PackageInfo packageBuildInfo,
                                    final String referencedResources) {
         new Thread(() -> buildPackage(userId, packageBuildInfo, referencedResources)).start();
-    }
-
-    /**
-     * Called from {@link BuildPackageImpl#buildPackage(String, PackageInfo, String)} to perform impersonated session
-     * closing
-     *
-     * @param userSession {@code Session} object used for package building
-     */
-
-    private void closeSession(final Session userSession) {
-        if (userSession != null && userSession.isLive()) {
-            userSession.logout();
-        }
-    }
-
-    /**
-     * Called by {@link BuildPackageImpl#buildPackage(String, PackageInfo, String)} to get the {@code Session} instance
-     * with required rights for package creation
-     *
-     * @param userId User ID per the effective {@code ResourceResolver}
-     * @return {@code Session} object
-     * @throws RepositoryException in case of a Sling repository failure
-     */
-
-    Session getUserImpersonatedSession(final String userId) throws RepositoryException {
-        return slingRepository.impersonateFromService(SERVICE_NAME,
-                new SimpleCredentials(userId, StringUtils.EMPTY.toCharArray()),
-                null);
     }
 
     /**
@@ -289,20 +265,6 @@ public class BuildPackageImpl implements BuildPackageService {
         List<String> packageGeneralResources = GSON.fromJson(definition.get(BasePackageServiceImpl.GENERAL_RESOURCES), listType);
         if (packageGeneralResources != null) {
             packageGeneralResources.forEach(pathConsumer);
-        }
-    }
-
-    /**
-     * Add information about the exception to {@link PackageInfo}
-     *
-     * @param packageInfo {@code PackageInfo} object to store status information in
-     * @param e           Exception to log
-     */
-
-    protected void addExceptionToLog(final PackageInfo packageInfo, final Exception e) {
-        packageInfo.addLogMessage(BasePackageServiceImpl.ERROR + e.getMessage());
-        if (basePackageService.isEnableStackTrace()) {
-            packageInfo.addLogMessage(ExceptionUtils.getStackTrace(e));
         }
     }
 

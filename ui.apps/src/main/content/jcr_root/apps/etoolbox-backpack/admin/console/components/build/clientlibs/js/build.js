@@ -22,10 +22,9 @@ $(function () {
         BUILD_IN_PROGRESS = 'BUILD_IN_PROGRESS',
         COMMAND_URL = Granite.HTTP.externalize("/bin/wcmcommand"),
         DIALOG_MODAL_URL = '/mnt/overlay/etoolbox-backpack/admin/console/page/content/editpackagedialog.html?packagePath=',
-        BUILD_PAGE_URL = '/tools/etoolbox/backpack/buildPackage.html?path=';
+        BUILD_PAGE_URL = '/tools/etoolbox/backpack/buildPackage.html?path=',
         INSTALL = 'INSTALL',
-        INSTALL_IN_PROGRESS = 'INSTALL_IN_PROGRESS',
-        COMMAND_URL = Granite.HTTP.externalize("/bin/wcmcommand");
+        INSTALL_IN_PROGRESS = 'INSTALL_IN_PROGRESS';
     $packageName = $('#packageName'),
         $name = $('#name'),
         $version = $('#version'),
@@ -176,7 +175,6 @@ $(function () {
                 e.preventDefault();
                 var form = $(this);
                 var url = form.attr('action');
-
                 $.ajax({
                     type: "POST",
                     url: url,

@@ -69,7 +69,7 @@ public class BasePackageServiceImpl implements BasePackageService {
 
     protected static final String DEFAULT_PACKAGE_GROUP = "EToolbox_BackPack";
     protected static final String JCR_CONTENT_NODE = "/" + JcrConstants.JCR_CONTENT;
-    protected static final String ERROR = "ERROR: ";
+    public static final String ERROR = "ERROR: ";
     protected static final String REFERENCED_RESOURCES = "referencedResources";
     protected static final String GENERAL_RESOURCES = "generalResources";
     protected static final String PACKAGE_DOES_NOT_EXIST_MESSAGE = "Package by this path %s doesn't exist in the repository.";

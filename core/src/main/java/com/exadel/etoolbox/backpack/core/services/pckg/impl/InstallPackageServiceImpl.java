@@ -2,12 +2,12 @@ package com.exadel.etoolbox.backpack.core.services.pckg.impl;
 
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
+import com.exadel.etoolbox.backpack.core.services.LoggerService;
+import com.exadel.etoolbox.backpack.core.services.SessionService;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.InstallPackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
 import com.exadel.etoolbox.backpack.core.servlets.model.InstallPackageModel;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.jackrabbit.vault.fs.api.ProgressTrackerListener;
 import org.apache.jackrabbit.vault.fs.io.ImportOptions;
 import org.apache.jackrabbit.vault.packaging.DependencyHandling;
@@ -15,7 +15,6 @@ import org.apache.jackrabbit.vault.packaging.JcrPackage;
 import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
 import org.apache.jackrabbit.vault.packaging.PackageException;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.jcr.api.SlingRepository;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -23,7 +22,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import javax.jcr.SimpleCredentials;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Calendar;
@@ -45,8 +43,10 @@ public class InstallPackageServiceImpl implements InstallPackageService {
     private BasePackageService basePackageService;
 
     @Reference
-    @SuppressWarnings("UnusedDeclaration") // value injected by Sling
-    protected SlingRepository slingRepository;
+    private SessionService sessionService;
+
+    @Reference
+    private LoggerService loggerService;
 
     /**
      * {@inheritDoc}
@@ -54,7 +54,7 @@ public class InstallPackageServiceImpl implements InstallPackageService {
     @Override
     public PackageInfo installPackage(ResourceResolver resourceResolver, InstallPackageModel installPackageModel) {
         PackageInfo packageInfo = packageInfoService.getPackageInfo(resourceResolver, installPackageModel);
-        if (!PackageStatus.INSTALL_IN_PROGRESS.equals(packageInfo.getPackageStatus())) {
+        if (!PackageStatus.INSTALL_IN_PROGRESS.equals(packageInfo.getPackageStatus()) && !PackageStatus.BUILD_IN_PROGRESS.equals(packageInfo.getPackageStatus())) {
             packageInfo.setPackageStatus(PackageStatus.INSTALL_IN_PROGRESS);
             packageInfo.clearLog();
             packageInfo.addLogMessage(START_INSTALL_MESSAGE + packageInfo.getPackagePath());
@@ -87,7 +87,7 @@ public class InstallPackageServiceImpl implements InstallPackageService {
     private void installPackage(String userId, InstallPackageModel installPackageModel, PackageInfo packageInfo) {
         Session session = null;
         try {
-            session = getUserImpersonatedSession(userId);
+            session = sessionService.getUserImpersonatedSession(userId);
             JcrPackageManager packMgr = basePackageService.getPackageManager(session);
             JcrPackage jcrPackage = packMgr.open(session.getNode(packageInfo.getPackagePath()));
             if (jcrPackage == null) {
@@ -105,10 +105,10 @@ public class InstallPackageServiceImpl implements InstallPackageService {
             packageInfo.addLogMessage("Package installed in " + (finish - start) + " ms.");
         } catch (RepositoryException | PackageException | IOException e) {
             packageInfo.setPackageStatus(PackageStatus.ERROR);
-            addExceptionToLog(packageInfo, e);
+            loggerService.addExceptionToLog(packageInfo, e);
             LOGGER.error("Error during package installation", e);
         } finally {
-            closeSession(session);
+            sessionService.closeSession(session);
         }
     }
 
@@ -136,44 +136,5 @@ public class InstallPackageServiceImpl implements InstallPackageService {
             }
         });
         return importOptions;
-    }
-
-    /**
-     * Called from {@link InstallPackageServiceImpl#installPackage(String, InstallPackageModel, PackageInfo)} to perform impersonated session
-     * closing
-     *
-     * @param userSession {@code Session} object used for package installation
-     */
-    private void closeSession(final Session userSession) {
-        if (userSession != null && userSession.isLive()) {
-            userSession.logout();
-        }
-    }
-
-    /**
-     * Called by {@link InstallPackageServiceImpl#installPackage(String, InstallPackageModel, PackageInfo)} to get the {@code Session} instance
-     * with required rights for package installation
-     *
-     * @param userId User ID per the effective {@code ResourceResolver}
-     * @return {@code Session} object
-     * @throws RepositoryException in case of a Sling repository failure
-     */
-    private Session getUserImpersonatedSession(final String userId) throws RepositoryException {
-        return slingRepository.impersonateFromService(SERVICE_NAME,
-                new SimpleCredentials(userId, StringUtils.EMPTY.toCharArray()),
-                null);
-    }
-
-    /**
-     * Add information about the exception to {@link PackageInfo}
-     *
-     * @param packageInfo {@code PackageInfo} object to store status information in
-     * @param e Exception to log
-     */
-    private void addExceptionToLog(final PackageInfo packageInfo, final Exception e) {
-        packageInfo.addLogMessage(BasePackageServiceImpl.ERROR + e.getMessage());
-        if (basePackageService.isEnableStackTrace()) {
-            packageInfo.addLogMessage(ExceptionUtils.getStackTrace(e));
-        }
     }
 }
