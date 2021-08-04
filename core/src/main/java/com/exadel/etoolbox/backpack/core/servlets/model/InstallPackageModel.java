@@ -22,7 +22,7 @@ public class InstallPackageModel extends PackageInfoModel{
     private String dependencyHandling;
 
     /**
-     * Gets the installed package auto-save threshold
+     * Gets the auto-save threshold of the installed package
      * @return int value
      */
     public int getThreshold() {
@@ -30,7 +30,7 @@ public class InstallPackageModel extends PackageInfoModel{
     }
 
     /**
-     * Gets the installed package the dependency handling
+     * Gets the dependency handling of the installed package
      * @return String value
      */
     public String getDependencyHandling() {

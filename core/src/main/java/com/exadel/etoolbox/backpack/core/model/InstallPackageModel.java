@@ -32,12 +32,12 @@ public class InstallPackageModel {
      * Instantiation of the model
      */
     @PostConstruct
-    public void init() {
+    private void init() {
         packagePath = request.getParameter("path");
     }
 
     /**
-     * Gets the installed package auto-save threshold
+     * Gets the auto-save threshold of the installed package
      * @return int value
      */
     public int getThreshold() {

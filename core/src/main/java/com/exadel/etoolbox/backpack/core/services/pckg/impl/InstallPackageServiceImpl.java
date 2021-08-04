@@ -8,6 +8,7 @@ import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.InstallPackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
 import com.exadel.etoolbox.backpack.core.servlets.model.InstallPackageModel;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.jackrabbit.vault.fs.api.ProgressTrackerListener;
 import org.apache.jackrabbit.vault.fs.io.ImportOptions;
 import org.apache.jackrabbit.vault.packaging.DependencyHandling;
@@ -95,14 +96,15 @@ public class InstallPackageServiceImpl implements InstallPackageService {
                 packageInfo.addLogMessage(BasePackageServiceImpl.ERROR + String.format(BasePackageServiceImpl.PACKAGE_DOES_NOT_EXIST_MESSAGE, packageInfo.getPackagePath()));
                 return;
             }
-            long start = System.currentTimeMillis();
+            StopWatch stopWatch = new StopWatch();
+            stopWatch.start();
             ImportOptions importOptions = getImportOptions(installPackageModel, packageInfo);
             packageInfo.setPackageStatus(PackageStatus.INSTALL_IN_PROGRESS);
             jcrPackage.install(importOptions);
             packageInfo.setPackageInstalled(Calendar.getInstance());
             packageInfo.setPackageStatus(PackageStatus.INSTALL);
-            long finish = System.currentTimeMillis();
-            packageInfo.addLogMessage("Package installed in " + (finish - start) + " ms.");
+            stopWatch.stop();
+            packageInfo.addLogMessage("Package installed in " + stopWatch);
         } catch (RepositoryException | PackageException | IOException e) {
             packageInfo.setPackageStatus(PackageStatus.ERROR);
             loggerService.addExceptionToLog(packageInfo, e);

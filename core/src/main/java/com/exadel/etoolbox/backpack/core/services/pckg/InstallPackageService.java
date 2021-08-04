@@ -6,12 +6,12 @@ import com.exadel.etoolbox.backpack.core.servlets.model.InstallPackageModel;
 import org.apache.sling.api.resource.ResourceResolver;
 
 /**
- * Represents a service running in an AEM instance responsible for install operation with package
+ * Performs package installation.
  */
 public interface InstallPackageService {
 
     /**
-     * Triggers operations needed to install a content package specified in the request, and reports the results
+     * Triggers operations needed to install the content package specified in the request, and reports the results
      *
      * @param resourceResolver  {@code ResourceResolver} instance used to install the package
      * @param installPackageModel {@link InstallPackageModel} instance containing user-set options for the package installing

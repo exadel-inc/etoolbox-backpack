@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+"use strict"
 $(function () {
     var path = new URL(window.location.href).searchParams.get('path')
         || (window.location.href.indexOf('.html/') ? window.location.href.split('.html').pop() : ''),
@@ -25,7 +25,7 @@ $(function () {
         BUILD_PAGE_URL = '/tools/etoolbox/backpack/buildPackage.html?path=',
         INSTALL = 'INSTALL',
         INSTALL_IN_PROGRESS = 'INSTALL_IN_PROGRESS';
-    $packageName = $('#packageName'),
+    var $packageName = $('#packageName'),
         $name = $('#name'),
         $version = $('#version'),
         $lastBuilt = $('#lastBuilt-time'),
