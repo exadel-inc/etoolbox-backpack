@@ -96,14 +96,12 @@ public class InstallPackageServiceImpl implements InstallPackageService {
                 packageInfo.addLogMessage(BasePackageServiceImpl.ERROR + String.format(BasePackageServiceImpl.PACKAGE_DOES_NOT_EXIST_MESSAGE, packageInfo.getPackagePath()));
                 return;
             }
-            StopWatch stopWatch = new StopWatch();
-            stopWatch.start();
+            StopWatch stopWatch = StopWatch.createStarted();
             ImportOptions importOptions = getImportOptions(installPackageModel, packageInfo);
             packageInfo.setPackageStatus(PackageStatus.INSTALL_IN_PROGRESS);
             jcrPackage.install(importOptions);
             packageInfo.setPackageInstalled(Calendar.getInstance());
             packageInfo.setPackageStatus(PackageStatus.INSTALL);
-            stopWatch.stop();
             packageInfo.addLogMessage("Package installed in " + stopWatch);
         } catch (RepositoryException | PackageException | IOException e) {
             packageInfo.setPackageStatus(PackageStatus.ERROR);

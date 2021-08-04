@@ -25,6 +25,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
 import org.apache.jackrabbit.vault.fs.api.ProgressTrackerListener;
 import org.apache.jackrabbit.vault.fs.config.DefaultWorkspaceFilter;
@@ -149,7 +150,7 @@ public class BuildPackageImpl implements BuildPackageService {
             JcrPackageManager packMgr = basePackageService.getPackageManager(userSession);
             JcrPackage jcrPackage = packMgr.open(userSession.getNode(packageBuildInfo.getPackagePath()));
             if (jcrPackage != null) {
-                long start = System.currentTimeMillis();
+                StopWatch stopWatch = StopWatch.createStarted();
                 JcrPackageDefinition definition = Objects.requireNonNull(jcrPackage.getDefinition());
                 DefaultWorkspaceFilter filter = new DefaultWorkspaceFilter();
                 includeGeneralResources(definition, s -> filter.add(new PathFilterSet(s)));
@@ -173,8 +174,7 @@ public class BuildPackageImpl implements BuildPackageService {
                 packageBuildInfo.setPackageStatus(PackageStatus.BUILT);
                 packageBuildInfo.setDataSize(jcrPackage.getSize());
                 packageBuildInfo.setPaths(filter.getFilterSets().stream().map(pathFilterSet -> pathFilterSet.seal().getRoot()).collect(Collectors.toList()));
-                long finish = System.currentTimeMillis();
-                packageBuildInfo.addLogMessage("Package built in " + (finish - start) + " milliseconds");
+                packageBuildInfo.addLogMessage("Package built in " + stopWatch);
             } else {
                 packageBuildInfo.setPackageStatus(PackageStatus.ERROR);
                 packageBuildInfo.addLogMessage(BasePackageServiceImpl.ERROR + String.format(BasePackageServiceImpl.PACKAGE_DOES_NOT_EXIST_MESSAGE, packageBuildInfo.getPackagePath()));
