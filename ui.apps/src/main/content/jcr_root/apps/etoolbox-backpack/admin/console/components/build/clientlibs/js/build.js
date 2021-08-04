@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+"use strict"
 $(function () {
     var path = new URL(window.location.href).searchParams.get('path')
         || (window.location.href.indexOf('.html/') ? window.location.href.split('.html').pop() : ''),
@@ -22,8 +22,10 @@ $(function () {
         BUILD_IN_PROGRESS = 'BUILD_IN_PROGRESS',
         COMMAND_URL = Granite.HTTP.externalize("/bin/wcmcommand"),
         DIALOG_MODAL_URL = '/mnt/overlay/etoolbox-backpack/admin/console/page/content/editpackagedialog.html?packagePath=',
-        BUILD_PAGE_URL = '/tools/etoolbox/backpack/buildPackage.html?path=';
-    $packageName = $('#packageName'),
+        BUILD_PAGE_URL = '/tools/etoolbox/backpack/buildPackage.html?path=',
+        INSTALL = 'INSTALL',
+        INSTALL_IN_PROGRESS = 'INSTALL_IN_PROGRESS';
+    var $packageName = $('#packageName'),
         $name = $('#name'),
         $version = $('#version'),
         $lastBuilt = $('#lastBuilt-time'),
@@ -39,8 +41,10 @@ $(function () {
         $containerInner = $('.content-container-inner'),
         $errorContainer = $('.content-error-container'),
         $closeLink = $('#shell-propertiespage-closeactivator'),
-        $goBackSection = $('#goBackLink');
-        $query = $('#query');
+        $goBackSection = $('#goBackLink'),
+        $query = $('#query'),
+        $lastInstalled = $('#lastInstalled-time'),
+        $installButton = $('#installButton');
     if (path) {
         var lastIndex = path.lastIndexOf('/');
         packageName = path.substring(lastIndex + 1);
@@ -59,6 +63,12 @@ $(function () {
             if (data.packageStatus === BUILT) {
                 packageBuilt();
             } else if (data.packageStatus === BUILD_IN_PROGRESS) {
+                updateLog(0);
+            } else if (data.packageStatus === INSTALL) {
+                packageBuilt();
+                packageInstall();
+            } else if (data.packageStatus === INSTALL_IN_PROGRESS) {
+                packageBuilt();
                 updateLog(0);
             } else {
                 packageCreated();
@@ -157,6 +167,27 @@ $(function () {
         downloadPackage();
     });
 
+    $installButton.click(function () {
+        var dialog = document.querySelector('#installDialog');
+        dialog.show();
+        $('#installSubmitBtn').click(function() {
+            $("#installForm").submit(function(e) {
+                e.preventDefault();
+                var form = $(this);
+                var url = form.attr('action');
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: form.serialize(),
+                    success: function(data) {
+                        $buildLog.empty();
+                        updateLog(0);
+                    }
+                });
+            });
+        });
+    });
+
     function downloadPackage() {
         window.location.href = path;
     }
@@ -200,6 +231,7 @@ $(function () {
         $downloadBtn.prop('disabled', true);
         $testBuildButton.prop('disabled', true);
         $buildButton.prop('disabled', true);
+        $installButton.prop('disabled' ,true);
     }
 
     function packageBuilt() {
@@ -207,11 +239,16 @@ $(function () {
         $downloadBtn.prop('disabled', false);
         $testBuildButton.prop('disabled', false);
         $buildButton.prop('disabled', false);
+        $installButton.prop('disabled', false);
     }
 
     function packageCreated() {
         $testBuildButton.prop('disabled', false);
         $buildButton.prop('disabled', false);
+    }
+
+    function packageInstall() {
+        $installButton.text('Reinstall');
     }
 
     function getLastBuiltDate(packageBuiltDate) {
@@ -248,13 +285,16 @@ $(function () {
 
                     scrollLog();
                 }
-                if (data.packageStatus === BUILD_IN_PROGRESS) {
+                if (data.packageStatus === BUILD_IN_PROGRESS || data.packageStatus === INSTALL_IN_PROGRESS) {
                     setTimeout(function () {
                         updateLog(logIndex);
                     }, 1000);
 
                 } else if (data.packageStatus === BUILT) {
                     packageBuilt();
+                    updatePackageDisplayInfo(data);
+                } else if (data.packageStatus === INSTALL) {
+                    packageInstall();
                     updatePackageDisplayInfo(data);
                 }
             }
@@ -290,6 +330,7 @@ $(function () {
         if (data.dataSize) {
             $packageSize.text('Package size: ' + bytesToSize(data.dataSize));
         }
+        $lastInstalled.val(getLastBuiltDate(data.packageInstalled));
     }
 
 

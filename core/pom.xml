@@ -52,6 +52,11 @@
                         <phase>process-classes</phase>
                     </execution>
                 </executions>
+                <configuration>
+                    <instructions>
+                        <Embed-Dependency>commons-lang3;scope=compile</Embed-Dependency>
+                    </instructions>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

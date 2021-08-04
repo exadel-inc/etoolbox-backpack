@@ -22,5 +22,7 @@ public enum PackageStatus {
     MODIFIED,
     BUILD_IN_PROGRESS,
     BUILT,
-    ERROR
+    ERROR,
+    INSTALL_IN_PROGRESS,
+    INSTALL
 }

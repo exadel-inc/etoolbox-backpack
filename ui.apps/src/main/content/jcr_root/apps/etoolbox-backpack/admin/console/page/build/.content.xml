@@ -18,12 +18,12 @@
     <jcr:content
             jcr:mixinTypes="[sling:VanityPath]"
             jcr:primaryType="nt:unstructured"
-            jcr:title="Build package"
+            jcr:title="Package"
             backHref="/tools/etoolbox/backpack.html/?group=/etc/packages/EToolbox_BackPack"
             sling:redirect="{Boolean}false"
             sling:resourceType="granite/ui/components/shell/propertiespage"
             sling:vanityOrder="{Long}1200"
-            sling:vanityPath="/tools/etoolbox/backpack/buildPackage"
+            sling:vanityPath="/tools/etoolbox/backpack/package"
             consoleId="cq-backpack-build-package">
 
         <head jcr:primaryType="nt:unstructured">
