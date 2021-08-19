@@ -23,6 +23,7 @@ $(function () {
         COMMAND_URL = Granite.HTTP.externalize("/bin/wcmcommand"),
         DIALOG_MODAL_URL = '/mnt/overlay/etoolbox-backpack/admin/console/page/content/editpackagedialog.html?packagePath=',
         BUILD_PAGE_URL = '/tools/etoolbox/backpack/buildPackage.html?path=',
+        REPLICATE_URL = '/services/backpack/replicatePackage',
         INSTALL = 'INSTALL',
         INSTALL_IN_PROGRESS = 'INSTALL_IN_PROGRESS';
     var $packageName = $('#packageName'),
@@ -44,7 +45,8 @@ $(function () {
         $goBackSection = $('#goBackLink'),
         $query = $('#query'),
         $lastInstalled = $('#lastInstalled-time'),
-        $installButton = $('#installButton');
+        $installButton = $('#installButton'),
+        $replicateButton = $('#replicateBtn');
     if (path) {
         var lastIndex = path.lastIndexOf('/');
         packageName = path.substring(lastIndex + 1);
@@ -187,6 +189,45 @@ $(function () {
             });
         });
     });
+
+    /**
+     * Invokes replication confirmation window
+     */
+    $replicateButton.click(function () {
+        var fui = $(window).adaptTo("foundation-ui");
+        fui.prompt("Please confirm", "Replicate this package?", "notice", [{
+            text: Granite.I18n.get("Cancel")
+        }, {
+            text: "Replicate",
+            primary: true,
+            handler: function () {
+                replicatePackage();
+            }
+        }]);
+    });
+
+    /**
+     * Replication helper function: sends 'post' request with path information to server
+     * and updates log information
+     */
+    function replicatePackage() {
+        $.ajax({
+            url: REPLICATE_URL,
+            type: "POST",
+            dataType: "json",
+            ContentType : 'application/json',
+            data: {path: path},
+            success: function (data) {
+                $buildLog.empty();
+                if (data.log) {
+                    $.each(data.log, function (index, value) {
+                        $buildLog.append('<div>' + value + '</div>');
+                    });
+                    scrollLog();
+                }
+            }
+        })
+    }
 
     function downloadPackage() {
         window.location.href = path;
