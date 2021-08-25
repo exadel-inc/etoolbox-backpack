@@ -45,6 +45,7 @@ $(function () {
         $goBackSection = $('#goBackLink'),
         $query = $('#query'),
         $lastInstalled = $('#lastInstalled-time'),
+        $lastReplicated = $('#lastReplicated-time'),
         $installButton = $('#installButton'),
         $replicateButton = $('#replicateBtn');
     if (path) {
@@ -372,6 +373,7 @@ $(function () {
             $packageSize.text('Package size: ' + bytesToSize(data.dataSize));
         }
         $lastInstalled.val(getLastBuiltDate(data.packageInstalled));
+        $lastReplicated.val(getLastBuiltDate(data.packageReplicated));
     }
 
 

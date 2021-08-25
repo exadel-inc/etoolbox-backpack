@@ -4,6 +4,7 @@ import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.Replicator;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
+import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
 import com.exadel.etoolbox.backpack.core.services.LoggerService;
 import com.exadel.etoolbox.backpack.core.services.SessionService;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
@@ -23,6 +24,7 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.time.LocalDateTime;
+import java.util.Calendar;
 
 /**
  * Implements {@link ReplicatePackageService} to provide replication operations
@@ -35,6 +37,7 @@ public class ReplicatePackageServiceImpl implements ReplicatePackageService {
     private static final String IN_PROGRESS_REPLICATE_MESSAGE = "Replicating package";
     private static final String FINISH_REPLICATE_MESSAGE = "Package is replicated asynchronously in ";
     private static final String NODE_NOT_ACCESSIBLE_MESSAGE = "Node is not accessible through the current Session";
+    private static final String PACKAGE_IS_NOT_BUILT_MESSAGE = "Before replication package must be built";
 
     @Reference
     private PackageInfoService packageInfoService;
@@ -57,11 +60,16 @@ public class ReplicatePackageServiceImpl implements ReplicatePackageService {
     @Override
     public PackageInfo replicatePackage(ResourceResolver resourceResolver, PackageInfoModel packageInfoModel) {
         PackageInfo packageInfo = packageInfoService.getPackageInfo(resourceResolver, packageInfoModel);
-        packageInfo.clearLog();
-        packageInfo.addLogMessage(START_REPLICATE_MESSAGE + packageInfoModel.getPackagePath());
-        packageInfo.addLogMessage(LocalDateTime.now().toString());
-        basePackageService.getPackageInfos().put(packageInfoModel.getPackagePath(), packageInfo);
-        replicatePackage(resourceResolver.getUserID(), packageInfo);
+
+        if (PackageStatus.BUILT.equals(packageInfo.getPackageStatus())) {
+            packageInfo.clearLog();
+            packageInfo.addLogMessage(START_REPLICATE_MESSAGE + packageInfoModel.getPackagePath());
+            packageInfo.addLogMessage(LocalDateTime.now().toString());
+            basePackageService.getPackageInfos().put(packageInfoModel.getPackagePath(), packageInfo);
+            replicatePackage(resourceResolver.getUserID(), packageInfo);
+        } else {
+            packageInfo.addLogMessage(BasePackageServiceImpl.ERROR + PACKAGE_IS_NOT_BUILT_MESSAGE);
+        }
         return packageInfo;
     }
 
@@ -96,6 +104,7 @@ public class ReplicatePackageServiceImpl implements ReplicatePackageService {
                     packageInfo.addLogMessage(IN_PROGRESS_REPLICATE_MESSAGE);
                     replicator.replicate(node.getSession(), ReplicationActionType.ACTIVATE, node.getPath());
                     packageInfo.addLogMessage(FINISH_REPLICATE_MESSAGE + stopWatch);
+                    packageInfo.setPackageReplicated(Calendar.getInstance());
                 } else {
                     packageInfo.addLogMessage(BasePackageServiceImpl.ERROR + NODE_NOT_ACCESSIBLE_MESSAGE);
                 }

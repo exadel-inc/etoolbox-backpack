@@ -60,6 +60,8 @@ public class PackageInfo {
 
     private Calendar packageInstalled;
 
+    private Calendar packageReplicated;
+
     /**
      * Default constructor
      */
@@ -92,6 +94,11 @@ public class PackageInfo {
         if (packageInfo.packageInstalled != null) {
             this.packageInstalled = Calendar.getInstance();
             this.packageInstalled.setTime(packageInfo.packageInstalled.getTime());
+        }
+
+        if (packageInfo.packageReplicated != null) {
+            this.packageReplicated = Calendar.getInstance();
+            this.packageReplicated.setTime(packageInfo.packageReplicated.getTime());
         }
     }
 
@@ -413,6 +420,24 @@ public class PackageInfo {
      */
     public void setPackageInstalled(Calendar packageInstalled) {
         this.packageInstalled = packageInstalled;
+    }
+
+    /**
+     * Gets the value representing when the package was replicated
+     *
+     * @return {@code Calendar} instance
+     */
+    public Calendar getPackageReplicated() {
+        return packageReplicated;
+    }
+
+    /**
+     * Sets the value representing when the package was replicated
+     *
+     * @param packageReplicated {@code Calendar} instance
+     */
+    public void setPackageReplicated(Calendar packageReplicated) {
+        this.packageReplicated = packageReplicated;
     }
 
     /**
