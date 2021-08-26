@@ -221,9 +221,7 @@ $(function () {
             success: function (data) {
                 $buildLog.empty();
                 if (data.log) {
-                    $.each(data.log, function (index, value) {
-                        $buildLog.append('<div>' + value + '</div>');
-                    });
+                    updateLog(0);
                     scrollLog();
                 }
             }
@@ -274,6 +272,7 @@ $(function () {
         $testBuildButton.prop('disabled', true);
         $buildButton.prop('disabled', true);
         $installButton.prop('disabled' ,true);
+        $replicateButton.prop('disabled', true);
     }
 
     function packageBuilt() {
@@ -282,6 +281,7 @@ $(function () {
         $testBuildButton.prop('disabled', false);
         $buildButton.prop('disabled', false);
         $installButton.prop('disabled', false);
+        $replicateButton.prop('disabled', false);
     }
 
     function packageCreated() {

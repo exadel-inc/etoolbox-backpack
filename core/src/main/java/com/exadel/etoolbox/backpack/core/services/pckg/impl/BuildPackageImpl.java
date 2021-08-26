@@ -170,6 +170,7 @@ public class BuildPackageImpl implements BuildPackageService {
                         packageBuildInfo.addLogMessage(s + " " + e.getMessage());
                     }
                 });
+                packageBuildInfo.setPackageReplicated(null);
                 packageBuildInfo.setPackageBuilt(Calendar.getInstance());
                 packageBuildInfo.setPackageStatus(PackageStatus.BUILT);
                 packageBuildInfo.setDataSize(jcrPackage.getSize());
