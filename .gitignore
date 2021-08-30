@@ -74,3 +74,6 @@ buildNumber.properties
 ### IntelliJ ###
 .idea/
 *.iml
+
+# AEM Repo Tool Configuration File
+.repo

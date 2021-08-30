@@ -54,6 +54,14 @@ public class PackageInfo {
 
     private Long dataSize;
 
+    private String query;
+
+    private boolean toggle;
+
+    private Calendar packageInstalled;
+
+    private Calendar packageReplicated;
+
     /**
      * Default constructor
      */
@@ -81,6 +89,17 @@ public class PackageInfo {
         this.log = packageInfo.log;
         this.dataSize = packageInfo.dataSize;
         this.paths = packageInfo.paths;
+        this.query = packageInfo.query;
+        this.toggle = packageInfo.toggle;
+        if (packageInfo.packageInstalled != null) {
+            this.packageInstalled = Calendar.getInstance();
+            this.packageInstalled.setTime(packageInfo.packageInstalled.getTime());
+        }
+
+        if (packageInfo.packageReplicated != null) {
+            this.packageReplicated = Calendar.getInstance();
+            this.packageReplicated.setTime(packageInfo.packageReplicated.getTime());
+        }
     }
 
     /**
@@ -347,6 +366,78 @@ public class PackageInfo {
      */
     public void setDataSize(final Long dataSize) {
         this.dataSize = dataSize;
+    }
+
+    /**
+     * Gets the SQL2 query of the current package
+     *
+     * @return String value
+     */
+    public String getQuery() {
+        return query;
+    }
+
+    /**
+     * Sets the SQL2 query of the current package
+     *
+     * @param query String value
+     */
+    public void setQuery(String query) {
+        this.query = query;
+    }
+
+    /**
+     * Gets the toggle between SQL2 (true) and Path Filter (false)
+     *
+     * @return boolean value
+     */
+    public boolean isToggle() {
+        return toggle;
+    }
+
+    /**
+     * Sets the toggle between SQL2 (true) and Path Filter (false)
+     *
+     * @param toggle boolean value
+     */
+    public void setToggle(boolean toggle) {
+        this.toggle = toggle;
+    }
+
+    /**
+     * Gets the value representing when the package was installed
+     *
+     * @return {@code Calendar} instance
+     */
+    public Calendar getPackageInstalled() {
+        return packageInstalled;
+    }
+
+    /**
+     * Sets the value representing when the package was installed
+     *
+     * @param packageInstalled {@code Calendar} instance
+     */
+    public void setPackageInstalled(Calendar packageInstalled) {
+        this.packageInstalled = packageInstalled;
+    }
+
+    /**
+     * Gets the value representing when the package was replicated
+     *
+     * @return {@code Calendar} instance
+     */
+    public Calendar getPackageReplicated() {
+        return packageReplicated;
+    }
+
+    /**
+     * Sets the value representing when the package was replicated
+     *
+     * @param packageReplicated {@code Calendar} instance
+     */
+    public void setPackageReplicated(Calendar packageReplicated) {
+        this.packageReplicated = packageReplicated;
     }
 
     /**

@@ -14,6 +14,7 @@
 package com.exadel.etoolbox.backpack.core.services.pckg.impl;
 
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
+import com.exadel.etoolbox.backpack.core.services.SessionService;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.BuildPackageService;
 import com.exadel.etoolbox.backpack.core.servlets.model.BuildPackageModel;
@@ -50,6 +51,7 @@ public class BuildPackageImplTest extends Base {
     private JcrPackageManager jcrPackageManagerMock;
     private BuildPackageService buildPackage;
     private BasePackageService basePackageServiceSpy;
+    private SessionService sessionService;
 
     @Override
     public void beforeTest() throws IOException, RepositoryException {
@@ -146,7 +148,7 @@ public class BuildPackageImplTest extends Base {
         basePackageServiceSpy = (BasePackageServiceImpl) Mockito.spy(basePackageService);
         jcrPackageManagerMock = mock(JcrPackageManager.class);
         doReturn(jcrPackageManagerMock).when(basePackageServiceSpy).getPackageManager(any(Session.class));
-        doReturn(resourceResolver.adaptTo(Session.class)).when(buildPackageServiceSpy).getUserImpersonatedSession(any(String.class));
+        doReturn(resourceResolver.adaptTo(Session.class)).when(sessionService).getUserImpersonatedSession(any(String.class));
     }
 
     @Test

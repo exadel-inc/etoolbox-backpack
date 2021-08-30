@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+"use strict"
 $(function () {
     var path = new URL(window.location.href).searchParams.get('path')
         || (window.location.href.indexOf('.html/') ? window.location.href.split('.html').pop() : ''),
@@ -20,8 +20,13 @@ $(function () {
         goBackLink;
     var BUILT = 'BUILT',
         BUILD_IN_PROGRESS = 'BUILD_IN_PROGRESS',
-        COMMAND_URL = Granite.HTTP.externalize("/bin/wcmcommand");
-    $packageName = $('#packageName'),
+        COMMAND_URL = Granite.HTTP.externalize("/bin/wcmcommand"),
+        DIALOG_MODAL_URL = '/mnt/overlay/etoolbox-backpack/admin/console/page/content/editpackagedialog.html?packagePath=',
+        BUILD_PAGE_URL = '/tools/etoolbox/backpack/buildPackage.html?path=',
+        REPLICATE_URL = '/services/backpack/replicatePackage',
+        INSTALL = 'INSTALL',
+        INSTALL_IN_PROGRESS = 'INSTALL_IN_PROGRESS';
+    var $packageName = $('#packageName'),
         $name = $('#name'),
         $version = $('#version'),
         $lastBuilt = $('#lastBuilt-time'),
@@ -37,7 +42,12 @@ $(function () {
         $containerInner = $('.content-container-inner'),
         $errorContainer = $('.content-error-container'),
         $closeLink = $('#shell-propertiespage-closeactivator'),
-        $goBackSection = $('#goBackLink');
+        $goBackSection = $('#goBackLink'),
+        $query = $('#query'),
+        $lastInstalled = $('#lastInstalled-time'),
+        $lastReplicated = $('#lastReplicated-time'),
+        $installButton = $('#installButton'),
+        $replicateButton = $('#replicateBtn');
     if (path) {
         var lastIndex = path.lastIndexOf('/');
         packageName = path.substring(lastIndex + 1);
@@ -56,6 +66,12 @@ $(function () {
             if (data.packageStatus === BUILT) {
                 packageBuilt();
             } else if (data.packageStatus === BUILD_IN_PROGRESS) {
+                updateLog(0);
+            } else if (data.packageStatus === INSTALL) {
+                packageBuilt();
+                packageInstall();
+            } else if (data.packageStatus === INSTALL_IN_PROGRESS) {
+                packageBuilt();
                 updateLog(0);
             } else {
                 packageCreated();
@@ -154,6 +170,64 @@ $(function () {
         downloadPackage();
     });
 
+    $installButton.click(function () {
+        var dialog = document.querySelector('#installDialog');
+        dialog.show();
+        $('#installSubmitBtn').click(function() {
+            $("#installForm").submit(function(e) {
+                e.preventDefault();
+                var form = $(this);
+                var url = form.attr('action');
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: form.serialize(),
+                    success: function(data) {
+                        $buildLog.empty();
+                        updateLog(0);
+                    }
+                });
+            });
+        });
+    });
+
+    /**
+     * Invokes replication confirmation window
+     */
+    $replicateButton.click(function () {
+        var fui = $(window).adaptTo("foundation-ui");
+        fui.prompt("Please confirm", "Replicate this package?", "notice", [{
+            text: Granite.I18n.get("Cancel")
+        }, {
+            text: "Replicate",
+            primary: true,
+            handler: function () {
+                replicatePackage();
+            }
+        }]);
+    });
+
+    /**
+     * Replication helper function: sends 'post' request with path information to server
+     * and updates log information
+     */
+    function replicatePackage() {
+        $.ajax({
+            url: REPLICATE_URL,
+            type: "POST",
+            dataType: "json",
+            ContentType : 'application/json',
+            data: {path: path},
+            success: function (data) {
+                $buildLog.empty();
+                if (data.log) {
+                    updateLog(0);
+                    scrollLog();
+                }
+            }
+        })
+    }
+
     function downloadPackage() {
         window.location.href = path;
     }
@@ -197,6 +271,8 @@ $(function () {
         $downloadBtn.prop('disabled', true);
         $testBuildButton.prop('disabled', true);
         $buildButton.prop('disabled', true);
+        $installButton.prop('disabled' ,true);
+        $replicateButton.prop('disabled', true);
     }
 
     function packageBuilt() {
@@ -204,11 +280,17 @@ $(function () {
         $downloadBtn.prop('disabled', false);
         $testBuildButton.prop('disabled', false);
         $buildButton.prop('disabled', false);
+        $installButton.prop('disabled', false);
+        $replicateButton.prop('disabled', false);
     }
 
     function packageCreated() {
         $testBuildButton.prop('disabled', false);
         $buildButton.prop('disabled', false);
+    }
+
+    function packageInstall() {
+        $installButton.text('Reinstall');
     }
 
     function getLastBuiltDate(packageBuiltDate) {
@@ -245,13 +327,16 @@ $(function () {
 
                     scrollLog();
                 }
-                if (data.packageStatus === BUILD_IN_PROGRESS) {
+                if (data.packageStatus === BUILD_IN_PROGRESS || data.packageStatus === INSTALL_IN_PROGRESS) {
                     setTimeout(function () {
                         updateLog(logIndex);
                     }, 1000);
 
                 } else if (data.packageStatus === BUILT) {
                     packageBuilt();
+                    updatePackageDisplayInfo(data);
+                } else if (data.packageStatus === INSTALL) {
+                    packageInstall();
                     updatePackageDisplayInfo(data);
                 }
             }
@@ -279,9 +364,16 @@ $(function () {
         $name.text(data.packageNodeName);
         $version.text('Package version: ' + data.version);
         $lastBuilt.val(getLastBuiltDate(data.packageBuilt));
+        if (data.query) {
+            $query.text('SQL2 Query: ' + data.query);
+        } else {
+            $query.hide();
+        }
         if (data.dataSize) {
             $packageSize.text('Package size: ' + bytesToSize(data.dataSize));
         }
+        $lastInstalled.val(getLastBuiltDate(data.packageInstalled));
+        $lastReplicated.val(getLastBuiltDate(data.packageReplicated));
     }
 
 
@@ -319,13 +411,13 @@ $(function () {
         };
 
         $.post(COMMAND_URL, data).done(function () {
-            showAlert("Package deleted", "Delete", function () {
+            showAlert("Package deleted", "Delete", "warning", function () {
                 window.location.href = goBackLink;
             });
         });
     }
 
-    function showAlert(message, title, callback) {
+    function showAlert(message, title, type, callback) {
         var fui = $(window).adaptTo("foundation-ui"),
             options = [{
                 id: "ok",
@@ -336,11 +428,41 @@ $(function () {
         message = message || "Unknown Error";
         title = title || "Error";
 
-        fui.prompt(title, message, "warning", options, callback);
+        fui.prompt(title, message, type, options, callback);
     }
 
     function createEl(name) {
         return $(document.createElement(name));
     }
+
+    /**
+     * Registers new behaviour for Edit Dialog. Sets src according to the current Build page's Path variable.
+     * Handler returns false that indicates that current handler has been done and system can be proceed
+     * with next handler.
+     */
+    $(window).adaptTo("foundation-registry").register("foundation.collection.action.action", {
+        name: "foundation.dialog",
+        handler: function(name, el, config, collection, selections) {
+            if (path) {
+                config.data.src = DIALOG_MODAL_URL + path;
+            }
+            return false;
+        }
+    });
+
+    /**
+     * Registers new behaviour for the Edit Dialog's Success Dialog. Instead of default Success Dialog
+     * handler show custom dialog window specified especially for the Build page. Handler returns true
+     * that indicate that current handler will be last one.
+     */
+    $(window).adaptTo("foundation-registry").register("foundation.form.response.ui.success", {
+        name: "foundation.prompt.open",
+        handler: function(name, el, config, collection, selections) {
+            showAlert("Your package has been updated.", "Success", "success",function () {
+                window.location.href = BUILD_PAGE_URL + path;
+            });
+            return true;
+        }
+    });
 
 });

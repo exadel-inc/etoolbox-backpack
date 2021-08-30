@@ -26,6 +26,7 @@
                   java.util.ArrayList,
                   java.util.List" %>
 <%@ page import="java.util.Calendar" %>
+<%@ page import="java.util.Optional" %>
 <%
 
     AccessControlManager acm = null;
@@ -38,6 +39,7 @@
     String title = resource.getName();
     String path = resource.getPath();
     String actionRels = StringUtils.join(getActionRels(resource, acm), " ");
+    double size = Optional.ofNullable(resource.getChild("jcr:content").getValueMap().get("jcr:data", Double.class)).orElse(0.0);
 
     Tag tag = cmp.consumeTag();
     AttrBuilder attrs = tag.getAttrs();
@@ -84,7 +86,7 @@
 </coral-card>
 
 <coral-quickactions target="_prev" alignmy="left top" alignat="left top">
-    <coral-quickactions-item icon="dataRefresh" class="foundation-collection-action" data-foundation-collection-action='{"action": "cq.wcm.open", "data": {"cookiePath":"<%= request.getContextPath() %>/","href":"/tools/etoolbox/backpack/buildPackage.html?path=<%= xssAPI.getValidHref(path) %>"}}'><%= xssAPI.encodeForHTML(i18n.get("Build")) %></coral-quickactions-item><%
+    <coral-quickactions-item icon="dataRefresh" class="foundation-collection-action" data-foundation-collection-action='{"action": "cq.wcm.open", "data": {"cookiePath":"<%= request.getContextPath() %>/","href":"/tools/etoolbox/backpack/package.html?path=<%= xssAPI.getValidHref(path) %>"}}'><%= xssAPI.encodeForHTML(i18n.get("Package")) %></coral-quickactions-item><%
 
     if (resource != null && hasPermission(acm, resource, Privilege.JCR_READ)) {
 %>
@@ -98,8 +100,9 @@
     ><%= xssAPI.encodeForHTML(i18n.get("Delete")) %></coral-quickactions-item>
     <%
         }
-        if (resource != null && hasPermission(acm, resource, Privilege.JCR_READ)) {
+        if (resource != null && size > 0 && hasPermission(acm, resource, Privilege.JCR_READ)) {
     %>
+
     <coral-quickactions-item icon="download" class="foundation-collection-action"
                              data-foundation-collection-action='{"action": "backpack.download", "data": {"href":"/crx/packmgr/download.jsp?_charset_=utf-8&path=<%= xssAPI.getValidHref(path) %>"}}'
     ><%= xssAPI.encodeForHTML(i18n.get("Download")) %></coral-quickactions-item><%

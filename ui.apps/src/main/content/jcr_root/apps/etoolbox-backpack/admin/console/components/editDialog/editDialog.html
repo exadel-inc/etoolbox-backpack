@@ -8,7 +8,7 @@
               class="coral-Form coral-Form--vertical foundation-layout-util-maximized-container foundation-form"
               data-foundation-form-ajax="true" data-foundation-form-loadingmask="true">
             <meta class="foundation-form-response-ui-success"
-                  data-foundation-form-response-ui-success='{"name":"foundation.prompt.open","open":"/tools/etoolbox/backpack/buildPackage.html?path={packagePath}","redirect":"/tools/etoolbox/backpack.html/?group=/etc/packages/{groupName}","title":"Success","message":"Your package has been created."}'>
+                  data-foundation-form-response-ui-success='{"name":"foundation.prompt.open","open":"/tools/etoolbox/backpack/buildPackage.html?path={packagePath}","redirect":"/tools/etoolbox/backpack.html/?group=/etc/packages/{groupName}","title":"Success","message":"Your package has been updated."}'>
             <div class="coral-FixedColumn">
                 <div class="coral-FixedColumn-column">
                     <div class="coral-Form-fieldwrapper">
@@ -29,20 +29,25 @@
                                value="${model.packageModel.version}"
                                is="coral-textfield">
                     </div>
+
                     <div class="coral-Form-fieldwrapper">
+                        <label id="label-switch" class="coral-Form-fieldlabel">SQL2 Query Package</label>
+                        <coral-switch class="cq-dialog-switch-toggle" name="toggle" value="true" checked="${model.packageModel.toggle}" labelledby="label-switch"></coral-switch>
+                    </div>
+
+                    <div class="coral-Form-fieldwrapper path-option-element-target">
                         <label class="coral-Form-fieldlabel">Filter Path *</label>
-                        <coral-multifield class="coral-Form-field"
+                        <coral-multifield class="coral-Form-field cq-dialog-path-filter-option"
                                           aria-required="true"
                                           data-granite-coral-multifield-name="paths"
                                           data-granite-coral-multifield-composite>
-
                             <sly data-sly-list.path="${model.packageModel.paths}">
 
                                 <coral-multifield-item>
 
                                     <div class="coral-Form-fieldwrapper">
                                         <label class="coral-Form-fieldlabel">Path *</label>
-                                        <foundation-autocomplete class="coral-Form-field"
+                                        <foundation-autocomplete class="coral-Form-field "
                                                                  name="path"
                                                                  required
                                                                  data-foundation-validation
@@ -113,6 +118,13 @@
                                 </div>
                             </template>
                         </coral-multifield>
+                    </div>
+
+                    <div class="sql2-option-element-target" data-showhidetargetvalue="true" style="display: block;">
+                        <div class="coral-Form-fieldwrapper">
+                            <label id="label_53b9d6df-cb22-4f34-83ca-48913c62d081" class="coral-Form-fieldlabel" for="coral-id-18">SQL2 Query *</label>
+                            <textarea class="coral-Form-field foundation-layout-util-resizable-none coral3-Textfield coral3-Textfield--multiline" name="query" rows="5" labelledby="label_53b9d6df-cb22-4f34-83ca-48913c62d081" aria-required="true" data-foundation-validation="" data-validation="" is="coral-textarea" id="coral-id-18" aria-labelledby="label_53b9d6df-cb22-4f34-83ca-48913c62d081" aria-invalid="false">${model.packageModel.query}</textarea>
+                        </div>
                     </div>
 
                     <sly data-sly-use.template="/apps/etoolbox-backpack/admin/console/components/editDialog/groupAutocomplete/groupAutocomplete.html"

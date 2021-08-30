@@ -3,3 +3,4 @@
 download-action.js
 error-response-action.js
 regex-validator.js
+switcher.js

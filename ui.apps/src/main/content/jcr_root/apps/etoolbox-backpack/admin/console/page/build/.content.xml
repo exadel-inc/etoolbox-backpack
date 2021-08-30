@@ -18,19 +18,19 @@
     <jcr:content
             jcr:mixinTypes="[sling:VanityPath]"
             jcr:primaryType="nt:unstructured"
-            jcr:title="Build package"
+            jcr:title="Package"
             backHref="/tools/etoolbox/backpack.html/?group=/etc/packages/EToolbox_BackPack"
             sling:redirect="{Boolean}false"
             sling:resourceType="granite/ui/components/shell/propertiespage"
             sling:vanityOrder="{Long}1200"
-            sling:vanityPath="/tools/etoolbox/backpack/buildPackage"
+            sling:vanityPath="/tools/etoolbox/backpack/package"
             consoleId="cq-backpack-build-package">
 
         <head jcr:primaryType="nt:unstructured">
             <clientlibs
                     jcr:primaryType="nt:unstructured"
                     sling:resourceType="granite/ui/components/coral/foundation/includeclientlibs"
-                    categories="[cq.common.wcm,cq.listview.coral.columns.personalization,cq.siteadmin.admin.page.row,cq.gui.coral.common.admin.references,cq.screens.dcc,backpack]"/>
+                    categories="[cq.common.wcm,cq.listview.coral.columns.personalization,cq.siteadmin.admin.page.row,cq.gui.coral.common.admin.references,cq.screens.dcc,backpack,backpack.build]"/>
         </head>
         <content
                 jcr:primaryType="nt:unstructured"

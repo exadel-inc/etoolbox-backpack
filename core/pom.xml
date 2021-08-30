@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.exadel.etoolbox</groupId>
         <artifactId>etoolbox-backpack</artifactId>
-        <version>2.0.1</version>
+        <version>3.0.0</version>
     </parent>
 
     <artifactId>etoolbox-backpack.core</artifactId>
@@ -52,6 +52,11 @@
                         <phase>process-classes</phase>
                     </execution>
                 </executions>
+                <configuration>
+                    <instructions>
+                        <Embed-Dependency>commons-lang3;scope=compile</Embed-Dependency>
+                    </instructions>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
