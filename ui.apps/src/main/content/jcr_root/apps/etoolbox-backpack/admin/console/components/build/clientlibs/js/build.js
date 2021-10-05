@@ -256,7 +256,7 @@ $(function () {
                         $.each(data.log, function (index, value) {
                             $buildLog.append('<div>' + value + '</div>');
                         });
-                        $buildLog.append('<h4>Approximate size of the assets in the package: ' + bytesToSize(data.dataSize) + '</h4>');
+                        $buildLog.append(<h4>There are no assets in the package</h4>);
                         scrollLog();
                     }
                 } else {
