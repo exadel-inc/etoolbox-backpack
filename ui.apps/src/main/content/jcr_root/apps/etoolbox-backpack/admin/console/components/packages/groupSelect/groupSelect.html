@@ -4,7 +4,7 @@
 
     <coral-select id="indexTypeSelect" placeholder="Select Group" name="group" class="coral-Form-field">
         <sly data-sly-list.option="${model.options}">
-            <coral-select-item value="/etc/packages${option.value ? '/' : ''}${option.value}" selected="${option.selected}">
+            <coral-select-item value="/etc/packages${option.value ? '/' : ''}${option.value}" selected="${option.text=='All packages'}">
                 ${option.text}
             </coral-select-item>
         </sly>
