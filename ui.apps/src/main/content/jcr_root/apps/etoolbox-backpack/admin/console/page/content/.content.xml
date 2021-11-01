@@ -178,7 +178,7 @@
                         jcr:title="Success"
                         jcr:titleError="Error"
                         sling:resourceType="granite/ui/components/coral/foundation/form/responses/openprompt"
-                        open="/tools/etoolbox/backpack/buildPackage.html?path={packagePath}"
+                        open="/tools/etoolbox/backpack/package.html?path={packagePath}"
                         redirect="/tools/etoolbox/backpack.html/?group=/etc/packages/{groupName}"
                         text="Your package has been created."/>
                 <items jcr:primaryType="nt:unstructured">
