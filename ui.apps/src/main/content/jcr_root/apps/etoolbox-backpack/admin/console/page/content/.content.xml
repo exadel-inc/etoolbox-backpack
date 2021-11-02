@@ -223,7 +223,11 @@
                                                     fieldLabel="Filter Path"
                                                     composite="{Boolean}true"
                                                     required="{Boolean}true"
-                                                    granite:class="cq-dialog-path-filter-option">
+                                                    granite:class="cq-dialog-path-filter-option"
+                                                    granite:id="create-package-multifield">
+                                                <granite:data
+                                                        jcr:primaryType="nt:unstructured"
+                                                        paths="${param.paths}"/>
                                                 <field
                                                         jcr:primaryType="nt:unstructured"
                                                         name="paths"
@@ -235,6 +239,7 @@
                                                                 allowBulkEdit="true"
                                                                 autocreateTag="true"
                                                                 fieldLabel="Path"
+                                                                value="${param.path}"
                                                                 multiple="false"
                                                                 required="{Boolean}true"
                                                                 name="path"/>
