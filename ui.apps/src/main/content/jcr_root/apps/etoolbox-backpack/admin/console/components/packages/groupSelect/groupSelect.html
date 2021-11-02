@@ -2,9 +2,9 @@
 <div class="coral-Form-fieldwrapper">
     <label class="coral-Form-fieldlabel">Group</label>
 
-    <coral-select id="indexTypeSelect" placeholder="Select Group" name="group" class="coral-Form-field">
+    <coral-select id="indexTypeSelect" placeholder="Select Group" name="group" class="coral-Form-field" value="Select Group">
         <sly data-sly-list.option="${model.options}">
-            <coral-select-item value="/etc/packages${option.value ? '/' : ''}${option.value}" selected="${option.text=='All packages'}">
+            <coral-select-item value="/etc/packages${option.value ? '/' : ''}${option.value}" selected="${option.selected}">
                 ${option.text}
             </coral-select-item>
         </sly>
