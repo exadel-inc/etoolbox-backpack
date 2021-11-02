@@ -109,7 +109,7 @@
                         href="/crx/packmgr"
                         x-cq-linkchecker="valid"
                         text="CRX Package Manager"
-                        variant="actionBar">
+                        icon="Actions">
                 </crxPM>
                 <create
                         jcr:primaryType="nt:unstructured"
