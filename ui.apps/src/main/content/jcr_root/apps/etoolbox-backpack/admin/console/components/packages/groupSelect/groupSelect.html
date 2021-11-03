@@ -1,10 +1,10 @@
-<sly data-sly-use.model="com.exadel.etoolbox.backpack.core.model.PackageGroups"></sly>
+<sly data-sly-use.model="com.exadel.etoolbox.backpack.core.model.PackageGroups"
+     data-sly-set.isFirstLoad="${request.queryString.toString==null}"></sly>
 <div class="coral-Form-fieldwrapper">
     <label class="coral-Form-fieldlabel">Group</label>
-
     <coral-select id="indexTypeSelect" placeholder="Select Group" name="group" class="coral-Form-field">
         <sly data-sly-list.option="${model.options}">
-            <coral-select-item value="/etc/packages${option.value ? '/' : ''}${option.value}" selected="${option.selected}">
+            <coral-select-item value="/etc/packages${option.value ? '/' : ''}${option.value}" selected="${isFirstLoad ? option.text=='All packages' : option.selected}">
                 ${option.text}
             </coral-select-item>
         </sly>
