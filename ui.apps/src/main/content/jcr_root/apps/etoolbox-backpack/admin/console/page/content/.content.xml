@@ -113,24 +113,15 @@
                 </crxPM>
                 <create
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="granite/ui/components/coral/foundation/pulldown"
+                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                        action="foundation.dialog"
+                        target=".screens-dcc-collection-resources"
                         text="Create"
                         variant="primary">
-                    <items jcr:primaryType="nt:unstructured">
-                        <createpackage
-                                granite:rel="cq-backpack-createpackage"
-                                jcr:primaryType="nt:unstructured"
-                                sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
-                                action="foundation.dialog"
-                                icon="experience"
-                                target=".screens-dcc-collection-resources"
-                                text="Package">
-                            <data
-                                    jcr:primaryType="nt:unstructured"
-                                    nesting="hide"
-                                    src.uritemplate="/apps/etoolbox-backpack/admin/console/page/content/createpagedialog.html"/>
-                        </createpackage>
-                    </items>
+                    <data
+                            jcr:primaryType="nt:unstructured"
+                            nesting="hide"
+                            src.uritemplate="/apps/etoolbox-backpack/admin/console/page/content/createpagedialog.html"/>
                     <granite:rendercondition
                             jcr:primaryType="nt:unstructured"
                             sling:resourceType="granite/ui/components/coral/foundation/renderconditions/privilege"
@@ -138,25 +129,17 @@
                             privileges="jcr:addChildNodes"/>
                 </create>
                 <upload
+                        granite:rel="cq-backpack-uploadpackage"
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="granite/ui/components/coral/foundation/pulldown"
+                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                        action="foundation.dialog"
+                        target=".screens-dcc-collection-resources"
                         text="Upload"
                         variant="primary">
-                    <items jcr:primaryType="nt:unstructured">
-                        <createpackage
-                                granite:rel="cq-backpack-uploadpackage"
-                                jcr:primaryType="nt:unstructured"
-                                sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
-                                action="foundation.dialog"
-                                icon="experience"
-                                target=".screens-dcc-collection-resources"
-                                text="Package">
-                            <data
-                                    jcr:primaryType="nt:unstructured"
-                                    nesting="hide"
-                                    src.uritemplate="/apps/etoolbox-backpack/admin/console/page/content/uploadpackagedialog.html"/>
-                        </createpackage>
-                    </items>
+                    <data
+                            jcr:primaryType="nt:unstructured"
+                            nesting="hide"
+                            src.uritemplate="/apps/etoolbox-backpack/admin/console/page/content/uploadpackagedialog.html"/>
                 </upload>
             </secondary>
         </actions>
