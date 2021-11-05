@@ -40,7 +40,7 @@ public class PackageGroups {
     private static final String ROOT_KEY = "/etc/packages";
 
     private static final String ROOT_TEXT = "All packages";
-//    private static final String ETOOLBOX_BACK_PACK = "EToolbox_BackPack";
+
     @Self
     private SlingHttpServletRequest request;
 
