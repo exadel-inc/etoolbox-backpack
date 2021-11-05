@@ -40,7 +40,7 @@ public class PackageGroups {
     private static final String ROOT_KEY = "/etc/packages";
 
     private static final String ROOT_TEXT = "All packages";
-    private static final String ETOOLBOX_BACK_PACK = "EToolbox_BackPack";
+//    private static final String ETOOLBOX_BACK_PACK = "EToolbox_BackPack";
     @Self
     private SlingHttpServletRequest request;
 
@@ -56,11 +56,10 @@ public class PackageGroups {
     public void init() {
         ResourceResolver resolver = request.getResourceResolver();
         List<Resource> results = packageInfoService.getPackageFolders(resolver);
-        String groupParam = request.getParameter("group");
-        String group = StringUtils.isNotBlank(groupParam) ? groupParam : ROOT_KEY + "/" + ETOOLBOX_BACK_PACK;
+        String groupParam = request.getParameter("group")==null ? ROOT_KEY : request.getParameter("group");
 
         options = results.stream()
-                .map(resource -> createDataOption(resource, group))
+                .map(resource -> createDataOption(resource, groupParam))
                 .collect(Collectors.toList());
         Option rootOption = createDataOption(resolver.getResource(ROOT_KEY), groupParam);
         options.add(0, rootOption);
