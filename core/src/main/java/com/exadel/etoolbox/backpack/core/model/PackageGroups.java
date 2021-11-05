@@ -57,7 +57,6 @@ public class PackageGroups {
         ResourceResolver resolver = request.getResourceResolver();
         List<Resource> results = packageInfoService.getPackageFolders(resolver);
         String groupParam = request.getParameter("group")==null ? ROOT_KEY : request.getParameter("group");
-
         options = results.stream()
                 .map(resource -> createDataOption(resource, groupParam))
                 .collect(Collectors.toList());
