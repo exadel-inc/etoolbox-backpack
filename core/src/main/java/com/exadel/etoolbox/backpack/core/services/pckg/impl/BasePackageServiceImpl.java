@@ -22,6 +22,7 @@ import com.exadel.etoolbox.backpack.core.services.QueryService;
 import com.exadel.etoolbox.backpack.core.services.ReferenceService;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.CreatePackageService;
+import com.exadel.etoolbox.backpack.core.services.pckg.PackageSizeService;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageModel;
 import com.exadel.etoolbox.backpack.core.servlets.model.PathModel;
 import com.google.common.cache.Cache;
@@ -102,6 +103,9 @@ public class BasePackageServiceImpl implements BasePackageService {
     protected Cache<String, PackageInfo> packageInfos;
     protected boolean enableStackTrace;
 
+    @Reference
+    protected PackageSizeService packageSizeService;
+
     /**
      * Run upon this OSGi service activation to initialize cache storage of collected {@link PackageInfo} objects
      *
@@ -163,6 +167,7 @@ public class BasePackageServiceImpl implements BasePackageService {
         packageInfo.setThumbnailPath(packageModel.getThumbnailPath());
         packageInfo.setQuery(packageModel.getQuery());
         packageInfo.setToggle(packageModel.isToggle());
+        packageInfo.setDataSize(packageSizeService.getPackageSize(resourceResolver, actualPaths));
 
         String packageGroupName = DEFAULT_PACKAGE_GROUP;
 

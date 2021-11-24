@@ -20,6 +20,7 @@ import com.exadel.etoolbox.backpack.core.services.ReferenceService;
 import com.exadel.etoolbox.backpack.core.services.impl.QueryServiceImpl;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
+import com.exadel.etoolbox.backpack.core.services.pckg.PackageSizeService;
 import com.exadel.etoolbox.backpack.core.servlets.model.PathModel;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -84,6 +85,7 @@ public class Base {
     protected ReferenceService referenceServiceMock = mock(ReferenceService.class);
     protected Map<String, List<String>> referencedResources;
     protected BasePackageService basePackageService;
+    protected PackageSizeService packageSizeService;
 
     @Before
     public void beforeTest() throws IOException, RepositoryException {
@@ -102,6 +104,7 @@ public class Base {
         Map<String, Object> properties = new HashMap<>();
         properties.put("buildInfoTTL", 1);
         context.registerInjectActivateService(new QueryServiceImpl());
+        packageSizeService = context.registerInjectActivateService(new PackageSizeServiceImpl());
         basePackageService = context.registerInjectActivateService(new BasePackageServiceImpl(), properties);
         packageInfoService = context.registerInjectActivateService(new PackageInfoServiceImpl());
 
