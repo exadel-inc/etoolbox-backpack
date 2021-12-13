@@ -50,7 +50,6 @@ public class PackageSizeScheduler implements Runnable {
     public static @interface Config {
 
         @AttributeDefinition(name = "Cron-job expression")
-//        String scheduler_expression() default "0 0 12 1/1 * ? *";
         String scheduler_expression() default "0 0/1 * 1/1 * ? *";
 
         @AttributeDefinition(name = "Concurrent task",
