@@ -14,6 +14,9 @@
 package com.exadel.etoolbox.backpack.core.services.pckg.impl;
 
 import com.exadel.etoolbox.backpack.core.services.pckg.PackageSizeService;
+import org.apache.jackrabbit.JcrConstants;
+import org.apache.jackrabbit.commons.iterator.NodeIteratorAdapter;
+import org.apache.sling.api.resource.AbstractResourceVisitor;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -23,165 +26,161 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.*;
-import javax.jcr.query.QueryResult;
+import javax.jcr.query.Query;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 /**
- * Implements {@link PackageSizeService} to provide base operation with package
+ * Implements {@link PackageSizeService} to provide base operation with package size
  */
 @Component(service = PackageSizeService.class)
 public class PackageSizeServiceImpl implements PackageSizeService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PackageSizeServiceImpl.class);
 
+    private static final String USER = "backpack-service";
+    private static final Map<String, Long> packageSizes = new HashMap<>();
+    private static final Map<String, Object> paramMap = new HashMap<>();
+    private static final String query = "SELECT base.* FROM [nt:resource] AS base WHERE ISDESCENDANTNODE(base,[/etc/packages]) AND [jcr:mimeType] = 'application/zip'";
+    private static long averageNodeSize = 0;
+
     @Reference
     private ResourceResolverFactory resolverFactory;
 
-    final String USER = "backpack-service";
-    Map<String, Object> paramMap;
+    /**
+     * Calculates package size
+     *
+     * @param resourceResolver Current {@code ResourceResolver} object
+     * @param paths List<String> enumerating addresses of package's descendant nodes
+     * @return Size of package - long
+     */
+    @Override
+    public long getPackageSize(final ResourceResolver resourceResolver, List<String> paths) {
+        long nodeCounts = getNodesCount(resourceResolver, paths);
+        if (averageNodeSize != 0) {
+            return nodeCounts * averageNodeSize;
+        }
+        Resource sizeResource = resourceResolver.getResource("/var/etoolbox-backpack");
+        if (sizeResource == null) {
+            LOGGER.warn("Could not get package size");
+            return 0L;
+        }
+        try {
+            Node sizeNode = sizeResource.adaptTo(Node.class);
+            Property averageSize = sizeNode.getProperty("averageSize");
+            if (averageSize == null) {
+                LOGGER.warn("Could not get average size");
+                return 0L;
+            }
+            averageNodeSize = averageSize.getLong();
+            return nodeCounts * averageNodeSize;
+        } catch (RepositoryException e) {
+            LOGGER.error("Could not get package size", e);
+        }
+        LOGGER.warn("Could not get package size");
+        return 0L;
+    }
 
     @Override
     public void calculateAverageSize() {
-        Map<String, Long> packageSizes = new HashMap<>();
-        paramMap = new HashMap<>();
         paramMap.put(ResourceResolverFactory.SUBSERVICE, USER);
-        List<String> paths = new ArrayList<>();
-        Node packageNode;
-        NodeIterator localIterator;
-        Node localNode;
-        long size;
         Session session;
-        String query = "SELECT base.* FROM [nt:resource] AS base WHERE ISDESCENDANTNODE(base,[/etc/packages]) " +
-                "AND [jcr:mimeType] = 'application/zip'";
         try (ResourceResolver resourceResolver = resolverFactory.getServiceResourceResolver(paramMap)) {
             session = resourceResolver.adaptTo(Session.class);
-            if (session != null) {
-                NodeIterator nodeIterator = session.getWorkspace().getQueryManager().createQuery(query, "JCR-SQL2").execute().getNodes();
-                while (nodeIterator.hasNext()) {
-                    packageNode = nodeIterator.nextNode();
-                    localNode = packageNode.getNode("vlt:definition");
-                    if (localNode != null) {
-                        localNode = localNode.getNode("filter");
-                        if (localNode != null) {
-                            localIterator = localNode.getNodes();
-                            while (localIterator.hasNext()) {
-                                paths.add(localIterator.nextNode().getProperty("root").getString());
-                            }
-                            size = Math.abs(getAverageSizeOfPackage(paths, session, packageNode.getProperty("jcr:data").getValue().getBinary().getSize()));
-                            packageSizes.put(packageNode.getParent().getName(), size);
-                            paths.clear();
-                        }
-                    }
-                }
-                setAverageSizeOfPackages(resourceResolver, packageSizes);
-                session.save();
+            if (session == null) {
+                LOGGER.warn("Session is null");
+                return;
             }
+            NodeIterator nodeIterator = session.getWorkspace().getQueryManager().createQuery(query, Query.JCR_SQL2).execute().getNodes();
+            while (nodeIterator.hasNext()) {
+                Node packageNode = nodeIterator.nextNode();
+                NodeIterator localIterator = getChildNodes(packageNode);
+                List<String> paths = new ArrayList<>();
+                while (localIterator.hasNext()) {
+                    paths.add(localIterator.nextNode().getProperty("root").getString());
+                }
+                long dataSize = Math.abs(packageNode.getProperty("jcr:data").getValue().getBinary().getSize()) / 76;
+                long nodesCount = getNodesCount(resourceResolver, paths);
+                long size = (dataSize / nodesCount);
+                packageSizes.put(packageNode.getParent().getName(), size);
+                paths.clear();
+            }
+            setAverageSizeOfPackages(resourceResolver);
+            session.save();
         } catch (Exception e) {
             LOGGER.error("Cannot calculate average size", e);
         }
     }
 
-    private long getAverageSizeOfPackage(List<String> paths, Session session, long dataSize) {
-        StringBuilder query;
-        NodeIterator nodeIterator;
-        long nodesCount = 1L;
-        if (paths.size() > 1) {
-            query = new StringBuilder("SELECT * FROM [nt:base] AS a WHERE (");
-            for (int i = 0; i < paths.size() - 1; i++) {
-                query.append("ISDESCENDANTNODE([").append(paths.get(i)).append("]) OR ");
-            }
-            query.append("ISDESCENDANTNODE([").append(paths.get(paths.size() - 1)).append("]))");
-        } else if (paths.size() == 0) {
-            return nodesCount;
+    private NodeIterator getChildNodes(Node node) throws RepositoryException {
+        NodeIterator nodeIterator = NodeIteratorAdapter.EMPTY;
+        Node childNode = node.getNode("vlt:definition");
+        if (childNode == null) {
+            LOGGER.warn("Child node vlt:definition is null");
+            return nodeIterator;
+        }
+        childNode = childNode.getNode("filter");
+        if (childNode == null) {
+            LOGGER.warn("Child node filter is null");
+            return nodeIterator;
+        }
+        return childNode.getNodes();
+    }
+
+    private void setAverageSizeOfPackages(final ResourceResolver resourceResolver) throws RepositoryException {
+        final String packageSize = "etoolbox-backpack";
+        Resource resourcePackages = resourceResolver.getResource("/var");
+        if (resourcePackages == null) {
+            return;
+        }
+        Resource packageSizesResource = resourcePackages.getChild(packageSize);
+        Node packageSizesNode;
+        if (packageSizesResource == null) {
+            packageSizesNode = resourcePackages.adaptTo(Node.class).addNode(packageSize, JcrConstants.NT_UNSTRUCTURED);
         } else {
-            query = new StringBuilder("SELECT * FROM [nt:base] AS node WHERE ISDESCENDANTNODE([" + paths.get(0) + "])");
+            packageSizesNode = packageSizesResource.adaptTo(Node.class);
         }
-        try {
-            nodeIterator = session.getWorkspace().getQueryManager().createQuery(query.toString(), "JCR-SQL2").execute().getNodes();
-            while (nodeIterator.hasNext()) {
-                nodesCount++;
-                nodeIterator.nextNode();
-            }
-            return (dataSize / nodesCount) / 50;
-        } catch (Exception e) {
-            LOGGER.error("This package contain too much nodes", e);
-        }
-        return nodesCount;
-    }
-
-    private void setAverageSizeOfPackages(final ResourceResolver resourceResolver, Map<String, Long> packageSizes) throws RepositoryException {
-        boolean isNull = false;
-        Resource resourcePackages = resourceResolver.getResource("/etc/packages");
-        Node packageSizesNode = null;
-        if (resourcePackages != null) {
-            try {
-                packageSizesNode = resourcePackages.getChild("packageSize").adaptTo(Node.class);
-            } catch (NullPointerException e) {
-                LOGGER.error("Package Sizes Node is null", e);
-                isNull = true;
-            }
-            if (isNull) {
-                packageSizesNode = resourcePackages.adaptTo(Node.class).addNode("packageSize", "nt:unstructured");
-            }
-            if (packageSizesNode != null) {
-                OptionalDouble size = LongStream.of(packageSizes.values().stream().mapToLong(l -> l).toArray()).average();
-                if (size.isPresent()) {
-                    packageSizesNode.setProperty("AverageSize", (long) size.getAsDouble());
-                    packageSizesNode.setProperty("Packages", Arrays.toString(packageSizes.keySet().toArray()));
-                }
-
-            }
+        OptionalDouble size = LongStream.of(packageSizes.values().stream().mapToLong(x -> x).toArray()).average();
+        if (size.isPresent()) {
+            averageNodeSize = (long) size.getAsDouble();
+            packageSizesNode.setProperty("averageSize", averageNodeSize);
         }
     }
 
-    private long getAverageSizeOfPackages(final ResourceResolver resourceResolver) throws RepositoryException {
-        try {
-            Node size = resourceResolver.getResource("/etc/packages/packageSize").adaptTo(Node.class);
-            return size.getProperty("AverageSize").getLong();
-        } catch (NullPointerException e) {
-            LOGGER.error("Node doesn't exist", e);
-        }
-        return 1L;
+    private long getNodesCount(final ResourceResolver resourceResolver, List<String> paths) {
+        ResourceFinder finder = new ResourceFinder();
+        List<Resource> resources = paths.stream().map(resourceResolver::getResource).collect(Collectors.toList());
+        resources.forEach(finder::accept);
+        return finder.getResult();
     }
 
-    /**
-     * Calculated package size
-     *
-     * @param paths List<String> representing where is located package descendant nodes.
-     * @return Size of package - long.
-     */
-    public long getPackageSize(final ResourceResolver resourceResolver, List<String> paths) {
-        Session session;
-        long size = 0L;
-        StringBuilder query;
-        if (paths.size() > 1) {
-            query = new StringBuilder("SELECT * FROM [nt:base] AS a WHERE (");
-            for (int i = 0; i < paths.size() - 1; i++) {
-                query.append("ISDESCENDANTNODE([").append(paths.get(i)).append("]) OR ");
-            }
-            query.append("ISDESCENDANTNODE([").append(paths.get(paths.size() - 1)).append("]))");
-        } else if (paths.size() == 0) {
-            return size;
-        } else {
-            query = new StringBuilder("SELECT * FROM [nt:base] AS node WHERE ISDESCENDANTNODE([" + paths.get(0) + "])");
+    private static class ResourceFinder extends AbstractResourceVisitor {
+        private boolean isFirstCall = true;
+        private long result;
+
+        public long getResult() {
+            return result;
         }
-        try {
-            session = resourceResolver.adaptTo(Session.class);
-            if (session != null) {
-                QueryResult queryResult = session.getWorkspace().getQueryManager().createQuery(query.toString(), "JCR-SQL2").execute();
-                NodeIterator nodeIterator = queryResult.getNodes();
-                long nodesCount = 0L;
-                while (nodeIterator.hasNext()) {
-                    nodeIterator.nextNode();
-                    nodesCount++;
-                }
-                session.save();
-                size = nodesCount * getAverageSizeOfPackages(resourceResolver);
+
+        @Override
+        public void accept(Resource resource) {
+            if (resource == null) {
+                return;
             }
-        } catch (RepositoryException e) {
-            e.printStackTrace();
+            visit(resource);
+            if (isFirstCall) {
+                isFirstCall = false;
+                Iterator<Resource> children = resource.listChildren();
+                traverseChildren(children);
+            } else {
+                traverseChildren(resource.listChildren());
+            }
         }
-        return size;
+
+        @Override
+        protected void visit(Resource resource) {
+            result++;
+        }
     }
 }

@@ -17,9 +17,21 @@ import org.apache.sling.api.resource.ResourceResolver;
 
 import java.util.List;
 
+/**
+ * Represents a service running in an AEM instance responsible for base operation with package size
+ */
 public interface PackageSizeService {
 
+    /**
+     * Calculates average size of node in package
+     */
     void calculateAverageSize();
 
+    /**
+     * Calculates package size.
+     * @param resourceResolver {@code ResourceResolver} used to get access to repository
+     * @param paths {@code List} used to calculate count of nodes included in archive
+     * @return Size of package
+     */
     long getPackageSize(final ResourceResolver resourceResolver, List<String> paths);
 }

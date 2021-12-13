@@ -24,40 +24,37 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Schedules the task for gathering package statistics
+ */
+@Component(service = Runnable.class,
+           immediate = true)
 @Designate(ocd = PackageSizeScheduler.Config.class)
-@Component(service = Runnable.class)
 public class PackageSizeScheduler implements Runnable {
-
-    @ObjectClassDefinition(name = "Package Size Scheduler",
-            description = "Scheduler to define size rate")
-    public static @interface Config {
-
-        @AttributeDefinition(name = "Cron-job expression")
-        String scheduler_expression() default "0 0 12 1/1 * ? *";
-
-        @AttributeDefinition(name = "Concurrent task",
-                description = "Whether or not to schedule this task concurrently")
-        boolean scheduler_concurrent() default true;
-    }
-
-    @Reference
-    private Scheduler scheduler;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PackageSizeScheduler.class);
 
     @Reference
     private PackageSizeService packageSizeService;
 
-
-
-    @Activate
-    protected void activate(final Config config) {
-    }
-
     @Override
     public void run() {
         packageSizeService.calculateAverageSize();
     }
 
+    @Activate
+    protected void activate(final Config config) {
+    }
 
+    @ObjectClassDefinition(name = "Configuration for scheduler")
+    public static @interface Config {
+
+        @AttributeDefinition(name = "Cron-job expression")
+//        String scheduler_expression() default "0 0 12 1/1 * ? *";
+        String scheduler_expression() default "0 0/1 * 1/1 * ? *";
+
+        @AttributeDefinition(name = "Concurrent task",
+                description = "Whether or not to schedule this task concurrently")
+        boolean scheduler_isConcurrent() default false;
+    }
 }

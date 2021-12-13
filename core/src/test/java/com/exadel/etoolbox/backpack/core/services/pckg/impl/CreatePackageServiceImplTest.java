@@ -31,8 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 public class CreatePackageServiceImplTest extends Base {
 
@@ -121,6 +120,24 @@ public class CreatePackageServiceImplTest extends Base {
 
         assertEquals(PackageStatus.ERROR, aPackage.getPackageStatus());
         assertEquals("ERROR: Package does not contain any valid filters.", aPackage.getLog().get(0));
+    }
+
+    @Test
+    public void shouldCreatePackageWithPackageSize() throws RepositoryException {
+        PackageModel packageModel = new PackageModel();
+        initBasePackageInfo(packageModel, Collections.singletonList(PAGE_1), false);
+        PackageInfo aPackage = createPackage.createPackage(resourceResolver, packageModel);
+
+        assertTrue(aPackage.getDataSize() > 0);
+    }
+
+    @Test
+    public void shouldCreatePackageWithoutPackageSize() {
+        PackageModel packageModel = new PackageModel();
+        initBasePackageInfo(packageModel, Collections.emptyList(), false);
+        PackageInfo aPackage = createPackage.createPackage(resourceResolver, packageModel);
+
+        assertEquals(0, (long) aPackage.getDataSize());
     }
 
     private void initBasePackageInfo(final PackageModel model, final List<String> strings, final boolean excludeChildren) {

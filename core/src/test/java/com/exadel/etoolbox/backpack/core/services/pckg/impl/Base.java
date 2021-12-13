@@ -65,6 +65,7 @@ public class Base {
     protected static final String TEST_PACKAGE = "testPackage";
     protected static final String PACKAGE_VERSION = "1";
     protected static final String PACKAGE_VERSION_2 = "2";
+    protected static final String PACKAGE_SIZE_NODE = "/var/etoolbox-backpack";
 
     protected static final String TEST_GROUP = "testGroup";
 
@@ -99,6 +100,7 @@ public class Base {
         referenceServiceMock = mock(ReferenceService.class);
         when(referenceServiceMock.getReferences(any(ResourceResolver.class), any(String.class))).thenReturn(assetReferenceItems);
 
+
         context.registerService(ReferenceService.class, referenceServiceMock);
 
         Map<String, Object> properties = new HashMap<>();
@@ -112,6 +114,7 @@ public class Base {
         context.create().page(PAGE_2);
         context.create().asset(PICTURE_1, 100, 100, IMAGE_JPEG);
         context.create().asset(PICTURE_2, 100, 100, IMAGE_PNG);
+        context.create().resource(PACKAGE_SIZE_NODE, Collections.singletonMap("averageSize", 4000));
         resourceResolver = context.resourceResolver();
         session = resourceResolver.adaptTo(Session.class);
         packMgr = PackagingService.getPackageManager(session);
