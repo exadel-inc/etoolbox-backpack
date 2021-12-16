@@ -87,7 +87,6 @@ public class PackageSizeServiceImpl implements PackageSizeService {
      */
     @Override
     public void calculateAverageSize() {
-        LOGGER.info("===========================start calculation==============================================");
         paramMap.put(ResourceResolverFactory.SUBSERVICE, USER);
         Session session;
         try (ResourceResolver resourceResolver = resolverFactory.getServiceResourceResolver(paramMap)) {
