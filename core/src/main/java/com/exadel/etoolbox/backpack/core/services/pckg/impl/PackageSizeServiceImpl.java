@@ -82,8 +82,12 @@ public class PackageSizeServiceImpl implements PackageSizeService {
         return 0L;
     }
 
+    /**
+     * Calculates average size of node in compilated packages
+     */
     @Override
     public void calculateAverageSize() {
+        LOGGER.info("===========================start calculation==============================================");
         paramMap.put(ResourceResolverFactory.SUBSERVICE, USER);
         Session session;
         try (ResourceResolver resourceResolver = resolverFactory.getServiceResourceResolver(paramMap)) {
@@ -113,6 +117,14 @@ public class PackageSizeServiceImpl implements PackageSizeService {
         }
     }
 
+    /**
+     * Called by {@link PackageSizeServiceImpl#calculateAverageSize()}
+     * for getting child nodes
+     *
+     * @param node for whom we get child nodes
+     * @return instance of the{@link NodeIterator}
+     * @throws RepositoryException in case {@code Node} doesn't have child nodes
+     */
     private NodeIterator getChildNodes(Node node) throws RepositoryException {
         NodeIterator nodeIterator = NodeIteratorAdapter.EMPTY;
         Node childNode = node.getNode("vlt:definition");
@@ -128,6 +140,12 @@ public class PackageSizeServiceImpl implements PackageSizeService {
         return childNode.getNodes();
     }
 
+    /**
+     * Called by {@link PackageSizeServiceImpl#calculateAverageSize()} in order to save result in JcrRepository
+     *
+     * @param resourceResolver Current {@code ResourceResolver} object
+     * @throws RepositoryException in cases where we cannot add the node or set property for it.
+     */
     private void setAverageSizeOfPackages(final ResourceResolver resourceResolver) throws RepositoryException {
         final String packageSize = "etoolbox-backpack";
         Resource resourcePackages = resourceResolver.getResource("/var");
@@ -148,6 +166,14 @@ public class PackageSizeServiceImpl implements PackageSizeService {
         }
     }
 
+    /**
+     * Called by {@link PackageSizeServiceImpl#getPackageSize(ResourceResolver, List)} and {@link PackageSizeServiceImpl#calculateAverageSize()}
+     * for getting count of all nodes in package
+     *
+     * @param resourceResolver Current {@code ResourceResolver} object
+     * @param paths List<String> enumerating addresses of package's descendant nodes
+     * @return count of nodes
+     */
     private long getNodesCount(final ResourceResolver resourceResolver, List<String> paths) {
         ResourceFinder finder = new ResourceFinder();
         List<Resource> resources = paths.stream().map(resourceResolver::getResource).collect(Collectors.toList());
@@ -155,6 +181,9 @@ public class PackageSizeServiceImpl implements PackageSizeService {
         return finder.getResult();
     }
 
+    /**
+     * Implementation of traversing for {@link PackageSizeServiceImpl#getNodesCount(ResourceResolver, List)}
+     */
     private static class ResourceFinder extends AbstractResourceVisitor {
         private boolean isFirstCall = true;
         private long result;
