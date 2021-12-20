@@ -122,30 +122,10 @@ public class CreatePackageServiceImplTest extends Base {
         assertEquals("ERROR: Package does not contain any valid filters.", aPackage.getLog().get(0));
     }
 
-    @Test
-    public void shouldCreatePackageWithPackageSize() throws RepositoryException {
-        PackageModel packageModel = new PackageModel();
-        initBasePackageInfo(packageModel, Collections.singletonList(PAGE_1), false);
-        PackageInfo aPackage = createPackage.createPackage(resourceResolver, packageModel);
-
-        assertTrue(aPackage.getDataSize() > 0);
-    }
-
-    @Test
-    public void shouldCreatePackageWithoutPackageSize() {
-        PackageModel packageModel = new PackageModel();
-        initBasePackageInfo(packageModel, Collections.emptyList(), false);
-        PackageInfo aPackage = createPackage.createPackage(resourceResolver, packageModel);
-
-        assertEquals(0, (long) aPackage.getDataSize());
-    }
-
     private void initBasePackageInfo(final PackageModel model, final List<String> strings, final boolean excludeChildren) {
         model.setPaths(strings.stream().map(s -> new PathModel(s, excludeChildren)).collect(Collectors.toList()));
         model.setPackageName(TEST_PACKAGE);
         model.setThumbnailPath(THUMBNAIL);
         model.setVersion(PACKAGE_VERSION);
     }
-
-
 }

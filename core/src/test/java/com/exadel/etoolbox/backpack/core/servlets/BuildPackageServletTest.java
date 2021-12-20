@@ -22,7 +22,6 @@ import com.exadel.etoolbox.backpack.core.services.impl.ReferenceServiceImpl;
 import com.exadel.etoolbox.backpack.core.services.pckg.BuildPackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.impl.BasePackageServiceImpl;
 import com.exadel.etoolbox.backpack.core.services.pckg.impl.PackageInfoServiceImpl;
-import com.exadel.etoolbox.backpack.core.services.pckg.impl.PackageSizeServiceImpl;
 import com.exadel.etoolbox.backpack.core.servlets.model.BuildPackageModel;
 import com.exadel.etoolbox.backpack.core.util.CalendarAdapter;
 import com.exadel.etoolbox.backpack.request.RequestAdapter;
@@ -71,7 +70,6 @@ public class BuildPackageServletTest {
         context.registerService(ReferenceService.class, new ReferenceServiceImpl());
         Map<String, Object> properties = new HashMap<>();
         properties.put("buildInfoTTL", 1);
-        context.registerInjectActivateService(new PackageSizeServiceImpl());
         context.registerInjectActivateService(new BasePackageServiceImpl(), properties);
         context.registerInjectActivateService(new PackageInfoServiceImpl());
         servlet = context.registerInjectActivateService(new BuildPackageServlet());

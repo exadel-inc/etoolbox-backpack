@@ -24,7 +24,6 @@ import com.exadel.etoolbox.backpack.core.servlets.model.BuildPackageModel;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
 import org.apache.jackrabbit.vault.fs.api.ProgressTrackerListener;
@@ -33,9 +32,7 @@ import org.apache.jackrabbit.vault.packaging.JcrPackage;
 import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
 import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
 import org.apache.jackrabbit.vault.packaging.PackageException;
-import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.jcr.api.SlingRepository;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -44,7 +41,6 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import javax.jcr.SimpleCredentials;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Calendar;
@@ -110,11 +106,11 @@ public class BuildPackageImpl implements BuildPackageService {
                     }
                     includeGeneralResources(definition, s -> {
                         packageInfo.addLogMessage("A " + s);
-                        totalSize.addAndGet(getAssetSize(resourceResolver, s));
+                        totalSize.addAndGet(basePackageService.getAssetSize(resourceResolver, s));
                     });
                     includeReferencedResources(requestInfo.getReferencedResources(), definition, s -> {
                         packageInfo.addLogMessage("A " + s);
-                        totalSize.addAndGet(getAssetSize(resourceResolver, s));
+                        totalSize.addAndGet(basePackageService.getAssetSize(resourceResolver, s));
                     });
                     packageInfo.setDataSize(totalSize.get());
                     packageInfo.setPackageBuilt(definition.getLastWrapped());
@@ -268,42 +264,4 @@ public class BuildPackageImpl implements BuildPackageService {
             packageGeneralResources.forEach(pathConsumer);
         }
     }
-
-    /**
-     * Called by {@link BuildPackageImpl#testBuildPackage(ResourceResolver, BuildPackageModel)} to compute size
-     * of the asset specified by path
-     *
-     * @param resourceResolver {@code ResourceResolver} used to retrieve path-specified {@code Resource}s
-     * @param path             JCR path of the required resource
-     * @return Asset size in bytes, or 0 if the asset is not found
-     */
-
-    private long getAssetSize(ResourceResolver resourceResolver, String path) {
-        Resource rootResource = resourceResolver.getResource(path);
-        return getAssetSize(rootResource);
-    }
-
-    /**
-     * Called by {@link BuildPackageImpl#getAssetSize(ResourceResolver, String)} to recursively compute the size of
-     * the current resource and its child resources, summed up
-     *
-     * @param resource The {@code Resource} to compute size for
-     * @return Resource size in bytes, or 0 if the resource is a null value
-     */
-
-    private long getAssetSize(Resource resource) {
-        long totalSize = 0L;
-        if (resource == null) {
-            return totalSize;
-        }
-        for (Resource child : resource.getChildren()) {
-            totalSize += getAssetSize(child);
-        }
-        Resource childResource = resource.getChild("jcr:content/jcr:data");
-        if (childResource != null && childResource.getResourceMetadata().containsKey("sling.contentLength")) {
-            totalSize += (Long) childResource.getResourceMetadata().get("sling.contentLength");
-        }
-        return totalSize;
-    }
-
 }
