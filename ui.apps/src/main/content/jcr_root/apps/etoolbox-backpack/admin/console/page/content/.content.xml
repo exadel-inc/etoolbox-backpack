@@ -85,7 +85,7 @@
                     path="${requestPathInfo.suffix}"
                     selectionMode="${state[&quot;shell.collectionpage.selectionMode&quot;].boolean}"
                     size="${empty requestPathInfo.selectors[1] ? &quot;20&quot; : requestPathInfo.selectors[1]}"
-                    src="/apps/etoolbox-backpack/admin/console/page/content/jcr:content/views/card{.offset,limit}.html?group=${param.group != null ? param.group : '/etc/packages/EToolbox_BackPack'}{+id}"
+                    src="/apps/etoolbox-backpack/admin/console/page/content/jcr:content/views/card{.offset,limit}.html?group=${param.group != null ? param.group : '/etc/packages/'}"
                     stateId="shell.collectionpage">
                 <datasource
                         jcr:primaryType="nt:unstructured"
