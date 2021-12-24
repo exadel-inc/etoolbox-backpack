@@ -48,7 +48,7 @@
 
     String parentPath = ex.getString(dsCfg.get("path", String.class));
     if (StringUtils.isBlank(parentPath) || parentPath.equals("/")) {
-        parentPath = ETC_PACKAGES + "EToolbox_BackPack";
+        parentPath = ETC_PACKAGES;
     }
 
     if (StringUtils.isNotBlank(request.getParameter("group"))) {
