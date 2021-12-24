@@ -13,7 +13,11 @@
  */
 
 [data-globalnav-anchor-href='/tools/etoolbox/backpack.html'] .coral3-Icon--gift:before {
-    content: url("../../../backpack-icon.png");
+    content: url("../../../backpack-icon.svg");
+}
+
+[title='Pack by Backpack'] .coral3-Icon--briefcase:before {
+    content: url("../../../backpack-icon-sites.svg");
 }
 
 [data-globalnav-anchor-href='/tools/etoolbox/backpack.html'] .globalnav-toolcard-icon {
