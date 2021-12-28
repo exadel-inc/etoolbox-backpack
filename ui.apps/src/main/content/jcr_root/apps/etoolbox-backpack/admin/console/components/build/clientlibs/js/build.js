@@ -173,21 +173,20 @@ $(function () {
     $installButton.click(function () {
         var dialog = document.querySelector('#installDialog');
         dialog.show();
-        $('#installSubmitBtn').click(function() {
-            $("#installForm").submit(function(e) {
-                e.preventDefault();
-                var form = $(this);
-                var url = form.attr('action');
-                $.ajax({
-                    type: "POST",
-                    url: url,
-                    data: form.serialize(),
-                    success: function(data) {
-                        $buildLog.empty();
-                        updateLog(0);
-                    }
-                });
-            });
+    });
+
+    $("#installForm").submit(function(e) {
+        e.preventDefault();
+        var form = $(this);
+        var url = form.attr('action');
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: form.serialize(),
+            success: function(data) {
+                $buildLog.empty();
+                updateLog(0);
+            }
         });
     });
 
