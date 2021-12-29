@@ -295,7 +295,7 @@
                         jcr:primaryType="nt:unstructured"
                         jcr:title="Success"
                         sling:resourceType="etoolbox-backpack/admin/console/components/openprompt"
-                        open="/tools/etoolbox/backpack/buildPackage.html?path={packagePath}"
+                        open="/tools/etoolbox/backpack/package.html?path={packagePath}"
                         redirect="/tools/etoolbox/backpack.html/?group=/etc/packages/{groupName}"
                         text="Your package has been uploaded."/>
                 <items jcr:primaryType="nt:unstructured">

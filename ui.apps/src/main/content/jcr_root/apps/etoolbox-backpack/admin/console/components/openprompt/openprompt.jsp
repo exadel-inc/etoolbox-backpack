@@ -13,8 +13,55 @@
   --%>
 
 <%@ include file="/libs/granite/ui/global.jsp" %><%
-%><%@page session="false"%>
+%><%@ page session="false"
+           import="org.apache.sling.commons.json.io.JSONStringer,
+                  com.adobe.granite.ui.components.AttrBuilder,
+                  com.adobe.granite.ui.components.Config,
+                  com.adobe.granite.ui.components.ExpressionHelper,
+                  com.adobe.granite.ui.components.Tag" %>
+<%
 
-<sling:adaptTo adaptable="${resource}" adaptTo="OpenPromptModel" var="comp"/>
+    Config cfg = cmp.getConfig();
+    ExpressionHelper ex = cmp.getExpressionHelper();
 
-<meta class="foundation-form-response-ui-success" data-foundation-form-response-ui-success="${comp.json}">
+    Tag tag = cmp.consumeTag();
+
+    AttrBuilder attrs = tag.getAttrs();
+    cmp.populateCommonAttrs(attrs);
+
+    JSONStringer json = new JSONStringer();
+    json.object();
+
+    json.key("name").value("backpack.prompt.open");
+    json.key("open").value(handleURITemplate(cfg, "open", ex, request));
+    json.key("redirect").value(handleURITemplate(cfg, "redirect", ex, request));
+    json.key("title").value(i18n.getVar(cfg.get("jcr:title", String.class)));
+    json.key("message").value(i18n.getVar(cfg.get("text", String.class)));
+
+    json.endObject();
+
+    attrs.addClass("foundation-form-response-ui-success");
+    attrs.add("data-foundation-form-response-ui-success", json.toString());
+
+%><meta <%= attrs %>><%!
+
+    private String handleURITemplate(Config cfg, String name, ExpressionHelper ex, HttpServletRequest request) {
+        String value = ex.getString(cfg.get(name, String.class));
+
+        if (value != null) {
+            if (value.startsWith("/")) {
+                return request.getContextPath() + value;
+            } else {
+                return value;
+            }
+        }
+
+        value = ex.getString(cfg.get(name + ".abs", String.class));
+
+        if (value != null) {
+            return request.getContextPath() + value;
+        } else {
+            return value;
+        }
+    }
+%>
