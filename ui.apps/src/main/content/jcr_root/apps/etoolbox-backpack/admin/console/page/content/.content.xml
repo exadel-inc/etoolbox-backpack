@@ -295,7 +295,7 @@
                         jcr:primaryType="nt:unstructured"
                         jcr:title="Success"
                         sling:resourceType="etoolbox-backpack/admin/console/components/openprompt"
-                        open="/tools/etoolbox/backpack/buildPackage.html?path={packagePath}"
+                        open="/tools/etoolbox/backpack/package.html?path={packagePath}"
                         redirect="/tools/etoolbox/backpack.html/?group=/etc/packages/{groupName}"
                         text="Your package has been uploaded."/>
                 <items jcr:primaryType="nt:unstructured">
@@ -307,15 +307,21 @@
                                     jcr:primaryType="nt:unstructured"
                                     sling:resourceType="granite/ui/components/coral/foundation/container">
                                 <items jcr:primaryType="nt:unstructured">
+                                    <filename
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                            fieldLabel="Package"
+                                            name="filename"
+                                            disabled="{Boolean}true"/>
                                     <fileupload
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/form/fileupload"
-                                            fieldLabel="Package"
                                             mimeTypes="[application/zip,application/x-zip-compressed,application/x-compressed]"
                                             multiple="{Boolean}false"
                                             name="fileupload"
                                             required="{Boolean}true"
-                                            text="Select package..."/>
+                                            text="Select package..."
+                                            emptyText=""/>
                                     <forceUpload
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
