@@ -17,7 +17,7 @@
                         sling:resourceType="granite/ui/components/coral/foundation/collection/action"
                         action="foundation.dialog"
                         activeSelectionCount="multiple"
-                        icon="briefcase"
+                        icon="backpack-sites"
                         target=".cq-siteadmin-admin-childpages"
                         text="Backpack"
                         variant="actionBar">

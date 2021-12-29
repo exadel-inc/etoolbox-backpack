@@ -12,14 +12,14 @@
  * limitations under the License.
  */
 
-[data-globalnav-anchor-href='/tools/etoolbox/backpack.html'] .coral3-Icon--gift:before {
-    content: url("../../../backpack-icon.svg");
+.coral3-Icon--backpack {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" version="1.1" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd" viewBox="0 0 30074 30074"><circle fill="%23666666" cx="15037" cy="15037" r="15037"/><path fill="%23ffffff" d="M11986 6121l0 0c0,-452 370,-822 822,-822l4436 0c452,0 822,370 822,822l0 0c0,452 -370,822 -822,822l-4436 0c-452,0 -822,-370 -822,-822zm-4526 8343l0 0c452,0 822,370 822,822l0 5200c0,452 -370,822 -822,822l0 0c-452,0 -822,-370 -822,-822l0 -5200c0,-452 370,-822 822,-822zm2660 -6088l9801 0c650,0 1181,532 1181,1181l0 12811c0,650 -531,1181 -1181,1181l-9801 0c-650,0 -1181,-532 -1181,-1181l0 -12811c0,-649 531,-1181 1181,-1181zm1144 12895l7519 0 0 -10660 -7519 0 0 10660zm11364 -6791l0 0c452,0 822,370 822,822l0 5201c0,452 -370,822 -822,822l0 0c-452,0 -823,-370 -823,-822l0 -5201c0,-452 370,-822 823,-822z"/></svg>');
+    height: 3rem;
+    width: 3rem;
 }
 
-[title='Pack by Backpack'] .coral3-Icon--briefcase:before {
-    content: url("../../../backpack-icon-sites.svg");
-}
-
-[data-globalnav-anchor-href='/tools/etoolbox/backpack.html'] .globalnav-toolcard-icon {
-    padding-top: 60px;
+.coral3-Icon--backpack-sites {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" version="1.1" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd" viewBox="0 0 30074 30074"><circle fill="%23666666" cx="15037" cy="15037" r="15037"/><path fill="%23ffffff" d="M11986 6121l0 0c0,-452 370,-822 822,-822l4436 0c452,0 822,370 822,822l0 0c0,452 -370,822 -822,822l-4436 0c-452,0 -822,-370 -822,-822zm-4526 8343l0 0c452,0 822,370 822,822l0 5200c0,452 -370,822 -822,822l0 0c-452,0 -822,-370 -822,-822l0 -5200c0,-452 370,-822 822,-822zm2660 -6088l9801 0c650,0 1181,532 1181,1181l0 12811c0,650 -531,1181 -1181,1181l-9801 0c-650,0 -1181,-532 -1181,-1181l0 -12811c0,-649 531,-1181 1181,-1181zm1144 12895l7519 0 0 -10660 -7519 0 0 10660zm11364 -6791l0 0c452,0 822,370 822,822l0 5201c0,452 -370,822 -822,822l0 0c-452,0 -823,-370 -823,-822l0 -5201c0,-452 370,-822 823,-822z"/></svg>');
+    height: 1.2rem;
+    width: 1.2rem;
 }

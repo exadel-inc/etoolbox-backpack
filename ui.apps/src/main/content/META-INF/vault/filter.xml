@@ -2,6 +2,8 @@
 <workspaceFilter version="1.0">
     <filter root="/apps/etoolbox-backpack"/>
     <filter root="/apps/cq/core/content/nav/tools/etoolbox/backpack"/>
+    <filter root="/apps/wcm/core/content/sites/jcr:content/actions/selection/backpack"/>
+    <filter root="/apps/wcm/core/content/sites/head/clientlibs"/>
     <filter root="/etc/packages/EToolbox_BackPack">
         <exclude pattern="/etc/packages/EToolbox_BackPack/.*" />
     </filter>
