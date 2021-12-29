@@ -307,15 +307,21 @@
                                     jcr:primaryType="nt:unstructured"
                                     sling:resourceType="granite/ui/components/coral/foundation/container">
                                 <items jcr:primaryType="nt:unstructured">
+                                    <filename
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                            fieldLabel="Package"
+                                            name="filename"
+                                            disabled="{Boolean}true"/>
                                     <fileupload
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/form/fileupload"
-                                            fieldLabel="Package"
                                             mimeTypes="[application/zip,application/x-zip-compressed,application/x-compressed]"
                                             multiple="{Boolean}false"
                                             name="fileupload"
                                             required="{Boolean}true"
-                                            text="Select package..."/>
+                                            text="Select package..."
+                                            emptyText=""/>
                                     <forceUpload
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
