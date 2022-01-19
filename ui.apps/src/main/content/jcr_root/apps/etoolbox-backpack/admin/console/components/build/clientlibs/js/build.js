@@ -22,7 +22,7 @@ $(function () {
         BUILD_IN_PROGRESS = 'BUILD_IN_PROGRESS',
         COMMAND_URL = Granite.HTTP.externalize("/bin/wcmcommand"),
         DIALOG_MODAL_URL = '/mnt/overlay/etoolbox-backpack/admin/console/page/content/editpackagedialog.html?packagePath=',
-        BUILD_PAGE_URL = '/tools/etoolbox/backpack/buildPackage.html?path=',
+        EDIT_PAGE_URL = '/tools/etoolbox/backpack/package.html?path=',
         REPLICATE_URL = '/services/backpack/replicatePackage',
         INSTALL = 'INSTALL',
         INSTALL_IN_PROGRESS = 'INSTALL_IN_PROGRESS';
@@ -459,7 +459,7 @@ $(function () {
         name: "foundation.prompt.open",
         handler: function(name, el, config, collection, selections) {
             showAlert("Your package has been updated.", "Success", "success",function () {
-                window.location.href = BUILD_PAGE_URL + path;
+                window.location.href = EDIT_PAGE_URL + path;
             });
             return true;
         }
