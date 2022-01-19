@@ -164,4 +164,12 @@ public interface BasePackageService {
     @SuppressWarnings("UnstableApiUsage")
     // sticking to Guava Cache version bundled in uber-jar; still safe to use
     Cache<String, PackageInfo> getPackageInfos();
+
+    /**
+     *
+     * @param resourceResolver {@code ResourceResolver} used to collect assets details
+     * @param path Collection of JCR paths of resources
+     * @return Data size
+     */
+    long getAssetSize(ResourceResolver resourceResolver, String path);
 }

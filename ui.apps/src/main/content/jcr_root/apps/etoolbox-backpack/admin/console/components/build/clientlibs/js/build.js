@@ -22,7 +22,7 @@ $(function () {
         BUILD_IN_PROGRESS = 'BUILD_IN_PROGRESS',
         COMMAND_URL = Granite.HTTP.externalize("/bin/wcmcommand"),
         DIALOG_MODAL_URL = '/mnt/overlay/etoolbox-backpack/admin/console/page/content/editpackagedialog.html?packagePath=',
-        BUILD_PAGE_URL = '/tools/etoolbox/backpack/buildPackage.html?path=',
+        EDIT_PAGE_URL = '/tools/etoolbox/backpack/package.html?path=',
         REPLICATE_URL = '/services/backpack/replicatePackage',
         INSTALL = 'INSTALL',
         INSTALL_IN_PROGRESS = 'INSTALL_IN_PROGRESS';
@@ -173,21 +173,20 @@ $(function () {
     $installButton.click(function () {
         var dialog = document.querySelector('#installDialog');
         dialog.show();
-        $('#installSubmitBtn').click(function() {
-            $("#installForm").submit(function(e) {
-                e.preventDefault();
-                var form = $(this);
-                var url = form.attr('action');
-                $.ajax({
-                    type: "POST",
-                    url: url,
-                    data: form.serialize(),
-                    success: function(data) {
-                        $buildLog.empty();
-                        updateLog(0);
-                    }
-                });
-            });
+    });
+
+    $("#installForm").submit(function(e) {
+        e.preventDefault();
+        var form = $(this);
+        var url = form.attr('action');
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: form.serialize(),
+            success: function(data) {
+                $buildLog.empty();
+                updateLog(0);
+            }
         });
     });
 
@@ -256,7 +255,8 @@ $(function () {
                         $.each(data.log, function (index, value) {
                             $buildLog.append('<div>' + value + '</div>');
                         });
-                        $buildLog.append('<h4>Approximate size of the assets in the package: ' + bytesToSize(data.dataSize) + '</h4>');
+                        var assetText = data.dataSize === 0 ? 'There are no assets in the package' : '<h4>Approximate size of the assets in the package: ' + bytesToSize(data.dataSize) + '</h4>';
+                        $buildLog.append(assetText);
                         scrollLog();
                     }
                 } else {
@@ -459,7 +459,7 @@ $(function () {
         name: "foundation.prompt.open",
         handler: function(name, el, config, collection, selections) {
             showAlert("Your package has been updated.", "Success", "success",function () {
-                window.location.href = BUILD_PAGE_URL + path;
+                window.location.href = EDIT_PAGE_URL + path;
             });
             return true;
         }

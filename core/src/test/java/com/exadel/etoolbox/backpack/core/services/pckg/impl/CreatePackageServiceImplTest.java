@@ -31,8 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 public class CreatePackageServiceImplTest extends Base {
 
@@ -129,6 +128,4 @@ public class CreatePackageServiceImplTest extends Base {
         model.setThumbnailPath(THUMBNAIL);
         model.setVersion(PACKAGE_VERSION);
     }
-
-
 }

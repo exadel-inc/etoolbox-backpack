@@ -80,6 +80,7 @@ public class BasePackageServiceImpl implements BasePackageService {
     public static final String PACKAGES_ROOT_PATH = "/etc/packages";
     protected static final String QUERY_PARAMETER = "queryPackage";
     protected static final String SWITCH_PARAMETER = "toggle";
+    protected static final String THUMBNAIL_PATH_PARAMETER = "thumbnailPath";
 
     protected static final Gson GSON = new Gson();
 
@@ -163,6 +164,7 @@ public class BasePackageServiceImpl implements BasePackageService {
         packageInfo.setThumbnailPath(packageModel.getThumbnailPath());
         packageInfo.setQuery(packageModel.getQuery());
         packageInfo.setToggle(packageModel.isToggle());
+        packageInfo.setDataSize(actualPaths.stream().mapToLong(value -> getAssetSize(resourceResolver, value)).sum());
 
         String packageGroupName = DEFAULT_PACKAGE_GROUP;
 
@@ -278,6 +280,7 @@ public class BasePackageServiceImpl implements BasePackageService {
         jcrPackageDefinition.set(QUERY_PARAMETER, GSON.toJson(packageInfo.getQuery()), true);
         jcrPackageDefinition.set(SWITCH_PARAMETER, GSON.toJson(packageInfo.isToggle()), true);
         jcrPackageDefinition.setFilter(filter, true);
+        jcrPackageDefinition.set(THUMBNAIL_PATH_PARAMETER, GSON.toJson(packageInfo.getThumbnailPath()), true);
 
         String thumbnailPath = StringUtils.defaultIfBlank(packageInfo.getThumbnailPath(), getDefaultThumbnailPath(true));
         addThumbnail(jcrPackageDefinition.getNode(), thumbnailPath, userSession);
@@ -355,15 +358,17 @@ public class BasePackageServiceImpl implements BasePackageService {
     }
 
     /**
-     * Generates package identifier string for the specified package own name, group name, and version
+     * Called by {@link BasePackageService#getPackageInfo(ResourceResolver, PackageModel)} to compute size
+     * of the asset specified by path
      *
-     * @param packageGroupName String representing package group name to check
-     * @param packageName      String representing package name to check
-     * @param version          String representing package version to check
-     * @return Package identifier string
+     * @param resourceResolver {@code ResourceResolver} used to retrieve path-specified {@code Resource}s
+     * @param path             JCR path of the required resource
+     * @return Asset size in bytes, or 0 if the asset is not found
      */
-    private String getPackageId(final String packageGroupName, final String packageName, final String version) {
-        return packageGroupName + ":" + packageName + (StringUtils.isNotBlank(version) ? ":" + version : StringUtils.EMPTY);
+    @Override
+    public long getAssetSize(ResourceResolver resourceResolver, String path) {
+        Resource rootResource = resourceResolver.getResource(path);
+        return getAssetSize(rootResource);
     }
 
     /**
@@ -374,5 +379,39 @@ public class BasePackageServiceImpl implements BasePackageService {
     @Override
     public Cache<String, PackageInfo> getPackageInfos() {
         return packageInfos;
+    }
+
+    /**
+     * Called by {@link BasePackageService#getAssetSize(ResourceResolver, String)} to recursively compute the size of
+     * the current resource and its child resources, summed up
+     *
+     * @param resource The {@code Resource} to compute size for
+     * @return Resource size in bytes, or 0 if the resource is a null value
+     */
+    private long getAssetSize(Resource resource) {
+        long totalSize = 0L;
+        if (resource == null) {
+            return totalSize;
+        }
+        for (Resource child : resource.getChildren()) {
+            totalSize += getAssetSize(child);
+        }
+        Resource childResource = resource.getChild("jcr:content/jcr:data");
+        if (childResource != null && childResource.getResourceMetadata().containsKey("sling.contentLength")) {
+            totalSize += (Long) childResource.getResourceMetadata().get("sling.contentLength");
+        }
+        return totalSize;
+    }
+
+    /**
+     * Generates package identifier string for the specified package own name, group name, and version
+     *
+     * @param packageGroupName String representing package group name to check
+     * @param packageName      String representing package name to check
+     * @param version          String representing package version to check
+     * @return Package identifier string
+     */
+    private String getPackageId(final String packageGroupName, final String packageName, final String version) {
+        return packageGroupName + ":" + packageName + (StringUtils.isNotBlank(version) ? ":" + version : StringUtils.EMPTY);
     }
 }

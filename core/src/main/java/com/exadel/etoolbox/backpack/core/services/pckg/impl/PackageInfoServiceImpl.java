@@ -230,6 +230,7 @@ public class PackageInfoServiceImpl implements PackageInfoService {
                     packageModel.setPackageName(definition.get(JcrPackageDefinition.PN_NAME));
                     packageModel.setGroup(definition.get(JcrPackageDefinition.PN_GROUP));
                     packageModel.setVersion(definition.get(JcrPackageDefinition.PN_VERSION));
+                    packageModel.setThumbnailPath(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.THUMBNAIL_PATH_PARAMETER), String.class));
                     if (StringUtils.isNotBlank(definition.get(BasePackageServiceImpl.SWITCH_PARAMETER))) {
                         packageModel.setToggle(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.SWITCH_PARAMETER), Boolean.class));
                     }

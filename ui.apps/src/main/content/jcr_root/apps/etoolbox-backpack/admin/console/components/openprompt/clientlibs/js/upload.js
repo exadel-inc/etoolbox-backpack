@@ -47,4 +47,10 @@ $(function () {
 
         }
     });
+
+    $(document).on("coral-fileupload:fileadded", "coral-fileupload", function(e) {
+        var fileName = e.originalEvent.detail.item.file.name;
+        var textField = $("input[name='filename']")[0];
+        textField.setAttribute('value', fileName);
+    });
 })(window, Granite.$, Granite.URITemplate);

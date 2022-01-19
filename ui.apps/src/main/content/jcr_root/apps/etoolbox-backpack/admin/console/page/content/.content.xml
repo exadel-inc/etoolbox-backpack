@@ -85,7 +85,7 @@
                     path="${requestPathInfo.suffix}"
                     selectionMode="${state[&quot;shell.collectionpage.selectionMode&quot;].boolean}"
                     size="${empty requestPathInfo.selectors[1] ? &quot;20&quot; : requestPathInfo.selectors[1]}"
-                    src="/apps/etoolbox-backpack/admin/console/page/content/jcr:content/views/card{.offset,limit}.html{+id}"
+                    src="/apps/etoolbox-backpack/admin/console/page/content/jcr:content/views/card{.offset,limit}.html?group=${param.group != null ? param.group : '/etc/packages/'}"
                     stateId="shell.collectionpage">
                 <datasource
                         jcr:primaryType="nt:unstructured"
@@ -108,29 +108,19 @@
                         sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
                         href="/crx/packmgr"
                         x-cq-linkchecker="valid"
-                        text="CRX Package Manager"
-                        variant="actionBar">
+                        text="CRX Package Manager">
                 </crxPM>
                 <create
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="granite/ui/components/coral/foundation/pulldown"
+                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                        action="foundation.dialog"
+                        target=".screens-dcc-collection-resources"
                         text="Create"
                         variant="primary">
-                    <items jcr:primaryType="nt:unstructured">
-                        <createpackage
-                                granite:rel="cq-backpack-createpackage"
-                                jcr:primaryType="nt:unstructured"
-                                sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
-                                action="foundation.dialog"
-                                icon="experience"
-                                target=".screens-dcc-collection-resources"
-                                text="Package">
-                            <data
-                                    jcr:primaryType="nt:unstructured"
-                                    nesting="hide"
-                                    src.uritemplate="/apps/etoolbox-backpack/admin/console/page/content/createpagedialog.html"/>
-                        </createpackage>
-                    </items>
+                    <data
+                            jcr:primaryType="nt:unstructured"
+                            nesting="hide"
+                            src.uritemplate="/apps/etoolbox-backpack/admin/console/page/content/createpagedialog.html"/>
                     <granite:rendercondition
                             jcr:primaryType="nt:unstructured"
                             sling:resourceType="granite/ui/components/coral/foundation/renderconditions/privilege"
@@ -138,25 +128,17 @@
                             privileges="jcr:addChildNodes"/>
                 </create>
                 <upload
+                        granite:rel="cq-backpack-uploadpackage"
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="granite/ui/components/coral/foundation/pulldown"
+                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                        action="foundation.dialog"
+                        target=".screens-dcc-collection-resources"
                         text="Upload"
                         variant="primary">
-                    <items jcr:primaryType="nt:unstructured">
-                        <createpackage
-                                granite:rel="cq-backpack-uploadpackage"
-                                jcr:primaryType="nt:unstructured"
-                                sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
-                                action="foundation.dialog"
-                                icon="experience"
-                                target=".screens-dcc-collection-resources"
-                                text="Package">
-                            <data
-                                    jcr:primaryType="nt:unstructured"
-                                    nesting="hide"
-                                    src.uritemplate="/apps/etoolbox-backpack/admin/console/page/content/uploadpackagedialog.html"/>
-                        </createpackage>
-                    </items>
+                    <data
+                            jcr:primaryType="nt:unstructured"
+                            nesting="hide"
+                            src.uritemplate="/apps/etoolbox-backpack/admin/console/page/content/uploadpackagedialog.html"/>
                 </upload>
             </secondary>
         </actions>
@@ -178,7 +160,7 @@
                         jcr:title="Success"
                         jcr:titleError="Error"
                         sling:resourceType="granite/ui/components/coral/foundation/form/responses/openprompt"
-                        open="/tools/etoolbox/backpack/buildPackage.html?path={packagePath}"
+                        open="/tools/etoolbox/backpack/package.html?path={packagePath}"
                         redirect="/tools/etoolbox/backpack.html/?group=/etc/packages/{groupName}"
                         text="Your package has been created."/>
                 <items jcr:primaryType="nt:unstructured">
@@ -223,7 +205,11 @@
                                                     fieldLabel="Filter Path"
                                                     composite="{Boolean}true"
                                                     required="{Boolean}true"
-                                                    granite:class="cq-dialog-path-filter-option">
+                                                    granite:class="cq-dialog-path-filter-option"
+                                                    granite:id="create-package-multifield">
+                                                <granite:data
+                                                        jcr:primaryType="nt:unstructured"
+                                                        paths="${param.paths}"/>
                                                 <field
                                                         jcr:primaryType="nt:unstructured"
                                                         name="paths"
@@ -235,6 +221,7 @@
                                                                 allowBulkEdit="true"
                                                                 autocreateTag="true"
                                                                 fieldLabel="Path"
+                                                                value="${param.path}"
                                                                 multiple="false"
                                                                 required="{Boolean}true"
                                                                 name="path"/>
@@ -308,7 +295,7 @@
                         jcr:primaryType="nt:unstructured"
                         jcr:title="Success"
                         sling:resourceType="etoolbox-backpack/admin/console/components/openprompt"
-                        open="/tools/etoolbox/backpack/buildPackage.html?path={packagePath}"
+                        open="/tools/etoolbox/backpack/package.html?path={packagePath}"
                         redirect="/tools/etoolbox/backpack.html/?group=/etc/packages/{groupName}"
                         text="Your package has been uploaded."/>
                 <items jcr:primaryType="nt:unstructured">
@@ -320,15 +307,21 @@
                                     jcr:primaryType="nt:unstructured"
                                     sling:resourceType="granite/ui/components/coral/foundation/container">
                                 <items jcr:primaryType="nt:unstructured">
+                                    <filename
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                            fieldLabel="Package"
+                                            name="filename"
+                                            disabled="{Boolean}true"/>
                                     <fileupload
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/form/fileupload"
-                                            fieldLabel="Package"
                                             mimeTypes="[application/zip,application/x-zip-compressed,application/x-compressed]"
                                             multiple="{Boolean}false"
                                             name="fileupload"
                                             required="{Boolean}true"
-                                            text="Select package..."/>
+                                            text="Select package..."
+                                            emptyText=""/>
                                     <forceUpload
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
