@@ -20,7 +20,7 @@
 
     <backpack jcr:primaryType="nt:unstructured"
               jcr:title="Backpack"
-              jcr:description="Create package with referenced resources"
+              jcr:description="Create packages with referenced resources"
               order="{Long}101"
               href="/tools/etoolbox/backpack.html"
               id="cq-backpack"
