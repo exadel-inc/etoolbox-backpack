@@ -8,7 +8,7 @@
 
     <groupId>com.exadel.etoolbox</groupId>
     <artifactId>etoolbox-backpack</artifactId>
-    <version>3.0.0</version>
+    <version>3.1.0</version>
 
     <name>EToolbox BackPack</name>
     <description>A tool for easily creating, handling and distributing content packages across Adobe Experience Manager (AEM) ecosystem.</description>
