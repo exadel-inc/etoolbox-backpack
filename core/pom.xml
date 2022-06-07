@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.exadel.etoolbox</groupId>
         <artifactId>etoolbox-backpack</artifactId>
-        <version>3.1.0</version>
+        <version>3.1.1</version>
     </parent>
 
     <artifactId>etoolbox-backpack.core</artifactId>
