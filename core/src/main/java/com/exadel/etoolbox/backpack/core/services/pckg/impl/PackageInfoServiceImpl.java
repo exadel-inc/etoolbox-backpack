@@ -283,7 +283,7 @@ public class PackageInfoServiceImpl implements PackageInfoService {
                     if (StringUtils.isNotBlank(definition.get(BasePackageServiceImpl.SWITCH_PARAMETER))) {
                         packageInfo.setToggle(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.SWITCH_PARAMETER), Boolean.class));
                     }
-                    if (definition.getLastWrapped() != null) {
+                    if (definition.getBuildCount() > 0) {
                         packageInfo.setPackageStatus(PackageStatus.BUILT);
                     } else {
                         packageInfo.setPackageStatus(PackageStatus.CREATED);
