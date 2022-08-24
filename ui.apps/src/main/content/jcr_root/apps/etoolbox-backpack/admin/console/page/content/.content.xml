@@ -223,7 +223,6 @@
                                                                 fieldLabel="Path"
                                                                 value="${param.path}"
                                                                 multiple="false"
-                                                                required="{Boolean}true"
                                                                 name="path"/>
                                                         <excludeChildren jcr:primaryType="nt:unstructured"
                                                                          fieldDescription="Check to exclude child pages from package filter"
