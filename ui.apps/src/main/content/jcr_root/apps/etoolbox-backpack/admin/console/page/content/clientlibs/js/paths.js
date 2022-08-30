@@ -35,18 +35,12 @@ $(function () {
                 });
             });
         }
-
-        var multifieldItems, switchField = $('#create-package-switch')[0];
+        var switchField = $('#create-package-switch')[0];
         $(switchField).on('change', function(e){
-            console.log('change');
-            let multifield = $('coral-multifield');
-            if($(this).attr('checked')){
-                multifieldItems = multifield.find('coral-multifield-item');
-                multifieldItems = multifield.find('coral-multifield-item').remove();
-            } else {
-                multifieldItems.insertBefore('coral-multifield button[coral-multifield-add]');
-            }
-        });
-
+            $('#create-package-multifield foundation-autocomplete').each(function (){
+                let isChecked = switchField.hasAttribute('checked');
+                $(this).attr('required',!isChecked);
+            });
+        })
     });
 });
