@@ -190,7 +190,8 @@
                                             name="toggle"
                                             fieldLabel="SQL2 Query Package"
                                             textOn="on"
-                                            granite:class="cq-dialog-switch-toggle">
+                                            granite:class="cq-dialog-switch-toggle"
+                                            granite:id="create-package-switch">
                                     </switch>
 
                                     <pathContainer
@@ -223,6 +224,7 @@
                                                                 fieldLabel="Path"
                                                                 value="${param.path}"
                                                                 multiple="false"
+                                                                required="{Boolean}true"
                                                                 name="path"/>
                                                         <excludeChildren jcr:primaryType="nt:unstructured"
                                                                          fieldDescription="Check to exclude child pages from package filter"
