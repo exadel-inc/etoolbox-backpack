@@ -190,7 +190,8 @@
                                             name="toggle"
                                             fieldLabel="SQL2 Query Package"
                                             textOn="on"
-                                            granite:class="cq-dialog-switch-toggle">
+                                            granite:class="cq-dialog-switch-toggle"
+                                            granite:id="create-package-switch">
                                     </switch>
 
                                     <pathContainer

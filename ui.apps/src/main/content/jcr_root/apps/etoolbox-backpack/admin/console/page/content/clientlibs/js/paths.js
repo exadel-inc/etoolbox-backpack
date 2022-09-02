@@ -35,5 +35,12 @@ $(function () {
                 });
             });
         }
+        var switchField = $('#create-package-switch')[0];
+        $(switchField).on('change', function(e){
+            $('#create-package-multifield foundation-autocomplete').each(function (){
+                var isChecked = switchField.hasAttribute('checked');
+                $(this).attr('required',!isChecked);
+            });
+        })
     });
 });
