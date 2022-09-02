@@ -38,7 +38,7 @@ $(function () {
         var switchField = $('#create-package-switch')[0];
         $(switchField).on('change', function(e){
             $('#create-package-multifield foundation-autocomplete').each(function (){
-                let isChecked = switchField.hasAttribute('checked');
+                var isChecked = switchField.hasAttribute('checked');
                 $(this).attr('required',!isChecked);
             });
         })
