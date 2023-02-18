@@ -226,17 +226,18 @@
                                                                 multiple="false"
                                                                 required="{Boolean}true"
                                                                 name="path"/>
-                                                        <excludeChildren jcr:primaryType="nt:unstructured"
-                                                                         fieldDescription="Check to exclude child pages from package filter"
-                                                                         name="excludeChildren"
-                                                                         text="Exclude child pages?"
-                                                                         uncheckedValue="false" value="true"
-                                                                         sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"/>
                                                         <includeLiveCopies jcr:primaryType="nt:unstructured"
-                                                                         fieldDescription="Check to include live copies of the page to package filter"
-                                                                         name="includeLiveCopies"
-                                                                         text="Include live copies?"
+                                                                           fieldDescription="Check to include live copies of the page to package filter"
+                                                                           name="includeLiveCopies"
+                                                                           text="Include live copies?"
+                                                                           uncheckedValue="false" value="true"
+                                                                           sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"/>
+                                                        <includeChildren jcr:primaryType="nt:unstructured"
+                                                                         fieldDescription="Check to include child pages to package filter"
+                                                                         name="includeChildren"
+                                                                         text="Include child pages?"
                                                                          uncheckedValue="false" value="true"
+                                                                         checked="{Boolean}true"
                                                                          sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"/>
                                                     </items>
                                                 </field>

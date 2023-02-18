@@ -160,7 +160,7 @@ public class BasePackageServiceImpl implements BasePackageService {
             actualPaths = packageModel.getPaths().stream()
                     .filter(s -> resourceResolver.getResource(s.getPath()) != null)
                     .flatMap(pathModel -> liveCopyService.getResourcePathWithLiveCopiesPaths(resourceResolver, pathModel.getPath(), pathModel.isIncludeLiveCopies())
-                            .stream().map(path -> getActualPath(path, pathModel.isExcludeChildren(), resourceResolver)))
+                            .stream().map(path -> getActualPath(path, pathModel.isIncludeChildren(), resourceResolver)))
                     .collect(Collectors.toList());
         }
         packageInfo.setPackageName(packageModel.getPackageName());
@@ -186,14 +186,14 @@ public class BasePackageServiceImpl implements BasePackageService {
      * to the underlying {@code jcr:content} node
      *
      * @param path             Resource path to inspect
-     * @param excludeChildren  Flag indicating if this resource's children must be excluded
+     * @param includeChildren  Flag indicating if this resource's children must be included
      * @param resourceResolver Current {@code ResourceResolver} object
      * @return Source path, or the adjusted resource path
      */
-    private String getActualPath(final String path, final boolean excludeChildren, final ResourceResolver resourceResolver) {
+    private String getActualPath(final String path, final boolean includeChildren, final ResourceResolver resourceResolver) {
         Resource res = resourceResolver.getResource(path);
 
-        if (!excludeChildren) {
+        if (includeChildren) {
             return path;
         }
         if (res != null && res.getChild(JcrConstants.JCR_CONTENT) != null) {
