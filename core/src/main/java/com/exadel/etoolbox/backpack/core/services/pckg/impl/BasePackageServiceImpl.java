@@ -18,6 +18,7 @@ import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.dam.api.Asset;
 import com.exadel.etoolbox.backpack.core.dto.repository.ReferencedItem;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
+import com.exadel.etoolbox.backpack.core.services.LiveCopyService;
 import com.exadel.etoolbox.backpack.core.services.QueryService;
 import com.exadel.etoolbox.backpack.core.services.ReferenceService;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
@@ -99,6 +100,9 @@ public class BasePackageServiceImpl implements BasePackageService {
     @Reference
     protected QueryService queryService;
 
+    @Reference
+    protected LiveCopyService liveCopyService;
+
     @SuppressWarnings("UnstableApiUsage") // sticking to Guava Cache version bundled in uber-jar; still safe to use
     protected Cache<String, PackageInfo> packageInfos;
     protected boolean enableStackTrace;
@@ -155,7 +159,8 @@ public class BasePackageServiceImpl implements BasePackageService {
         } else {
             actualPaths = packageModel.getPaths().stream()
                     .filter(s -> resourceResolver.getResource(s.getPath()) != null)
-                    .map(path -> getActualPath(path.getPath(), path.isExcludeChildren(), resourceResolver))
+                    .flatMap(pathModel -> liveCopyService.getResourcePathWithLiveCopiesPaths(resourceResolver, pathModel.getPath(), pathModel.isIncludeLiveCopies())
+                            .stream().map(path -> getActualPath(path, pathModel.isExcludeChildren(), resourceResolver)))
                     .collect(Collectors.toList());
         }
         packageInfo.setPackageName(packageModel.getPackageName());

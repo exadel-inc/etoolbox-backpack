@@ -34,12 +34,16 @@ public class PathModel {
     @RequestParam
     private boolean excludeChildren;
 
+    @RequestParam
+    private boolean includeLiveCopies;
+
     public PathModel() {
     }
 
-    public PathModel(final String path, final boolean excludeChildren) {
+    public PathModel(final String path, final boolean excludeChildren, final boolean includeLiveCopies) {
         this.path = path;
         this.excludeChildren = excludeChildren;
+        this.includeLiveCopies = includeLiveCopies;
     }
 
     /**
@@ -52,9 +56,17 @@ public class PathModel {
 
     /**
      * Gets the whether or not child pages excluded from a package build
-     * @return String value
+     * @return boolean value
      */
     public boolean isExcludeChildren() {
         return excludeChildren;
+    }
+
+    /**
+     * Gets the whether or not live copies of the page included to the package build
+     * @return boolean value
+     */
+    public boolean isIncludeLiveCopies() {
+        return includeLiveCopies;
     }
 }

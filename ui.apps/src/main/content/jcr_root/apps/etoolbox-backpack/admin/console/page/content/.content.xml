@@ -232,6 +232,12 @@
                                                                          text="Exclude child pages?"
                                                                          uncheckedValue="false" value="true"
                                                                          sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"/>
+                                                        <includeLiveCopies jcr:primaryType="nt:unstructured"
+                                                                         fieldDescription="Check to include live copies of the page to package filter"
+                                                                         name="includeLiveCopies"
+                                                                         text="Include live copies?"
+                                                                         uncheckedValue="false" value="true"
+                                                                         sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"/>
                                                     </items>
                                                 </field>
                                             </paths>
