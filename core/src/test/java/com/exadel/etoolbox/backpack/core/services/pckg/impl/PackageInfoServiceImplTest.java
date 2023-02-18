@@ -78,7 +78,7 @@ public class PackageInfoServiceImplTest extends Base {
             assertEquals(TEST_GROUP, packageModelByPath.getGroup());
             packageModelByPath.getPaths().forEach(pathModel -> {
                 assertEquals(PAGE_1, pathModel.getPath());
-                assertEquals(true, pathModel.isExcludeChildren());
+                assertEquals(true, pathModel.isIncludeChildren());
             });
         }
 
@@ -95,7 +95,7 @@ public class PackageInfoServiceImplTest extends Base {
             assertEquals(TEST_GROUP, packageModelByPath.getGroup());
             packageModelByPath.getPaths().forEach(pathModel -> {
                 assertEquals(PAGE_1, pathModel.getPath());
-                assertEquals(false, pathModel.isExcludeChildren());
+                assertEquals(false, pathModel.isIncludeChildren());
             });
         }
 

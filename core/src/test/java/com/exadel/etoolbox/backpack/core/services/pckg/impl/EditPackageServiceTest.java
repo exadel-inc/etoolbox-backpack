@@ -121,8 +121,8 @@ public class EditPackageServiceTest extends Base {
         assertEquals("ERROR: Package does not contain any valid filters.", aPackage.getLog().get(0));
     }
 
-    private void initBasePackageModel(final PackageModel model, final List<String> strings, final boolean excludeChildren) {
-        model.setPaths(strings.stream().map(s -> new PathModel(s, excludeChildren)).collect(Collectors.toList()));
+    private void initBasePackageModel(final PackageModel model, final List<String> strings, final boolean includeChildren) {
+        model.setPaths(strings.stream().map(s -> new PathModel(s, includeChildren)).collect(Collectors.toList()));
         model.setPackageName(TEST_PACKAGE_2);
         model.setGroup(TEST_GROUP_2);
         model.setThumbnailPath(THUMBNAIL);
