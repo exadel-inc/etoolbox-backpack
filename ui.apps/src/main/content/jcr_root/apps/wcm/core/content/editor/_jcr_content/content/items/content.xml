@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0" xmlns:vlt="http://www.day.com/jcr/vault/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:mixinTypes="[vlt:FullCoverage]"
+    jcr:primaryType="sling:OrderedFolder"
+    sling:resourceType="cq/gui/components/authoring/editorpanel"
+    default="{Boolean}true"
+    id="Content"
+    role="main">
+    <header
+        jcr:primaryType="nt:unstructured"
+        class="editor-GlobalBar js-editor-PanelHeader">
+        <items jcr:primaryType="nt:unstructured">
+            <headerbar
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="cq/gui/components/authoring/headerbar"
+                class="header-main">
+                <items jcr:primaryType="nt:unstructured">
+                    <pageinfopopover
+                        granite:class="pageinfo"
+                        granite:id="pageinfo-popover"
+                        granite:title="Page Information"
+                        jcr:primaryType="nt:unstructured"
+                        granite:rel="screens-dcc-collection-resources"
+                        sling:resourceType="granite/ui/components/coral/foundation/popover">
+                        <items jcr:primaryType="nt:unstructured">
+                            <list
+                                granite:id="pageinfo-data"
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="cq/gui/components/authoring/pageinfo/list">
+                                <items jcr:primaryType="nt:unstructured">
+                                    <backpack
+                                            granite:title="Pack by Backpack"
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                                            action="foundation.dialog"
+                                            target=".screens-dcc-collection-resources"
+                                            text="Backpack">
+                                        <data
+                                                jcr:primaryType="nt:unstructured"
+                                                src.uritemplate="/apps/etoolbox-backpack/admin/console/page/content/createpagedialog.html?paths=${requestPathInfo.suffix}"/>
+                                    </backpack>
+                                </items>
+                            </list>
+                        </items>
+                    </pageinfopopover>
+                </items>
+            </headerbar>
+        </items>
+    </header>
+</jcr:root>
