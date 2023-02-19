@@ -14,9 +14,12 @@
 
 package com.exadel.etoolbox.backpack.core.servlets;
 
+import com.day.cq.wcm.api.WCMException;
+import com.day.cq.wcm.msm.api.LiveRelationshipManager;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
 import com.exadel.etoolbox.backpack.core.services.ReferenceService;
+import com.exadel.etoolbox.backpack.core.services.impl.LiveCopyServiceImpl;
 import com.exadel.etoolbox.backpack.core.services.impl.QueryServiceImpl;
 import com.exadel.etoolbox.backpack.core.services.impl.ReferenceServiceImpl;
 import com.exadel.etoolbox.backpack.core.services.pckg.BuildPackageService;
@@ -30,12 +33,15 @@ import com.exadel.etoolbox.backpack.request.validator.ValidatorResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.wcm.testing.mock.aem.junit.AemContext;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.Mock;
 
+import javax.jcr.RangeIterator;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
@@ -62,9 +68,18 @@ public class BuildPackageServletTest {
     private PackageInfo packageInfoWithBuiltStatus;
     private Gson GSON;
 
+    @Mock
+    private LiveRelationshipManager liveRelationshipManager;
+
     @Before
-    public void beforeTest() {
+    public void beforeTest() throws WCMException {
         context.registerInjectActivateService(new QueryServiceImpl());
+        liveRelationshipManager = mock(LiveRelationshipManager.class);
+        context.registerService(LiveRelationshipManager.class, liveRelationshipManager);
+        RangeIterator relationships = mock(RangeIterator.class);
+        when(relationships.hasNext()).thenReturn(false);
+        when(liveRelationshipManager.getLiveRelationships(any(Resource.class), any(), any())).thenReturn(relationships);
+        context.registerInjectActivateService(new LiveCopyServiceImpl());
         context.registerService(BuildPackageService.class, buildPackageServiceMock);
         context.registerService(RequestAdapter.class, new RequestAdapterImpl());
         context.registerService(ReferenceService.class, new ReferenceServiceImpl());
