@@ -174,6 +174,7 @@
                                 <items jcr:primaryType="nt:unstructured">
                                     <packageName jcr:primaryType="nt:unstructured"
                                                  sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                                 granite:id="packageName"
                                                  fieldLabel="Name"
                                                  name="packageName"
                                                  required="{Boolean}true"/>

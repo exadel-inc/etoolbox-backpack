@@ -34,6 +34,7 @@ $(function () {
                     }
                 });
             });
+            setPackageName(paths);
         }
         var switchField = $('#create-package-switch')[0];
         $(switchField).on('change', function(e){
@@ -43,4 +44,30 @@ $(function () {
             });
         })
     });
+
+    function setPackageName(paths) {
+        setTimeout(function() {
+            var name = $('#packageName')[0];
+            if (name && paths) {
+                var prefix = longestCommonPrefix(paths);
+                prefix = prefix.substring(1).replaceAll('/', '-');
+                if (paths.length > 1) {
+                    prefix += '-multiple';
+                }
+                name.set('value', prefix);
+            }
+        }, 100);
+    }
+
+    function longestCommonPrefix(strings) {
+        var sorted = strings.sort((a, b) => a.length - b.length);
+        var shorted = sorted[0];
+        while (!strings.every((string) => string.startsWith(shorted))) {
+            if (shorted.length === 0) {
+                return;
+            }
+            shorted = shorted.slice(0, shorted.lastIndexOf('/'));
+        }
+        return shorted;
+    }
 });
