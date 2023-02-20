@@ -14,8 +14,40 @@
 $(function () {
     "use strict";
 
+    $(document).on("click", '.js-create-package-activator', function(event) {
+        var dialog = document.querySelector('#createPackageDialog');
+        if (!dialog) {
+            var path = $('.js-create-package-activator').data('path');
+            $.ajax({
+                type: "GET",
+                url: '/apps/etoolbox-backpack/admin/console/page/content/createpagedialog.html?paths=' + path,
+                success: function(data) {
+                    var doc = new DOMParser().parseFromString(data, 'text/html');
+                    document.body.appendChild(doc.body.firstChild);
+                }
+            });
+        }
+        setTimeout(function() {
+            dialog = document.querySelector('#createPackageDialog');
+            fillPaths();
+            dialog.show();
+        }, 300);
+    });
+
     $(document).on("foundation-contentloaded", function() {
 
+        fillPaths();
+
+        var switchField = $('#create-package-switch')[0];
+        $(switchField).on('change', function(e){
+            $('#create-package-multifield foundation-autocomplete').each(function (){
+                var isChecked = switchField.hasAttribute('checked');
+                $(this).attr('required',!isChecked);
+            });
+        })
+    });
+
+    function fillPaths() {
         var multifield = $('#create-package-multifield')[0];
         if (multifield && multifield.items.length === 0) {
             var paths = multifield.getAttribute('data-paths');
@@ -35,12 +67,5 @@ $(function () {
                 });
             });
         }
-        var switchField = $('#create-package-switch')[0];
-        $(switchField).on('change', function(e){
-            $('#create-package-multifield foundation-autocomplete').each(function (){
-                var isChecked = switchField.hasAttribute('checked');
-                $(this).attr('required',!isChecked);
-            });
-        })
-    });
+    }
 });
