@@ -1,32 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0" xmlns:vlt="http://www.day.com/jcr/vault/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
-    jcr:mixinTypes="[vlt:FullCoverage]"
-    jcr:primaryType="sling:OrderedFolder"
-    sling:resourceType="cq/gui/components/authoring/editorpanel"
-    default="{Boolean}true"
-    id="Content"
-    role="main">
+    jcr:primaryType="sling:OrderedFolder">
     <header
-        jcr:primaryType="nt:unstructured"
-        class="editor-GlobalBar js-editor-PanelHeader">
+        jcr:primaryType="nt:unstructured">
         <items jcr:primaryType="nt:unstructured">
             <headerbar
-                jcr:primaryType="nt:unstructured"
-                sling:resourceType="cq/gui/components/authoring/headerbar"
-                class="header-main">
+                jcr:primaryType="nt:unstructured">
                 <items jcr:primaryType="nt:unstructured">
                     <pageinfopopover
-                        granite:class="pageinfo"
-                        granite:id="pageinfo-popover"
-                        granite:title="Page Information"
-                        jcr:primaryType="nt:unstructured"
-                        granite:rel="screens-dcc-collection-resources"
-                        sling:resourceType="granite/ui/components/coral/foundation/popover">
+                        jcr:primaryType="nt:unstructured">
                         <items jcr:primaryType="nt:unstructured">
                             <list
-                                granite:id="pageinfo-data"
-                                jcr:primaryType="nt:unstructured"
-                                sling:resourceType="cq/gui/components/authoring/pageinfo/list">
+                                jcr:primaryType="nt:unstructured">
                                 <items jcr:primaryType="nt:unstructured">
                                     <backpack
                                             granite:title="Pack by Backpack"
