@@ -55,10 +55,10 @@ public class PathModel {
     }
 
     /**
-     * Gets the whether or not child pages excluded from a package build
+     * Gets the whether or not child pages are included to a package build
      * @return boolean value
      */
-    public boolean isIncludeChildren() {
+    public boolean includeChildren() {
         return includeChildren;
     }
 
@@ -66,7 +66,7 @@ public class PathModel {
      * Gets the whether or not live copies of the page included to the package build
      * @return boolean value
      */
-    public boolean isIncludeLiveCopies() {
+    public boolean includeLiveCopies() {
         return includeLiveCopies;
     }
 }

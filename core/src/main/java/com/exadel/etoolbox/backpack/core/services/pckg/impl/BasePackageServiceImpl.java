@@ -57,6 +57,7 @@ import javax.jcr.Session;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Implements {@link BasePackageService} to provide base operation with package
@@ -87,21 +88,21 @@ public class BasePackageServiceImpl implements BasePackageService {
 
     @Reference
     @SuppressWarnings("UnusedDeclaration") // value injected by Sling
-    protected ResourceResolverFactory resourceResolverFactory;
+    private ResourceResolverFactory resourceResolverFactory;
 
     @Reference
     @SuppressWarnings("UnusedDeclaration") // value injected by Sling
-    protected SlingRepository slingRepository;
+    private SlingRepository slingRepository;
 
     @Reference
     @SuppressWarnings("UnusedDeclaration") // value injected by Sling
-    protected ReferenceService referenceService;
+    private ReferenceService referenceService;
 
     @Reference
-    protected QueryService queryService;
+    private QueryService queryService;
 
     @Reference
-    protected LiveCopyService liveCopyService;
+    private LiveCopyService liveCopyService;
 
     @SuppressWarnings("UnstableApiUsage") // sticking to Guava Cache version bundled in uber-jar; still safe to use
     protected Cache<String, PackageInfo> packageInfos;
@@ -159,8 +160,7 @@ public class BasePackageServiceImpl implements BasePackageService {
         } else {
             actualPaths = packageModel.getPaths().stream()
                     .filter(s -> resourceResolver.getResource(s.getPath()) != null)
-                    .flatMap(pathModel -> liveCopyService.getResourcePathWithLiveCopiesPaths(resourceResolver, pathModel.getPath(), pathModel.isIncludeLiveCopies())
-                            .stream().map(path -> getActualPath(path, pathModel.isIncludeChildren(), resourceResolver)))
+                    .flatMap(pathModel -> getActualPaths(resourceResolver, pathModel))
                     .collect(Collectors.toList());
         }
         packageInfo.setPackageName(packageModel.getPackageName());
@@ -200,6 +200,11 @@ public class BasePackageServiceImpl implements BasePackageService {
             return path + JCR_CONTENT_NODE;
         }
         return path;
+    }
+
+    private Stream<String> getActualPaths(ResourceResolver resourceResolver, PathModel pathModel) {
+        return liveCopyService.getPaths(resourceResolver, pathModel.getPath(), pathModel.includeLiveCopies())
+                .stream().map(path -> getActualPath(path, pathModel.includeChildren(), resourceResolver));
     }
 
     /**

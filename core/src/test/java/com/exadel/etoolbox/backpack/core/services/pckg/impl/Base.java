@@ -200,7 +200,7 @@ public class Base {
 
             for (int i = 0; i < initialFiltersModels.size(); i++) {
                 assertEquals("Initial path must be as in expected list", expectedInitialFiltersModels.get(i).getPath(), initialFiltersModels.get(i).getPath());
-                assertEquals("Initial includeChildren flag must be as in expected list", expectedInitialFiltersModels.get(i).isIncludeChildren(), initialFiltersModels.get(i).isIncludeChildren());
+                assertEquals("Initial includeChildren flag must be as in expected list", expectedInitialFiltersModels.get(i).includeChildren(), initialFiltersModels.get(i).includeChildren());
 
             }
 

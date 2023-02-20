@@ -75,7 +75,7 @@ $(function () {
                 $(this).attr('required',!isChecked);
             });
         })
-    });
+    }
 
     function setPackageName(paths) {
         setTimeout(function() {
@@ -101,6 +101,5 @@ $(function () {
             shorted = shorted.slice(0, shorted.lastIndexOf('/'));
         }
         return shorted;
-    }
     }
 });
