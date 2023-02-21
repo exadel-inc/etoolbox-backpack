@@ -19,7 +19,7 @@ $(function () {
         if (!dialog) {
             var path = $('.js-create-package-activator').data('path');
             $.ajax({
-                type: "GET",
+                type: 'GET',
                 url: '/apps/etoolbox-backpack/admin/console/page/content/createpagedialog.html?paths=' + path,
                 success: function(data) {
                     var doc = new DOMParser().parseFromString(data, 'text/html');
@@ -27,19 +27,27 @@ $(function () {
                 }
             });
         }
-        setTimeout(function() {
-            dialog = document.querySelector('#createPackageDialog');
-            fillPaths();
-            dialog.show();
-        }, 300);
+        showDialog(dialog);
     });
 
-    $(document).on("foundation-contentloaded", function() {
+    function showDialog(dialog) {
+        if(dialog && dialog._componentReady) {
+            fillPaths();
+            dialog.show();
+        } else {
+            if (!dialog) {
+                dialog = document.querySelector('#createPackageDialog');
+            }
+            window.setTimeout(showDialog, 50, dialog);
+        }
+    }
+
+
+    $(document).on('foundation-contentloaded', function() {
 
         fillPaths();
 
-        var switchField = $('#create-package-switch')[0];
-        $(switchField).on('change', function(e){
+        $('#create-package-switch').on('change', function(e){
             $('#create-package-multifield foundation-autocomplete').each(function (){
                 var isChecked = switchField.hasAttribute('checked');
                 $(this).attr('required',!isChecked);
@@ -53,9 +61,9 @@ $(function () {
             var paths = multifield.getAttribute('data-paths');
             paths = paths.split(',');
             paths.forEach(function (part, index) {
-                var url = "/apps/etoolbox-backpack/admin/console/page/content/createpagedialog/items/form/items/content/items/column/items/pathContainer/items/paths/field.html?path=" + part;
+                var url = '/apps/etoolbox-backpack/admin/console/page/content/createpagedialog/items/form/items/content/items/column/items/pathContainer/items/paths/field.html?path=' + part;
                 $.ajax({
-                    type: "GET",
+                    type: 'GET',
                     url: url,
                     success: function(data) {
                         multifield.items.add({
@@ -78,17 +86,17 @@ $(function () {
     }
 
     function setPackageName(paths) {
-        setTimeout(function() {
-            var name = $('#packageName')[0];
-            if (name && paths) {
-                var prefix = longestCommonPrefix(paths);
-                prefix = prefix.substring(1).replaceAll('/', '-');
-                if (paths.length > 1) {
-                    prefix += '-multiple';
-                }
-                name.set('value', prefix);
+        var name = $('#packageName')[0];
+        if (name && name._componentReady) {
+            var prefix = longestCommonPrefix(paths);
+            prefix = prefix.substring(1).replaceAll('/', '-');
+            if (paths.length > 1) {
+                prefix += '-multiple';
             }
-        }, 100);
+            name.set('value', prefix);
+        } else {
+            window.setTimeout(setPackageName, 50, paths);
+        }
     }
 
     function longestCommonPrefix(strings) {
