@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface LiveCopyService {
 
-    List<String> getPaths(ResourceResolver resourceResolver, java.lang.String path, boolean includeLiveCopies);
+    List<String> getPaths(ResourceResolver resourceResolver, String path, boolean includeLiveCopies);
 }
