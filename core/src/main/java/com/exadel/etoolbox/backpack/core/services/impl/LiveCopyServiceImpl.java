@@ -42,6 +42,12 @@ public class LiveCopyServiceImpl implements LiveCopyService {
         if (!includeLiveCopies) {
             return paths;
         }
+        paths.addAll(getLiveCopies(resourceResolver, path));
+        return paths;
+    }
+
+    private List<String> getLiveCopies(ResourceResolver resourceResolver, String path) {
+        List<String> paths = new ArrayList<>();
         Resource resource = resourceResolver.getResource(path);
         if (resource == null) {
             return paths;
@@ -54,10 +60,12 @@ public class LiveCopyServiceImpl implements LiveCopyService {
                 if (liveCopy == null) {
                     continue;
                 }
-                String liveCopyPath = liveCopy.getPath() + relationship.getSyncPath();
-                if (resourceResolver.getResource(liveCopyPath) != null) {
-                    paths.add(liveCopyPath);
+                String liveCopyPath = liveCopy.getPath();
+                String syncPath = liveCopyPath + relationship.getSyncPath();
+                if (resourceResolver.getResource(syncPath) != null) {
+                    paths.add(syncPath);
                 }
+                paths.addAll(getLiveCopies(resourceResolver, liveCopyPath));
             }
         } catch (WCMException e) {
             LOGGER.error("Can't get relationships of the resource {}", resource.getPath(), e);
