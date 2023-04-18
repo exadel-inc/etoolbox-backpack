@@ -13,6 +13,7 @@
  */
 package com.exadel.etoolbox.backpack.core.services.pckg.impl;
 
+import com.day.cq.wcm.api.WCMException;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.services.SessionService;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
@@ -54,7 +55,7 @@ public class BuildPackageImplTest extends Base {
     private SessionService sessionService;
 
     @Override
-    public void beforeTest() throws IOException, RepositoryException {
+    public void beforeTest() throws IOException, RepositoryException, WCMException {
         super.beforeTest();
         buildPackage = context.registerInjectActivateService(new BuildPackageImpl());
     }
@@ -128,7 +129,7 @@ public class BuildPackageImplTest extends Base {
         packageInfo.setVersion(PACKAGE_VERSION);
         packageInfo.setReferencedResources(referencedResources);
         packageInfo.setPaths(Collections.singletonList(PAGE_1));
-        createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, false)), new DefaultWorkspaceFilter());
+        createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, true, false)), new DefaultWorkspaceFilter());
     }
 
 
@@ -141,7 +142,7 @@ public class BuildPackageImplTest extends Base {
         packageInfo.setReferencedResources(referencedResources);
         packageInfo.setPaths(Collections.singletonList(PAGE_1));
         packageInfo.setPackagePath(PACKAGE_PATH);
-        aPackage = spy(createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, false)), new DefaultWorkspaceFilter()));
+        aPackage = spy(createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, true, false)), new DefaultWorkspaceFilter()));
 
 
         buildPackageServiceSpy = (BuildPackageImpl) spy(buildPackage);

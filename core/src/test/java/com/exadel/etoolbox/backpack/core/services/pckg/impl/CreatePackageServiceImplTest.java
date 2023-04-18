@@ -13,6 +13,7 @@
  */
 package com.exadel.etoolbox.backpack.core.services.pckg.impl;
 
+import com.day.cq.wcm.api.WCMException;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
 import com.exadel.etoolbox.backpack.core.services.pckg.CreatePackageService;
@@ -35,12 +36,12 @@ import static org.junit.Assert.*;
 
 public class CreatePackageServiceImplTest extends Base {
 
-    private List<PathModel> expectedInitialFiltersModels = Collections.singletonList(new PathModel(PAGE_1, false));
+    private List<PathModel> expectedInitialFiltersModels = Collections.singletonList(new PathModel(PAGE_1, true, false));
 
     private CreatePackageService createPackage;
 
     @Override
-    public void beforeTest() throws IOException, RepositoryException {
+    public void beforeTest() throws IOException, RepositoryException, WCMException {
         super.beforeTest();
         createPackage = context.registerInjectActivateService(new CreatePackageServiceImpl());
     }
@@ -49,7 +50,7 @@ public class CreatePackageServiceImplTest extends Base {
     public void shouldCreatePackage() throws RepositoryException {
         PackageModel packageModel = new PackageModel();
 
-        initBasePackageInfo(packageModel, Collections.singletonList(PAGE_1), false);
+        initBasePackageInfo(packageModel, Collections.singletonList(PAGE_1), true);
         packageModel.setGroup(TEST_GROUP);
         resourceResolver = context.resourceResolver();
         PackageInfo aPackage = createPackage.createPackage(resourceResolver, packageModel);
@@ -66,7 +67,7 @@ public class CreatePackageServiceImplTest extends Base {
     public void shouldCreatePackageWithJcrContentInCaseOfExcludedChildren() throws RepositoryException {
         PackageModel packageModel = new PackageModel();
 
-        initBasePackageInfo(packageModel, Collections.singletonList(PAGE_1), true);
+        initBasePackageInfo(packageModel, Collections.singletonList(PAGE_1), false);
         packageModel.setGroup(TEST_GROUP);
 
         PackageInfo aPackage = createPackage.createPackage(resourceResolver, packageModel);
@@ -75,13 +76,13 @@ public class CreatePackageServiceImplTest extends Base {
         assertNotNull("testPackage-1.zip", aPackage.getPackageNodeName());
         Node packageNode = session.getNode("/etc/packages/testGroup/testPackage-1.zip");
         assertNotNull(packageNode);
-        verifyPackageFilters(packageNode, Collections.singletonList(PAGE_1 + "/jcr:content"), Collections.singletonList(new PathModel(PAGE_1, true)), referencedResources);
+        verifyPackageFilters(packageNode, Collections.singletonList(PAGE_1 + "/jcr:content"), Collections.singletonList(new PathModel(PAGE_1, false, false)), referencedResources);
     }
 
     @Test
     public void shouldCreatePackageWithDefaultGroup() throws RepositoryException {
         PackageModel packageModel = new PackageModel();
-        initBasePackageInfo(packageModel, Collections.singletonList(PAGE_1), false);
+        initBasePackageInfo(packageModel, Collections.singletonList(PAGE_1), true);
         PackageInfo aPackage = createPackage.createPackage(resourceResolver, packageModel);
 
         Assert.assertEquals(PackageStatus.CREATED, aPackage.getPackageStatus());
@@ -100,7 +101,7 @@ public class CreatePackageServiceImplTest extends Base {
         packageInfo.setVersion(PACKAGE_VERSION);
         packageInfo.setReferencedResources(new HashMap<>());
         packageInfo.setPaths(new ArrayList<>());
-        createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, false)), new DefaultWorkspaceFilter());
+        createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, true, false)), new DefaultWorkspaceFilter());
 
         PackageModel packageModel = new PackageModel();
         initBasePackageInfo(packageModel, Collections.singletonList(PAGE_1), false);
@@ -122,8 +123,8 @@ public class CreatePackageServiceImplTest extends Base {
         assertEquals("ERROR: Package does not contain any valid filters.", aPackage.getLog().get(0));
     }
 
-    private void initBasePackageInfo(final PackageModel model, final List<String> strings, final boolean excludeChildren) {
-        model.setPaths(strings.stream().map(s -> new PathModel(s, excludeChildren)).collect(Collectors.toList()));
+    private void initBasePackageInfo(final PackageModel model, final List<String> strings, final boolean includeChildren) {
+        model.setPaths(strings.stream().map(s -> new PathModel(s, includeChildren, false)).collect(Collectors.toList()));
         model.setPackageName(TEST_PACKAGE);
         model.setThumbnailPath(THUMBNAIL);
         model.setVersion(PACKAGE_VERSION);

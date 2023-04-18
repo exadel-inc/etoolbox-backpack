@@ -13,6 +13,7 @@
  */
 package com.exadel.etoolbox.backpack.core.services.pckg.impl;
 
+import com.day.cq.wcm.api.WCMException;
 import com.exadel.etoolbox.backpack.core.dto.repository.AssetReferencedItem;
 import com.exadel.etoolbox.backpack.core.dto.repository.ReferencedItem;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
@@ -44,7 +45,7 @@ public class EditPackageServiceTest extends Base {
     private EditPackageService editPackageService;
 
     @Override
-    public void beforeTest() throws IOException, RepositoryException {
+    public void beforeTest() throws IOException, RepositoryException, WCMException {
         super.beforeTest();
         packageInfo = new PackageInfo();
         packageInfo.setGroupName(TEST_GROUP);
@@ -54,7 +55,7 @@ public class EditPackageServiceTest extends Base {
         packageInfo.setPaths(Collections.singletonList(PAGE_1));
         packageInfo.setPackagePath(PACKAGE_PATH);
         resourceResolver = context.resourceResolver();
-        createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, false)), new DefaultWorkspaceFilter());
+        createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, true, false)), new DefaultWorkspaceFilter());
         editPackageService = context.registerInjectActivateService(new EditPackageServiceImpl());
     }
 
@@ -68,7 +69,7 @@ public class EditPackageServiceTest extends Base {
         Map<String, List<String>> modifiedReferencedResources = new HashMap<>();
         modifiedReferencedResources.put(IMAGE_JPEG, Collections.singletonList(PICTURE_3));
 
-        initBasePackageModel(packageModel, Collections.singletonList(PAGE_2), false);
+        initBasePackageModel(packageModel, Collections.singletonList(PAGE_2), true);
 
 
         PackageInfo aPackage = editPackageService.editPackage(resourceResolver, packageModel);
@@ -78,7 +79,7 @@ public class EditPackageServiceTest extends Base {
         assertNotNull(PACKAGE_2_2_ZIP, aPackage.getPackageNodeName());
         Node packageNode = session.getNode("/etc/packages/testGroup2/testPackage2-2.zip");
         assertNotNull(packageNode);
-        verifyPackageFilters(packageNode, Collections.singletonList(PAGE_2), Collections.singletonList(new PathModel(PAGE_2, false)), modifiedReferencedResources);
+        verifyPackageFilters(packageNode, Collections.singletonList(PAGE_2), Collections.singletonList(new PathModel(PAGE_2, true, false)), modifiedReferencedResources);
     }
 
     @Test
@@ -86,7 +87,7 @@ public class EditPackageServiceTest extends Base {
         packageInfo.setGroupName(TEST_GROUP_2);
         packageInfo.setPackageName(TEST_PACKAGE_2);
         packageInfo.setVersion(PACKAGE_VERSION_2);
-        createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, false)), new DefaultWorkspaceFilter());
+        createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, false, false)), new DefaultWorkspaceFilter());
         PackageModel packageModel = new PackageModel();
         initBasePackageModel(packageModel, Collections.singletonList(PAGE_2), false);
 
@@ -100,7 +101,7 @@ public class EditPackageServiceTest extends Base {
     public void shouldModifyPackageFilters() throws RepositoryException {
         PackageModel packageModel = new PackageModel();
 
-        initBasePackageModel(packageModel, Collections.singletonList(PAGE_1), true);
+        initBasePackageModel(packageModel, Collections.singletonList(PAGE_1), false);
 
         PackageInfo aPackage = editPackageService.editPackage(resourceResolver, packageModel);
 
@@ -108,7 +109,7 @@ public class EditPackageServiceTest extends Base {
         assertNotNull(PACKAGE_2_2_ZIP, aPackage.getPackageNodeName());
         Node packageNode = session.getNode("/etc/packages/testGroup2/testPackage2-2.zip");
         assertNotNull(packageNode);
-        verifyPackageFilters(packageNode, Collections.singletonList(PAGE_1 + "/jcr:content"), Collections.singletonList(new PathModel(PAGE_1, true)), referencedResources);
+        verifyPackageFilters(packageNode, Collections.singletonList(PAGE_1 + "/jcr:content"), Collections.singletonList(new PathModel(PAGE_1, false, false)), referencedResources);
     }
 
     @Test
@@ -121,8 +122,8 @@ public class EditPackageServiceTest extends Base {
         assertEquals("ERROR: Package does not contain any valid filters.", aPackage.getLog().get(0));
     }
 
-    private void initBasePackageModel(final PackageModel model, final List<String> strings, final boolean excludeChildren) {
-        model.setPaths(strings.stream().map(s -> new PathModel(s, excludeChildren)).collect(Collectors.toList()));
+    private void initBasePackageModel(final PackageModel model, final List<String> strings, final boolean includeChildren) {
+        model.setPaths(strings.stream().map(s -> new PathModel(s, includeChildren, false)).collect(Collectors.toList()));
         model.setPackageName(TEST_PACKAGE_2);
         model.setGroup(TEST_GROUP_2);
         model.setThumbnailPath(THUMBNAIL);

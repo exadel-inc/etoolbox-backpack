@@ -12,7 +12,7 @@
             <div class="coral-FixedColumn">
                 <div class="coral-FixedColumn-column">
                     <div class="coral-Form-fieldwrapper">
-                        <label class="coral-Form-fieldlabel">Package Name *</label>
+                        <label class="coral-Form-fieldlabel">Name *</label>
                         <input class="coral-Form-field" type="text" name="packageName"
                                value="${model.packageModel.packageName}"
                                aria-required="true"
@@ -20,18 +20,9 @@
                                data-validation
                                is="coral-textfield">
                     </div>
-                    <div class="coral-Form-fieldwrapper">
-                        <label class="coral-Form-fieldlabel">Package Version</label>
-                        <input class="coral-Form-field" type="text"
-                               name="version"
-                               data-foundation-validation
-                               data-validation
-                               value="${model.packageModel.version}"
-                               is="coral-textfield">
-                    </div>
 
                     <div class="coral-Form-fieldwrapper">
-                        <label id="label-switch" class="coral-Form-fieldlabel">SQL2 Query Package</label>
+                        <label id="label-switch" class="coral-Form-fieldlabel">Use SQL2 Query</label>
                         <coral-switch class="cq-dialog-switch-toggle" name="toggle" value="true" checked="${model.packageModel.toggle}" labelledby="label-switch"></coral-switch>
                     </div>
 
@@ -61,21 +52,36 @@
                                                 </coral-tag>
                                             </coral-taglist>
                                         </foundation-autocomplete>
-
                                     </div>
                                     <div class="coral-Form-fieldwrapper coral-Form-fieldwrapper--singleline">
-                                        <coral-checkbox name="excludeChildren" value="true"
-                                                        data-foundation-validation
-                                                        data-validation
-                                                        class="coral-Form-field" checked="${path.excludeChildren}">
-                                            <coral-checkbox-label>Exclude child pages?</coral-checkbox-label>
-                                        </coral-checkbox>
-                                        <coral-icon class="coral-Form-fieldinfo" icon="infoCircle" tabindex="0"
-                                                    alt="description"></coral-icon>
-                                        <coral-tooltip target="_prev" placement="right">
-                                            <coral-tooltip-content>Check to exclude child pages from package filter
-                                            </coral-tooltip-content>
-                                        </coral-tooltip>
+                                        <div class="coral-Form-fieldwrapper coral-Form-fieldwrapper--singleline">
+                                            <coral-checkbox name="includeLiveCopies" value="true"
+                                                            data-foundation-validation
+                                                            data-validation
+                                                            class="coral-Form-field" checked="${path.includeLiveCopies}">
+                                                <coral-checkbox-label>Include live copies?</coral-checkbox-label>
+                                            </coral-checkbox>
+                                            <coral-icon class="coral-Form-fieldinfo" icon="infoCircle" tabindex="0"
+                                                        alt="description"></coral-icon>
+                                            <coral-tooltip target="_prev" placement="right">
+                                                <coral-tooltip-content>Check to include live copies of the page to the package filter
+                                                </coral-tooltip-content>
+                                            </coral-tooltip>
+                                        </div>
+                                        <div class="coral-Form-fieldwrapper coral-Form-fieldwrapper--singleline">
+                                            <coral-checkbox name="includeChildren" value="true"
+                                                            data-foundation-validation
+                                                            data-validation
+                                                            class="coral-Form-field" checked="${path.includeChildren}">
+                                                <coral-checkbox-label>Include child pages?</coral-checkbox-label>
+                                            </coral-checkbox>
+                                            <coral-icon class="coral-Form-fieldinfo" icon="infoCircle" tabindex="0"
+                                                        alt="description"></coral-icon>
+                                            <coral-tooltip target="_prev" placement="right">
+                                                <coral-tooltip-content>Check to exclude child pages from package filter
+                                                </coral-tooltip-content>
+                                            </coral-tooltip>
+                                        </div>
                                     </div>
 
                                 </coral-multifield-item>
@@ -102,11 +108,23 @@
                                         </foundation-autocomplete>
                                     </div>
                                     <div class="coral-Form-fieldwrapper coral-Form-fieldwrapper--singleline">
-                                        <coral-checkbox name="excludeChildren" value="true"
+                                        <coral-checkbox name="includeLiveCopies" value="true"
                                                         data-foundation-validation
                                                         data-validation
                                                         class="coral-Form-field">
-                                            <coral-checkbox-label>Exclude child pages?</coral-checkbox-label>
+                                            <coral-checkbox-label>Include live copies?</coral-checkbox-label>
+                                        </coral-checkbox>
+                                        <coral-icon class="coral-Form-fieldinfo" icon="infoCircle" tabindex="0"
+                                                    alt="description"></coral-icon>
+                                        <coral-tooltip target="_prev" placement="right">
+                                            <coral-tooltip-content>Check to include live copies of the page to the package filter
+                                            </coral-tooltip-content>
+                                        </coral-tooltip>
+                                        <coral-checkbox name="includeChildren" value="true"
+                                                        data-foundation-validation
+                                                        data-validation
+                                                        class="coral-Form-field">
+                                            <coral-checkbox-label>Include child pages?</coral-checkbox-label>
                                         </coral-checkbox>
                                         <coral-icon class="coral-Form-fieldinfo" icon="infoCircle" tabindex="0"
                                                     alt="description"></coral-icon>
@@ -129,7 +147,15 @@
 
                     <sly data-sly-use.template="/apps/etoolbox-backpack/admin/console/components/editDialog/groupAutocomplete/groupAutocomplete.html"
                          data-sly-call="${template.autocompleteTemplate @ selectedPackageGroup = model.packageGroup}"/>
-
+                    <div class="coral-Form-fieldwrapper">
+                        <label class="coral-Form-fieldlabel">Version</label>
+                        <input class="coral-Form-field" type="text"
+                               name="version"
+                               data-foundation-validation
+                               data-validation
+                               value="${model.packageModel.version}"
+                               is="coral-textfield">
+                    </div>
                     <div class="coral-Form-fieldwrapper">
                         <label class="coral-Form-fieldlabel">Thumbnail Path</label>
                         <foundation-autocomplete class="coral-Form-field"
