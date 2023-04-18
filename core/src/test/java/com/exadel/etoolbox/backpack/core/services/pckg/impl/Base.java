@@ -13,10 +13,13 @@
  */
 package com.exadel.etoolbox.backpack.core.services.pckg.impl;
 
+import com.day.cq.wcm.api.WCMException;
+import com.day.cq.wcm.msm.api.LiveRelationshipManager;
 import com.exadel.etoolbox.backpack.core.dto.repository.AssetReferencedItem;
 import com.exadel.etoolbox.backpack.core.dto.repository.ReferencedItem;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.services.ReferenceService;
+import com.exadel.etoolbox.backpack.core.services.impl.LiveCopyServiceImpl;
 import com.exadel.etoolbox.backpack.core.services.impl.QueryServiceImpl;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
@@ -31,12 +34,15 @@ import org.apache.jackrabbit.vault.packaging.JcrPackage;
 import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
 import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
 import org.apache.jackrabbit.vault.packaging.PackagingService;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
 import org.junit.Rule;
+import org.mockito.Mock;
 
 import javax.jcr.Node;
+import javax.jcr.RangeIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.io.IOException;
@@ -86,8 +92,11 @@ public class Base {
     protected Map<String, List<String>> referencedResources;
     protected BasePackageService basePackageService;
 
+    @Mock
+    private LiveRelationshipManager liveRelationshipManager;
+
     @Before
-    public void beforeTest() throws IOException, RepositoryException {
+    public void beforeTest() throws IOException, RepositoryException, WCMException {
         referencedResources = new HashMap<>();
         referencedResources.put(IMAGE_JPEG, Collections.singletonList(PICTURE_1));
         referencedResources.put(IMAGE_PNG, Collections.singletonList(PICTURE_2));
@@ -104,6 +113,12 @@ public class Base {
         Map<String, Object> properties = new HashMap<>();
         properties.put("buildInfoTTL", 1);
         context.registerInjectActivateService(new QueryServiceImpl());
+        liveRelationshipManager = mock(LiveRelationshipManager.class);
+        context.registerService(LiveRelationshipManager.class, liveRelationshipManager);
+        RangeIterator relationships = mock(RangeIterator.class);
+        when(relationships.hasNext()).thenReturn(false);
+        when(liveRelationshipManager.getLiveRelationships(any(Resource.class), any(), any())).thenReturn(relationships);
+        context.registerInjectActivateService(new LiveCopyServiceImpl());
         basePackageService = context.registerInjectActivateService(new BasePackageServiceImpl(), properties);
         packageInfoService = context.registerInjectActivateService(new PackageInfoServiceImpl());
 
@@ -185,7 +200,7 @@ public class Base {
 
             for (int i = 0; i < initialFiltersModels.size(); i++) {
                 assertEquals("Initial path must be as in expected list", expectedInitialFiltersModels.get(i).getPath(), initialFiltersModels.get(i).getPath());
-                assertEquals("Initial excludeChildren flag must be as in expected list", expectedInitialFiltersModels.get(i).isExcludeChildren(), initialFiltersModels.get(i).isExcludeChildren());
+                assertEquals("Initial includeChildren flag must be as in expected list", expectedInitialFiltersModels.get(i).includeChildren(), initialFiltersModels.get(i).includeChildren());
 
             }
 

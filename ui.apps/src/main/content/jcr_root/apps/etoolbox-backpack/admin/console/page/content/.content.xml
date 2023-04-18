@@ -144,6 +144,7 @@
         </actions>
     </jcr:content>
     <createpagedialog
+            granite:id="createPackageDialog"
             jcr:primaryType="nt:unstructured"
             jcr:title="Create package"
             sling:resourceType="granite/ui/components/coral/foundation/dialog">
@@ -174,13 +175,10 @@
                                 <items jcr:primaryType="nt:unstructured">
                                     <packageName jcr:primaryType="nt:unstructured"
                                                  sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-                                                 fieldLabel="Package Name"
+                                                 granite:id="packageName"
+                                                 fieldLabel="Name"
                                                  name="packageName"
                                                  required="{Boolean}true"/>
-                                    <packageVersion jcr:primaryType="nt:unstructured"
-                                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-                                                    fieldLabel="Package Version"
-                                                    name="version"/>
                                     <switch
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="/libs/granite/ui/components/coral/foundation/form/switch"
@@ -188,9 +186,10 @@
                                             checked="false"
                                             value="true"
                                             name="toggle"
-                                            fieldLabel="SQL2 Query Package"
+                                            fieldLabel="Use SQL2 Query"
                                             textOn="on"
-                                            granite:class="cq-dialog-switch-toggle">
+                                            granite:class="cq-dialog-switch-toggle"
+                                            granite:id="create-package-switch">
                                     </switch>
 
                                     <pathContainer
@@ -225,11 +224,18 @@
                                                                 multiple="false"
                                                                 required="{Boolean}true"
                                                                 name="path"/>
-                                                        <excludeChildren jcr:primaryType="nt:unstructured"
-                                                                         fieldDescription="Check to exclude child pages from package filter"
-                                                                         name="excludeChildren"
-                                                                         text="Exclude child pages?"
+                                                        <includeLiveCopies jcr:primaryType="nt:unstructured"
+                                                                           fieldDescription="Check to include live copies of the page to package filter"
+                                                                           name="includeLiveCopies"
+                                                                           text="Include live copies?"
+                                                                           uncheckedValue="false" value="true"
+                                                                           sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"/>
+                                                        <includeChildren jcr:primaryType="nt:unstructured"
+                                                                         fieldDescription="Check to include child pages to package filter"
+                                                                         name="includeChildren"
+                                                                         text="Include child pages?"
                                                                          uncheckedValue="false" value="true"
+                                                                         checked="{Boolean}true"
                                                                          sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"/>
                                                     </items>
                                                 </field>
@@ -254,6 +260,10 @@
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="etoolbox-backpack/admin/console/components/editDialog/groupAutocomplete">
                                     </group_select>
+                                    <packageVersion jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                                    fieldLabel="Version"
+                                                    name="version"/>
                                     <image jcr:primaryType="nt:unstructured"
                                            sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
                                            fieldLabel="Thumbnail Path"

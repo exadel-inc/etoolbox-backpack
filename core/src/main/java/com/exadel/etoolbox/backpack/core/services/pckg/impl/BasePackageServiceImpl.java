@@ -18,6 +18,7 @@ import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.dam.api.Asset;
 import com.exadel.etoolbox.backpack.core.dto.repository.ReferencedItem;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
+import com.exadel.etoolbox.backpack.core.services.LiveCopyService;
 import com.exadel.etoolbox.backpack.core.services.QueryService;
 import com.exadel.etoolbox.backpack.core.services.ReferenceService;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
@@ -56,6 +57,7 @@ import javax.jcr.Session;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Implements {@link BasePackageService} to provide base operation with package
@@ -86,18 +88,21 @@ public class BasePackageServiceImpl implements BasePackageService {
 
     @Reference
     @SuppressWarnings("UnusedDeclaration") // value injected by Sling
-    protected ResourceResolverFactory resourceResolverFactory;
+    private ResourceResolverFactory resourceResolverFactory;
 
     @Reference
     @SuppressWarnings("UnusedDeclaration") // value injected by Sling
-    protected SlingRepository slingRepository;
+    private SlingRepository slingRepository;
 
     @Reference
     @SuppressWarnings("UnusedDeclaration") // value injected by Sling
-    protected ReferenceService referenceService;
+    private ReferenceService referenceService;
 
     @Reference
-    protected QueryService queryService;
+    private QueryService queryService;
+
+    @Reference
+    private LiveCopyService liveCopyService;
 
     @SuppressWarnings("UnstableApiUsage") // sticking to Guava Cache version bundled in uber-jar; still safe to use
     protected Cache<String, PackageInfo> packageInfos;
@@ -155,7 +160,7 @@ public class BasePackageServiceImpl implements BasePackageService {
         } else {
             actualPaths = packageModel.getPaths().stream()
                     .filter(s -> resourceResolver.getResource(s.getPath()) != null)
-                    .map(path -> getActualPath(path.getPath(), path.isExcludeChildren(), resourceResolver))
+                    .flatMap(pathModel -> getActualPaths(resourceResolver, pathModel))
                     .collect(Collectors.toList());
         }
         packageInfo.setPackageName(packageModel.getPackageName());
@@ -181,20 +186,25 @@ public class BasePackageServiceImpl implements BasePackageService {
      * to the underlying {@code jcr:content} node
      *
      * @param path             Resource path to inspect
-     * @param excludeChildren  Flag indicating if this resource's children must be excluded
+     * @param includeChildren  Flag indicating if this resource's children must be included
      * @param resourceResolver Current {@code ResourceResolver} object
      * @return Source path, or the adjusted resource path
      */
-    private String getActualPath(final String path, final boolean excludeChildren, final ResourceResolver resourceResolver) {
+    private String getActualPath(final String path, final boolean includeChildren, final ResourceResolver resourceResolver) {
         Resource res = resourceResolver.getResource(path);
 
-        if (!excludeChildren) {
+        if (includeChildren) {
             return path;
         }
         if (res != null && res.getChild(JcrConstants.JCR_CONTENT) != null) {
             return path + JCR_CONTENT_NODE;
         }
         return path;
+    }
+
+    private Stream<String> getActualPaths(ResourceResolver resourceResolver, PathModel pathModel) {
+        return liveCopyService.getPaths(resourceResolver, pathModel.getPath(), pathModel.includeLiveCopies())
+                .stream().map(path -> getActualPath(path, pathModel.includeChildren(), resourceResolver));
     }
 
     /**
