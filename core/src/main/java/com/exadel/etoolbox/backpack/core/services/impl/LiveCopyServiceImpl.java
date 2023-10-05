@@ -7,6 +7,7 @@ import com.day.cq.wcm.msm.api.LiveRelationshipManager;
 import com.exadel.etoolbox.backpack.core.services.LiveCopyService;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageModel;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Component;
@@ -42,11 +43,11 @@ public class LiveCopyServiceImpl implements LiveCopyService {
         if (!includeLiveCopies) {
             return paths;
         }
-        paths.addAll(getLiveCopies(resourceResolver, path));
+        paths.addAll(getLiveCopies(resourceResolver, path, StringUtils.EMPTY));
         return paths;
     }
 
-    private List<String> getLiveCopies(ResourceResolver resourceResolver, String path) {
+    private List<String> getLiveCopies(ResourceResolver resourceResolver, String path, String sourceSyncPath) {
         List<String> paths = new ArrayList<>();
         Resource resource = resourceResolver.getResource(path);
         if (resource == null) {
@@ -57,15 +58,15 @@ public class LiveCopyServiceImpl implements LiveCopyService {
             while (relationships.hasNext()) {
                 LiveRelationship relationship = (LiveRelationship) relationships.next();
                 LiveCopy liveCopy = relationship.getLiveCopy();
-                if (liveCopy == null) {
+                String syncPath = StringUtils.defaultIfEmpty(relationship.getSyncPath(), sourceSyncPath);
+                if (liveCopy == null || (StringUtils.isNotBlank(syncPath) && !liveCopy.isDeep())) {
                     continue;
                 }
                 String liveCopyPath = liveCopy.getPath();
-                String syncPath = liveCopyPath + relationship.getSyncPath();
-                if (resourceResolver.getResource(syncPath) != null) {
-                    paths.add(syncPath);
+                if (resourceResolver.getResource(liveCopyPath + syncPath) != null) {
+                    paths.add(liveCopyPath + syncPath);
                 }
-                paths.addAll(getLiveCopies(resourceResolver, liveCopyPath));
+                paths.addAll(getLiveCopies(resourceResolver, liveCopyPath, syncPath));
             }
         } catch (WCMException e) {
             LOGGER.error("Can't get relationships of the resource {}", resource.getPath(), e);
