@@ -18,6 +18,8 @@ import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.dam.api.Asset;
 import com.exadel.etoolbox.backpack.core.dto.repository.ReferencedItem;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
+import com.exadel.etoolbox.backpack.core.dto.response.ResourceRelationships;
+import com.exadel.etoolbox.backpack.core.dto.response.Status;
 import com.exadel.etoolbox.backpack.core.services.LiveCopyService;
 import com.exadel.etoolbox.backpack.core.services.QueryService;
 import com.exadel.etoolbox.backpack.core.services.ReferenceService;
@@ -57,7 +59,6 @@ import javax.jcr.Session;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Implements {@link BasePackageService} to provide base operation with package
@@ -154,14 +155,18 @@ public class BasePackageServiceImpl implements BasePackageService {
     @Override
     public PackageInfo getPackageInfo(final ResourceResolver resourceResolver, final PackageModel packageModel) {
         PackageInfo packageInfo = new PackageInfo();
-        List<String> actualPaths;
+        final Set<String> actualPaths = new HashSet<>();
+        final Set<String> brokenPaths = new HashSet<>();
         if (packageModel.isToggle()) {
-            actualPaths = queryService.getResourcesPathsFromQuery(resourceResolver, packageModel.getQuery(), packageInfo);
+            actualPaths.addAll(queryService.getResourcesPathsFromQuery(resourceResolver, packageModel.getQuery(), packageInfo));
         } else {
-            actualPaths = packageModel.getPaths().stream()
+            packageModel.getPaths().stream()
                     .filter(s -> resourceResolver.getResource(s.getPath()) != null)
-                    .flatMap(pathModel -> getActualPaths(resourceResolver, pathModel))
-                    .collect(Collectors.toList());
+                    .forEach(pathModel -> {
+                        final ResourceRelationships resourceRelationships = getResourceRelationships(resourceResolver, pathModel);
+                        actualPaths.addAll(resourceRelationships.getActualPaths());
+                        brokenPaths.addAll(resourceRelationships.getBrokenPaths());
+            });
         }
         packageInfo.setPackageName(packageModel.getPackageName());
         packageInfo.setPaths(actualPaths);
@@ -170,6 +175,10 @@ public class BasePackageServiceImpl implements BasePackageService {
         packageInfo.setQuery(packageModel.getQuery());
         packageInfo.setToggle(packageModel.isToggle());
         packageInfo.setDataSize(actualPaths.stream().mapToLong(value -> getAssetSize(resourceResolver, value)).sum());
+
+        if (!brokenPaths.isEmpty()) {
+            packageInfo.setStatus(Status.warning(brokenPaths));
+        }
 
         String packageGroupName = DEFAULT_PACKAGE_GROUP;
 
@@ -202,9 +211,10 @@ public class BasePackageServiceImpl implements BasePackageService {
         return path;
     }
 
-    private Stream<String> getActualPaths(ResourceResolver resourceResolver, PathModel pathModel) {
-        return liveCopyService.getPaths(resourceResolver, pathModel.getPath(), pathModel.includeLiveCopies())
-                .stream().map(path -> getActualPath(path, pathModel.includeChildren(), resourceResolver));
+    private ResourceRelationships getResourceRelationships(ResourceResolver resourceResolver, PathModel pathModel) {
+        ResourceRelationships resourceRelationships = liveCopyService.getResourceRelationships(resourceResolver, pathModel.getPath(), pathModel.includeLiveCopies());
+        resourceRelationships.setActualPaths(resourceRelationships.getActualPaths().stream().map(path -> getActualPath(path, pathModel.includeChildren(), resourceResolver)).collect(Collectors.toList()));
+        return resourceRelationships;
     }
 
     /**

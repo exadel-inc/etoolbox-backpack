@@ -4,6 +4,7 @@ import com.day.cq.wcm.api.WCMException;
 import com.day.cq.wcm.msm.api.LiveCopy;
 import com.day.cq.wcm.msm.api.LiveRelationship;
 import com.day.cq.wcm.msm.api.LiveRelationshipManager;
+import com.exadel.etoolbox.backpack.core.dto.response.ResourceRelationships;
 import com.exadel.etoolbox.backpack.core.services.LiveCopyService;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageModel;
@@ -15,6 +16,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.jcr.ItemNotFoundException;
 import javax.jcr.RangeIterator;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,20 +40,21 @@ public class LiveCopyServiceImpl implements LiveCopyService {
      * @return List of paths
      */
     @Override
-    public List<String> getPaths(ResourceResolver resourceResolver, String path, boolean includeLiveCopies) {
-        List<String> paths = new ArrayList<>(Collections.singletonList(path));
+    public ResourceRelationships getResourceRelationships(ResourceResolver resourceResolver, String path, boolean includeLiveCopies) {
+        ResourceRelationships resourceRelationships = new ResourceRelationships(new ArrayList<>(Collections.singletonList(path)), new ArrayList<>());
         if (!includeLiveCopies) {
-            return paths;
+            return resourceRelationships;
         }
-        paths.addAll(getLiveCopies(resourceResolver, path, StringUtils.EMPTY));
-        return paths;
+        return resourceRelationships.concat(getLiveCopies(resourceResolver, path, StringUtils.EMPTY));
     }
 
-    private List<String> getLiveCopies(ResourceResolver resourceResolver, String path, String sourceSyncPath) {
-        List<String> paths = new ArrayList<>();
+    private ResourceRelationships getLiveCopies(ResourceResolver resourceResolver, String path, String sourceSyncPath) {
+        List<String> actualPaths = new ArrayList<>();
+        List<String> brokenPaths = new ArrayList<>();
         Resource resource = resourceResolver.getResource(path);
         if (resource == null) {
-            return paths;
+            brokenPaths.add(path);
+            return new ResourceRelationships(actualPaths, brokenPaths);
         }
         try {
             RangeIterator relationships = liveRelationshipManager.getLiveRelationships(resource, null, null);
@@ -64,13 +67,16 @@ public class LiveCopyServiceImpl implements LiveCopyService {
                 }
                 String liveCopyPath = liveCopy.getPath();
                 if (resourceResolver.getResource(liveCopyPath + syncPath) != null) {
-                    paths.add(liveCopyPath + syncPath);
+                    actualPaths.add(liveCopyPath + syncPath);
                 }
-                paths.addAll(getLiveCopies(resourceResolver, liveCopyPath, syncPath));
+                ResourceRelationships resourceRelationships = getLiveCopies(resourceResolver, liveCopyPath, syncPath);
+                actualPaths.addAll(resourceRelationships.getActualPaths());
+                brokenPaths.addAll(resourceRelationships.getBrokenPaths());
             }
-        } catch (WCMException e) {
+        } catch (Exception e) {
+            brokenPaths.add(resource.getPath());
             LOGGER.error("Can't get relationships of the resource {}", resource.getPath(), e);
         }
-        return paths;
+        return new ResourceRelationships(actualPaths, brokenPaths);
     }
 }

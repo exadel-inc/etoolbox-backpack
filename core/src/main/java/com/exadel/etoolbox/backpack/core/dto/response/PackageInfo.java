@@ -48,6 +48,8 @@ public class PackageInfo {
 
     private Collection<String> paths;
 
+    private Status status;
+
     private Map<String, List<String>> referencedResources = new TreeMap<>();
 
     private List<String> log = new ArrayList<>();
@@ -89,6 +91,7 @@ public class PackageInfo {
         this.log = packageInfo.log;
         this.dataSize = packageInfo.dataSize;
         this.paths = packageInfo.paths;
+        this.status = packageInfo.status;
         this.query = packageInfo.query;
         this.toggle = packageInfo.toggle;
         if (packageInfo.packageInstalled != null) {
@@ -438,6 +441,15 @@ public class PackageInfo {
      */
     public void setPackageReplicated(Calendar packageReplicated) {
         this.packageReplicated = packageReplicated;
+    }
+
+    /**
+     * Sets the status of the package creation result
+     *
+     * @param  {@code Status} object
+     */
+    public void setStatus(final Status status) {
+        this.status = status;
     }
 
     /**
