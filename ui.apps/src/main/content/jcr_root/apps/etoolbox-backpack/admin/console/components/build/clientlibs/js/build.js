@@ -410,10 +410,14 @@ $(function () {
             force: true
         };
 
-        $.post(COMMAND_URL, data).done(function () {
-            showAlert("Package deleted", "Delete", "warning", function () {
-                window.location.href = goBackLink;
-            });
+        $.ajax({
+            url: '/services/backpack/deletePackage?path=' + path,
+            type: 'DELETE',
+            success: function(result) {
+                showAlert("Package deleted", "Delete", "warning", function () {
+                    window.location.href = goBackLink;
+                });
+            }
         });
     }
 
