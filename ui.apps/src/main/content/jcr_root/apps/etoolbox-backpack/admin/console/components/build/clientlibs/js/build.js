@@ -402,14 +402,6 @@ $(function () {
 
 
     function deleteAction() {
-
-        var data = {
-            _charset_: "UTF-8",
-            cmd: "deletePage",
-            path: path,
-            force: true
-        };
-
         $.ajax({
             url: '/services/backpack/deletePackage?path=' + path,
             type: 'DELETE',
