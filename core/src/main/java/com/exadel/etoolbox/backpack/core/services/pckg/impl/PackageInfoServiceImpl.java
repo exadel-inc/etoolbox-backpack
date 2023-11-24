@@ -17,10 +17,7 @@ import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
-import com.exadel.etoolbox.backpack.core.servlets.model.LatestPackageInfoModel;
-import com.exadel.etoolbox.backpack.core.servlets.model.PackageInfoModel;
-import com.exadel.etoolbox.backpack.core.servlets.model.PackageModel;
-import com.exadel.etoolbox.backpack.core.servlets.model.PathModel;
+import com.exadel.etoolbox.backpack.core.servlets.model.*;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.vault.fs.api.FilterSet;
@@ -41,10 +38,7 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -82,7 +76,7 @@ public class PackageInfoServiceImpl implements PackageInfoService {
                 Node packageNode = session.getNode(packagePath);
                 if (packageNode != null) {
                     jcrPackage = packMgr.open(packageNode);
-                    getPackageInfo(packageInfo, jcrPackage, packageNode);
+                    getPackageInfo(packageInfo, jcrPackage, packageNode, resourceResolver);
                 }
             }
         } catch (RepositoryException e) {
@@ -101,11 +95,11 @@ public class PackageInfoServiceImpl implements PackageInfoService {
      * {@inheritDoc}
      */
     @Override
-    public PackageInfo getPackageInfo(final JcrPackage jcrPackage) {
+    public PackageInfo getPackageInfo(final JcrPackage jcrPackage, final ResourceResolver resourceResolver) {
         PackageInfo packageInfo = new PackageInfo();
         try {
             if (jcrPackage != null) {
-                getPackageInfo(packageInfo, jcrPackage, jcrPackage.getNode());
+                getPackageInfo(packageInfo, jcrPackage, jcrPackage.getNode(), resourceResolver);
 
                 return packageInfo;
             }
@@ -259,9 +253,10 @@ public class PackageInfoServiceImpl implements PackageInfoService {
      * @param jcrPackage  The standard {@link JcrPackage} model used to retrieve information for the {@code PackageInfo} object
      * @param packageNode The corresponding JCR {@code Node} used to retrieve path requisite
      *                    for the {@code PackageInfo} object
+     * @param resourceResolver {@code ResourceResolver} instance used to access resources
      * @throws RepositoryException in case retrieving of JCR node detail fails
      */
-    private void getPackageInfo(final PackageInfo packageInfo, final JcrPackage jcrPackage, final Node packageNode) throws RepositoryException {
+    private void getPackageInfo(final PackageInfo packageInfo, final JcrPackage jcrPackage, final Node packageNode, final ResourceResolver resourceResolver) throws RepositoryException {
         if (jcrPackage != null) {
             JcrPackageDefinition definition = jcrPackage.getDefinition();
             if (definition != null) {
@@ -275,7 +270,12 @@ public class PackageInfoServiceImpl implements PackageInfoService {
                     packageInfo.setPackageName(definition.get(JcrPackageDefinition.PN_NAME));
                     packageInfo.setGroupName(definition.get(JcrPackageDefinition.PN_GROUP));
                     packageInfo.setVersion(definition.get(JcrPackageDefinition.PN_VERSION));
-                    packageInfo.setReferencedResources(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.REFERENCED_RESOURCES), mapType));
+                    packageInfo.setReferencedResources(
+                            validateReferencesResources(
+                                    BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.REFERENCED_RESOURCES), mapType),
+                                    resourceResolver
+                            )
+                    );
                     packageInfo.setPaths(filterSets.stream().map(FilterSet::getRoot).collect(Collectors.toList()));
                     packageInfo.setDataSize(jcrPackage.getSize());
                     packageInfo.setPackageBuilt(definition.getLastWrapped());
@@ -318,4 +318,24 @@ public class PackageInfoServiceImpl implements PackageInfoService {
         return partialBuildInfo;
     }
 
+    /**
+     * Validate the availability of references resources for pages
+     *
+     * @param resources {@code Map} representing references types and paths
+     * @param resourceResolver {@code ResourceResolver} object used to check the actual information about the validity of the resource
+     *
+     * @return {@code Map} instance
+     */
+    private Map<String, List<String>> validateReferencesResources(Map<String, List<String>> resources, ResourceResolver resourceResolver) {
+        Map<String, List<String>> filteredMap = new HashMap<>();
+        if (resources != null) {
+            resources.forEach(
+                    (key, value) -> filteredMap.put(
+                            key,
+                            value.stream().filter(path -> resourceResolver.getResource(path) != null).collect(Collectors.toList())
+                    )
+            );
+        }
+        return filteredMap;
+    }
 }
