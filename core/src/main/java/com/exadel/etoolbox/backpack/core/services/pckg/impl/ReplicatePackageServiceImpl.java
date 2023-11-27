@@ -60,7 +60,7 @@ public class ReplicatePackageServiceImpl implements ReplicatePackageService {
     @Override
     public PackageInfo replicatePackage(ResourceResolver resourceResolver, PackageInfoModel packageInfoModel) {
         PackageInfo packageInfo = packageInfoService.getPackageInfo(resourceResolver, packageInfoModel);
-        if (PackageStatus.BUILT.equals(packageInfo.getPackageStatus())) {
+        if (PackageStatus.BUILT.equals(packageInfo.getPackageStatus()) || PackageStatus.INSTALL.equals(packageInfo.getPackageStatus())) {
             packageInfo.clearLog();
             packageInfo.addLogMessage(START_REPLICATE_MESSAGE + packageInfoModel.getPackagePath());
             packageInfo.addLogMessage(LocalDateTime.now().toString());
