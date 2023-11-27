@@ -319,7 +319,7 @@ public class PackageInfoServiceImpl implements PackageInfoService {
     }
 
     /**
-     * Validate the availability of references resources for pages
+     * Validate the availability of referenced resources for pages
      *
      * @param resources {@code Map} representing references types and paths
      * @param resourceResolver {@code ResourceResolver} object used to check the actual information about the validity of the resource

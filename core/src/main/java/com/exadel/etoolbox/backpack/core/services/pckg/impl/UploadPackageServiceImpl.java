@@ -68,8 +68,9 @@ public class UploadPackageServiceImpl implements UploadPackageService {
                 final boolean strict = true;
 
                 uploadedPackage = packageManager.upload(fileUpload, isTempFile, forceUpdate, nameHint, strict);
+                packageInfo = packageInfoService.getPackageInfo(uploadedPackage, resourceResolver);
 
-                return packageInfoService.getPackageInfo(uploadedPackage, resourceResolver);
+                basePackageService.getPackageInfos().put(packageInfo.getPackagePath(), packageInfo);
             } catch (Exception e) {
                 LOGGER.error("Cannot upload package: {}", e.getMessage(), e);
                 packageInfo.addLogMessage(e.getMessage());

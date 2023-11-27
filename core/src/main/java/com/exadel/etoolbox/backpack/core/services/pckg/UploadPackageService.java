@@ -21,10 +21,10 @@ import org.apache.sling.api.resource.ResourceResolver;
  */
 public interface UploadPackageService {
     /**
-     * Method upload package by byte[] array representation
+     * Uploads a content package as an array of bytes
      *
      * @param resourceResolver     {@code ResourceResolver} instance used to adapt to Session object and access resources
-     * @param fileUploadBytesArray {@code byte[]} instance used provides the content of the package
+     * @param fileUploadBytesArray {@code byte[]} content of the package
      * @param forceUpdate          {@code boolean} if true existing packages will be replaced
      * @return {@code JcrPackageWrapper} the jcr-package with additional information
      */
