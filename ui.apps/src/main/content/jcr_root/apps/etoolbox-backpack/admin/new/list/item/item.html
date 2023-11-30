@@ -1,0 +1,31 @@
+<sly data-sly-use.entry="com.exadel.etoolbox.backpack.core.model.ParentPackageEntry"></sly>
+<div class="foundation-collection-item package-entry primary"
+     data-has-children="${entry.hasChildren}"
+     data-tree-state="${entry.hasSubsidiaries ? 'expanded' : 'none'}">
+    <div class="header">
+        <div class="toggler">
+            <coral-icon icon="triangleDown" size="S"></coral-icon>
+        </div>
+        <div class="icon">
+            <coral-icon icon="${entry.icon}" size="M"></coral-icon>
+        </div>
+        <div class="title">
+            <span class="path">${entry.title}</span>
+            <span data-sly-test="${entry.hasChildren}" class="children">Children included</span>
+        </div>
+    </div>
+    <div class="subsidiaries" data-sly-list.subsidiary="${entry.subsidiaries}">
+        <div class="foundation-collection-item package-entry secondary">
+            <div class="header">
+                <div class="icon">
+                    <coral-icon icon="${subsidiary.icon}" size="M"></coral-icon>
+                </div>
+                <div class="title">
+                    <span class="path">${subsidiary.title}</span>
+                    <span data-sly-test="${subsidiary.type == 'asset'}"
+                          class="parents">Referenced by of ${resource.valueMap.referer}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
