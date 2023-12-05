@@ -21,6 +21,7 @@ import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.BuildPackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
 import com.exadel.etoolbox.backpack.core.servlets.model.BuildPackageModel;
+import com.exadel.etoolbox.backpack.core.util.ProgressTrackerMessageUtil;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
@@ -61,8 +62,6 @@ public class BuildPackageImpl implements BuildPackageService {
     private static final Logger LOGGER = LoggerFactory.getLogger(BuildPackageImpl.class);
 
     protected static final Gson GSON = new Gson();
-    private static final String NOP_STATUS_CODE = "-";
-    private static final String AGGREGATION_STATUS_LOG_MESSAGE = "Aggregation status:";
 
     @Reference
     private PackageInfoService packageInfoService;
@@ -160,11 +159,10 @@ public class BuildPackageImpl implements BuildPackageService {
                 packMgr.assemble(jcrPackage, new ProgressTrackerListener() {
                     @Override
                     public void onMessage(final Mode mode, final String statusCode, final String path) {
-                        if (path.contains(AGGREGATION_STATUS_LOG_MESSAGE)) {
+                        if (ProgressTrackerMessageUtil.isContainAggregationStatus(path)) {
                             return;
                         }
-                        final String message = statusCode.equals(NOP_STATUS_CODE) ? StringUtils.EMPTY : statusCode + " " + path;
-                        packageBuildInfo.addLogMessage(message);
+                        packageBuildInfo.addLogMessage(ProgressTrackerMessageUtil.buildLogMessage(statusCode, path));
                     }
 
                     @Override
