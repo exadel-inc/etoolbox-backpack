@@ -1,6 +1,5 @@
 package com.exadel.etoolbox.backpack.core.services.impl;
 
-import com.day.cq.wcm.api.WCMException;
 import com.day.cq.wcm.msm.api.LiveCopy;
 import com.day.cq.wcm.msm.api.LiveRelationship;
 import com.day.cq.wcm.msm.api.LiveRelationshipManager;
@@ -16,7 +15,6 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.ItemNotFoundException;
 import javax.jcr.RangeIterator;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,6 +24,7 @@ import java.util.List;
 public class LiveCopyServiceImpl implements LiveCopyService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LiveCopyServiceImpl.class);
+    private static final String ITEM_NOT_FOUND_EXP_MESSAGE = "javax.jcr.ItemNotFoundException: No content resource for resource at path ";
 
     @Reference
     private LiveRelationshipManager liveRelationshipManager;
@@ -74,7 +73,9 @@ public class LiveCopyServiceImpl implements LiveCopyService {
                 brokenPaths.addAll(resourceRelationships.getBrokenPaths());
             }
         } catch (Exception e) {
-            brokenPaths.add(resource.getPath());
+            if (e.getMessage().contains(ITEM_NOT_FOUND_EXP_MESSAGE)) {
+                brokenPaths.add(StringUtils.substringAfter(e.getMessage(), ITEM_NOT_FOUND_EXP_MESSAGE));
+            }
             LOGGER.error("Can't get relationships of the resource {}", resource.getPath(), e);
         }
         return new ResourceRelationships(actualPaths, brokenPaths);
