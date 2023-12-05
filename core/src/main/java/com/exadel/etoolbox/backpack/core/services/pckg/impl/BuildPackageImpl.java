@@ -61,6 +61,8 @@ public class BuildPackageImpl implements BuildPackageService {
     private static final Logger LOGGER = LoggerFactory.getLogger(BuildPackageImpl.class);
 
     protected static final Gson GSON = new Gson();
+    private static final String NOP_STATUS_CODE = "-";
+    private static final String AGGREGATION_STATUS_LOG_MESSAGE = "Aggregation status:";
 
     @Reference
     private PackageInfoService packageInfoService;
@@ -158,7 +160,11 @@ public class BuildPackageImpl implements BuildPackageService {
                 packMgr.assemble(jcrPackage, new ProgressTrackerListener() {
                     @Override
                     public void onMessage(final Mode mode, final String statusCode, final String path) {
-                        packageBuildInfo.addLogMessage(statusCode + " " + path);
+                        if (path.contains(AGGREGATION_STATUS_LOG_MESSAGE)) {
+                            return;
+                        }
+                        final String message = statusCode.equals(NOP_STATUS_CODE) ? StringUtils.EMPTY : statusCode + " " + path;
+                        packageBuildInfo.addLogMessage(message);
                     }
 
                     @Override
