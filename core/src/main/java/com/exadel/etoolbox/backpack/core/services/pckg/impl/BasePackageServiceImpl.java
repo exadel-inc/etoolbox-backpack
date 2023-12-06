@@ -169,7 +169,6 @@ public class BasePackageServiceImpl implements BasePackageService {
             });
         }
         packageInfo.setPackageName(packageModel.getPackageName());
-        packageInfo.setPaths(validPaths);
         packageInfo.setVersion(packageModel.getVersion());
         packageInfo.setThumbnailPath(packageModel.getThumbnailPath());
         packageInfo.setQuery(packageModel.getQuery());
@@ -177,8 +176,11 @@ public class BasePackageServiceImpl implements BasePackageService {
         packageInfo.setDataSize(validPaths.stream().mapToLong(value -> getAssetSize(resourceResolver, value)).sum());
 
         if (!brokenPaths.isEmpty()) {
+            validPaths.removeAll(brokenPaths);
             packageInfo.setStatus(Status.warning(brokenPaths));
         }
+
+        packageInfo.setPaths(validPaths);
 
         String packageGroupName = DEFAULT_PACKAGE_GROUP;
 
