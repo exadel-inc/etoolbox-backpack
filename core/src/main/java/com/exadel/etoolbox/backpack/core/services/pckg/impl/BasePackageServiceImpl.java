@@ -155,26 +155,26 @@ public class BasePackageServiceImpl implements BasePackageService {
     @Override
     public PackageInfo getPackageInfo(final ResourceResolver resourceResolver, final PackageModel packageModel) {
         PackageInfo packageInfo = new PackageInfo();
-        final Set<String> actualPaths = new HashSet<>();
+        final Set<String> validPaths = new HashSet<>();
         final Set<String> brokenPaths = new HashSet<>();
         if (packageModel.isToggle()) {
-            actualPaths.addAll(queryService.getResourcesPathsFromQuery(resourceResolver, packageModel.getQuery(), packageInfo));
+            validPaths.addAll(queryService.getResourcesPathsFromQuery(resourceResolver, packageModel.getQuery(), packageInfo));
         } else {
             packageModel.getPaths().stream()
                     .filter(s -> resourceResolver.getResource(s.getPath()) != null)
                     .forEach(pathModel -> {
                         final ResourceRelationships resourceRelationships = getResourceRelationships(resourceResolver, pathModel);
-                        actualPaths.addAll(resourceRelationships.getActualPaths());
+                        validPaths.addAll(resourceRelationships.getValidPaths());
                         brokenPaths.addAll(resourceRelationships.getBrokenPaths());
             });
         }
         packageInfo.setPackageName(packageModel.getPackageName());
-        packageInfo.setPaths(actualPaths);
+        packageInfo.setPaths(validPaths);
         packageInfo.setVersion(packageModel.getVersion());
         packageInfo.setThumbnailPath(packageModel.getThumbnailPath());
         packageInfo.setQuery(packageModel.getQuery());
         packageInfo.setToggle(packageModel.isToggle());
-        packageInfo.setDataSize(actualPaths.stream().mapToLong(value -> getAssetSize(resourceResolver, value)).sum());
+        packageInfo.setDataSize(validPaths.stream().mapToLong(value -> getAssetSize(resourceResolver, value)).sum());
 
         if (!brokenPaths.isEmpty()) {
             packageInfo.setStatus(Status.warning(brokenPaths));
@@ -213,7 +213,7 @@ public class BasePackageServiceImpl implements BasePackageService {
 
     private ResourceRelationships getResourceRelationships(ResourceResolver resourceResolver, PathModel pathModel) {
         ResourceRelationships resourceRelationships = liveCopyService.getResourceRelationships(resourceResolver, pathModel.getPath(), pathModel.includeLiveCopies());
-        resourceRelationships.setActualPaths(resourceRelationships.getActualPaths().stream().map(path -> getActualPath(path, pathModel.includeChildren(), resourceResolver)).collect(Collectors.toList()));
+        resourceRelationships.setValidPaths(resourceRelationships.getValidPaths().stream().map(path -> getActualPath(path, pathModel.includeChildren(), resourceResolver)).collect(Collectors.toList()));
         return resourceRelationships;
     }
 

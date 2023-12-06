@@ -8,24 +8,24 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Represents the wrapper for a collection of active paths and broken paths obtained as a result of the search.
+ * Represents the wrapper for a collection of active paths and broken paths obtained as a result of the search
  */
 public class ResourceRelationships {
 
-    private List<String> actualPaths;
+    private List<String> validPaths;
     private List<String> brokenPaths;
 
-    public ResourceRelationships(List<String> actualPaths, List<String> brokenPaths) {
-        this.actualPaths = actualPaths != null ? actualPaths : new ArrayList<>();
+    public ResourceRelationships(List<String> validPaths, List<String> brokenPaths) {
+        this.validPaths = validPaths != null ? validPaths : new ArrayList<>();
         this.brokenPaths = brokenPaths != null ? brokenPaths : new ArrayList<>();
     }
 
-    public List<String> getActualPaths() {
-        return actualPaths;
+    public List<String> getValidPaths() {
+        return validPaths;
     }
 
-    public void setActualPaths(List<String> actualPaths) {
-        this.actualPaths = actualPaths != null ? actualPaths : new ArrayList<>();;
+    public void setValidPaths(List<String> validPaths) {
+        this.validPaths = validPaths != null ? validPaths : new ArrayList<>();;
     }
 
     public List<String> getBrokenPaths() {
@@ -33,13 +33,13 @@ public class ResourceRelationships {
     }
 
     /**
-     * Concatenation two ResourceRelationships objects into one
+     * Appends the provided {@link ResourceRelationships} object to the current one
      *
      * @param pathRelationships {@code ResourceRelationships} object
      * @return ResourceRelationships object
      */
     public ResourceRelationships concat(ResourceRelationships pathRelationships) {
-        this.actualPaths = concatPaths(this.actualPaths, pathRelationships.getActualPaths());
+        this.validPaths = concatPaths(this.validPaths, pathRelationships.getValidPaths());
         this.brokenPaths = concatPaths(this.brokenPaths, pathRelationships.getBrokenPaths());
         return this;
     }

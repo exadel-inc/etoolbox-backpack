@@ -5,7 +5,7 @@ import java.util.Collection;
 /**
  * Represents an object with the status of a result of package creation.
  */
-public class Status {
+public abstract class Status {
 
     private final String status;
     private final String title;

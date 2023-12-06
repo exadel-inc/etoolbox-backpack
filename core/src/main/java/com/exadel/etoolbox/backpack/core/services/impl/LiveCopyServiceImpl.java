@@ -48,12 +48,12 @@ public class LiveCopyServiceImpl implements LiveCopyService {
     }
 
     private ResourceRelationships getLiveCopies(ResourceResolver resourceResolver, String path, String sourceSyncPath) {
-        List<String> actualPaths = new ArrayList<>();
+        List<String> validPaths = new ArrayList<>();
         List<String> brokenPaths = new ArrayList<>();
         Resource resource = resourceResolver.getResource(path);
         if (resource == null) {
             brokenPaths.add(path);
-            return new ResourceRelationships(actualPaths, brokenPaths);
+            return new ResourceRelationships(validPaths, brokenPaths);
         }
         try {
             RangeIterator relationships = liveRelationshipManager.getLiveRelationships(resource, null, null);
@@ -66,10 +66,10 @@ public class LiveCopyServiceImpl implements LiveCopyService {
                 }
                 String liveCopyPath = liveCopy.getPath();
                 if (resourceResolver.getResource(liveCopyPath + syncPath) != null) {
-                    actualPaths.add(liveCopyPath + syncPath);
+                    validPaths.add(liveCopyPath + syncPath);
                 }
                 ResourceRelationships resourceRelationships = getLiveCopies(resourceResolver, liveCopyPath, syncPath);
-                actualPaths.addAll(resourceRelationships.getActualPaths());
+                validPaths.addAll(resourceRelationships.getValidPaths());
                 brokenPaths.addAll(resourceRelationships.getBrokenPaths());
             }
         } catch (Exception e) {
@@ -78,6 +78,6 @@ public class LiveCopyServiceImpl implements LiveCopyService {
             }
             LOGGER.error("Can't get relationships of the resource {}", resource.getPath(), e);
         }
-        return new ResourceRelationships(actualPaths, brokenPaths);
+        return new ResourceRelationships(validPaths, brokenPaths);
     }
 }
