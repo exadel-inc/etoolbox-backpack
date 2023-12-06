@@ -8,7 +8,7 @@ import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.InstallPackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
 import com.exadel.etoolbox.backpack.core.servlets.model.InstallPackageModel;
-import com.exadel.etoolbox.backpack.core.util.ProgressTrackerMessageUtil;
+import com.exadel.etoolbox.backpack.core.util.ProgressTrackerUtil;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.jackrabbit.vault.fs.api.ProgressTrackerListener;
 import org.apache.jackrabbit.vault.fs.io.ImportOptions;
@@ -128,10 +128,10 @@ public class InstallPackageServiceImpl implements InstallPackageService {
         importOptions.setListener(new ProgressTrackerListener() {
             @Override
             public void onMessage(Mode mode, String statusCode, String path) {
-                if (ProgressTrackerMessageUtil.isContainAggregationStatus(path)) {
+                if (ProgressTrackerUtil.isContainAggregationStatus(path)) {
                     return;
                 }
-                packageInfo.addLogMessage(ProgressTrackerMessageUtil.buildLogMessage(statusCode, path));
+                packageInfo.addLogMessage(ProgressTrackerUtil.buildLogMessage(statusCode, path));
             }
 
             @Override
