@@ -25,13 +25,13 @@ import java.util.Calendar;
  * Serves as the network endpoint for user requests that trigger start of package installation <br><br>
  *
  */
-@Component(
-        service = Servlet.class,
-        property = {
-                "sling.servlet.paths=/services/backpack/installPackage",
-                "sling.servlet.methods=[post]"
-        }
-)
+//@Component(
+//        service = Servlet.class,
+//        property = {
+//                "sling.servlet.paths=/services/backpack/installPackage",
+//                "sling.servlet.methods=[post]"
+//        }
+//)
 public class InstallPackageServlet extends SlingAllMethodsServlet {
     private static final long serialVersionUID = 1L;
 

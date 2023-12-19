@@ -15,8 +15,8 @@ package com.exadel.etoolbox.backpack.core.services.pckg.impl;
 
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
-import com.exadel.etoolbox.backpack.core.services.LoggerService;
-import com.exadel.etoolbox.backpack.core.services.SessionService;
+import com.exadel.etoolbox.backpack.core.services.util.LoggerService;
+import com.exadel.etoolbox.backpack.core.services.util.SessionService;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.BuildPackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;

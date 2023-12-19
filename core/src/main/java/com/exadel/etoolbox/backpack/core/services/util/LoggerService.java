@@ -1,4 +1,4 @@
-package com.exadel.etoolbox.backpack.core.services;
+package com.exadel.etoolbox.backpack.core.services.util;
 
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 

@@ -1,1 +1,2 @@
-scripts.js
+js/init.js
+js/scripts.js

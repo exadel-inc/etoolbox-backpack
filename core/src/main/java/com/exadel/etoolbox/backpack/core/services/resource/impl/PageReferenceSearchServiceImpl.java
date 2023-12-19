@@ -12,13 +12,13 @@
  * limitations under the License.
  */
 
-package com.exadel.etoolbox.backpack.core.services.impl;
+package com.exadel.etoolbox.backpack.core.services.resource.impl;
 
 import com.day.cq.commons.PathInfo;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.Template;
-import com.exadel.etoolbox.backpack.core.services.PageReferenceSearchService;
+import com.exadel.etoolbox.backpack.core.services.resource.PageReferenceSearchService;
 import com.exadel.etoolbox.backpack.core.services.config.PageReferenceSearchConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;

@@ -1,6 +1,6 @@
-package com.exadel.etoolbox.backpack.core.services.impl;
+package com.exadel.etoolbox.backpack.core.services.util.impl;
 
-import com.exadel.etoolbox.backpack.core.services.SessionService;
+import com.exadel.etoolbox.backpack.core.services.util.SessionService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.jcr.api.SlingRepository;
 import org.osgi.service.component.annotations.Component;

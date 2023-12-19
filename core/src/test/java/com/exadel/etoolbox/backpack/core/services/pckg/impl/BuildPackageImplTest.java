@@ -15,7 +15,7 @@ package com.exadel.etoolbox.backpack.core.services.pckg.impl;
 
 import com.day.cq.wcm.api.WCMException;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
-import com.exadel.etoolbox.backpack.core.services.SessionService;
+import com.exadel.etoolbox.backpack.core.services.util.SessionService;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.BuildPackageService;
 import com.exadel.etoolbox.backpack.core.servlets.model.BuildPackageModel;

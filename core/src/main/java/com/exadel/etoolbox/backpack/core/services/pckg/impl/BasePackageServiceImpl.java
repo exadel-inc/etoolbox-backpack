@@ -18,9 +18,7 @@ import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.dam.api.Asset;
 import com.exadel.etoolbox.backpack.core.dto.repository.ReferencedItem;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
-import com.exadel.etoolbox.backpack.core.services.LiveCopyService;
-import com.exadel.etoolbox.backpack.core.services.QueryService;
-import com.exadel.etoolbox.backpack.core.services.ReferenceService;
+import com.exadel.etoolbox.backpack.core.services.resource.ReferenceService;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.CreatePackageService;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageModel;
@@ -56,14 +54,12 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Implements {@link BasePackageService} to provide base operation with package
  */
-@Component(immediate = true)
-@Designate(ocd = BasePackageServiceImpl.Configuration.class)
+//@Component(immediate = true)
+//@Designate(ocd = BasePackageServiceImpl.Configuration.class)
 public class BasePackageServiceImpl implements BasePackageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasePackageServiceImpl.class);
@@ -98,11 +94,11 @@ public class BasePackageServiceImpl implements BasePackageService {
     @SuppressWarnings("UnusedDeclaration") // value injected by Sling
     private ReferenceService referenceService;
 
-    @Reference
-    private QueryService queryService;
-
-    @Reference
-    private LiveCopyService liveCopyService;
+//    @Reference
+//    private QueryService queryService;
+//
+//    @Reference
+//    private LiveCopyService liveCopyService;
 
     @SuppressWarnings("UnstableApiUsage") // sticking to Guava Cache version bundled in uber-jar; still safe to use
     protected Cache<String, PackageInfo> packageInfos;
@@ -154,22 +150,23 @@ public class BasePackageServiceImpl implements BasePackageService {
     @Override
     public PackageInfo getPackageInfo(final ResourceResolver resourceResolver, final PackageModel packageModel) {
         PackageInfo packageInfo = new PackageInfo();
-        List<String> actualPaths;
-        if (packageModel.isToggle()) {
-            actualPaths = queryService.getResourcesPathsFromQuery(resourceResolver, packageModel.getQuery(), packageInfo);
-        } else {
-            actualPaths = packageModel.getPaths().stream()
-                    .filter(s -> resourceResolver.getResource(s.getPath()) != null)
-                    .flatMap(pathModel -> getActualPaths(resourceResolver, pathModel))
-                    .collect(Collectors.toList());
-        }
+//        List<String> actualPaths;
+//        if (packageModel.isToggle()) {
+//            actualPaths = queryService.getResourcesPathsFromQuery(resourceResolver, packageModel.getQuery(), packageInfo);
+//        } else {
+//            actualPaths = packageModel.getPaths().stream()
+//                    .filter(s -> resourceResolver.getResource(s.getPath()) != null)
+//                    .flatMap(pathModel -> getActualPaths(resourceResolver, pathModel))
+//                    .collect(Collectors.toList());
+//        }
         packageInfo.setPackageName(packageModel.getPackageName());
-        packageInfo.setPaths(actualPaths);
+//        packageInfo.setPaths(actualPaths);
         packageInfo.setVersion(packageModel.getVersion());
         packageInfo.setThumbnailPath(packageModel.getThumbnailPath());
         packageInfo.setQuery(packageModel.getQuery());
         packageInfo.setToggle(packageModel.isToggle());
-        packageInfo.setDataSize(actualPaths.stream().mapToLong(value -> getAssetSize(resourceResolver, value)).sum());
+
+//        packageInfo.setDataSize(actualPaths.stream().mapToLong(value -> getAssetSize(resourceResolver, value)).sum());
 
         String packageGroupName = DEFAULT_PACKAGE_GROUP;
 
@@ -190,22 +187,22 @@ public class BasePackageServiceImpl implements BasePackageService {
      * @param resourceResolver Current {@code ResourceResolver} object
      * @return Source path, or the adjusted resource path
      */
-    private String getActualPath(final String path, final boolean includeChildren, final ResourceResolver resourceResolver) {
-        Resource res = resourceResolver.getResource(path);
-
-        if (includeChildren) {
-            return path;
-        }
-        if (res != null && res.getChild(JcrConstants.JCR_CONTENT) != null) {
-            return path + JCR_CONTENT_NODE;
-        }
-        return path;
-    }
-
-    private Stream<String> getActualPaths(ResourceResolver resourceResolver, PathModel pathModel) {
-        return liveCopyService.getPaths(resourceResolver, pathModel.getPath(), pathModel.includeLiveCopies())
-                .stream().map(path -> getActualPath(path, pathModel.includeChildren(), resourceResolver));
-    }
+//    private String getActualPath(final String path, final boolean includeChildren, final ResourceResolver resourceResolver) {
+//        Resource res = resourceResolver.getResource(path);
+//
+//        if (includeChildren) {
+//            return path;
+//        }
+//        if (res != null && res.getChild(JcrConstants.JCR_CONTENT) != null) {
+//            return path + JCR_CONTENT_NODE;
+//        }
+//        return path;
+//    }
+//
+//    private Stream<String> getActualPaths(ResourceResolver resourceResolver, PathModel pathModel) {
+//        return liveCopyService.getPaths(resourceResolver, pathModel.getPath(), pathModel.includeLiveCopies())
+//                .stream().map(path -> getActualPath(path, pathModel.includeChildren(), resourceResolver));
+//    }
 
     /**
      * {@inheritDoc}

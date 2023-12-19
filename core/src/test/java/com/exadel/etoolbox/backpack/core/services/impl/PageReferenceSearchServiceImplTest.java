@@ -15,6 +15,7 @@
 package com.exadel.etoolbox.backpack.core.services.impl;
 
 import com.day.cq.wcm.api.Page;
+import com.exadel.etoolbox.backpack.core.services.resource.impl.PageReferenceSearchServiceImpl;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;

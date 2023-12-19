@@ -1,18 +1,16 @@
 package com.exadel.etoolbox.backpack.core.services.impl;
 
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
+import com.exadel.etoolbox.backpack.core.services.resource.impl.QueryServiceImpl;
 import io.wcm.testing.mock.aem.junit.AemContext;
-import junit.framework.TestCase;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
-import org.apache.sling.testing.mock.sling.oak.OakMockSlingRepository;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
 

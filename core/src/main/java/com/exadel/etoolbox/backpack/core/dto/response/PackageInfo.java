@@ -135,7 +135,7 @@ public class PackageInfo {
      * @return {@code Collection<String>} object, read-only
      */
     public Collection<String> getPaths() {
-        return Collections.unmodifiableCollection(paths);
+        return Collections.unmodifiableCollection(paths != null ? paths : Collections.EMPTY_LIST);
     }
 
     /**

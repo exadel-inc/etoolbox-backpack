@@ -1,4 +1,4 @@
-package com.exadel.etoolbox.backpack.core.services;
+package com.exadel.etoolbox.backpack.core.services.resource;
 
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import org.apache.sling.api.resource.ResourceResolver;

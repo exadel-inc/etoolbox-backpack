@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.exadel.etoolbox.backpack.core.services.impl;
+package com.exadel.etoolbox.backpack.core.services.resource.impl;
 
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.commons.util.AssetReferenceSearch;
@@ -22,8 +22,8 @@ import com.exadel.etoolbox.backpack.core.dto.repository.AssetReferencedItem;
 import com.exadel.etoolbox.backpack.core.dto.repository.PageReferencedItem;
 import com.exadel.etoolbox.backpack.core.dto.repository.ReferencedItem;
 import com.exadel.etoolbox.backpack.core.dto.repository.TagReferencedItem;
-import com.exadel.etoolbox.backpack.core.services.PageReferenceSearchService;
-import com.exadel.etoolbox.backpack.core.services.ReferenceService;
+import com.exadel.etoolbox.backpack.core.services.resource.ReferenceService;
+import com.exadel.etoolbox.backpack.core.services.resource.PageReferenceSearchService;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Component;

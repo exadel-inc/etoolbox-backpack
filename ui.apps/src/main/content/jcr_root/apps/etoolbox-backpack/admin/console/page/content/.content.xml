@@ -127,6 +127,14 @@
                             path="${param.group != null ? param.group : '/etc/packages/EToolbox_BackPack'}"
                             privileges="jcr:addChildNodes"/>
                 </create>
+                <createV2
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
+                        href="/apps/etoolbox-backpack/admin/new.html"
+                        target=".screens-dcc-collection-resources"
+                        text="V2"
+                        variant="primary">
+                </createV2>
                 <upload
                         granite:rel="cq-backpack-uploadpackage"
                         jcr:primaryType="nt:unstructured"

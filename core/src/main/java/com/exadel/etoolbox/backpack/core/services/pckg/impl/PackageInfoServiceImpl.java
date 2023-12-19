@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 /**
  * Implements {@link PackageInfoService} to provide info about the package
  */
-@Component(service = PackageInfoService.class)
+//@Component(service = PackageInfoService.class)
 public class PackageInfoServiceImpl implements PackageInfoService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PackageInfoServiceImpl.class);

@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.exadel.etoolbox.backpack.core.services;
+package com.exadel.etoolbox.backpack.core.services.resource;
 
 import com.exadel.etoolbox.backpack.core.dto.repository.ReferencedItem;
 import org.apache.sling.api.resource.ResourceResolver;

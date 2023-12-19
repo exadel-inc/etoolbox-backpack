@@ -1,9 +1,8 @@
-package com.exadel.etoolbox.backpack.core.services.impl;
+package com.exadel.etoolbox.backpack.core.services.resource.impl;
 
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
-import com.exadel.etoolbox.backpack.core.services.QueryService;
-import com.exadel.etoolbox.backpack.core.services.pckg.impl.BasePackageServiceImpl;
+import com.exadel.etoolbox.backpack.core.services.resource.QueryService;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
@@ -18,7 +17,6 @@ import javax.jcr.query.QueryManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 /**
  * Implements {@link QueryService} to provide operations for getting Resources paths from SQL2 query

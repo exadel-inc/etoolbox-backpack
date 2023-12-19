@@ -1,4 +1,4 @@
-package com.exadel.etoolbox.backpack.core.services;
+package com.exadel.etoolbox.backpack.core.services.util;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;

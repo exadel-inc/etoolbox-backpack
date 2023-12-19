@@ -1,11 +1,12 @@
-package com.exadel.etoolbox.backpack.core.services.impl;
+package com.exadel.etoolbox.backpack.core.services.resource.handler.impl;
 
 import com.day.cq.wcm.api.WCMException;
 import com.day.cq.wcm.msm.api.LiveCopy;
 import com.day.cq.wcm.msm.api.LiveRelationship;
 import com.day.cq.wcm.msm.api.LiveRelationshipManager;
-import com.exadel.etoolbox.backpack.core.services.LiveCopyService;
-import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
+import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
+import com.exadel.etoolbox.backpack.core.services.pckg.v2.BasePackageService;
+import com.exadel.etoolbox.backpack.core.services.resource.handler.BaseHandler;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageModel;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
@@ -17,13 +18,17 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.RangeIterator;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-@Component(service = LiveCopyService.class)
-public class LiveCopyServiceImpl implements LiveCopyService {
+@Component(service = BaseHandler.class)
+public class LiveCopyHandler implements BaseHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LiveCopyServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LiveCopyHandler.class);
+    private static final String LIVE_COPY = "liveCopies";
 
     @Reference
     private LiveRelationshipManager liveRelationshipManager;
@@ -38,13 +43,15 @@ public class LiveCopyServiceImpl implements LiveCopyService {
      * @return List of paths
      */
     @Override
-    public List<String> getPaths(ResourceResolver resourceResolver, String path, boolean includeLiveCopies) {
-        List<String> paths = new ArrayList<>(Collections.singletonList(path));
-        if (!includeLiveCopies) {
-            return paths;
-        }
-        paths.addAll(getLiveCopies(resourceResolver, path, StringUtils.EMPTY));
-        return paths;
+    public void process(ResourceResolver resourceResolver, String payload, PackageInfo packageInfo) {
+        List<String> paths = new ArrayList<>(Collections.singletonList(payload));
+        paths.addAll(getLiveCopies(resourceResolver, payload, StringUtils.EMPTY));
+        packageInfo.setPaths(Stream.of(paths, packageInfo.getPaths()).flatMap(Collection::stream).collect(Collectors.toSet()));
+    }
+
+    @Override
+    public String getType() {
+        return LIVE_COPY;
     }
 
     private List<String> getLiveCopies(ResourceResolver resourceResolver, String path, String sourceSyncPath) {

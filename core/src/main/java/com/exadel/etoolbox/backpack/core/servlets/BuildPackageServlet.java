@@ -43,13 +43,13 @@ import java.util.Calendar;
  *     {@link CreatePackageServlet} - endpoint for requests for package creation<br>
  *     {@link PackageInfoServlet} - endpoint for requests for information on previously built packages
  */
-@Component(
-        service = Servlet.class,
-        property = {
-                "sling.servlet.paths=/services/backpack/buildPackage",
-                "sling.servlet.methods=[get,post]"
-        })
-@SuppressWarnings("PackageAccessibility") // because Servlet and HttpServletResponse classes reported as a non-bundle dependency
+//@Component(
+//        service = Servlet.class,
+//        property = {
+//                "sling.servlet.paths=/services/backpack/buildPackage",
+//                "sling.servlet.methods=[get,post]"
+//        })
+//@SuppressWarnings("PackageAccessibility") // because Servlet and HttpServletResponse classes reported as a non-bundle dependency
 public class BuildPackageServlet extends SlingAllMethodsServlet {
     private static final long serialVersionUID = 1L;
 

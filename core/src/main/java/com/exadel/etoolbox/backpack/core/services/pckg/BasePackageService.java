@@ -16,7 +16,6 @@ package com.exadel.etoolbox.backpack.core.services.pckg;
 import com.exadel.etoolbox.backpack.core.dto.repository.AssetReferencedItem;
 import com.exadel.etoolbox.backpack.core.dto.repository.ReferencedItem;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
-import com.exadel.etoolbox.backpack.core.services.ReferenceService;
 import com.exadel.etoolbox.backpack.core.servlets.model.BuildPackageModel;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageModel;
 import com.exadel.etoolbox.backpack.core.servlets.model.PathModel;
