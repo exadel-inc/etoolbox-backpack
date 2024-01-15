@@ -30,6 +30,7 @@ import java.util.Map;
                 "sling.servlet.paths=/services/backpack/add/query",
                 "sling.servlet.paths=/services/backpack/add/children",
                 "sling.servlet.paths=/services/backpack/add/liveCopies",
+                "sling.servlet.paths=/services/backpack/add/references",
                 "sling.servlet.methods=post"
         })
 @SuppressWarnings("PackageAccessibility")

@@ -23,7 +23,7 @@ import java.util.Map;
 @Component(
         service = Servlet.class,
         property = {
-                "sling.servlet.paths=/services/backpack/delete/path",
+                "sling.servlet.paths=/services/backpack/delete",
                 "sling.servlet.methods=post"
         })
 @SuppressWarnings("PackageAccessibility")

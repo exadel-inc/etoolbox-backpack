@@ -1,6 +1,7 @@
 <sly data-sly-use.entry="com.exadel.etoolbox.backpack.core.model.ParentPackageEntry"></sly>
 <div class="foundation-collection-item package-entry primary"
      data-has-children="${entry.hasChildren}"
+     data-type="${entry.type}"
      data-entry-title="${entry.title}"
      data-tree-state="${entry.hasSubsidiaries ? 'expanded' : 'none'}">
     <div class="header">
@@ -16,7 +17,10 @@
         </div>
     </div>
     <div class="subsidiaries" data-sly-list.subsidiary="${entry.subsidiaries}">
-        <div class="foundation-collection-item package-entry secondary">
+        <div class="foundation-collection-item package-entry secondary"
+             data-type="${subsidiary.type}"
+             data-entry-title="${entry.title}"
+             data-subsidiary-title="${subsidiary.title}">
             <div class="header">
                 <div class="icon">
                     <coral-icon icon="${subsidiary.icon}" size="M"></coral-icon>

@@ -19,16 +19,17 @@ public class PathHandler implements BaseHandler {
 
     @Override
     public void process(ResourceResolver resourceResolver, String payload, PackageInfo packageInfo) {
+
         Resource resource = resourceResolver.getResource(payload);
         if (resource != null) {
             packageInfo.setPaths(Stream.of(
-                    Collections.singletonList(resource.getPath()),
-                    packageInfo.getPaths())
+                            Collections.singletonList(resource.getPath()),
+                            packageInfo.getPaths())
                     .flatMap(Collection::stream)
                     .collect(Collectors.toList()));
         } else {
             packageInfo.setPackageStatus(PackageStatus.ERROR);
-            packageInfo.setLog(Collections.singletonList("Resource is empty"));
+            packageInfo.addLogMessage("Resource not found: " + payload);
         }
     }
 

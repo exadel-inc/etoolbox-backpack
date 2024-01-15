@@ -49,11 +49,12 @@
 
     $(document).on('click', '#excludeChildrenAction', function() {
         const selection = $('.foundation-selections-item');
+        const dataObject = {'entry':selection.attr('data-entry-title'),'type':'children'};
         if (selection) {
             $.ajax({
               type: "POST",
-              url: "/services/backpack/add/excludeChildren",
-              data: {'path': path, 'payload': selection.attr('data-entry-title')},
+              url: "/services/backpack/delete",
+              data: {'path': path, 'payload': JSON.stringify(dataObject)},
               success: success
             });
         }
@@ -73,8 +74,7 @@
 
     $(document).on('click', '.add-references-action', function(event) {
         const selection = $('.foundation-selections-item');
-        //todo check data-type attr(debug) and add loading window
-        const dataObject = {'path':selection.attr('data-entry-title'),'type':event.target.getAttribute('data-type')}
+        const dataObject = {'path':selection.attr('data-entry-title'),'type':event.target.closest('[data-type]').getAttribute('data-type')}
         if (selection) {
             $.ajax({
               type: 'POST',
@@ -85,13 +85,19 @@
         }
     });
 
-    $(document).on('click', '#deleteAction', function() {
+    $(document).on('click', '#deleteAction', function(event) {
         const selection = $('.foundation-selections-item');
+        const dataObject = {'entry':selection.attr('data-entry-title'),'type':selection.attr('data-type')};
+
+        if (selection.hasClass('secondary')) {
+           dataObject['subsidiary'] = selection.attr('data-subsidiary-title');
+        }
+
         if (selection) {
             $.ajax({
               type: "POST",
-              url: "/services/backpack/delete/path",
-              data: {'path': path, 'payload': selection.attr('data-entry-title')},
+              url: "/services/backpack/delete",
+              data: {'path': path, 'payload': JSON.stringify(dataObject)},
               success: success
             });
         }
@@ -228,7 +234,7 @@
                         $.each(data.log, function (index, value) {
                             $buildLog.append('<div>' + value + '</div>');
                         });
-                        var assetText = data.dataSize === 0 ? 'There are no assets in the package' : '<h4>Approximate size of the assets in the package: ' + bytesToSize(data.dataSize) + '</h4>';
+                        const assetText = data.dataSize === 0 ? 'There are no assets in the package' : '<h4>Approximate size of the assets in the package: ' + bytesToSize(data.dataSize) + '</h4>';
                         $buildLog.append(assetText);
                         scrollLog();
                     }

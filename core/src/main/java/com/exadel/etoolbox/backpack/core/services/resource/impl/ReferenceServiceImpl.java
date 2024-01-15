@@ -101,7 +101,7 @@ public class ReferenceServiceImpl implements ReferenceService {
         TagManager tagManager = resourceResolve.adaptTo(TagManager.class);
         Set<ReferencedItem> tagsReferencedItemSet = new LinkedHashSet<>();
 
-        if (pageResource != null) {
+        if (pageResource != null && tagManager != null) {
             Tag[] tags = tagManager.getTagsForSubtree(pageResource, false);
             if (tags != null) {
                 for (int i = 0; i < tags.length; i++) {

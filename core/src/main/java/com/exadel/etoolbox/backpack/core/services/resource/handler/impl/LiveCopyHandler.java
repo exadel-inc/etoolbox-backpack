@@ -5,9 +5,8 @@ import com.day.cq.wcm.msm.api.LiveCopy;
 import com.day.cq.wcm.msm.api.LiveRelationship;
 import com.day.cq.wcm.msm.api.LiveRelationshipManager;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
-import com.exadel.etoolbox.backpack.core.services.pckg.v2.BasePackageService;
+import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
 import com.exadel.etoolbox.backpack.core.services.resource.handler.BaseHandler;
-import com.exadel.etoolbox.backpack.core.servlets.model.PackageModel;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -18,11 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.RangeIterator;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component(service = BaseHandler.class)
 public class LiveCopyHandler implements BaseHandler {
@@ -33,20 +28,16 @@ public class LiveCopyHandler implements BaseHandler {
     @Reference
     private LiveRelationshipManager liveRelationshipManager;
 
-    /**
-     * Called by {@link BasePackageService#getPackageInfo(ResourceResolver, PackageModel)} to adjust paths to resources
-     * intended for the package
-     *
-     * @param path             Resource path
-     * @param includeLiveCopies  Flag indicating if this resource's live copies must be included
-     * @param resourceResolver Current {@code ResourceResolver} object
-     * @return List of paths
-     */
+
     @Override
     public void process(ResourceResolver resourceResolver, String payload, PackageInfo packageInfo) {
-        List<String> paths = new ArrayList<>(Collections.singletonList(payload));
-        paths.addAll(getLiveCopies(resourceResolver, payload, StringUtils.EMPTY));
-        packageInfo.setPaths(Stream.of(paths, packageInfo.getPaths()).flatMap(Collection::stream).collect(Collectors.toSet()));
+        if (resourceResolver.getResource(payload) != null) {
+            List<String> paths = new ArrayList<>(getLiveCopies(resourceResolver, payload, StringUtils.EMPTY));
+            packageInfo.getPathInfo(payload).getLiveCopies().addAll(paths);
+        } else {
+            packageInfo.setPackageStatus(PackageStatus.ERROR);
+            packageInfo.addLogMessage("Resource not found: " + payload);
+        }
     }
 
     @Override

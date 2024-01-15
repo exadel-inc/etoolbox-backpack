@@ -50,6 +50,8 @@ public class PackageInfo {
 
     private Map<String, List<String>> referencedResources = new TreeMap<>();
 
+    private Map<String, PathInfo> pathInfoMap = new HashMap<>();
+
     private List<String> log = new ArrayList<>();
 
     private Long dataSize;
@@ -464,5 +466,17 @@ public class PackageInfo {
     @Override
     public int hashCode() {
         return Objects.hash(packageName, groupName);
+    }
+
+    public PathInfo getPathInfo(String path) {
+        if (!pathInfoMap.containsKey(path)) {
+            return pathInfoMap.put(path, new PathInfo());
+        }
+        return pathInfoMap.get(path);
+    }
+
+    public void deletePath(String path) {
+        pathInfoMap.remove(path);
+        paths.remove(path);
     }
 }
