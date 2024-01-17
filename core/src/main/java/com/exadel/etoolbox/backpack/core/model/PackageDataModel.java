@@ -24,15 +24,15 @@ import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.apache.sling.models.annotations.injectorspecific.Self;
 
 import javax.annotation.PostConstruct;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Represents the package modification info.
  */
 @Model(adaptables = SlingHttpServletRequest.class, defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
-public class EditPackageModel {
+public class PackageDataModel {
 
     @Self
     private SlingHttpServletRequest request;
@@ -40,36 +40,24 @@ public class EditPackageModel {
     @OSGiService
     private PackageInfoService packageInfoService;
 
-    private String packagePath;
     private PackageModel packageModel;
+
+    private List<String> initialPaths;
 
     /**
      * Instantiation of the model
      */
     @PostConstruct
     public void init() {
-        packagePath = request.getParameter("packagePath");
+        String packagePath = request.getParameter("packagePath");
         if (StringUtils.isNotBlank(packagePath)) {
             packageModel = packageInfoService.getPackageModelByPath(packagePath, request.getResourceResolver());
         }
-    }
-
-    /**
-     * Gets the modified package path
-     *
-     * @return String value
-     */
-    public String getPackagePath() {
-        return packagePath;
-    }
-
-    /**
-     * Gets the modified package group
-     *
-     * @return String value
-     */
-    public String getPackageGroup() {
-        return packageModel.getGroup();
+        if (StringUtils.isNotBlank(request.getParameter("initialPath"))) {
+            initialPaths = Arrays.stream(request.getParameterValues("initialPath"))
+                    .filter(StringUtils::isNotBlank)
+                    .collect(Collectors.toList());
+        }
     }
 
     /**
@@ -79,5 +67,9 @@ public class EditPackageModel {
      */
     public PackageModel getPackageModel() {
         return packageModel;
+    }
+
+    public List<String> getInitialPaths() {
+        return initialPaths;
     }
 }

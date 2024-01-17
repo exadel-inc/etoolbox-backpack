@@ -25,7 +25,7 @@ import java.util.Collections;
 @Component(service = CreatePackageService.class)
 public class CreatePackageServiceImpl implements CreatePackageService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(com.exadel.etoolbox.backpack.core.services.pckg.impl.CreatePackageServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CreatePackageServiceImpl.class);
 
     @Reference
     private BasePackageService basePackageService;

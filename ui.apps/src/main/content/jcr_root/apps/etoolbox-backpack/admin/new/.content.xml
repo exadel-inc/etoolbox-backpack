@@ -385,10 +385,10 @@
     </addList>
     <editpackagedialog
             jcr:primaryType="nt:unstructured"
-            sling:resourceType="etoolbox-backpack/admin/new/components/editDialog">
+            sling:resourceType="/apps/etoolbox-backpack/admin/new/components/package/info">
     </editpackagedialog>
     <installpackagedialog
             jcr:primaryType="nt:unstructured"
-            sling:resourceType="etoolbox-backpack/admin/new/components/installDialog">
+            sling:resourceType="/apps/etoolbox-backpack/admin/new/components/package/install">
     </installpackagedialog>
 </jcr:root>

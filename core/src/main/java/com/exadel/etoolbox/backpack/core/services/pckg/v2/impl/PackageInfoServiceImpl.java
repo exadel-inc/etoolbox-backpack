@@ -20,7 +20,6 @@ import com.exadel.etoolbox.backpack.core.services.pckg.v2.PackageInfoService;
 import com.exadel.etoolbox.backpack.core.servlets.model.LatestPackageInfoModel;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageInfoModel;
 import com.exadel.etoolbox.backpack.core.servlets.model.v2.PackageModel;
-import com.exadel.etoolbox.backpack.core.servlets.model.v2.PathModel;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.vault.fs.api.FilterSet;
@@ -219,30 +218,20 @@ public class PackageInfoServiceImpl implements PackageInfoService {
      * @throws RepositoryException in case {@code JcrPackageManager} could not  retrieve a packages's info
      */
     private PackageModel getPackageModel(final JcrPackage jcrPackage) throws RepositoryException {
-        if (jcrPackage != null) {
+        if (jcrPackage != null && jcrPackage.getNode() != null) {
             JcrPackageDefinition definition = jcrPackage.getDefinition();
             if (definition != null) {
                 WorkspaceFilter filter = definition.getMetaInf().getFilter();
-                Type listType = new TypeToken<ArrayList<PathModel>>() {
-                }.getType();
+                    //todo check if it is needed
+//                Type listType = new TypeToken<ArrayList<PathModel>>() {
+//                }.getType();
                 if (filter != null) {
                     PackageModel packageModel = new PackageModel();
+                    packageModel.setPackagePath(jcrPackage.getNode().getPath());
                     packageModel.setPackageName(definition.get(JcrPackageDefinition.PN_NAME));
                     packageModel.setGroup(definition.get(JcrPackageDefinition.PN_GROUP));
                     packageModel.setVersion(definition.get(JcrPackageDefinition.PN_VERSION));
                     packageModel.setThumbnailPath(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.THUMBNAIL_PATH_PARAMETER), String.class));
-//                    if (StringUtils.isNotBlank(definition.get(BasePackageServiceImpl.SWITCH_PARAMETER))) {
-//                        packageModel.setToggle(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.SWITCH_PARAMETER), Boolean.class));
-//                    }
-//                    if (definition.get(BasePackageServiceImpl.QUERY_PARAMETER) != null) {
-//                        packageModel.setQuery(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.QUERY_PARAMETER), String.class));
-//                    }
-//                    if (definition.get(BasePackageServiceImpl.INITIAL_FILTERS) != null) {
-//                        packageModel.setPaths(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.INITIAL_FILTERS), listType));
-//                    } else {
-//                        List<PathFilterSet> filterSets = filter.getFilterSets();
-//                        packageModel.setPaths(filterSets.stream().map(pathFilterSet -> new PathModel(pathFilterSet.getRoot(), false, false)).collect(Collectors.toList()));
-//                    }
                     return packageModel;
                 }
             }

@@ -1,4 +1,4 @@
-<sly data-sly-use.model="com.exadel.etoolbox.backpack.core.model.InstallPackageModel"/>
+<sly data-sly-use.installPackageModel="com.exadel.etoolbox.backpack.core.model.InstallPackageModel"/>
 
 <coral-dialog id="installDialog" class="modal-form foundation-toggleable" closable="on" backdrop="static">
     <coral-dialog-header>Install package</coral-dialog-header>
@@ -10,14 +10,14 @@
                     <div class="coral-Form-fieldwrapper">
                         <label class="coral-Form-fieldlabel">Save Threshold: </label>
                         <input class="coral-Form-field" type="text" name="threshold"
-                               value="${model.threshold}"
+                               value="${installPackageModel.threshold}"
                                aria-required="true"
                                data-foundation-validation
                                data-validation
                                is="coral-textfield">
                     </div>
-                    <input name="path" value="${model.packagePath}" type="hidden">
-                    <input name="dependencyHandling" value="${model.dependencyHandling}" type="hidden">
+                    <input name="path" value="${installPackageModel.packagePath}" type="hidden">
+                    <input name="dependencyHandling" value="${installPackageModel.dependencyHandling}" type="hidden">
                     <coral-buttongroup name="button-group">
                         <button style="margin-top: 0" type="submit" autocomplete="off" id="installSubmitBtn" is="coral-button" coral-close="" variant="primary">Install</button>
                         <button is="coral-button" type="button" variant="warning" coral-close="">Cancel</button>

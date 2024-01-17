@@ -45,7 +45,7 @@ public class PackageInfo {
     private String thumbnailPath;
 
     private Collection<String> paths;
-    private Collection<String> generalResources;
+//    private Collection<String> generalResources;
 
     private Map<String, PathInfo> pathInfoMap = new HashMap<>();
 
@@ -93,7 +93,7 @@ public class PackageInfo {
         this.log = packageInfo.log;
         this.dataSize = packageInfo.dataSize;
         this.paths = packageInfo.paths;
-        this.generalResources = packageInfo.generalResources;
+//        this.generalResources = packageInfo.generalResources;
         this.query = packageInfo.query;
         this.toggle = packageInfo.toggle;
         if (packageInfo.packageInstalled != null) {
@@ -144,9 +144,9 @@ public class PackageInfo {
         return Collections.unmodifiableCollection(paths != null ? paths : Collections.EMPTY_LIST);
     }
 
-    public Collection<String> getGeneralResources() {
-        return Collections.unmodifiableCollection(generalResources != null ? generalResources : Collections.EMPTY_LIST);
-    }
+//    public Collection<String> getGeneralResources() {
+//        return Collections.unmodifiableCollection(generalResources != null ? generalResources : Collections.EMPTY_LIST);
+//    }
 
     /**
      * Gets the collection of paths representing assets to be embedded in the current package, grouped by their MIME types
@@ -331,9 +331,9 @@ public class PackageInfo {
         this.paths = paths;
     }
 
-    public void setGeneralResources(final Collection<String> generalResources) {
-        this.generalResources = generalResources;
-    }
+//    public void setGeneralResources(final Collection<String> generalResources) {
+//        this.generalResources = generalResources;
+//    }
 
     /**
      * Sets the collection of paths representing assets to be embedded in the current package, grouped by their MIME types

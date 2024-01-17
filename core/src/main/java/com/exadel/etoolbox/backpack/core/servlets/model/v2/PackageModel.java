@@ -14,20 +14,13 @@
 
 package com.exadel.etoolbox.backpack.core.servlets.model.v2;
 
-import com.exadel.etoolbox.backpack.core.services.pckg.CreatePackageService;
-import com.exadel.etoolbox.backpack.core.servlets.CreatePackageServlet;
 import com.exadel.etoolbox.backpack.request.annotations.RequestMapping;
 import com.exadel.etoolbox.backpack.request.annotations.RequestParam;
 import com.exadel.etoolbox.backpack.request.annotations.Validate;
 import com.exadel.etoolbox.backpack.request.validator.impl.RequiredValidator;
-import org.apache.sling.api.resource.ResourceResolver;
 
-/**
- * Represents the set of user-defined options for a request to build a package. Upon initialization, passed
- * as a parameter to the {@link CreatePackageService#createPackage(ResourceResolver, PackageModel)}
- *
- * @see CreatePackageServlet
- */
+import java.util.List;
+
 @RequestMapping
 public class PackageModel {
 
@@ -47,6 +40,9 @@ public class PackageModel {
 
     @RequestParam
     private String thumbnailPath;
+
+    @RequestParam
+    private List<String> initialPaths;
 
 
     /**
@@ -128,5 +124,13 @@ public class PackageModel {
 
     public void setPackagePath(String packagePath) {
         this.packagePath = packagePath;
+    }
+
+    public List<String> getInitialPaths() {
+        return initialPaths;
+    }
+
+    public void setInitialPaths(List<String> initialPaths) {
+        this.initialPaths = initialPaths;
     }
 }
