@@ -18,7 +18,7 @@
                url: '/services/backpack/package',
                data: {path: packagePath},
                success: updateFunction,
-               statusCode: {404: errorFunction}
+               error: errorFunction
            });
        }
 

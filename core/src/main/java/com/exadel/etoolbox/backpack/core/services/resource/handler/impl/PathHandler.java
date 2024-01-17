@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 @Component(service = BaseHandler.class)
 public class PathHandler implements BaseHandler {
 
-    private static final String PATH = "path";
+    private static final String ACTION_PATH = "path";
 
     @Override
     public void process(ResourceResolver resourceResolver, String payload, PackageInfo packageInfo) {
@@ -34,7 +34,7 @@ public class PathHandler implements BaseHandler {
     }
 
     @Override
-    public String getType() {
-        return PATH;
+    public String getActionType() {
+        return ACTION_PATH;
     }
 }

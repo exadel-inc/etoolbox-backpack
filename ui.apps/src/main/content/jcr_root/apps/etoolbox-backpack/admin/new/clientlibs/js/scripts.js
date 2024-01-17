@@ -38,12 +38,7 @@
     $(document).on('click', '#includeChildrenAction', function() {
         const selection = $('.foundation-selections-item');
         if (selection) {
-            $.ajax({
-              type: "POST",
-              url: "/services/backpack/add/children",
-              data: {'path': path, 'payload': selection.attr('data-entry-title')},
-              success: success
-            });
+            doPost("/services/backpack/add/children", {'path': path, 'payload': selection.attr('data-entry-title')}, success);
         }
     });
 
@@ -51,24 +46,14 @@
         const selection = $('.foundation-selections-item');
         const dataObject = {'entry':selection.attr('data-entry-title'),'type':'children'};
         if (selection) {
-            $.ajax({
-              type: "POST",
-              url: "/services/backpack/delete",
-              data: {'path': path, 'payload': JSON.stringify(dataObject)},
-              success: success
-            });
+            doPost("/services/backpack/delete", {'path': path, 'payload': JSON.stringify(dataObject)}, success);
         }
     });
 
     $(document).on('click', '#liveCopiesAction', function() {
         const selection = $('.foundation-selections-item');
         if (selection) {
-            $.ajax({
-              type: "POST",
-              url: "/services/backpack/add/liveCopies",
-              data: {'path': path, 'payload': selection.attr('data-entry-title')},
-              success: success
-            });
+            doPost("/services/backpack/add/liveCopies", {'path': path, 'payload': selection.attr('data-entry-title')}, success);
         }
     });
 
@@ -76,12 +61,7 @@
         const selection = $('.foundation-selections-item');
         const dataObject = {'path':selection.attr('data-entry-title'),'type':event.target.closest('[data-type]').getAttribute('data-type')}
         if (selection) {
-            $.ajax({
-              type: 'POST',
-              url: '/services/backpack/add/references',
-              data: {'path': path, 'payload': JSON.stringify(dataObject)},
-              success: success
-            });
+            doPost("/services/backpack/add/references", {'path': path, 'payload': JSON.stringify(dataObject)}, success);
         }
     });
 
@@ -94,12 +74,7 @@
         }
 
         if (selection) {
-            $.ajax({
-              type: "POST",
-              url: "/services/backpack/delete",
-              data: {'path': path, 'payload': JSON.stringify(dataObject)},
-              success: success
-            });
+            doPost("/services/backpack/delete", {'path': path, 'payload': JSON.stringify(dataObject)}, success);
         }
     });
 
@@ -118,6 +93,18 @@
     $(document).on('click', '#buildAction', function() {
         buildPackage(false);
     });
+
+    function doPost(url, data, success) {
+       $.ajax({
+         type: "POST",
+         url: url,
+         data: data,
+         success: success,
+         error: function(data) {
+            console.log(data);
+         }
+       });
+    }
 
     function success() {
         // todo change loading on success

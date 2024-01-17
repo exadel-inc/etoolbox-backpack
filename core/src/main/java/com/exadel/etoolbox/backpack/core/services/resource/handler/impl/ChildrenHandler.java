@@ -11,7 +11,7 @@ import org.osgi.service.component.annotations.Component;
 @Component(service = BaseHandler.class)
 public class ChildrenHandler implements BaseHandler {
 
-    private static final String CHILDREN = "children";
+    private static final String ACTION_CHILDREN = "children";
     private static final String JCR_CONTENT_NODE = "/" + JcrConstants.JCR_CONTENT;
 
     @Override
@@ -29,7 +29,7 @@ public class ChildrenHandler implements BaseHandler {
     }
 
     @Override
-    public String getType() {
-        return CHILDREN;
+    public String getActionType() {
+        return ACTION_CHILDREN;
     }
 }

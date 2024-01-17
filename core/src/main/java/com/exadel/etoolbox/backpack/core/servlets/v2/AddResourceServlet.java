@@ -4,10 +4,10 @@ import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
 import com.exadel.etoolbox.backpack.core.services.resource.BaseResourceService;
 import com.exadel.etoolbox.backpack.core.servlets.model.v2.PathModel;
+import com.exadel.etoolbox.backpack.core.util.RequestUtils;
 import com.exadel.etoolbox.backpack.request.RequestAdapter;
 import com.exadel.etoolbox.backpack.request.validator.ValidatorResponse;
 import com.google.gson.Gson;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -19,7 +19,6 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 @Component(
@@ -36,50 +35,47 @@ import java.util.Map;
 @SuppressWarnings("PackageAccessibility")
 public class AddResourceServlet extends SlingAllMethodsServlet {
 
-        private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-        private static final Gson GSON = new Gson();
+    private static final Gson GSON = new Gson();
 
-        private static final String SERVLET_PATH_BASE = "/services/backpack/add/";
+    private static final String SERVLET_PATH_BASE = "services/backpack/add/";
 
-        private static final String APPLICATION_JSON = "application/json";
+    private static final String APPLICATION_JSON = "application/json";
 
-        @Reference
-        @SuppressWarnings("UnusedDeclaration") // value injected by Sling
-        private transient RequestAdapter requestAdapter;
+    @Reference
+    @SuppressWarnings("UnusedDeclaration") // value injected by Sling
+    private transient RequestAdapter requestAdapter;
 
-        @Reference
-        @SuppressWarnings("UnusedDeclaration") // value injected by Sling
-        private transient BaseResourceService baseResourceService;
+    @Reference
+    @SuppressWarnings("UnusedDeclaration") // value injected by Sling
+    private transient BaseResourceService baseResourceService;
 
-        @Override
-        protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
+    @Override
+    protected void doPost(final SlingHttpServletRequest request, final SlingHttpServletResponse response) throws ServletException, IOException {
 
-                response.setContentType(APPLICATION_JSON);
+        response.setContentType(APPLICATION_JSON);
 
-                ValidatorResponse<PathModel> validatorResponse = requestAdapter.adaptValidate(modifyParameterMap(request.getParameterMap(), request.getPathInfo()), PathModel.class);
+        Map<String, String[]> parameterMap = RequestUtils
+                .modifyParameterMap(request.getParameterMap(), "type", StringUtils.substringAfter(request.getPathInfo(), SERVLET_PATH_BASE));
 
-                if (!validatorResponse.isValid()) {
-                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                        response.getWriter().write(GSON.toJson(validatorResponse));
-                } else {
+        ValidatorResponse<PathModel> validatorResponse = requestAdapter.adaptValidate(parameterMap, PathModel.class);
 
-                        final PackageInfo packageInfo = baseResourceService.getPackageInfo(
-                                request.getResourceResolver(),
-                                validatorResponse.getModel()
-                        );
+        if (!validatorResponse.isValid()) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write(GSON.toJson(validatorResponse));
+        } else {
 
-                        response.getWriter().write(GSON.toJson(packageInfo));
+            final PackageInfo packageInfo = baseResourceService.getPackageInfo(
+                    request.getResourceResolver(),
+                    validatorResponse.getModel()
+            );
 
-                        if (!PackageStatus.MODIFIED.equals(packageInfo.getPackageStatus())) {
-                                response.setStatus(HttpServletResponse.SC_CONFLICT);
-                        }
-                }
+            response.getWriter().write(GSON.toJson(packageInfo));
+
+            if (!PackageStatus.MODIFIED.equals(packageInfo.getPackageStatus())) {
+                response.setStatus(HttpServletResponse.SC_CONFLICT);
+            }
         }
-
-        private Map<String, String[]> modifyParameterMap(Map paramMap, String pathInfo) {
-                Map<String, String[]> map = new HashMap<String, String[]>(paramMap);
-                map.put("type", ArrayUtils.toArray(StringUtils.substringAfter(pathInfo, SERVLET_PATH_BASE)));
-                return map;
-        }
+    }
 }

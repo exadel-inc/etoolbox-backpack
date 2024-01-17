@@ -40,10 +40,10 @@ import java.util.Calendar;
 /**
  * Serves as the network endpoint for user requests that trigger start of package building or else poll information
  * on package building progress<br><br>
- *
+ * <p>
  * See also:<br>
- *     {@link CreatePackageServlet} - endpoint for requests for package creation<br>
- *     {@link PackageInfoServlet} - endpoint for requests for information on previously built packages
+ * {@link CreatePackageServlet} - endpoint for requests for package creation<br>
+ * {@link PackageInfoServlet} - endpoint for requests for information on previously built packages
  */
 @Component(
         service = Servlet.class,
@@ -51,7 +51,8 @@ import java.util.Calendar;
                 "sling.servlet.paths=/services/backpack/package/build",
                 "sling.servlet.methods=[get,post]"
         })
-@SuppressWarnings("PackageAccessibility") // because Servlet and HttpServletResponse classes reported as a non-bundle dependency
+@SuppressWarnings("PackageAccessibility")
+// because Servlet and HttpServletResponse classes reported as a non-bundle dependency
 public class BuildPackageServlet extends SlingAllMethodsServlet {
     private static final long serialVersionUID = 1L;
 
@@ -74,7 +75,8 @@ public class BuildPackageServlet extends SlingAllMethodsServlet {
      * Processes {@code POST} requests to the current endpoint. Attempts to build a package according to the request parameters.
      * Request parameters are parsed to a {@link BuildPackageModel} which is validated and passed
      * to the corresponding {@link BuildPackageService} routine if proven valid; otherwise, the {@code HTTP status 400} reported
-     * @param request {@code SlingHttpServletRequest} instance
+     *
+     * @param request  {@code SlingHttpServletRequest} instance
      * @param response {@code SlingHttpServletResponse} instance
      * @throws IOException in case writing data to the {@code SlingHttpServletResponse} fails
      */
@@ -102,7 +104,8 @@ public class BuildPackageServlet extends SlingAllMethodsServlet {
      * Processes {@code GET} requests to the current endpoint. Reports information on the latest package build status.
      * Request parameters are parsed to a {@link LatestPackageInfoModel} which is validated and passed
      * to the corresponding {@link PackageInfoService} routine if proven valid; otherwise, the {@code HTTP status 400} reported
-     * @param request {@code SlingHttpServletRequest} instance
+     *
+     * @param request  {@code SlingHttpServletRequest} instance
      * @param response {@code SlingHttpServletResponse} instance
      * @throws IOException in case writing data to the {@code SlingHttpServletResponse} fails
      */

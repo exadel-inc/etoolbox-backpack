@@ -7,5 +7,5 @@ public interface BaseHandler {
 
     void process(ResourceResolver resourceResolver, String payload, PackageInfo packageInfo);
 
-    String getType();
+    String getActionType();
 }

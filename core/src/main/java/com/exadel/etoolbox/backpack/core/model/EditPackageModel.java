@@ -24,6 +24,9 @@ import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.apache.sling.models.annotations.injectorspecific.Self;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Represents the package modification info.
@@ -53,6 +56,7 @@ public class EditPackageModel {
 
     /**
      * Gets the modified package path
+     *
      * @return String value
      */
     public String getPackagePath() {
@@ -61,6 +65,7 @@ public class EditPackageModel {
 
     /**
      * Gets the modified package group
+     *
      * @return String value
      */
     public String getPackageGroup() {
@@ -69,6 +74,7 @@ public class EditPackageModel {
 
     /**
      * Gets the modified package model
+     *
      * @return {@link PackageModel}
      */
     public PackageModel getPackageModel() {

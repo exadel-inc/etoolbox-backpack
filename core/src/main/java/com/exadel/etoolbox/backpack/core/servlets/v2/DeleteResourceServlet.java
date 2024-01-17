@@ -4,10 +4,10 @@ import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
 import com.exadel.etoolbox.backpack.core.services.resource.BaseResourceService;
 import com.exadel.etoolbox.backpack.core.servlets.model.v2.PathModel;
+import com.exadel.etoolbox.backpack.core.util.RequestUtils;
 import com.exadel.etoolbox.backpack.request.RequestAdapter;
 import com.exadel.etoolbox.backpack.request.validator.ValidatorResponse;
 import com.google.gson.Gson;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
@@ -17,7 +17,6 @@ import org.osgi.service.component.annotations.Reference;
 import javax.servlet.Servlet;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 @Component(
@@ -47,7 +46,10 @@ public class DeleteResourceServlet extends SlingAllMethodsServlet {
     protected void doPost(final SlingHttpServletRequest request, final SlingHttpServletResponse response) throws IOException {
         response.setContentType(APPLICATION_JSON);
 
-        ValidatorResponse<PathModel> validatorResponse = requestAdapter.adaptValidate(modifyParameterMap(request.getParameterMap()), PathModel.class);
+        Map<String, String[]> parameterMap = RequestUtils
+                .modifyParameterMap(request.getParameterMap(), "type", "delete");
+
+        ValidatorResponse<PathModel> validatorResponse = requestAdapter.adaptValidate(parameterMap, PathModel.class);
 
         if (!validatorResponse.isValid()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -65,11 +67,5 @@ public class DeleteResourceServlet extends SlingAllMethodsServlet {
                 response.setStatus(HttpServletResponse.SC_CONFLICT);
             }
         }
-    }
-
-    private Map<String, String[]> modifyParameterMap(Map paramMap) {
-        Map<String, String[]> map = new HashMap<String, String[]>(paramMap);
-        map.put("type", ArrayUtils.toArray("delete"));
-        return map;
     }
 }

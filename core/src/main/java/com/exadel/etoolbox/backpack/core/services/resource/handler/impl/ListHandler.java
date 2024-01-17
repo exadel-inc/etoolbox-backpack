@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 @Component(service = BaseHandler.class)
 public class ListHandler implements BaseHandler {
 
-    private static final String LIST = "list";
+    private static final String ACTION_LIST = "list";
 
     @Override
     public void process(ResourceResolver resourceResolver, String payload, PackageInfo packageInfo) {
@@ -30,8 +30,8 @@ public class ListHandler implements BaseHandler {
     }
 
     @Override
-    public String getType() {
-        return LIST;
+    public String getActionType() {
+        return ACTION_LIST;
     }
 
     private List<String> parseString(String payload, List<String> log) {

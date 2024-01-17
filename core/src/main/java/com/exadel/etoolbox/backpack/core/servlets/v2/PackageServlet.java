@@ -2,9 +2,9 @@ package com.exadel.etoolbox.backpack.core.servlets.v2;
 
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
-import com.exadel.etoolbox.backpack.core.services.pckg.v2.PackageInfoService;
-import com.exadel.etoolbox.backpack.core.services.pckg.v2.EditPackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.v2.CreatePackageService;
+import com.exadel.etoolbox.backpack.core.services.pckg.v2.EditPackageService;
+import com.exadel.etoolbox.backpack.core.services.pckg.v2.PackageInfoService;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageInfoModel;
 import com.exadel.etoolbox.backpack.core.servlets.model.v2.PackageModel;
 import com.exadel.etoolbox.backpack.request.RequestAdapter;

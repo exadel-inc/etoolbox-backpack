@@ -60,11 +60,11 @@ public class BaseResourceServiceImpl implements BaseResourceService {
             handlerMap = new HashMap<>();
         }
 
-        handlerMap.put(searchService.getType(), searchService);
+        handlerMap.put(searchService.getActionType(), searchService);
     }
 
     protected void unbindHandlerMap(final BaseHandler searchService) {
-        handlerMap.remove(searchService.getType());
+        handlerMap.remove(searchService.getActionType());
     }
 
     private long getAssetSize(Resource resource) {

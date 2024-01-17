@@ -42,7 +42,7 @@ public class StatusBarModel {
             }
             group = packageInfo.getGroupName();
             version = packageInfo.getVersion();
-            size = String.valueOf(packageInfo.getDataSize());
+            size = getStringOrEmpty(packageInfo.getDataSize());
             lastBuilt = getStringOrEmpty(packageInfo.getPackageBuilt());
             lastInstalled = getStringOrEmpty(packageInfo.getPackageInstalled());
             lastReplicated = getStringOrEmpty(packageInfo.getPackageReplicated());

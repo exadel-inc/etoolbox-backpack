@@ -19,11 +19,16 @@
 
     final Session session = slingRequest.getResourceResolver().adaptTo(Session.class);
     final JcrPackageManager packageManager = PackagingService.getPackageManager(session);
+    JcrPackage jcrPackage = null;
 
     try {
-        final JcrPackage jcrPackage = packageManager.open(session.getNode(path), false);
+        jcrPackage = packageManager.open(session.getNode(path), false);
         out.print(xssAPI.encodeForHTML(jcrPackage.getDefinition().getId().getName()));
     } catch (RepositoryException ex) {
         out.print(xssAPI.encodeForHTML(""));
+    } finally {
+        if (jcrPackage != null) {
+            jcrPackage.close();
+        }
     }
 %>

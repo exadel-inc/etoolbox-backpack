@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 @Component(service = BaseHandler.class)
 public class QueryHandler implements BaseHandler {
 
-    private static final String QUERY = "query";
+    private static final String ACTION_QUERY = "query";
 
     @Reference
     private QueryService queryService;
@@ -27,7 +27,7 @@ public class QueryHandler implements BaseHandler {
     }
 
     @Override
-    public String getType() {
-        return QUERY;
+    public String getActionType() {
+        return ACTION_QUERY;
     }
 }

@@ -9,7 +9,7 @@ import org.osgi.service.component.annotations.Component;
 @Component(service = BaseHandler.class)
 public class DeleteHandler implements BaseHandler {
 
-    private static final String DELETE = "delete";
+    private static final String ACTION_DELETE = "delete";
 
     private static final Gson GSON = new Gson();
 
@@ -48,8 +48,8 @@ public class DeleteHandler implements BaseHandler {
     }
 
     @Override
-    public String getType() {
-        return DELETE;
+    public String getActionType() {
+        return ACTION_DELETE;
     }
 
 

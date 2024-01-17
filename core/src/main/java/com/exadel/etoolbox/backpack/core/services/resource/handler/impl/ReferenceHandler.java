@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @Component(service = BaseHandler.class)
 public class ReferenceHandler implements BaseHandler {
 
-    private static final String REFERENCES = "references";
+    private static final String ACTION_REFERENCES = "references";
     private static final Gson GSON = new Gson();
 
     @Reference
@@ -41,8 +41,8 @@ public class ReferenceHandler implements BaseHandler {
     }
 
     @Override
-    public String getType() {
-        return REFERENCES;
+    public String getActionType() {
+        return ACTION_REFERENCES;
     }
 
     private static final class ReferencesDto {

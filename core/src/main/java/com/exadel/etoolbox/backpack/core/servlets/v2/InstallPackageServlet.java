@@ -23,7 +23,6 @@ import java.util.Calendar;
 
 /**
  * Serves as the network endpoint for user requests that trigger start of package installation <br><br>
- *
  */
 @Component(
         service = Servlet.class,
@@ -54,12 +53,13 @@ public class InstallPackageServlet extends SlingAllMethodsServlet {
      * Processes {@code POST} requests to the current endpoint. Attempts to install a package according to the request parameters.
      * Request parameters are parsed to a {@link InstallPackageModel} which is validated and passed
      * to the corresponding {@link InstallPackageService} routine if proven valid; otherwise, the {@code HTTP status 400} reported
-     * @param request {@code SlingHttpServletRequest} instance
+     *
+     * @param request  {@code SlingHttpServletRequest} instance
      * @param response {@code SlingHttpServletResponse} instance
      * @throws IOException in case writing data to the {@code SlingHttpServletResponse} fails
      */
     @Override
-    protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(final SlingHttpServletRequest request, final SlingHttpServletResponse response) throws ServletException, IOException {
         response.setContentType(APPLICATION_JSON);
         ValidatorResponse<InstallPackageModel> validatorResponse = requestAdapter.adaptValidate(request.getParameterMap(), InstallPackageModel.class);
         if (!validatorResponse.isValid()) {

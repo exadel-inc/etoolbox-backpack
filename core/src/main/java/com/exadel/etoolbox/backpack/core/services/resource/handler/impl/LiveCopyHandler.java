@@ -23,7 +23,7 @@ import java.util.List;
 public class LiveCopyHandler implements BaseHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LiveCopyHandler.class);
-    private static final String LIVE_COPY = "liveCopies";
+    private static final String ACTION_LIVE_COPY = "liveCopies";
 
     @Reference
     private LiveRelationshipManager liveRelationshipManager;
@@ -38,11 +38,6 @@ public class LiveCopyHandler implements BaseHandler {
             packageInfo.setPackageStatus(PackageStatus.ERROR);
             packageInfo.addLogMessage("Resource not found: " + payload);
         }
-    }
-
-    @Override
-    public String getType() {
-        return LIVE_COPY;
     }
 
     private List<String> getLiveCopies(ResourceResolver resourceResolver, String path, String sourceSyncPath) {
@@ -70,5 +65,10 @@ public class LiveCopyHandler implements BaseHandler {
             LOGGER.error("Can't get relationships of the resource {}", resource.getPath(), e);
         }
         return paths;
+    }
+
+    @Override
+    public String getActionType() {
+        return ACTION_LIVE_COPY;
     }
 }

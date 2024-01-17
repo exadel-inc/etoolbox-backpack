@@ -40,18 +40,18 @@ public class PackageInfo {
 
     private Calendar packageBuilt;
 
-    private PackageStatus packageStatus;
-
     private String packagePath;
 
     private String thumbnailPath;
 
     private Collection<String> paths;
-
-    private Map<String, List<String>> referencedResources = new TreeMap<>();
+    private Collection<String> generalResources;
 
     private Map<String, PathInfo> pathInfoMap = new HashMap<>();
 
+    private Map<String, List<String>> referencedResources = new TreeMap<>();
+
+    private PackageStatus packageStatus;
     private List<String> log = new ArrayList<>();
 
     private Long dataSize;
@@ -63,6 +63,8 @@ public class PackageInfo {
     private Calendar packageInstalled;
 
     private Calendar packageReplicated;
+
+    private String replicatedBy;
 
     /**
      * Default constructor
@@ -91,6 +93,7 @@ public class PackageInfo {
         this.log = packageInfo.log;
         this.dataSize = packageInfo.dataSize;
         this.paths = packageInfo.paths;
+        this.generalResources = packageInfo.generalResources;
         this.query = packageInfo.query;
         this.toggle = packageInfo.toggle;
         if (packageInfo.packageInstalled != null) {
@@ -102,6 +105,7 @@ public class PackageInfo {
             this.packageReplicated = Calendar.getInstance();
             this.packageReplicated.setTime(packageInfo.packageReplicated.getTime());
         }
+        this.replicatedBy = packageInfo.replicatedBy;
     }
 
     /**
@@ -138,6 +142,10 @@ public class PackageInfo {
      */
     public Collection<String> getPaths() {
         return Collections.unmodifiableCollection(paths != null ? paths : Collections.EMPTY_LIST);
+    }
+
+    public Collection<String> getGeneralResources() {
+        return Collections.unmodifiableCollection(generalResources != null ? generalResources : Collections.EMPTY_LIST);
     }
 
     /**
@@ -323,6 +331,10 @@ public class PackageInfo {
         this.paths = paths;
     }
 
+    public void setGeneralResources(final Collection<String> generalResources) {
+        this.generalResources = generalResources;
+    }
+
     /**
      * Sets the collection of paths representing assets to be embedded in the current package, grouped by their MIME types
      *
@@ -478,5 +490,13 @@ public class PackageInfo {
     public void deletePath(String path) {
         pathInfoMap.remove(path);
         paths.remove(path);
+    }
+
+    public String getReplicatedBy() {
+        return replicatedBy;
+    }
+
+    public void setReplicatedBy(String replicatedBy) {
+        this.replicatedBy = replicatedBy;
     }
 }
