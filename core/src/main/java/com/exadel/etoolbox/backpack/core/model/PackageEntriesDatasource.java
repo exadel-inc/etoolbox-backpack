@@ -59,34 +59,19 @@ public class PackageEntriesDatasource {
             if (packageInfo.getPaths() != null) {
                 packageInfo.getPaths().forEach(path -> {
                     PathInfo pathInfo = packageInfo.getPathInfo(path);
-                    List<Resource> childResources = new ArrayList<>();
+                    List<Resource> subsidiaries = new ArrayList<>();
 
-                    if (!pathInfo.getReferences().isEmpty()) {
-                        childResources.addAll(pathInfo.getReferences()
-                                .values().stream().flatMap(Collection::stream)
-                                .map(title -> createPackageEntry("reference", title, ImmutableMap.of("upstream", title)))
-                                .collect(Collectors.toList()));
-                    }
+                    addSubsidiaries(subsidiaries, pathInfo.getReferences()
+                            .values().stream().flatMap(Collection::stream)
+                            .collect(Collectors.toSet()), "reference");
+                    addSubsidiaries(subsidiaries, pathInfo.getLiveCopies(), "livecopy");
+                    addSubsidiaries(subsidiaries, pathInfo.getChildren(), "child");
 
-                    if (!pathInfo.getLiveCopies().isEmpty()) {
-                        childResources.addAll(pathInfo.getLiveCopies()
-                                .stream()
-                                .map(title -> createPackageEntry("livecopy", title, ImmutableMap.of("upstream", title)))
-                                .collect(Collectors.toList()));
-                    }
-
-                    if (!pathInfo.getChildren().isEmpty()) {
-                        childResources.addAll(pathInfo.getChildren()
-                                .stream()
-                                .map(title -> createPackageEntry("child", title, ImmutableMap.of("upstream", title)))
-                                .collect(Collectors.toList()));
-                    }
-
-                    if (childResources.isEmpty()) {
+                    if (subsidiaries.isEmpty()) {
                         resources.add(createPackageEntry("page", path, ImmutableMap.of("hasChildren", pathInfo.hasChildren())));
                     } else {
                         resources.add(createPackageEntry("page", path, ImmutableMap.of("hasChildren", pathInfo.hasChildren()),
-                                childResources)
+                                subsidiaries)
                         );
                     }
                 });
@@ -116,5 +101,13 @@ public class PackageEntriesDatasource {
                 resourceType,
                 valueMap,
                 children);
+    }
+
+    private void addSubsidiaries(List<Resource> subsidiaries, Set<String> subsidiaryPaths, String type) {
+        if (!subsidiaryPaths.isEmpty()) {
+            subsidiaries.addAll(subsidiaryPaths.stream()
+                    .map(path -> createPackageEntry(type, path, ImmutableMap.of("upstream", path)))
+                    .collect(Collectors.toList()));
+        }
     }
 }

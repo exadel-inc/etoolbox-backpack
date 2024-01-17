@@ -16,9 +16,7 @@
         </head>
         <title
                 jcr:primaryType="nt:unstructured"
-                sling:resourceType="granite/ui/components/shell/title"
-                jcr:title="New package">
-        </title>
+                sling:resourceType="/apps/etoolbox-backpack/admin/new/components/title"/>
         <actions jcr:primaryType="nt:unstructured">
             <primary jcr:primaryType="nt:unstructured">
                 <add
@@ -218,7 +216,7 @@
                     </list>
                     <status
                             jcr:primaryType="nt:unstructured"
-                            sling:resourceType="/apps/etoolbox-backpack/admin/new/statusbar"/>
+                            sling:resourceType="/apps/etoolbox-backpack/admin/new/components/statusbar"/>
                 </items>
             </stack>
         </views>
