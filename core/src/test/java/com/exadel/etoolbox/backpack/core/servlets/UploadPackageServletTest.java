@@ -37,7 +37,7 @@ public class UploadPackageServletTest {
 
     @Test
     public void shouldReturnBadRequest_whenPackageServiceGetPackageInfoReturnNull() throws IOException {
-        when(uploadPackageService.uploadPackage(null, null, false)).thenReturn(getPackageInfoObj());
+        when(uploadPackageService.uploadPackage(context.request().getResourceResolver(), null, false)).thenReturn(getPackageInfoObj());
 
         servlet.doPost(context.request(), context.response());
 
@@ -48,7 +48,7 @@ public class UploadPackageServletTest {
 
     @Test
     public void shouldReturnSuccessRequest() throws IOException {
-        when(uploadPackageService.uploadPackage(null, null, false)).thenReturn(getPackageInfoObj());
+        when(uploadPackageService.uploadPackage(context.request().getResourceResolver(), null, false)).thenReturn(getPackageInfoObj());
 
         servlet.doPost(context.request(), context.response());
 
@@ -60,7 +60,7 @@ public class UploadPackageServletTest {
 
     @Test
     public void shouldReturnBadRequest_whenRequestIsEmpty() throws IOException {
-        when(uploadPackageService.uploadPackage(null, null, false)).thenReturn(getErrorPackageInfoObj());
+        when(uploadPackageService.uploadPackage(context.request().getResourceResolver(), null, false)).thenReturn(getErrorPackageInfoObj());
 
         servlet.doPost(context.request(), context.response());
 
