@@ -24,29 +24,39 @@ $(function () {
     $(window).adaptTo('foundation-registry').register('foundation.form.response.ui.success', {
         name: 'backpack.prompt.open',
         handler: function (form, config, data, textStatus, xhr) {
-            function successPopup(ui, dataJson) {
-                ui.prompt(config.title, config.message, 'success', [{
+            function successPopup(ui, result, message, dataJson) {
+                ui.prompt(result.title, message, result.status, [{
                     text: Granite.I18n.get('Done'),
                     handler: function () {
-                        window.location.href = URITemplate.expand(config.redirect, dataJson);
+                        window.location.href = URITemplate.expand(result.redirect, dataJson);
                     }
                 }, {
                     text: Granite.I18n.get('Open'),
                     primary: true,
                     handler: function () {
-                        open(URITemplate.expand(config.open, dataJson), true);
-                        window.location.href = URITemplate.expand(config.redirect, dataJson);
+                        open(URITemplate.expand(result.open, dataJson), true);
+                        window.location.href = URITemplate.expand(result.redirect, dataJson);
                     }
                 }]);
             }
 
-            var ui = $(window).adaptTo('foundation-ui'),
-                dataJson = JSON.parse(data);
+            var ui = $(window).adaptTo('foundation-ui');
+            const resultConfig = Object.assign(config, {'status': textStatus}, data.status);
 
-            successPopup(ui, dataJson);
-
+            successPopup(ui, resultConfig, extractMessage(resultConfig), data);
         }
     });
+
+    function extractMessage(result) {
+        if (result.status === 'warning') {
+            const $wrapper =  $('<div/>').addClass('etoolbox-backpack-prompt_wrapper');
+            $('<div/>').text(result.message).appendTo($wrapper);
+            $('<div/>').addClass('etoolbox-backpack-prompt_wrapper-paths').html($('<pre/>').text(result.brokenPaths.join('\n'))).appendTo($wrapper);
+            return $('<div/>').html($wrapper).html();
+        } else {
+            return result.message;
+        }
+    }
 
     $(document).on("coral-fileupload:fileadded", "coral-fileupload", function(e) {
         var fileName = e.originalEvent.detail.item.file.name;

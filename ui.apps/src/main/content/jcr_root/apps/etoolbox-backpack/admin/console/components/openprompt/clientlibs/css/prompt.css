@@ -1,0 +1,5 @@
+coral-dialog-content .etoolbox-backpack-prompt_wrapper-paths pre {
+    max-height: 300px;
+    max-width: 800px;
+    overflow: auto;
+}
