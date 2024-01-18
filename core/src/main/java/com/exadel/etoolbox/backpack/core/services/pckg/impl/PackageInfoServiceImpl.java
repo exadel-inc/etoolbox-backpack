@@ -235,7 +235,7 @@ public class PackageInfoServiceImpl implements PackageInfoService {
                         packageModel.setPaths(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.INITIAL_FILTERS), listType));
                     } else {
                         List<PathFilterSet> filterSets = filter.getFilterSets();
-                        packageModel.setPaths(filterSets.stream().map(pathFilterSet -> new PathModel(pathFilterSet.getRoot(), false, false)).collect(Collectors.toList()));
+                        packageModel.setPaths(filterSets.stream().map(pathFilterSet -> new PathModel(pathFilterSet.getRoot(), false, false, false)).collect(Collectors.toList()));
                     }
                     return packageModel;
                 }

@@ -16,7 +16,6 @@ package com.exadel.etoolbox.backpack.core.services.pckg.impl;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.dam.api.Asset;
-import com.exadel.etoolbox.backpack.core.dto.repository.ReferencedItem;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.services.LiveCopyService;
 import com.exadel.etoolbox.backpack.core.services.QueryService;
@@ -157,11 +156,13 @@ public class BasePackageServiceImpl implements BasePackageService {
         List<String> actualPaths;
         if (packageModel.isToggle()) {
             actualPaths = queryService.getResourcesPathsFromQuery(resourceResolver, packageModel.getQuery(), packageInfo);
+            extractReferencedResources(resourceResolver, actualPaths, packageInfo);
         } else {
             actualPaths = packageModel.getPaths().stream()
                     .filter(s -> resourceResolver.getResource(s.getPath()) != null)
                     .flatMap(pathModel -> getActualPaths(resourceResolver, pathModel))
                     .collect(Collectors.toList());
+            extractReferencedResources(resourceResolver, filteringPaths(packageModel.getPaths()), packageInfo);
         }
         packageInfo.setPackageName(packageModel.getPackageName());
         packageInfo.setPaths(actualPaths);
@@ -307,18 +308,6 @@ public class BasePackageServiceImpl implements BasePackageService {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Set<ReferencedItem> getReferencedResources(final ResourceResolver resourceResolver, final Collection<String> paths) {
-        Set<ReferencedItem> assetLinks = new HashSet<>();
-        paths.forEach(path -> {
-            Set<ReferencedItem> assetReferences = referenceService.getReferences(resourceResolver, path);
-            assetLinks.addAll(assetReferences);
-        });
-        return assetLinks;
-    }
 
     /**
      * {@inheritDoc}
@@ -332,18 +321,6 @@ public class BasePackageServiceImpl implements BasePackageService {
         });
 
         return filter;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Collection<String> initAssets(final Collection<String> initialPaths,
-                                         final Set<ReferencedItem> referencedAssets,
-                                         final PackageInfo packageInfo) {
-        referencedAssets.forEach(packageInfo::addAssetReferencedItem);
-        Collection<String> resultingPaths = new ArrayList<>(initialPaths);
-        return resultingPaths;
     }
 
     /**
@@ -423,5 +400,37 @@ public class BasePackageServiceImpl implements BasePackageService {
      */
     private String getPackageId(final String packageGroupName, final String packageName, final String version) {
         return packageGroupName + ":" + packageName + (StringUtils.isNotBlank(version) ? ":" + version : StringUtils.EMPTY);
+    }
+
+    /**
+     * Filtering paths by includeReferences param for looking resources referenced {@link PackageInfo}
+     *
+     * @param paths   {@code List<PathModel>} representing the list of {@link PathModel}
+     */
+    private List<String> filteringPaths(final List<PathModel> paths) {
+        if (paths != null) {
+            return paths.stream()
+                    .filter(PathModel::includeReferences)
+                    .map(PathModel::getPath)
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * Looks for the resources referenced by the given path models and includes them in the provided {@link PackageInfo}
+     *
+     * @param resourceResolver  {@code ResourceResolver} used to access JCR resources
+     * @param paths             {@code List<String>}  representing the list of paths for looking references
+     * @param packageInfo       {@code PackageInfo} representing the object with info about package
+     */
+    private void extractReferencedResources(final ResourceResolver resourceResolver, final List<String> paths, final PackageInfo packageInfo) {
+        if (paths != null) {
+            paths.stream()
+                    .filter(path -> resourceResolver.getResource(path) != null)
+                    .flatMap(path -> referenceService.getReferences(resourceResolver, path).stream())
+                    .collect(Collectors.toSet())
+                    .forEach(packageInfo::addAssetReferencedItem);
+        }
     }
 }

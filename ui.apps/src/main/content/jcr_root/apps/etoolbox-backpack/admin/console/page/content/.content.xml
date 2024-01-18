@@ -237,6 +237,13 @@
                                                                          uncheckedValue="false" value="true"
                                                                          checked="{Boolean}true"
                                                                          sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"/>
+                                                        <includeReferences jcr:primaryType="nt:unstructured"
+                                                                         fieldDescription="Check to include pages and assets referenced by the current page"
+                                                                         name="includeReferences"
+                                                                         text="Include references of page?"
+                                                                         uncheckedValue="false" value="true"
+                                                                         checked="{Boolean}true"
+                                                                         sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"/>
                                                     </items>
                                                 </field>
                                             </paths>

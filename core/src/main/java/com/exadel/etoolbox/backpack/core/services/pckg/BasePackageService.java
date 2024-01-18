@@ -13,10 +13,7 @@
  */
 package com.exadel.etoolbox.backpack.core.services.pckg;
 
-import com.exadel.etoolbox.backpack.core.dto.repository.AssetReferencedItem;
-import com.exadel.etoolbox.backpack.core.dto.repository.ReferencedItem;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
-import com.exadel.etoolbox.backpack.core.services.ReferenceService;
 import com.exadel.etoolbox.backpack.core.servlets.model.BuildPackageModel;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageModel;
 import com.exadel.etoolbox.backpack.core.servlets.model.PathModel;
@@ -31,7 +28,6 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Represents a service running in an AEM instance responsible for base operation with package
@@ -107,37 +103,12 @@ public interface BasePackageService {
     void addExceptionToLog(PackageInfo packageInfo, Exception e);
 
     /**
-     * Gets the collection of unique {@link ReferencedItem}s matching the collection of provided resource paths
-     * applying for the {@link ReferenceService} instance
-     *
-     * @param resourceResolver {@code ResourceResolver} used to collect assets details
-     * @param paths            Collection of JCR paths of resources to gather references for
-     * @return {@code Set<ReferencedItem>} object
-     */
-    Set<ReferencedItem> getReferencedResources(ResourceResolver resourceResolver, Collection<String> paths);
-
-    /**
      * Gets a {@link DefaultWorkspaceFilter} instance populated with the specified JCR paths
      *
      * @param paths Collection of JCR paths of resources
      * @return {@code DefaultWorkspaceFilter} object
      */
     DefaultWorkspaceFilter getWorkspaceFilter(Collection<String> paths);
-
-    /**
-     * Called by {@link CreatePackageService#createPackage(ResourceResolver, PackageModel)} to populate a preliminarily
-     * initialized {@link PackageInfo} object, as it represents an <i>actual</i> JCR storage item, with data reflecting
-     * assets referenced by resources of this package
-     *
-     * @param initialPaths     Collections of strings representing paths of resources to be included in the package
-     * @param referencedAssets Collection of unique {@link AssetReferencedItem} objects matching assets referenced
-     *                         by resources of this package
-     * @param packageInfo      {@code PackageInfo} object to store information in
-     * @return {@code List<String>} object containing paths of package entries
-     */
-    Collection<String> initAssets(Collection<String> initialPaths,
-                                  Set<ReferencedItem> referencedAssets,
-                                  PackageInfo packageInfo);
 
     /**
      * Called from {@link CreatePackageService#createPackage(ResourceResolver, PackageModel)} to get whether
