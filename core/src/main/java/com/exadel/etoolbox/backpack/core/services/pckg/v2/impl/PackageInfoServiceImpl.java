@@ -15,13 +15,13 @@ package com.exadel.etoolbox.backpack.core.services.pckg.v2.impl;
 
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
+import com.exadel.etoolbox.backpack.core.dto.response.PathInfo;
 import com.exadel.etoolbox.backpack.core.services.pckg.v2.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.v2.PackageInfoService;
 import com.exadel.etoolbox.backpack.core.servlets.model.LatestPackageInfoModel;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageInfoModel;
 import com.exadel.etoolbox.backpack.core.servlets.model.v2.PackageModel;
 import com.google.gson.reflect.TypeToken;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.vault.fs.api.FilterSet;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
 import org.apache.jackrabbit.vault.fs.api.WorkspaceFilter;
@@ -82,6 +82,7 @@ public class PackageInfoServiceImpl implements PackageInfoService {
                 if (packageNode != null) {
                     jcrPackage = packMgr.open(packageNode);
                     getPackageInfo(packageInfo, jcrPackage, packageNode);
+                    basePackageService.getPackageInfos().asMap().put(packagePath, packageInfo);
                 }
             }
         } catch (RepositoryException e) {
@@ -222,9 +223,6 @@ public class PackageInfoServiceImpl implements PackageInfoService {
             JcrPackageDefinition definition = jcrPackage.getDefinition();
             if (definition != null) {
                 WorkspaceFilter filter = definition.getMetaInf().getFilter();
-                    //todo check if it is needed
-//                Type listType = new TypeToken<ArrayList<PathModel>>() {
-//                }.getType();
                 if (filter != null) {
                     PackageModel packageModel = new PackageModel();
                     packageModel.setPackagePath(jcrPackage.getNode().getPath());
@@ -257,21 +255,19 @@ public class PackageInfoServiceImpl implements PackageInfoService {
                 WorkspaceFilter filter = definition.getMetaInf().getFilter();
                 if (filter != null) {
                     List<PathFilterSet> filterSets = filter.getFilterSets();
-                    Type mapType = new TypeToken<Map<String, List<String>>>() {
+                    Type mapType = new TypeToken<Map<String, PathInfo>>() {
                     }.getType();
 
                     packageInfo.setPackagePath(packageNode.getPath());
                     packageInfo.setPackageName(definition.get(JcrPackageDefinition.PN_NAME));
                     packageInfo.setGroupName(definition.get(JcrPackageDefinition.PN_GROUP));
                     packageInfo.setVersion(definition.get(JcrPackageDefinition.PN_VERSION));
-                    packageInfo.setReferencedResources(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.REFERENCED_RESOURCES), mapType));
+                    packageInfo.setPathInfoMap(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.PACKAGE_METADATA), mapType));
                     packageInfo.setPaths(filterSets.stream().map(FilterSet::getRoot).collect(Collectors.toList()));
                     packageInfo.setDataSize(jcrPackage.getSize());
                     packageInfo.setPackageBuilt(definition.getLastWrapped());
-                    packageInfo.setQuery(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.QUERY_PARAMETER), String.class));
-                    if (StringUtils.isNotBlank(definition.get(BasePackageServiceImpl.SWITCH_PARAMETER))) {
-                        packageInfo.setToggle(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.SWITCH_PARAMETER), Boolean.class));
-                    }
+                    packageInfo.setLastModifiedBy(definition.getLastModifiedBy());
+
                     if (definition.getBuildCount() > 0) {
                         packageInfo.setPackageStatus(PackageStatus.BUILT);
                     } else {

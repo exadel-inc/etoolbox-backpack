@@ -13,7 +13,6 @@
  */
 package com.exadel.etoolbox.backpack.core.services.pckg.v2.impl;
 
-import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.dam.api.Asset;
 import com.exadel.etoolbox.backpack.core.dto.repository.ReferencedItem;
@@ -21,7 +20,6 @@ import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.services.pckg.v2.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.resource.ReferenceService;
 import com.exadel.etoolbox.backpack.core.servlets.model.v2.PackageModel;
-import com.exadel.etoolbox.backpack.core.servlets.model.PathModel;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.Gson;
@@ -53,6 +51,7 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Implements {@link BasePackageService} to provide base operation with package
@@ -63,17 +62,20 @@ public class BasePackageServiceImpl implements BasePackageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasePackageServiceImpl.class);
 
-    protected static final String DEFAULT_PACKAGE_GROUP = "EToolbox_BackPack";
-    protected static final String JCR_CONTENT_NODE = "/" + JcrConstants.JCR_CONTENT;
-    public static final String ERROR = "ERROR: ";
-    protected static final String REFERENCED_RESOURCES = "referencedResources";
+    protected static final String PACKAGE_METADATA = "metadata";
     protected static final String GENERAL_RESOURCES = "generalResources";
+    protected static final String DEFAULT_PACKAGE_GROUP = "EToolbox_BackPack";
+
+    public static final String ERROR = "ERROR: ";
+
+
+    protected static final String REFERENCED_RESOURCES = "referencedResources";
+
     protected static final String PACKAGE_DOES_NOT_EXIST_MESSAGE = "Package by this path %s doesn't exist in the repository.";
     private static final String THUMBNAIL_FILE = "thumbnail.png";
     private static final String DEFAULT_THUMBNAILS_LOCATION = "/apps/etoolbox-backpack/assets/";
-    protected static final String INITIAL_FILTERS = "initialFilters";
     private static final String THUMBNAIL_PATH_TEMPLATE = DEFAULT_THUMBNAILS_LOCATION + "backpack_%s.png";
-    public static final String PACKAGES_ROOT_PATH = "/etc/packages";
+
     protected static final String QUERY_PARAMETER = "queryPackage";
     protected static final String SWITCH_PARAMETER = "toggle";
     protected static final String THUMBNAIL_PATH_PARAMETER = "thumbnailPath";
@@ -146,6 +148,16 @@ public class BasePackageServiceImpl implements BasePackageService {
         packageInfo.setPackageName(packageModel.getPackageName());
         packageInfo.setVersion(packageModel.getVersion());
         packageInfo.setThumbnailPath(packageModel.getThumbnailPath());
+
+        if (packageModel.getInitialResources() != null) {
+            packageInfo.setPaths(packageModel
+                    .getInitialResources().stream()
+                    .filter(path -> resourceResolver.getResource(path) != null)
+                    .collect(Collectors.toSet())
+            );
+        } else {
+            packageInfo.setPaths(Collections.emptySet());
+        }
 
         String packageGroupName = DEFAULT_PACKAGE_GROUP;
 
@@ -233,16 +245,12 @@ public class BasePackageServiceImpl implements BasePackageService {
     public void setPackageInfo(final JcrPackageDefinition jcrPackageDefinition,
                                final Session userSession,
                                final PackageInfo packageInfo,
-                               final List<PathModel> paths,
                                final DefaultWorkspaceFilter filter) {
-        jcrPackageDefinition.set(REFERENCED_RESOURCES, GSON.toJson(packageInfo.getReferencedResources()), true);
-//        jcrPackageDefinition.set(GENERAL_RESOURCES, GSON.toJson(packageInfo.getPaths()), true);
-        //todo init empty package??
-//        jcrPackageDefinition.set(INITIAL_FILTERS, GSON.toJson(paths), true);
-//        jcrPackageDefinition.set(QUERY_PARAMETER, GSON.toJson(packageInfo.getQuery()), true);
-//        jcrPackageDefinition.set(SWITCH_PARAMETER, GSON.toJson(packageInfo.isToggle()), true);
-        jcrPackageDefinition.setFilter(filter, true);
+        //todo move to jcr nodes??
+        jcrPackageDefinition.set(GENERAL_RESOURCES, GSON.toJson(packageInfo.getPaths()), true);
+        jcrPackageDefinition.set(PACKAGE_METADATA, GSON.toJson(packageInfo.getPathInfoMap()), true);
         jcrPackageDefinition.set(THUMBNAIL_PATH_PARAMETER, GSON.toJson(packageInfo.getThumbnailPath()), true);
+        jcrPackageDefinition.setFilter(filter, true);
 
         String thumbnailPath = StringUtils.defaultIfBlank(packageInfo.getThumbnailPath(), getDefaultThumbnailPath(true));
         addThumbnail(jcrPackageDefinition.getNode(), thumbnailPath, userSession);

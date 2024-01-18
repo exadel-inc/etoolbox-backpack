@@ -42,7 +42,7 @@ import java.util.Set;
 /**
  * Implements {@link CreatePackageService} to provide create package operation
  */
-@Component(service = CreatePackageService.class)
+//@Component(service = CreatePackageService.class)
 public class CreatePackageServiceImpl implements CreatePackageService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CreatePackageServiceImpl.class);
 

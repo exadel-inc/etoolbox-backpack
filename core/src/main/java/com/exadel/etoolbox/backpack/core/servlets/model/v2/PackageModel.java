@@ -41,8 +41,8 @@ public class PackageModel {
     @RequestParam
     private String thumbnailPath;
 
-    @RequestParam
-    private List<String> initialPaths;
+    @RequestParam(name = "initialResource")
+    private List<String> initialResources;
 
 
     /**
@@ -126,11 +126,7 @@ public class PackageModel {
         this.packagePath = packagePath;
     }
 
-    public List<String> getInitialPaths() {
-        return initialPaths;
-    }
-
-    public void setInitialPaths(List<String> initialPaths) {
-        this.initialPaths = initialPaths;
+    public List<String> getInitialResources() {
+        return initialResources;
     }
 }

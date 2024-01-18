@@ -17,7 +17,6 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import javax.servlet.Servlet;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
@@ -95,7 +94,7 @@ public class PackageServlet extends SlingAllMethodsServlet {
     }
 
     @Override
-    protected void doPut(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
+    protected void doPut(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
         response.setContentType(APPLICATION_JSON);
         ValidatorResponse<PackageModel> validatorResponse = requestAdapter.adaptValidate(request.getParameterMap(), PackageModel.class);
         if (!validatorResponse.isValid()) {

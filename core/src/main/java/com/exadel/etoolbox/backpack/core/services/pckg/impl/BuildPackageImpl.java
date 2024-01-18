@@ -54,7 +54,7 @@ import java.util.stream.Collectors;
 /**
  * Implements {@link BuildPackageService} to provide build package operations
  */
-@Component(service = BuildPackageService.class)
+//@Component(service = BuildPackageService.class)
 public class BuildPackageImpl implements BuildPackageService {
     private static final String SERVICE_NAME = "backpack-service";
 

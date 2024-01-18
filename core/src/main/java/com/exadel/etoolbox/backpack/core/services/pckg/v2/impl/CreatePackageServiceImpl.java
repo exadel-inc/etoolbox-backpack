@@ -20,7 +20,6 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.io.IOException;
-import java.util.Collections;
 
 @Component(service = CreatePackageService.class)
 public class CreatePackageServiceImpl implements CreatePackageService {
@@ -57,10 +56,8 @@ public class CreatePackageServiceImpl implements CreatePackageService {
 
 //        Set<ReferencedItem> referencedAssets = basePackageService.getReferencedResources(resourceResolver, packageInfo.getPaths());
 //        Collection<String> resultingPaths = basePackageService.initAssets(packageInfo.getPaths(), referencedAssets, packageInfo);
-//        DefaultWorkspaceFilter filter = basePackageService.getWorkspaceFilter(resultingPaths);
 
-        //todo init filters
-        DefaultWorkspaceFilter filter = basePackageService.getWorkspaceFilter(Collections.EMPTY_SET);
+        DefaultWorkspaceFilter filter = basePackageService.getWorkspaceFilter(packageInfo.getPaths());
 
         createPackage(session, packageInfo, filter);
 
@@ -81,8 +78,7 @@ public class CreatePackageServiceImpl implements CreatePackageService {
             jcrPackage = packMgr.create(packageInfo.getGroupName(), packageInfo.getPackageName(), packageInfo.getVersion());
             JcrPackageDefinition jcrPackageDefinition = jcrPackage.getDefinition();
             if (jcrPackageDefinition != null) {
-                //EMPTY_LIST
-                basePackageService.setPackageInfo(jcrPackageDefinition, userSession, packageInfo, Collections.EMPTY_LIST, filter);
+                basePackageService.setPackageInfo(jcrPackageDefinition, userSession, packageInfo, filter);
                 packageInfo.setPackageStatus(PackageStatus.CREATED);
                 Node packageNode = jcrPackage.getNode();
                 if (packageNode != null) {

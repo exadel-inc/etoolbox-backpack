@@ -30,7 +30,7 @@ import java.util.Calendar;
 /**
  * Implements {@link InstallPackageService} to provide install package operations
  */
-@Component(service = InstallPackageService.class)
+//@Component(service = InstallPackageService.class)
 public class InstallPackageServiceImpl implements InstallPackageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstallPackageServiceImpl.class);

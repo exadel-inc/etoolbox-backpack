@@ -97,7 +97,6 @@ public interface BasePackageService {
     void setPackageInfo(JcrPackageDefinition jcrPackageDefinition,
                         Session userSession,
                         PackageInfo packageInfo,
-                        List<PathModel> paths,
                         DefaultWorkspaceFilter filter);
 
     /**

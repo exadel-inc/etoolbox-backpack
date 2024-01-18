@@ -42,7 +42,7 @@ public class PackageDataModel {
 
     private PackageModel packageModel;
 
-    private List<String> initialPaths;
+    private List<String> initialResources;
 
     /**
      * Instantiation of the model
@@ -53,8 +53,8 @@ public class PackageDataModel {
         if (StringUtils.isNotBlank(packagePath)) {
             packageModel = packageInfoService.getPackageModelByPath(packagePath, request.getResourceResolver());
         }
-        if (StringUtils.isNotBlank(request.getParameter("initialPath"))) {
-            initialPaths = Arrays.stream(request.getParameterValues("initialPath"))
+        if (StringUtils.isNotBlank(request.getParameter("initialResource"))) {
+            initialResources = Arrays.stream(request.getParameterValues("initialResource"))
                     .filter(StringUtils::isNotBlank)
                     .collect(Collectors.toList());
         }
@@ -69,7 +69,7 @@ public class PackageDataModel {
         return packageModel;
     }
 
-    public List<String> getInitialPaths() {
-        return initialPaths;
+    public List<String> getInitialResources() {
+        return initialResources;
     }
 }

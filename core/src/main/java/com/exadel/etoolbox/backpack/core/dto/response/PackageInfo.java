@@ -45,26 +45,27 @@ public class PackageInfo {
     private String thumbnailPath;
 
     private Collection<String> paths;
-//    private Collection<String> generalResources;
 
     private Map<String, PathInfo> pathInfoMap = new HashMap<>();
 
+    private PackageStatus packageStatus;
+
+    //todo: remove
     private Map<String, List<String>> referencedResources = new TreeMap<>();
 
-    private PackageStatus packageStatus;
     private List<String> log = new ArrayList<>();
 
     private Long dataSize;
-
+    //todo: remove
     private String query;
-
+    //todo: remove
     private boolean toggle;
 
     private Calendar packageInstalled;
 
     private Calendar packageReplicated;
 
-    private String replicatedBy;
+    private String lastModifiedBy;
 
     /**
      * Default constructor
@@ -93,7 +94,6 @@ public class PackageInfo {
         this.log = packageInfo.log;
         this.dataSize = packageInfo.dataSize;
         this.paths = packageInfo.paths;
-//        this.generalResources = packageInfo.generalResources;
         this.query = packageInfo.query;
         this.toggle = packageInfo.toggle;
         if (packageInfo.packageInstalled != null) {
@@ -105,7 +105,7 @@ public class PackageInfo {
             this.packageReplicated = Calendar.getInstance();
             this.packageReplicated.setTime(packageInfo.packageReplicated.getTime());
         }
-        this.replicatedBy = packageInfo.replicatedBy;
+        this.lastModifiedBy = packageInfo.lastModifiedBy;
     }
 
     /**
@@ -143,10 +143,6 @@ public class PackageInfo {
     public Collection<String> getPaths() {
         return Collections.unmodifiableCollection(paths != null ? paths : Collections.EMPTY_LIST);
     }
-
-//    public Collection<String> getGeneralResources() {
-//        return Collections.unmodifiableCollection(generalResources != null ? generalResources : Collections.EMPTY_LIST);
-//    }
 
     /**
      * Gets the collection of paths representing assets to be embedded in the current package, grouped by their MIME types
@@ -331,10 +327,6 @@ public class PackageInfo {
         this.paths = paths;
     }
 
-//    public void setGeneralResources(final Collection<String> generalResources) {
-//        this.generalResources = generalResources;
-//    }
-
     /**
      * Sets the collection of paths representing assets to be embedded in the current package, grouped by their MIME types
      *
@@ -492,11 +484,19 @@ public class PackageInfo {
         paths.remove(path);
     }
 
-    public String getReplicatedBy() {
-        return replicatedBy;
+    public Map<String, PathInfo> getPathInfoMap() {
+        return pathInfoMap;
     }
 
-    public void setReplicatedBy(String replicatedBy) {
-        this.replicatedBy = replicatedBy;
+    public void setPathInfoMap(Map<String, PathInfo> pathInfoMap) {
+        this.pathInfoMap = pathInfoMap;
+    }
+
+    public String getLastModifiedBy() {
+        return lastModifiedBy;
+    }
+
+    public void setLastModifiedBy(String lastModifiedBy) {
+        this.lastModifiedBy = lastModifiedBy;
     }
 }

@@ -40,7 +40,7 @@ import java.util.Set;
 /**
  * Implements {@link EditPackageService} to provide edit package operations
  */
-@Component(service = EditPackageService.class)
+//@Component(service = EditPackageService.class)
 public class EditPackageServiceImpl implements EditPackageService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EditPackageServiceImpl.class);
 

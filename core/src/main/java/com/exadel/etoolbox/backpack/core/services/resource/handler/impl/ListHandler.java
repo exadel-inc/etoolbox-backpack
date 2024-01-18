@@ -35,7 +35,7 @@ public class ListHandler implements BaseHandler {
     }
 
     private List<String> parseString(String payload, List<String> log) {
-        // log errors
+        //todo log errors
         return Arrays.stream(payload.split(",")).map(String::trim).collect(Collectors.toList());
     }
 }

@@ -59,6 +59,11 @@ public class PackageEntriesDatasource {
             if (packageInfo.getPaths() != null) {
                 packageInfo.getPaths().forEach(path -> {
                     PathInfo pathInfo = packageInfo.getPathInfo(path);
+                    if (pathInfo == null) {
+                        resources.add(createPackageEntry("page", path, ImmutableMap.of("hasChildren", false)));
+                        return;
+                    }
+
                     List<Resource> subsidiaries = new ArrayList<>();
 
                     addSubsidiaries(subsidiaries, pathInfo.getReferences()
@@ -76,8 +81,6 @@ public class PackageEntriesDatasource {
                     }
                 });
             }
-
-            basePackageService.getPackageInfos().asMap().put(packageInfo.getPackagePath(), packageInfo);
         }
 
         request.setAttribute(DataSource.class.getName(), new SimpleDataSource(resources.iterator()));

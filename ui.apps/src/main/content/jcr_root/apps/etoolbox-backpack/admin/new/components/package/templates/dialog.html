@@ -1,4 +1,4 @@
-<template data-sly-template.dialogTemplate="${@ packageModel, initialPaths}">
+<template data-sly-template.dialogTemplate="${@ packageModel, initialResources}">
     <coral-dialog id="editDialog" class="modal-form foundation-toggleable" closable="on" backdrop="static">
         <coral-dialog-header>Package Properties</coral-dialog-header>
         <coral-dialog-content>
@@ -46,7 +46,9 @@
                             </foundation-autocomplete>
                         </div>
                         <input data-sly-test="${packageModel.packagePath}" type="hidden" name="packagePath" value="${packageModel.packagePath}">
-                        <input data-sly-test="${initialPaths}" type="hidden" name="initialPaths" value="${initialPaths}">
+                        <sly data-sly-repeat.initialResource="${initialResources}">
+                            <input type="hidden" name="initialResource" value="${initialResource}">
+                        </sly>
                         <button class="foundation-ui-notification coral-Form-fieldwrapper" type="submit" autocomplete="off" is="coral-button" variant="primary" trackingfeature="" trackingelement="save" tracking="ON">Save</button>
                     </div>
                 </div>
