@@ -37,7 +37,7 @@ public class ReplicatePackageServiceImpl implements ReplicatePackageService {
     private static final String IN_PROGRESS_REPLICATE_MESSAGE = "Replicating package";
     private static final String FINISH_REPLICATE_MESSAGE = "Package is replicated asynchronously in ";
     private static final String NODE_NOT_ACCESSIBLE_MESSAGE = "Node is not accessible through the current Session";
-    private static final String PACKAGE_IS_NOT_BUILT_MESSAGE = "Before replication package must be built";
+    private static final String PACKAGE_IS_NOT_BUILT_OR_INSTALL_MESSAGE = "Before replication package must be built or install";
 
     @Reference
     private PackageInfoService packageInfoService;
@@ -60,14 +60,14 @@ public class ReplicatePackageServiceImpl implements ReplicatePackageService {
     @Override
     public PackageInfo replicatePackage(ResourceResolver resourceResolver, PackageInfoModel packageInfoModel) {
         PackageInfo packageInfo = packageInfoService.getPackageInfo(resourceResolver, packageInfoModel);
-        if (PackageStatus.BUILT.equals(packageInfo.getPackageStatus())) {
+        if (PackageStatus.BUILT.equals(packageInfo.getPackageStatus()) || PackageStatus.INSTALL.equals(packageInfo.getPackageStatus())) {
             packageInfo.clearLog();
             packageInfo.addLogMessage(START_REPLICATE_MESSAGE + packageInfoModel.getPackagePath());
             packageInfo.addLogMessage(LocalDateTime.now().toString());
             basePackageService.getPackageInfos().put(packageInfoModel.getPackagePath(), packageInfo);
             replicatePackage(resourceResolver.getUserID(), packageInfo);
         } else {
-            packageInfo.addLogMessage(BasePackageServiceImpl.ERROR + PACKAGE_IS_NOT_BUILT_MESSAGE);
+            packageInfo.addLogMessage(BasePackageServiceImpl.ERROR + PACKAGE_IS_NOT_BUILT_OR_INSTALL_MESSAGE);
         }
         return packageInfo;
     }
