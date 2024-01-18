@@ -32,7 +32,7 @@ public class BaseResourceServiceImpl implements BaseResourceService {
     @Override
     public PackageInfo getPackageInfo(ResourceResolver resourceResolver, PathModel pathModel) {
 
-        PackageInfo packageInfo = basePackageService.getPackageInfos().asMap().get(pathModel.getPath());
+        PackageInfo packageInfo = basePackageService.getPackageInfos().asMap().get(pathModel.getPackagePath());
 
         //move to servlet
         if (packageInfo == null) {
@@ -46,7 +46,7 @@ public class BaseResourceServiceImpl implements BaseResourceService {
             handlerMap.get(pathModel.getType()).process(resourceResolver, pathModel.getPayload(), packageInfo);
             packageInfo.setDataSize(packageInfo.getPaths().stream().mapToLong(value -> getAssetSize(resourceResolver.getResource(value))).sum());
             packageInfo.setPackageStatus(PackageStatus.MODIFIED);
-            basePackageService.getPackageInfos().asMap().put(pathModel.getPath(), packageInfo);
+            basePackageService.getPackageInfos().asMap().put(pathModel.getPackagePath(), packageInfo);
         } else {
             packageInfo.setPackageStatus(PackageStatus.ERROR);
         }

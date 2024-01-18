@@ -22,9 +22,9 @@
 <%@ page import="org.apache.jackrabbit.vault.packaging.PackageId" %>
 <%
 
-    final String path = slingRequest.getParameter("path");
+    final String packagePath = slingRequest.getParameter("packagePath");
 
-    if (path == null) {
+    if (packagePath == null) {
         out.print(xssAPI.encodeForHTML(""));
         return;
     }
@@ -34,7 +34,7 @@
     JcrPackage jcrPackage = null;
 
     try {
-        jcrPackage = packageManager.open(session.getNode(path), false);
+        jcrPackage = packageManager.open(session.getNode(packagePath), false);
         out.print(xssAPI.encodeForHTML(jcrPackage.getDefinition().getId().getName()));
     } catch (RepositoryException ex) {
         out.print(xssAPI.encodeForHTML(""));

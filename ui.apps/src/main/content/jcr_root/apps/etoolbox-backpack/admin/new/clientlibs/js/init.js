@@ -1,7 +1,7 @@
 (function (Granite, $) {
        'use strict';
 
-       const path = new URL(window.location.href).searchParams.get('path');
+       const packagePath = new URL(window.location.href).searchParams.get('packagePath');
 
        function openPackageDialog(success, error) {
             //todo looking for another way for opening
@@ -16,15 +16,15 @@
        function getPackageInfo(packagePath, updateFunction, errorFunction) {
            $.ajax({
                url: '/services/backpack/package',
-               data: {path: packagePath},
+               data: {'packagePath': packagePath},
                success: updateFunction,
                error: errorFunction
            });
        }
 
        $(window).on('load', function() {
-          if (path && path.length > 0) {
-              getPackageInfo(path, function (data) {
+          if (packagePath && packagePath.length > 0) {
+              getPackageInfo(packagePath, function (data) {
                   updatePackageData(data);
               }, function (data) {
                   openPackageDialog()

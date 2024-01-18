@@ -39,7 +39,7 @@ public class PathModel {
     @RequestParam
     @Validate(validator = RequiredValidator.class,
             invalidMessages = "Path field is required")
-    private String path;
+    private String packagePath;
 
     @RequestParam
     @Validate(validator = RequiredValidator.class,
@@ -54,8 +54,8 @@ public class PathModel {
     public PathModel() {
     }
 
-    public PathModel(final String path, final String payload, final String type) {
-        this.path = path;
+    public PathModel(final String packagePath, final String payload, final String type) {
+        this.packagePath = packagePath;
         this.payload = payload;
         this.type = type;
     }
@@ -63,9 +63,9 @@ public class PathModel {
     @PostConstruct
     @SuppressWarnings("PackageAccessibility") // because PostConstruct class reported as a non-bundle dependency
     private void init() {
-        if (StringUtils.isNotBlank(path)) {
+        if (StringUtils.isNotBlank(packagePath)) {
             try {
-                path = URLDecoder.decode(path, StandardCharsets.UTF_8.displayName());
+                packagePath = URLDecoder.decode(packagePath, StandardCharsets.UTF_8.displayName());
             } catch (UnsupportedEncodingException e) {
                 LOGGER.error("Path decode exception", e);
             }
@@ -80,7 +80,7 @@ public class PathModel {
         return type;
     }
 
-    public String getPath() {
-        return path;
+    public String getPackagePath() {
+        return packagePath;
     }
 }

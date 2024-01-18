@@ -1,14 +1,24 @@
 <sly data-sly-use.statusBarModel="com.exadel.etoolbox.backpack.core.model.StatusBarModel"/>
 <div class="package-status">
-  <span><b>Group:</b> ${statusBarModel.group}</span>
-  |
-  <span><b>Version:</b> ${statusBarModel.version}</span>
-  |
-  <span><b>Size:</b> ${statusBarModel.size}</span>
-  |
-  <span><b>Last built:</b> ${statusBarModel.lastBuilt}</span>
-  |
-  <span><b>Last installed:</b> ${statusBarModel.lastInstalled}</span>
-  |
-  <span><b>Last replicated:</b> ${statusBarModel.lastReplicated} <b>by</b> //todo</span>
+  <sly data-sly-test="${statusBarModel.group}">
+    <span><b>Group:</b> ${statusBarModel.group}</span>
+    |
+  </sly>
+  <sly data-sly-test="${statusBarModel.version}">
+    <span><b>Version:</b> ${statusBarModel.version}</span>
+    |
+  </sly>
+  <sly data-sly-test="${statusBarModel.size}">
+    <span ><b>Size:</b> ${statusBarModel.size}</span>
+    |
+  </sly>
+  <sly data-sly-test="${statusBarModel.lastBuilt}">
+    <span><b>Last built:</b> ${statusBarModel.lastBuilt}</span>
+    |
+  </sly>
+  <sly data-sly-test="${statusBarModel.lastInstalled}">
+    <span ><b>Last installed:</b> ${statusBarModel.lastInstalled}</span>
+    |
+  </sly>
+  <span data-sly-test="${statusBarModel.lastReplicated}"><b>Last replicated:</b> ${statusBarModel.lastReplicated} <b>by</b> //todo</span>
 </div>

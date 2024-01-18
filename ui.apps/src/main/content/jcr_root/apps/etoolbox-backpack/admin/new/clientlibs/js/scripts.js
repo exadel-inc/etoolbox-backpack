@@ -2,7 +2,7 @@
     'use strict';
 
     const registry = Granite.UI.Foundation.Registry;
-    const path = new URL(window.location.href).searchParams.get('path');
+    const packagePath = new URL(window.location.href).searchParams.get('packagePath');
 
     // Make package entries selectable
 
@@ -38,7 +38,7 @@
     $(document).on('click', '#includeChildrenAction', function() {
         const selection = $('.foundation-selections-item');
         if (selection) {
-            doPost("/services/backpack/add/children", {'path': path, 'payload': selection.attr('data-entry-title')}, success);
+            doPost("/services/backpack/add/children", {'packagePath': packagePath, 'payload': selection.attr('data-entry-title')}, success);
         }
     });
 
@@ -46,14 +46,14 @@
         const selection = $('.foundation-selections-item');
         const dataObject = {'entry':selection.attr('data-entry-title'),'type':'children'};
         if (selection) {
-            doPost("/services/backpack/delete", {'path': path, 'payload': JSON.stringify(dataObject)}, success);
+            doPost("/services/backpack/delete", {'packagePath': packagePath, 'payload': JSON.stringify(dataObject)}, success);
         }
     });
 
     $(document).on('click', '#liveCopiesAction', function() {
         const selection = $('.foundation-selections-item');
         if (selection) {
-            doPost("/services/backpack/add/liveCopies", {'path': path, 'payload': selection.attr('data-entry-title')}, success);
+            doPost("/services/backpack/add/liveCopies", {'packagePath': packagePath, 'payload': selection.attr('data-entry-title')}, success);
         }
     });
 
@@ -61,7 +61,7 @@
         const selection = $('.foundation-selections-item');
         const dataObject = {'path':selection.attr('data-entry-title'),'type':event.target.closest('[data-type]').getAttribute('data-type')}
         if (selection) {
-            doPost("/services/backpack/add/references", {'path': path, 'payload': JSON.stringify(dataObject)}, success);
+            doPost("/services/backpack/add/references", {'packagePath': packagePath, 'payload': JSON.stringify(dataObject)}, success);
         }
     });
 
@@ -74,7 +74,7 @@
         }
 
         if (selection) {
-            doPost("/services/backpack/delete", {'path': path, 'payload': JSON.stringify(dataObject)}, success);
+            doPost("/services/backpack/delete", {'packagePath': packagePath, 'payload': JSON.stringify(dataObject)}, success);
         }
     });
 
@@ -83,7 +83,7 @@
     });
 
     $(document).on('click', '#downloadAction', function() {
-        window.location.href = path;
+        window.location.href = packagePath;
     });
 
     $(document).on('click', '#testBuildAction', function() {
@@ -158,7 +158,7 @@
         handler: function (form, config, data, textStatus, xhr) {
             //todo change loading on success
             if (data && data.packagePath) {
-                const paramPath = 'path=' + data.packagePath;
+                const paramPath = 'packagePath=' + data.packagePath;
                 window.location.search = paramPath;
             } else {
                 window.location.reload();
@@ -211,7 +211,7 @@
             type: 'POST',
             url: '/services/backpack/package/build',
             data: {
-                path: path,
+                path: packagePath,
                 referencedResources: JSON.stringify(referencedResources),
                 testBuild: testBuild
             }, success: function (data) {

@@ -40,7 +40,7 @@ import java.nio.charset.StandardCharsets;
 public class PackageInfoModel {
     private static final Logger LOGGER = LoggerFactory.getLogger(PackageInfoModel.class);
 
-    @RequestParam(name = "path")
+    @RequestParam
     @Validate(validator = RequiredValidator.class,
             invalidMessages = "Path field is required")
     private String packagePath;
