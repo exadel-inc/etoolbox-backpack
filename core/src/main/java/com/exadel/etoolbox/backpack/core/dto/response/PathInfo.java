@@ -1,21 +1,18 @@
 package com.exadel.etoolbox.backpack.core.dto.response;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 public class PathInfo {
 
-    private Map<String, List<String>> references;
+    private Set<String> references;
     private Set<String> liveCopies;
     private Set<String> children;
 
     public PathInfo() {
-        this.references = new HashMap<>();
+        this.references = new HashSet<>();
         this.liveCopies = new HashSet<>();
         this.children = new HashSet<>();
-    }
-
-    public Map<String, List<String>> getReferences() {
-        return references;
     }
 
     public Set<String> getLiveCopies() {
@@ -24,6 +21,10 @@ public class PathInfo {
 
     public Set<String> getChildren() {
         return children;
+    }
+
+    public Set<String> getReferences() {
+        return references;
     }
 
     public boolean hasChildren() {

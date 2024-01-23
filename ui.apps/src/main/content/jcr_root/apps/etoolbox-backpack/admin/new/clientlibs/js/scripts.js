@@ -59,7 +59,7 @@
 
     $(document).on('click', '.add-references-action', function(event) {
         const selection = $('.foundation-selections-item');
-        const dataObject = {'path':selection.attr('data-entry-title'),'type':event.target.closest('[data-type]').getAttribute('data-type')}
+        const dataObject = {'entry':selection.attr('data-entry-title'),'type':event.target.closest('[data-type]').getAttribute('data-type')}
         if (selection) {
             doPost("/services/backpack/add/references", {'packagePath': packagePath, 'payload': JSON.stringify(dataObject)}, success);
         }

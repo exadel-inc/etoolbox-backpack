@@ -2,6 +2,7 @@ package com.exadel.etoolbox.backpack.core.services.resource.handler.impl;
 
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.services.resource.handler.BaseHandler;
+import com.exadel.etoolbox.backpack.core.services.resource.handler.dto.PayloadDto;
 import com.google.gson.Gson;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Component;
@@ -23,7 +24,6 @@ public class DeleteHandler implements BaseHandler {
             case "reference":
                 packageInfo.getPathInfo(payloadDto.getEntry())
                         .getReferences()
-                        .get(payloadDto.getType())
                         .remove(payloadDto.getSubsidiary());
                 break;
             case "livecopy":
@@ -31,7 +31,6 @@ public class DeleteHandler implements BaseHandler {
                         .getLiveCopies()
                         .remove(payloadDto.getSubsidiary());
                 break;
-            //todo children all or one check
             case "child":
                 packageInfo.getPathInfo(payloadDto.getEntry())
                         .getChildren()
@@ -48,27 +47,7 @@ public class DeleteHandler implements BaseHandler {
     }
 
     @Override
-    public String getActionType() {
+    public String bindActionType() {
         return ACTION_DELETE;
-    }
-
-
-    private static final class PayloadDto {
-
-        private String entry;
-        private String type;
-        private String subsidiary;
-
-        public String getEntry() {
-            return entry;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public String getSubsidiary() {
-            return subsidiary;
-        }
     }
 }

@@ -111,10 +111,10 @@
                                 jcr:primaryType="nt:unstructured"
                                 sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
                                 granite:class="add-references-action"
-                                text="Images">
+                                text="Pages">
                             <granite:data
                                     jcr:primaryType="nt:unstructured"
-                                    type="images"/>
+                                    type="pages"/>
                         </images>
                         <assets
                                 jcr:primaryType="nt:unstructured"

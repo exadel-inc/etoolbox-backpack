@@ -34,7 +34,7 @@ public class PathHandler implements BaseHandler {
     }
 
     @Override
-    public String getActionType() {
+    public String bindActionType() {
         return ACTION_PATH;
     }
 }

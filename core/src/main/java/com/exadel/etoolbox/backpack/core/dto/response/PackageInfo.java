@@ -14,12 +14,6 @@
 
 package com.exadel.etoolbox.backpack.core.dto.response;
 
-import com.exadel.etoolbox.backpack.core.dto.repository.AssetReferencedItem;
-import com.exadel.etoolbox.backpack.core.dto.repository.ReferencedItem;
-import com.exadel.etoolbox.backpack.core.servlets.BuildPackageServlet;
-import com.exadel.etoolbox.backpack.core.servlets.CreatePackageServlet;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.*;
 
 /**
@@ -50,16 +44,9 @@ public class PackageInfo {
 
     private PackageStatus packageStatus;
 
-    //todo: remove
-    private Map<String, List<String>> referencedResources = new TreeMap<>();
-
     private List<String> log = new ArrayList<>();
 
     private Long dataSize;
-    //todo: remove
-    private String query;
-    //todo: remove
-    private boolean toggle;
 
     private Calendar packageInstalled;
 
@@ -90,12 +77,10 @@ public class PackageInfo {
         this.packageStatus = packageInfo.packageStatus;
         this.packagePath = packageInfo.getPackagePath();
         this.thumbnailPath = packageInfo.thumbnailPath;
-        this.referencedResources = new HashMap<>(packageInfo.getReferencedResources());
+        this.pathInfoMap = new HashMap<>(packageInfo.getPathInfoMap());
         this.log = packageInfo.log;
         this.dataSize = packageInfo.dataSize;
         this.paths = packageInfo.paths;
-        this.query = packageInfo.query;
-        this.toggle = packageInfo.toggle;
         if (packageInfo.packageInstalled != null) {
             this.packageInstalled = Calendar.getInstance();
             this.packageInstalled.setTime(packageInfo.packageInstalled.getTime());
@@ -141,16 +126,7 @@ public class PackageInfo {
      * @return {@code Collection<String>} object, read-only
      */
     public Collection<String> getPaths() {
-        return Collections.unmodifiableCollection(paths != null ? paths : Collections.EMPTY_LIST);
-    }
-
-    /**
-     * Gets the collection of paths representing assets to be embedded in the current package, grouped by their MIME types
-     *
-     * @return {@code Collection<String>} object, read-only
-     */
-    public Map<String, List<String>> getReferencedResources() {
-        return referencedResources != null ? Collections.unmodifiableMap(referencedResources) : Collections.emptyMap();
+        return Collections.unmodifiableCollection(paths != null ? paths : Collections.emptyList());
     }
 
     /**
@@ -202,21 +178,6 @@ public class PackageInfo {
      */
     public void clearLog() {
         log.clear();
-    }
-
-    /**
-     * Appends a path to a referenced asset to the current {@link PackageInfo}
-     *
-     * @param item {@link AssetReferencedItem} object containing asset's MIME type and path
-     */
-    public void addAssetReferencedItem(final ReferencedItem item) {
-        if (referencedResources == null) {
-            referencedResources = new TreeMap<>();
-        }
-        if (StringUtils.isNotBlank(item.getPath()) && StringUtils.isNotBlank(item.getType())) {
-            List<String> assetsPaths = referencedResources.computeIfAbsent(item.getType(), k -> new ArrayList<>());
-            assetsPaths.add(item.getPath());
-        }
     }
 
     /**
@@ -328,15 +289,6 @@ public class PackageInfo {
     }
 
     /**
-     * Sets the collection of paths representing assets to be embedded in the current package, grouped by their MIME types
-     *
-     * @param referencedResources {@code Collection<String>} object
-     */
-    public void setReferencedResources(final Map<String, List<String>> referencedResources) {
-        this.referencedResources = referencedResources;
-    }
-
-    /**
      * Gets the path to the thumbnail of the current package
      *
      * @return String value
@@ -372,42 +324,6 @@ public class PackageInfo {
      */
     public void setDataSize(final Long dataSize) {
         this.dataSize = dataSize;
-    }
-
-    /**
-     * Gets the SQL2 query of the current package
-     *
-     * @return String value
-     */
-    public String getQuery() {
-        return query;
-    }
-
-    /**
-     * Sets the SQL2 query of the current package
-     *
-     * @param query String value
-     */
-    public void setQuery(String query) {
-        this.query = query;
-    }
-
-    /**
-     * Gets the toggle between SQL2 (true) and Path Filter (false)
-     *
-     * @return boolean value
-     */
-    public boolean isToggle() {
-        return toggle;
-    }
-
-    /**
-     * Sets the toggle between SQL2 (true) and Path Filter (false)
-     *
-     * @param toggle boolean value
-     */
-    public void setToggle(boolean toggle) {
-        this.toggle = toggle;
     }
 
     /**
@@ -473,10 +389,11 @@ public class PackageInfo {
     }
 
     public PathInfo getPathInfo(String path) {
-        if (!pathInfoMap.containsKey(path)) {
-            return pathInfoMap.put(path, new PathInfo());
+        //todo add default empty map after json parsing
+        if (pathInfoMap == null) {
+            return null;
         }
-        return pathInfoMap.get(path);
+        return pathInfoMap.computeIfAbsent(path, k -> new PathInfo());
     }
 
     public void deletePath(String path) {

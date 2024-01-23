@@ -5,7 +5,6 @@ import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
 import com.exadel.etoolbox.backpack.core.services.pckg.v2.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.v2.InstallPackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.v2.PackageInfoService;
-import com.exadel.etoolbox.backpack.core.services.pckg.v2.impl.BasePackageServiceImpl;
 import com.exadel.etoolbox.backpack.core.services.util.LoggerService;
 import com.exadel.etoolbox.backpack.core.services.util.SessionService;
 import com.exadel.etoolbox.backpack.core.servlets.model.InstallPackageModel;
@@ -55,13 +54,13 @@ public class InstallPackageServiceImpl implements InstallPackageService {
      */
     @Override
     public PackageInfo installPackage(ResourceResolver resourceResolver, InstallPackageModel installPackageModel) {
-        PackageInfo packageInfo = packageInfoService.getPackageInfo(resourceResolver, installPackageModel);
+        PackageInfo packageInfo = packageInfoService.getPackageInfo(resourceResolver, installPackageModel.getPackagePath());
         if (!PackageStatus.INSTALL_IN_PROGRESS.equals(packageInfo.getPackageStatus()) && !PackageStatus.BUILD_IN_PROGRESS.equals(packageInfo.getPackageStatus())) {
             packageInfo.setPackageStatus(PackageStatus.INSTALL_IN_PROGRESS);
             packageInfo.clearLog();
             packageInfo.addLogMessage(START_INSTALL_MESSAGE + packageInfo.getPackagePath());
             packageInfo.addLogMessage(LocalDateTime.now().toString());
-            basePackageService.getPackageInfos().put(installPackageModel.getPackagePath(), packageInfo);
+            basePackageService.getPackageCacheAsMap().put(installPackageModel.getPackagePath(), packageInfo);
             installPackageAsync(resourceResolver.getUserID(), installPackageModel, packageInfo);
         }
         return packageInfo;

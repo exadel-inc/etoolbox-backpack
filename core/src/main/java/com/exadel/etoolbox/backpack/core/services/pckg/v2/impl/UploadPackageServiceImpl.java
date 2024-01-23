@@ -11,12 +11,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.exadel.etoolbox.backpack.core.services.pckg.impl;
+package com.exadel.etoolbox.backpack.core.services.pckg.v2.impl;
 
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
-import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
-import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
-import com.exadel.etoolbox.backpack.core.services.pckg.UploadPackageService;
+import com.exadel.etoolbox.backpack.core.services.pckg.v2.BasePackageService;
+import com.exadel.etoolbox.backpack.core.services.pckg.v2.PackageInfoService;
+import com.exadel.etoolbox.backpack.core.services.pckg.v2.UploadPackageService;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;
 import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
 import org.osgi.service.component.annotations.Component;

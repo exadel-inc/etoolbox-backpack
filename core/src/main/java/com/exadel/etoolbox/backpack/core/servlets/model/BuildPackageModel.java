@@ -14,8 +14,6 @@
 
 package com.exadel.etoolbox.backpack.core.servlets.model;
 
-import com.exadel.etoolbox.backpack.core.services.pckg.BuildPackageService;
-import com.exadel.etoolbox.backpack.core.servlets.BuildPackageServlet;
 import com.exadel.etoolbox.backpack.request.annotations.RequestMapping;
 import com.exadel.etoolbox.backpack.request.annotations.RequestParam;
 import org.apache.sling.api.resource.ResourceResolver;

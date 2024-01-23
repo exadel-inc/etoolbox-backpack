@@ -3,7 +3,7 @@ package com.exadel.etoolbox.backpack.core.services.util.impl;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.services.util.LoggerService;
 import com.exadel.etoolbox.backpack.core.services.pckg.v2.BasePackageService;
-import com.exadel.etoolbox.backpack.core.services.pckg.impl.BasePackageServiceImpl;
+import com.exadel.etoolbox.backpack.core.services.pckg.v2.impl.BasePackageServiceImpl;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;

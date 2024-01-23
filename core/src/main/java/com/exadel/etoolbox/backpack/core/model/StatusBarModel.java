@@ -36,7 +36,7 @@ public class StatusBarModel {
     private void init() {
         ValidatorResponse<PackageInfoModel> validatorResponse = requestAdapter.adaptValidate(request.getParameterMap(), PackageInfoModel.class);
         if (validatorResponse.isValid()) {
-            PackageInfo packageInfo = packageInfoService.getPackageInfo(request.getResourceResolver(), validatorResponse.getModel());
+            PackageInfo packageInfo = packageInfoService.getPackageInfo(request.getResourceResolver(), validatorResponse.getModel().getPackagePath());
             if (packageInfo == null) {
                 return;
             }

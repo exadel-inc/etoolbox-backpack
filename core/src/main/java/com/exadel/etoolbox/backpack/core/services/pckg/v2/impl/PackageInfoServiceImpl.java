@@ -18,6 +18,7 @@ import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
 import com.exadel.etoolbox.backpack.core.dto.response.PathInfo;
 import com.exadel.etoolbox.backpack.core.services.pckg.v2.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.v2.PackageInfoService;
+import com.exadel.etoolbox.backpack.core.services.util.constants.Constants;
 import com.exadel.etoolbox.backpack.core.servlets.model.LatestPackageInfoModel;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageInfoModel;
 import com.exadel.etoolbox.backpack.core.servlets.model.v2.PackageModel;
@@ -58,13 +59,9 @@ public class PackageInfoServiceImpl implements PackageInfoService {
     @Reference
     private BasePackageService basePackageService;
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public PackageInfo getPackageInfo(final ResourceResolver resourceResolver, final PackageInfoModel packageInfoModel) {
-        String packagePath = packageInfoModel.getPackagePath();
-        PackageInfo packageInfo = basePackageService.getPackageInfos().asMap().get(packagePath);
+    public PackageInfo getPackageInfo(final ResourceResolver resourceResolver, final String packagePath) {
+        PackageInfo packageInfo = basePackageService.getPackageCacheAsMap().get(packagePath);
         if (packageInfo != null) {
             return packageInfo;
         }
@@ -82,7 +79,7 @@ public class PackageInfoServiceImpl implements PackageInfoService {
                 if (packageNode != null) {
                     jcrPackage = packMgr.open(packageNode);
                     getPackageInfo(packageInfo, jcrPackage, packageNode);
-                    basePackageService.getPackageInfos().asMap().put(packagePath, packageInfo);
+                    basePackageService.getPackageCacheAsMap().put(packagePath, packageInfo);
                 }
             }
         } catch (RepositoryException e) {
@@ -95,7 +92,6 @@ public class PackageInfoServiceImpl implements PackageInfoService {
         }
         return packageInfo;
     }
-
 
     /**
      * {@inheritDoc}
@@ -176,7 +172,7 @@ public class PackageInfoServiceImpl implements PackageInfoService {
     @Override
     public List<Resource> getPackageFolders(final ResourceResolver resourceResolver) {
         List<Resource> packageGroups = new ArrayList<>();
-        Resource resource = resourceResolver.getResource(com.exadel.etoolbox.backpack.core.services.pckg.impl.BasePackageServiceImpl.PACKAGES_ROOT_PATH);
+        Resource resource = resourceResolver.getResource(Constants.PACKAGES_ROOT_PATH);
         return getFolderResources(packageGroups, resource);
     }
 
@@ -257,11 +253,14 @@ public class PackageInfoServiceImpl implements PackageInfoService {
                     List<PathFilterSet> filterSets = filter.getFilterSets();
                     Type mapType = new TypeToken<Map<String, PathInfo>>() {
                     }.getType();
+                    //save to metadata
+                    definition.getNode().getNode(Constants.PACKAGE_METADATA_NODE);
 
                     packageInfo.setPackagePath(packageNode.getPath());
                     packageInfo.setPackageName(definition.get(JcrPackageDefinition.PN_NAME));
                     packageInfo.setGroupName(definition.get(JcrPackageDefinition.PN_GROUP));
                     packageInfo.setVersion(definition.get(JcrPackageDefinition.PN_VERSION));
+                    //check if
                     packageInfo.setPathInfoMap(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.PACKAGE_METADATA), mapType));
                     packageInfo.setPaths(filterSets.stream().map(FilterSet::getRoot).collect(Collectors.toList()));
                     packageInfo.setDataSize(jcrPackage.getSize());
@@ -287,7 +286,7 @@ public class PackageInfoServiceImpl implements PackageInfoService {
     public PackageInfo getLatestPackageBuildInfo(final LatestPackageInfoModel latestPackageInfoModel) {
         String packagePath = latestPackageInfoModel.getPackagePath();
         String packageNotExistMsg = String.format(BasePackageServiceImpl.PACKAGE_DOES_NOT_EXIST_MESSAGE, packagePath);
-        PackageInfo completeBuildInfo = basePackageService.getPackageInfos().asMap().get(packagePath);
+        PackageInfo completeBuildInfo = basePackageService.getPackageCacheAsMap().get(packagePath);
         PackageInfo partialBuildInfo;
 
         if (completeBuildInfo != null) {

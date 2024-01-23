@@ -49,7 +49,7 @@ public class PackageEntriesDatasource {
         ValidatorResponse<PackageInfoModel> validatorResponse = requestAdapter.adaptValidate(request.getParameterMap(), PackageInfoModel.class);
 
         if (validatorResponse.isValid() && packageInfoService.packageExists(request.getResourceResolver(), validatorResponse.getModel())) {
-            PackageInfo packageInfo = packageInfoService.getPackageInfo(request.getResourceResolver(), validatorResponse.getModel());
+            PackageInfo packageInfo = packageInfoService.getPackageInfo(request.getResourceResolver(), validatorResponse.getModel().getPackagePath());
 
             resourceType = Optional.ofNullable(request.getResource().getChild("datasource"))
                     .map(Resource::getValueMap)
@@ -66,9 +66,7 @@ public class PackageEntriesDatasource {
 
                     List<Resource> subsidiaries = new ArrayList<>();
 
-                    addSubsidiaries(subsidiaries, pathInfo.getReferences()
-                            .values().stream().flatMap(Collection::stream)
-                            .collect(Collectors.toSet()), "reference");
+                    addSubsidiaries(subsidiaries, pathInfo.getReferences(), "reference");
                     addSubsidiaries(subsidiaries, pathInfo.getLiveCopies(), "livecopy");
                     addSubsidiaries(subsidiaries, pathInfo.getChildren(), "child");
 

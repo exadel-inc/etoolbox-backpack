@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.exadel.etoolbox.backpack.core.services.pckg;
+package com.exadel.etoolbox.backpack.core.services.pckg.v2;
 
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 

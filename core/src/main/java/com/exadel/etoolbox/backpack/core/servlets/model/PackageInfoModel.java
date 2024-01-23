@@ -14,8 +14,6 @@
 
 package com.exadel.etoolbox.backpack.core.servlets.model;
 
-import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
-import com.exadel.etoolbox.backpack.core.servlets.PackageInfoServlet;
 import com.exadel.etoolbox.backpack.request.annotations.RequestMapping;
 import com.exadel.etoolbox.backpack.request.annotations.RequestParam;
 import com.exadel.etoolbox.backpack.request.annotations.Validate;

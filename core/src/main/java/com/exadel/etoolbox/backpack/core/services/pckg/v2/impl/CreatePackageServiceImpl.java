@@ -33,10 +33,7 @@ public class CreatePackageServiceImpl implements CreatePackageService {
     public PackageInfo createPackage(ResourceResolver resourceResolver, PackageModel packageModel) {
         final Session session = resourceResolver.adaptTo(Session.class);
 
-        PackageInfo packageInfo = basePackageService.getPackageInfo(resourceResolver, packageModel);
-        if (packageInfo.getPackageStatus() != null) {
-            return packageInfo;
-        }
+        PackageInfo packageInfo = basePackageService.initPackageInfo(resourceResolver, packageModel);
 
         try {
             JcrPackageManager packMgr = basePackageService.getPackageManager(session);
@@ -54,15 +51,10 @@ public class CreatePackageServiceImpl implements CreatePackageService {
             return packageInfo;
         }
 
-//        Set<ReferencedItem> referencedAssets = basePackageService.getReferencedResources(resourceResolver, packageInfo.getPaths());
-//        Collection<String> resultingPaths = basePackageService.initAssets(packageInfo.getPaths(), referencedAssets, packageInfo);
-
-        DefaultWorkspaceFilter filter = basePackageService.getWorkspaceFilter(packageInfo.getPaths());
-
-        createPackage(session, packageInfo, filter);
+        createPackage(session, packageInfo, basePackageService.buildWorkspaceFilter(packageInfo.getPaths()));
 
         if (PackageStatus.CREATED.equals(packageInfo.getPackageStatus())) {
-            basePackageService.getPackageInfos().asMap().put(packageInfo.getPackagePath(), packageInfo);
+            basePackageService.getPackageCacheAsMap().put(packageInfo.getPackagePath(), packageInfo);
         }
 
         return packageInfo;

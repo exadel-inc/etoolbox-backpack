@@ -18,6 +18,7 @@ import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
 import com.exadel.etoolbox.backpack.core.services.pckg.v2.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.v2.EditPackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.v2.PackageInfoService;
+import com.exadel.etoolbox.backpack.core.services.util.constants.Constants;
 import com.exadel.etoolbox.backpack.core.servlets.model.v2.PackageModel;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.vault.fs.config.DefaultWorkspaceFilter;
@@ -39,7 +40,6 @@ import javax.jcr.Session;
 public class EditPackageServiceImpl implements EditPackageService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EditPackageServiceImpl.class);
 
-
     @Reference
     private PackageInfoService packageInfoService;
 
@@ -51,18 +51,18 @@ public class EditPackageServiceImpl implements EditPackageService {
      */
     @Override
     public PackageInfo editPackage(final ResourceResolver resourceResolver, final PackageModel modificationPackageModel) {
+
         final Session session = resourceResolver.adaptTo(Session.class);
 
-        PackageInfo packageInfo = basePackageService.getPackageInfo(resourceResolver, modificationPackageModel);
+        PackageInfo packageInfo = packageInfoService.getPackageInfo(resourceResolver, modificationPackageModel.getPackagePath());
 
-        PackageModel oldPackageModel = packageInfoService.getPackageModelByPath(modificationPackageModel.getPackagePath(), resourceResolver);
         try {
             JcrPackageManager packMgr = basePackageService.getPackageManager(session);
-            if (isPackageLocationUpdated(modificationPackageModel, oldPackageModel)
-                    && basePackageService.isPackageExist(packMgr, packageInfo.getPackageName(), packageInfo.getGroupName(), packageInfo.getVersion())) {
+            if (isPackageLocationUpdated(packageInfo, modificationPackageModel)
+                    && basePackageService.isPackageExist(packMgr, modificationPackageModel.getPackageName(), modificationPackageModel.getGroup(), modificationPackageModel.getVersion())) {
                 String packageExistMsg = "Package with this name already exists in the " + packageInfo.getGroupName() + " group.";
 
-                packageInfo.addLogMessage(com.exadel.etoolbox.backpack.core.services.pckg.impl.BasePackageServiceImpl.ERROR + packageExistMsg);
+                packageInfo.addLogMessage(Constants.ERROR + packageExistMsg);
                 packageInfo.setPackageStatus(PackageStatus.ERROR);
                 LOGGER.error(packageExistMsg);
                 return packageInfo;
@@ -73,26 +73,25 @@ public class EditPackageServiceImpl implements EditPackageService {
             return packageInfo;
         }
 
-//        Set<ReferencedItem> referencedAssets = basePackageService.getReferencedResources(resourceResolver, packageInfo.getPaths());
-//        Collection<String> resultingPaths = basePackageService.initAssets(packageInfo.getPaths(), referencedAssets, packageInfo);
-//        DefaultWorkspaceFilter filter = basePackageService.getWorkspaceFilter(resultingPaths);
+        packageInfo.setPackageName(modificationPackageModel.getPackageName());
+        packageInfo.setGroupName(modificationPackageModel.getGroup());
+        packageInfo.setVersion(modificationPackageModel.getVersion());
+        packageInfo.setThumbnailPath(modificationPackageModel.getThumbnailPath());
 
-        DefaultWorkspaceFilter filter = basePackageService.getWorkspaceFilter(packageInfo.getPaths());
-
-        modifyPackage(session, modificationPackageModel.getPackagePath(), packageInfo, filter);
+        modifyPackage(session, modificationPackageModel.getPackagePath(), packageInfo, basePackageService.buildWorkspaceFilter(packageInfo.getPaths()));
 
         if (PackageStatus.MODIFIED.equals(packageInfo.getPackageStatus())) {
-            basePackageService.getPackageInfos().asMap().remove(modificationPackageModel.getPackagePath());
-            basePackageService.getPackageInfos().asMap().put(packageInfo.getPackagePath(), packageInfo);
+            basePackageService.getPackageCacheAsMap().remove(modificationPackageModel.getPackagePath());
+            basePackageService.getPackageCacheAsMap().put(packageInfo.getPackagePath(), packageInfo);
         }
 
         return packageInfo;
     }
 
-    private boolean isPackageLocationUpdated(final PackageModel newPackage, final PackageModel oldPackage) {
-        return !StringUtils.equals(oldPackage.getPackageName(), newPackage.getPackageName()) ||
-                !StringUtils.equals(oldPackage.getGroup(), newPackage.getGroup()) ||
-                !StringUtils.equals(oldPackage.getVersion(), newPackage.getVersion());
+    private boolean isPackageLocationUpdated(final PackageInfo packageInfo, final PackageModel modificationPackageModel) {
+        return !StringUtils.equals(packageInfo.getPackageName(), modificationPackageModel.getPackageName()) ||
+                !StringUtils.equals(packageInfo.getGroupName(), modificationPackageModel.getGroup()) ||
+                !StringUtils.equals(packageInfo.getVersion(), modificationPackageModel.getVersion());
     }
 
 
@@ -101,12 +100,6 @@ public class EditPackageServiceImpl implements EditPackageService {
                                final PackageInfo packageInfo,
                                final DefaultWorkspaceFilter filter) {
 
-//        if (filter.getFilterSets().isEmpty()) {
-//            packageInfo.setPackageStatus(PackageStatus.ERROR);
-//            packageInfo.addLogMessage(BasePackageServiceImpl.ERROR + "Package does not contain any valid filters.");
-//            return;
-//
-//        }
         JcrPackage jcrPackage = null;
 
         try {
@@ -117,7 +110,6 @@ public class EditPackageServiceImpl implements EditPackageService {
                 jcrPackage = packMgr.rename(jcrPackage, packageInfo.getGroupName(), packageInfo.getPackageName(), packageInfo.getVersion());
                 JcrPackageDefinition jcrPackageDefinition = jcrPackage.getDefinition();
                 if (jcrPackageDefinition != null) {
-                    //todo empty list
                     basePackageService.setPackageInfo(jcrPackageDefinition, userSession, packageInfo, filter);
                     packageInfo.setPackageStatus(PackageStatus.MODIFIED);
                     Node movedPackageNode = jcrPackage.getNode();
@@ -136,6 +128,5 @@ public class EditPackageServiceImpl implements EditPackageService {
                 jcrPackage.close();
             }
         }
-
     }
 }

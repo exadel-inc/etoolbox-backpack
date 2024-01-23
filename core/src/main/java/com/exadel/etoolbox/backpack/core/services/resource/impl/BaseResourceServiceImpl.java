@@ -3,11 +3,15 @@ package com.exadel.etoolbox.backpack.core.services.resource.impl;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
 import com.exadel.etoolbox.backpack.core.services.pckg.v2.BasePackageService;
+import com.exadel.etoolbox.backpack.core.services.pckg.v2.PackageInfoService;
 import com.exadel.etoolbox.backpack.core.services.resource.BaseResourceService;
 import com.exadel.etoolbox.backpack.core.services.resource.handler.BaseHandler;
 import com.exadel.etoolbox.backpack.core.servlets.model.v2.PathModel;
 import org.apache.jackrabbit.vault.fs.config.DefaultWorkspaceFilter;
-import org.apache.jackrabbit.vault.packaging.*;
+import org.apache.jackrabbit.vault.packaging.JcrPackage;
+import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
+import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
+import org.apache.jackrabbit.vault.packaging.PackagingService;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Component;
@@ -20,11 +24,8 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 
 @Component(service = BaseResourceService.class)
@@ -40,53 +41,45 @@ public class BaseResourceServiceImpl implements BaseResourceService {
     @Reference
     private BasePackageService basePackageService;
 
+    @Reference
+    private PackageInfoService packageInfoService;
+
     @Override
     public PackageInfo getPackageInfo(ResourceResolver resourceResolver, PathModel pathModel) {
 
-        //todo get package if null
-        PackageInfo packageInfo = basePackageService.getPackageInfos().asMap().get(pathModel.getPackagePath());
-
-        if (packageInfo == null) {
-            PackageInfo errorPackageInfo = new PackageInfo();
-            errorPackageInfo.setLog(Collections.singletonList("Path isn't valid"));
-            errorPackageInfo.setPackageStatus(PackageStatus.ERROR);
-            return errorPackageInfo;
-        }
+        PackageInfo packageInfo = packageInfoService.getPackageInfo(resourceResolver, pathModel.getPackagePath());
+        //todo add check for packageInfo
 
         if (handlerMap.containsKey(pathModel.getType())) {
             handlerMap.get(pathModel.getType()).process(resourceResolver, pathModel.getPayload(), packageInfo);
 
             packageInfo.setDataSize(packageInfo.getPaths().stream().mapToLong(value -> getAssetSize(resourceResolver.getResource(value))).sum());
+
+            Session session = resourceResolver.adaptTo(Session.class);
+            modifyPackage(session, pathModel.getPackagePath(), packageInfo, basePackageService.buildWorkspaceFilter(packageInfo.getPaths()));
+
             packageInfo.setPackageStatus(PackageStatus.MODIFIED);
 
-            //todo refactoring
-            Set<String> filteredPaths = packageInfo.getPaths() != null ? packageInfo.getPaths().stream()
-                    .filter(path -> resourceResolver.getResource(path) != null)
-                    .collect(Collectors.toSet()) : Collections.emptySet();
+            basePackageService.getPackageCacheAsMap().put(pathModel.getPackagePath(), packageInfo);
 
-            DefaultWorkspaceFilter filter = basePackageService.getWorkspaceFilter(filteredPaths);
-            Session session = resourceResolver.adaptTo(Session.class);
-            modifyPackage(session, pathModel.getPackagePath(), packageInfo, filter);
-
-            basePackageService.getPackageInfos().asMap().put(pathModel.getPackagePath(), packageInfo);
         } else {
             packageInfo.setPackageStatus(PackageStatus.ERROR);
+            packageInfo.addLogMessage("Handler for this type isn't exist");
         }
 
         return packageInfo;
     }
 
 
-    protected void bindHandlerMap(final BaseHandler searchService) {
+    protected void bindHandlerMap(final BaseHandler handler) {
         if (handlerMap == null) {
             handlerMap = new HashMap<>();
         }
-
-        handlerMap.put(searchService.getActionType(), searchService);
+        handlerMap.put(handler.bindActionType(), handler);
     }
 
-    protected void unbindHandlerMap(final BaseHandler searchService) {
-        handlerMap.remove(searchService.getActionType());
+    protected void unbindHandlerMap(final BaseHandler handler) {
+        handlerMap.remove(handler.bindActionType());
     }
 
     private long getAssetSize(Resource resource) {

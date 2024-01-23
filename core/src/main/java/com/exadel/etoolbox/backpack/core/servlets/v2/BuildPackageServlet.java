@@ -17,8 +17,6 @@ package com.exadel.etoolbox.backpack.core.servlets.v2;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.services.pckg.v2.BuildPackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.v2.PackageInfoService;
-import com.exadel.etoolbox.backpack.core.servlets.CreatePackageServlet;
-import com.exadel.etoolbox.backpack.core.servlets.PackageInfoServlet;
 import com.exadel.etoolbox.backpack.core.servlets.model.BuildPackageModel;
 import com.exadel.etoolbox.backpack.core.servlets.model.LatestPackageInfoModel;
 import com.exadel.etoolbox.backpack.core.util.CalendarAdapter;

@@ -18,7 +18,6 @@ import com.day.cq.dam.api.Asset;
 import com.exadel.etoolbox.backpack.core.dto.repository.ReferencedItem;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.services.pckg.v2.BasePackageService;
-import com.exadel.etoolbox.backpack.core.services.resource.ReferenceService;
 import com.exadel.etoolbox.backpack.core.servlets.model.v2.PackageModel;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -50,6 +49,7 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.util.*;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -76,8 +76,6 @@ public class BasePackageServiceImpl implements BasePackageService {
     private static final String DEFAULT_THUMBNAILS_LOCATION = "/apps/etoolbox-backpack/assets/";
     private static final String THUMBNAIL_PATH_TEMPLATE = DEFAULT_THUMBNAILS_LOCATION + "backpack_%s.png";
 
-    protected static final String QUERY_PARAMETER = "queryPackage";
-    protected static final String SWITCH_PARAMETER = "toggle";
     protected static final String THUMBNAIL_PATH_PARAMETER = "thumbnailPath";
 
     protected static final Gson GSON = new Gson();
@@ -90,9 +88,6 @@ public class BasePackageServiceImpl implements BasePackageService {
     @SuppressWarnings("UnusedDeclaration") // value injected by Sling
     private SlingRepository slingRepository;
 
-    @Reference
-    @SuppressWarnings("UnusedDeclaration") // value injected by Sling
-    private ReferenceService referenceService;
 
     @SuppressWarnings("UnstableApiUsage") // sticking to Guava Cache version bundled in uber-jar; still safe to use
     protected Cache<String, PackageInfo> packageInfos;
@@ -143,7 +138,7 @@ public class BasePackageServiceImpl implements BasePackageService {
      * {@inheritDoc}
      */
     @Override
-    public PackageInfo getPackageInfo(final ResourceResolver resourceResolver, final PackageModel packageModel) {
+    public PackageInfo initPackageInfo(final ResourceResolver resourceResolver, final PackageModel packageModel) {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.setPackageName(packageModel.getPackageName());
         packageInfo.setVersion(packageModel.getVersion());
@@ -159,13 +154,11 @@ public class BasePackageServiceImpl implements BasePackageService {
             packageInfo.setPaths(Collections.emptySet());
         }
 
-        String packageGroupName = DEFAULT_PACKAGE_GROUP;
-
         if (StringUtils.isNotBlank(packageModel.getGroup())) {
-            packageGroupName = packageModel.getGroup();
+            packageInfo.setGroupName(packageModel.getGroup());
+        } else {
+            packageInfo.setGroupName(DEFAULT_PACKAGE_GROUP);
         }
-
-        packageInfo.setGroupName(packageGroupName);
 
         return packageInfo;
     }
@@ -271,20 +264,7 @@ public class BasePackageServiceImpl implements BasePackageService {
      * {@inheritDoc}
      */
     @Override
-    public Set<ReferencedItem> getReferencedResources(final ResourceResolver resourceResolver, final Collection<String> paths) {
-        Set<ReferencedItem> assetLinks = new HashSet<>();
-        paths.forEach(path -> {
-            Set<ReferencedItem> assetReferences = referenceService.getReferences(resourceResolver, path);
-            assetLinks.addAll(assetReferences);
-        });
-        return assetLinks;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public DefaultWorkspaceFilter getWorkspaceFilter(final Collection<String> paths) {
+    public DefaultWorkspaceFilter buildWorkspaceFilter(final Collection<String> paths) {
         DefaultWorkspaceFilter filter = new DefaultWorkspaceFilter();
         paths.forEach(path -> {
             PathFilterSet pathFilterSet = new PathFilterSet(path);
@@ -292,18 +272,6 @@ public class BasePackageServiceImpl implements BasePackageService {
         });
 
         return filter;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Collection<String> initAssets(final Collection<String> initialPaths,
-                                         final Set<ReferencedItem> referencedAssets,
-                                         final PackageInfo packageInfo) {
-        referencedAssets.forEach(packageInfo::addAssetReferencedItem);
-        Collection<String> resultingPaths = new ArrayList<>(initialPaths);
-        return resultingPaths;
     }
 
     /**
@@ -328,7 +296,7 @@ public class BasePackageServiceImpl implements BasePackageService {
     }
 
     /**
-     * Called by {@link BasePackageService#getPackageInfo(ResourceResolver, PackageModel)} to compute size
+     * Called by {@link BasePackageService#initPackageInfo(ResourceResolver, PackageModel)} to compute size
      * of the asset specified by path
      *
      * @param resourceResolver {@code ResourceResolver} used to retrieve path-specified {@code Resource}s
@@ -337,8 +305,7 @@ public class BasePackageServiceImpl implements BasePackageService {
      */
     @Override
     public long getAssetSize(ResourceResolver resourceResolver, String path) {
-        Resource rootResource = resourceResolver.getResource(path);
-        return getAssetSize(rootResource);
+        return getAssetSize(resourceResolver.getResource(path));
     }
 
     /**
@@ -347,8 +314,8 @@ public class BasePackageServiceImpl implements BasePackageService {
     @SuppressWarnings("UnstableApiUsage")
     // sticking to Guava Cache version bundled in uber-jar; still safe to use
     @Override
-    public Cache<String, PackageInfo> getPackageInfos() {
-        return packageInfos;
+    public ConcurrentMap<String, PackageInfo> getPackageCacheAsMap() {
+        return packageInfos.asMap();
     }
 
     /**

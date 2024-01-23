@@ -16,7 +16,6 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import javax.servlet.Servlet;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
@@ -52,7 +51,7 @@ public class AddResourceServlet extends SlingAllMethodsServlet {
     private transient BaseResourceService baseResourceService;
 
     @Override
-    protected void doPost(final SlingHttpServletRequest request, final SlingHttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(final SlingHttpServletRequest request, final SlingHttpServletResponse response) throws IOException {
 
         response.setContentType(APPLICATION_JSON);
 

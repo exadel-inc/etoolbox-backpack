@@ -30,12 +30,12 @@ public class ListHandler implements BaseHandler {
     }
 
     @Override
-    public String getActionType() {
+    public String bindActionType() {
         return ACTION_LIST;
     }
 
     private List<String> parseString(String payload, List<String> log) {
-        //todo log errors
+        //todo log errors and processing
         return Arrays.stream(payload.split(",")).map(String::trim).collect(Collectors.toList());
     }
 }

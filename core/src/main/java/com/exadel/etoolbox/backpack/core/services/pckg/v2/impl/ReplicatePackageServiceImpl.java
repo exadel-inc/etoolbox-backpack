@@ -1,15 +1,17 @@
-package com.exadel.etoolbox.backpack.core.services.pckg.impl;
+package com.exadel.etoolbox.backpack.core.services.pckg.v2.impl;
 
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.Replicator;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
+import com.exadel.etoolbox.backpack.core.services.pckg.v2.impl.BasePackageServiceImpl;
 import com.exadel.etoolbox.backpack.core.services.util.LoggerService;
 import com.exadel.etoolbox.backpack.core.services.util.SessionService;
-import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
-import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
-import com.exadel.etoolbox.backpack.core.services.pckg.ReplicatePackageService;
+import com.exadel.etoolbox.backpack.core.services.pckg.v2.BasePackageService;
+import com.exadel.etoolbox.backpack.core.services.pckg.v2.PackageInfoService;
+import com.exadel.etoolbox.backpack.core.services.pckg.v2.ReplicatePackageService;
+import com.exadel.etoolbox.backpack.core.services.util.constants.Constants;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageInfoModel;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;
@@ -59,15 +61,15 @@ public class ReplicatePackageServiceImpl implements ReplicatePackageService {
      */
     @Override
     public PackageInfo replicatePackage(ResourceResolver resourceResolver, PackageInfoModel packageInfoModel) {
-        PackageInfo packageInfo = packageInfoService.getPackageInfo(resourceResolver, packageInfoModel);
+        PackageInfo packageInfo = packageInfoService.getPackageInfo(resourceResolver, packageInfoModel.getPackagePath());
         if (PackageStatus.BUILT.equals(packageInfo.getPackageStatus())) {
             packageInfo.clearLog();
             packageInfo.addLogMessage(START_REPLICATE_MESSAGE + packageInfoModel.getPackagePath());
             packageInfo.addLogMessage(LocalDateTime.now().toString());
-            basePackageService.getPackageInfos().put(packageInfoModel.getPackagePath(), packageInfo);
+            basePackageService.getPackageCacheAsMap().put(packageInfoModel.getPackagePath(), packageInfo);
             replicatePackage(resourceResolver.getUserID(), packageInfo);
         } else {
-            packageInfo.addLogMessage(BasePackageServiceImpl.ERROR + PACKAGE_IS_NOT_BUILT_MESSAGE);
+            packageInfo.addLogMessage(Constants.ERROR + PACKAGE_IS_NOT_BUILT_MESSAGE);
         }
         return packageInfo;
     }
@@ -105,10 +107,10 @@ public class ReplicatePackageServiceImpl implements ReplicatePackageService {
                     packageInfo.addLogMessage(FINISH_REPLICATE_MESSAGE + stopWatch);
                     packageInfo.setPackageReplicated(Calendar.getInstance());
                 } else {
-                    packageInfo.addLogMessage(BasePackageServiceImpl.ERROR + NODE_NOT_ACCESSIBLE_MESSAGE);
+                    packageInfo.addLogMessage(Constants.ERROR + NODE_NOT_ACCESSIBLE_MESSAGE);
                 }
             } else {
-                packageInfo.addLogMessage(BasePackageServiceImpl.ERROR + String.format(BasePackageServiceImpl.PACKAGE_DOES_NOT_EXIST_MESSAGE, packageInfo.getPackagePath()));
+                packageInfo.addLogMessage(Constants.ERROR + String.format(BasePackageServiceImpl.PACKAGE_DOES_NOT_EXIST_MESSAGE, packageInfo.getPackagePath()));
             }
         } catch (RepositoryException | ReplicationException e) {
             loggerService.addExceptionToLog(packageInfo, e);

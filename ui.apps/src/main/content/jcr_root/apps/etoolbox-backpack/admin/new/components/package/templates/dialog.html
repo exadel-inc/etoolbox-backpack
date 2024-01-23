@@ -1,6 +1,6 @@
 <template data-sly-template.dialogTemplate="${@ packageModel, initialResources}">
-    <coral-dialog id="editDialog" class="modal-form foundation-toggleable" closable="on" backdrop="static">
-        <coral-dialog-header>Package Properties</coral-dialog-header>
+    <coral-dialog id="editDialog" class="modal-form foundation-toggleable" closable="${packageModel ? 'on' : 'off'}" backdrop="static">
+        <coral-dialog-header>${packageModel ? 'Edit' : 'Create'} Package</coral-dialog-header>
         <coral-dialog-content>
             <form action="/services/backpack/package" method="${packageModel ? 'put' : 'post'}"
                   class="coral-Form coral-Form--vertical foundation-form"

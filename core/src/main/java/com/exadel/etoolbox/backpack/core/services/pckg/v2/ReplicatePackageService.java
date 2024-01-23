@@ -1,4 +1,4 @@
-package com.exadel.etoolbox.backpack.core.services.pckg;
+package com.exadel.etoolbox.backpack.core.services.pckg.v2;
 
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageInfoModel;

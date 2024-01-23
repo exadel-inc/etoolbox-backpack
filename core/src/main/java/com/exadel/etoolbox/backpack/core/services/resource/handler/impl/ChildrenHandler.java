@@ -29,7 +29,7 @@ public class ChildrenHandler implements BaseHandler {
     }
 
     @Override
-    public String getActionType() {
+    public String bindActionType() {
         return ACTION_CHILDREN;
     }
 }

@@ -28,7 +28,6 @@ public class LiveCopyHandler implements BaseHandler {
     @Reference
     private LiveRelationshipManager liveRelationshipManager;
 
-
     @Override
     public void process(ResourceResolver resourceResolver, String payload, PackageInfo packageInfo) {
         if (resourceResolver.getResource(payload) != null) {
@@ -68,7 +67,7 @@ public class LiveCopyHandler implements BaseHandler {
     }
 
     @Override
-    public String getActionType() {
+    public String bindActionType() {
         return ACTION_LIVE_COPY;
     }
 }

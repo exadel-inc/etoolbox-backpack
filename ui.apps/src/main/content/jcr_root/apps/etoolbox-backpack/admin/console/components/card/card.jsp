@@ -87,7 +87,7 @@
 
 <coral-quickactions target="_prev" alignmy="left top" alignat="left top">
     <coral-quickactions-item icon="dataRefresh" class="foundation-collection-action" data-foundation-collection-action='{"action": "cq.wcm.open", "data": {"cookiePath":"<%= request.getContextPath() %>/","href":"/tools/etoolbox/backpack/package.html?path=<%= xssAPI.getValidHref(path) %>"}}'><%= xssAPI.encodeForHTML(i18n.get("Package")) %></coral-quickactions-item>
-    <coral-quickactions-item icon="dataRefresh" class="foundation-collection-action" data-foundation-collection-action='{"action": "cq.wcm.open", "data": {"cookiePath":"<%= request.getContextPath() %>/","href":"/apps/etoolbox-backpack/admin/new.html?path=<%= xssAPI.getValidHref(path) %>"}}'><%= xssAPI.encodeForHTML(i18n.get("PackageV2")) %></coral-quickactions-item>
+    <coral-quickactions-item icon="dataRefresh" class="foundation-collection-action" data-foundation-collection-action='{"action": "cq.wcm.open", "data": {"cookiePath":"<%= request.getContextPath() %>/","href":"/apps/etoolbox-backpack/admin/new.html?packagePath=<%= xssAPI.getValidHref(path) %>"}}'><%= xssAPI.encodeForHTML(i18n.get("PackageV2")) %></coral-quickactions-item>
 
     <%
 
