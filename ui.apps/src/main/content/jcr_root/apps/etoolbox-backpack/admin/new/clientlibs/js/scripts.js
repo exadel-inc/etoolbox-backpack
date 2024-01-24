@@ -90,6 +90,7 @@
     });
 
     $(document).on('click', '#testBuildAction', function() {
+        showTestBuildDialog();
         buildPackage(true);
     });
 
@@ -201,7 +202,7 @@
 
 
     function buildPackage(testBuild) {
-        var container = $('#buildLogsContainer');
+        var container = testBuild ? $('#testBuildLogsContainer') : $('#buildLogsContainer');
         var referencedResources = [];
         $('.reference').each(function () {
             referencedResources.push(this.innerText);
@@ -221,7 +222,7 @@
                         });
                         const assetText = data.dataSize === 0 ? 'There are no assets in the package' : '<h4>Approximate size of the assets in the package: ' + bytesToSize(data.dataSize) + '</h4>';
                         container.append(assetText);
-                        scrollLog();
+                        $('#testBuildLogsContainer')[0].scrollIntoView(false)
                     }
                 } else {
                     updateLog(0);
@@ -242,7 +243,7 @@
                         container.append('<div>' + value + '</div>');
                     });
                     logIndex = logIndex + data.log.length;
-                    scrollLog();
+                    $('#buildLogsContainer')[0].scrollIntoView(false)
                 }
                 if (data.packageStatus === BUILD_IN_PROGRESS || data.packageStatus === INSTALL_IN_PROGRESS) {
                     setTimeout(function () {
@@ -254,8 +255,34 @@
         })
     }
 
-    function scrollLog() {
-        $('#buildLogsContainer')[0].scrollIntoView(false)
+    function bytesToSize(bytes) {
+        var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        if (bytes === 0) return '0 Bytes';
+        var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+        return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
+    }
+
+    function showTestBuildDialog() {
+        var dialog = $('#testBuildDialog')[0];
+        if (dialog) {
+            $('#testBuildLogsContainer')[0].innerHTML = '';
+            dialog.show();
+        } else {
+            dialog = new Coral.Dialog().set({
+                id: 'testBuildDialog',
+                header: {
+                    innerHTML: 'Logs'
+                },
+                content: {
+                    innerHTML: '<div id="testBuildLogsContainer"></div>'
+                },
+                footer: {
+                    innerHTML: '<button is="coral-button" variant="primary" coral-close>Ok</button>'
+                }
+            });
+            document.body.appendChild(dialog);
+            dialog.show();
+        }
     }
 
 })(Granite, Granite.$);
