@@ -4,6 +4,9 @@
     const registry = Granite.UI.Foundation.Registry;
     const packagePath = new URL(window.location.href).searchParams.get('packagePath');
 
+    const BUILD_IN_PROGRESS = 'BUILD_IN_PROGRESS';
+    const INSTALL_IN_PROGRESS = 'INSTALL_IN_PROGRESS';
+
     // Make package entries selectable
 
     $(document).on('click', '.foundation-collection-item', function(e) {
@@ -198,31 +201,26 @@
 
 
     function buildPackage(testBuild) {
-        var referencedResources = {};
-        $('input[name="referencedResources"]:checked').each(function () {
-            var resources = [];
-            var currentResourceType = this.value;
-            $(this).closest('coral-accordion-item').find('input[name="referencedResourcesItem"]:checked').each(function () {
-                resources.push(this.value);
-            });
-            referencedResources[currentResourceType] = resources;
+        var container = $('#buildLogsContainer');
+        var referencedResources = [];
+        $('.reference').each(function () {
+            referencedResources.push(this.innerText);
         });
         $.ajax({
             type: 'POST',
             url: '/services/backpack/package/build',
             data: {
-                path: packagePath,
+                packagePath: packagePath,
                 referencedResources: JSON.stringify(referencedResources),
                 testBuild: testBuild
             }, success: function (data) {
-                $buildLog.empty();
                 if (testBuild) {
                     if (data.log) {
                         $.each(data.log, function (index, value) {
-                            $buildLog.append('<div>' + value + '</div>');
+                            container.append('<div>' + value + '</div>');
                         });
                         const assetText = data.dataSize === 0 ? 'There are no assets in the package' : '<h4>Approximate size of the assets in the package: ' + bytesToSize(data.dataSize) + '</h4>';
-                        $buildLog.append(assetText);
+                        container.append(assetText);
                         scrollLog();
                     }
                 } else {
@@ -231,6 +229,33 @@
             },
             dataType: 'json'
         });
+    }
+
+    function updateLog(logIndex) {
+        var container = $('#buildLogsContainer');
+        $.ajax({
+            url: '/services/backpack/package/build',
+            data: {packagePath: packagePath, latestLogIndex: logIndex},
+            success: function (data) {
+                if (data.log && data.log.length) {
+                    $.each(data.log, function (index, value) {
+                        container.append('<div>' + value + '</div>');
+                    });
+                    logIndex = logIndex + data.log.length;
+                    scrollLog();
+                }
+                if (data.packageStatus === BUILD_IN_PROGRESS || data.packageStatus === INSTALL_IN_PROGRESS) {
+                    setTimeout(function () {
+                        updateLog(logIndex);
+                    }, 1000);
+
+                }
+            }
+        })
+    }
+
+    function scrollLog() {
+        $('#buildLogsContainer')[0].scrollIntoView(false)
     }
 
 })(Granite, Granite.$);

@@ -43,10 +43,7 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -108,7 +105,7 @@ public class BuildPackageServiceImpl implements BuildPackageService {
                         packageInfo.addLogMessage("A " + s);
                         totalSize.addAndGet(basePackageService.getAssetSize(resourceResolver, s));
                     });
-                    includeReferencedResources(requestInfo.getReferencedResources(), definition, s -> {
+                    includeReferencedResources(requestInfo.getReferencedResources(), s -> {
                         packageInfo.addLogMessage("A " + s);
                         totalSize.addAndGet(basePackageService.getAssetSize(resourceResolver, s));
                     });
@@ -150,7 +147,7 @@ public class BuildPackageServiceImpl implements BuildPackageService {
                 JcrPackageDefinition definition = Objects.requireNonNull(jcrPackage.getDefinition());
                 DefaultWorkspaceFilter filter = new DefaultWorkspaceFilter();
                 includeGeneralResources(definition, s -> filter.add(new PathFilterSet(s)));
-                includeReferencedResources(referencedResources, definition, s -> filter.add(new PathFilterSet(s)));
+                includeReferencedResources(referencedResources, s -> filter.add(new PathFilterSet(s)));
                 definition.setFilter(filter, true);
                 String thumbnailPath = StringUtils.defaultIfBlank(packageBuildInfo.getThumbnailPath(), basePackageService.getDefaultThumbnailPath(false));
                 basePackageService.addThumbnail(definition.getNode(), thumbnailPath, userSession);
@@ -224,24 +221,17 @@ public class BuildPackageServiceImpl implements BuildPackageService {
      * resources (assets) into the current package
      *
      * @param includeReferencedResources JSON string representing resources to be embedded in the resulting package
-     * @param definition                 {@code JcrPackageDefinition} object
      * @param pathConsumer               A routine executed over each resources' path value (mainly for logging purposes
      *                                   and statistics gathering)
      */
 
     private void includeReferencedResources(final String includeReferencedResources,
-                                            final JcrPackageDefinition definition,
                                             final Consumer<String> pathConsumer) {
-        Type mapType = new TypeToken<Map<String, List<String>>>() {
+        Type mapType = new TypeToken<Set<String>>() {
         }.getType();
-        Map<String, List<String>> packageReferencedResources = GSON.fromJson(definition.get(BasePackageServiceImpl.REFERENCED_RESOURCES), mapType);
-        Map<String, List<String>> includeResources = GSON.fromJson(includeReferencedResources, mapType);
-        if (packageReferencedResources != null && includeResources != null) {
-            for (Map.Entry<String, List<String>> entry : includeResources.entrySet()) {
-                List<String> packageResourceList = packageReferencedResources.get(entry.getKey());
-                List<String> includeResourceList = entry.getValue();
-                includeResourceList.stream().filter(s -> packageResourceList.contains(s)).forEach(pathConsumer);
-            }
+        Set<String> includeResources = GSON.fromJson(includeReferencedResources, mapType);
+        if (includeResources != null) {
+            includeResources.forEach(pathConsumer);
         }
     }
 
