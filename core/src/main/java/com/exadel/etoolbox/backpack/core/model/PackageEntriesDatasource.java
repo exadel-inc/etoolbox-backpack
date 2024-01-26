@@ -6,8 +6,8 @@ import com.adobe.granite.ui.components.ds.ValueMapResource;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.PathInfo;
-import com.exadel.etoolbox.backpack.core.services.pckg.v2.BasePackageService;
-import com.exadel.etoolbox.backpack.core.services.pckg.v2.PackageInfoService;
+import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
+import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageInfoModel;
 import com.exadel.etoolbox.backpack.request.RequestAdapter;
 import com.exadel.etoolbox.backpack.request.validator.ValidatorResponse;
@@ -66,8 +66,10 @@ public class PackageEntriesDatasource {
 
                     List<Resource> subsidiaries = new ArrayList<>();
 
-                    addSubsidiaries(subsidiaries, pathInfo.getReferences(), "reference");
-                    addSubsidiaries(subsidiaries, pathInfo.getLiveCopies(), "livecopy");
+                    addSubsidiaries(subsidiaries, pathInfo.getTags(), "tag");
+                    addSubsidiaries(subsidiaries, pathInfo.getPages(), "page");
+                    addSubsidiaries(subsidiaries, pathInfo.getPages(), "asset");
+                    addSubsidiaries(subsidiaries, pathInfo.getLiveCopies(), "liveCopy");
                     addSubsidiaries(subsidiaries, pathInfo.getChildren(), "child");
 
                     if (subsidiaries.isEmpty()) {

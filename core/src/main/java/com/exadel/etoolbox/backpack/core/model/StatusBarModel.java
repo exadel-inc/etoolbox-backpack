@@ -1,7 +1,7 @@
 package com.exadel.etoolbox.backpack.core.model;
 
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
-import com.exadel.etoolbox.backpack.core.services.pckg.v2.PackageInfoService;
+import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageInfoModel;
 import com.exadel.etoolbox.backpack.request.RequestAdapter;
 import com.exadel.etoolbox.backpack.request.validator.ValidatorResponse;

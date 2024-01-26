@@ -17,7 +17,7 @@
                         variant="actionBar">
                     <data
                             jcr:primaryType="nt:unstructured"
-                            src.uritemplate="/apps/etoolbox-backpack/admin/console/page/content/createpagedialog.html?paths={+item}"/>
+                            src.uritemplate="/apps/etoolbox-backpack/admin/new.html?initialResource={+item}"/>
                 </backpack>
             </selection>
         </actions>

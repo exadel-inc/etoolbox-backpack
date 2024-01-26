@@ -38,8 +38,6 @@ public class PackageInfo {
 
     private String thumbnailPath;
 
-    private Collection<String> paths;
-
     private Map<String, PathInfo> pathInfoMap = new HashMap<>();
 
     private PackageStatus packageStatus;
@@ -80,7 +78,6 @@ public class PackageInfo {
         this.pathInfoMap = new HashMap<>(packageInfo.getPathInfoMap());
         this.log = packageInfo.log;
         this.dataSize = packageInfo.dataSize;
-        this.paths = packageInfo.paths;
         if (packageInfo.packageInstalled != null) {
             this.packageInstalled = Calendar.getInstance();
             this.packageInstalled.setTime(packageInfo.packageInstalled.getTime());
@@ -126,7 +123,7 @@ public class PackageInfo {
      * @return {@code Collection<String>} object, read-only
      */
     public Collection<String> getPaths() {
-        return Collections.unmodifiableCollection(paths != null ? paths : Collections.emptyList());
+        return Collections.unmodifiableCollection(pathInfoMap != null ? pathInfoMap.keySet() : Collections.emptyList());
     }
 
     /**
@@ -285,7 +282,15 @@ public class PackageInfo {
      * @param paths {@code Collection<String>} object
      */
     public void setPaths(final Collection<String> paths) {
-        this.paths = paths;
+        if (paths == null || paths.isEmpty()) {
+            return;
+        }
+        for (String path : paths) {
+            if (this.pathInfoMap.containsKey(path)) {
+                continue;
+            }
+            this.pathInfoMap.put(path, new PathInfo());
+        }
     }
 
     /**
@@ -389,16 +394,11 @@ public class PackageInfo {
     }
 
     public PathInfo getPathInfo(String path) {
-        //todo add default empty map after json parsing
-        if (pathInfoMap == null) {
-            return null;
-        }
         return pathInfoMap.computeIfAbsent(path, k -> new PathInfo());
     }
 
     public void deletePath(String path) {
         pathInfoMap.remove(path);
-        paths.remove(path);
     }
 
     public Map<String, PathInfo> getPathInfoMap() {

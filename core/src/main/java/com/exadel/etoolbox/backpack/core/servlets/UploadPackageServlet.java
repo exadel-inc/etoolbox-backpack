@@ -15,7 +15,7 @@
 package com.exadel.etoolbox.backpack.core.servlets;
 
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
-import com.exadel.etoolbox.backpack.core.services.pckg.v2.UploadPackageService;
+import com.exadel.etoolbox.backpack.core.services.pckg.UploadPackageService;
 import com.google.gson.Gson;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;

@@ -14,8 +14,8 @@
 
 package com.exadel.etoolbox.backpack.core.model;
 
-import com.exadel.etoolbox.backpack.core.services.pckg.v2.PackageInfoService;
-import com.exadel.etoolbox.backpack.core.servlets.model.v2.PackageModel;
+import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
+import com.exadel.etoolbox.backpack.core.servlets.model.PackageModel;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;

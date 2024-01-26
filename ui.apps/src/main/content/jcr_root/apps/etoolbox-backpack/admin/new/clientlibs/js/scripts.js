@@ -47,9 +47,8 @@
 
     $(document).on('click', '#excludeChildrenAction', function() {
         const selection = $('.foundation-selections-item');
-        const dataObject = {'entry':selection.attr('data-entry-title'),'type':'children'};
         if (selection) {
-            doPost("/services/backpack/delete", {'packagePath': packagePath, 'payload': JSON.stringify(dataObject)}, success);
+            doPost("/services/backpack/delete/children", {'packagePath': packagePath, 'payload': selection.attr('data-entry-title')}, success);
         }
     });
 
@@ -62,22 +61,24 @@
 
     $(document).on('click', '.add-references-action', function(event) {
         const selection = $('.foundation-selections-item');
-        const dataObject = {'entry':selection.attr('data-entry-title'),'type':event.target.closest('[data-type]').getAttribute('data-type')}
+        const referenceType = event.target.closest('[data-type]').getAttribute('data-type');
         if (selection) {
-            doPost("/services/backpack/add/references", {'packagePath': packagePath, 'payload': JSON.stringify(dataObject)}, success);
+            doPost("/services/backpack/add/" + referenceType, {'packagePath': packagePath, 'payload': selection.attr('data-entry-title')}, success);
         }
     });
 
     $(document).on('click', '#deleteAction', function(event) {
         const selection = $('.foundation-selections-item');
-        const dataObject = {'entry':selection.attr('data-entry-title'),'type':selection.attr('data-type')};
 
-        if (selection.hasClass('secondary')) {
-           dataObject['subsidiary'] = selection.attr('data-subsidiary-title');
+        if (!selection) {
+            return;
         }
 
-        if (selection) {
-            doPost("/services/backpack/delete", {'packagePath': packagePath, 'payload': JSON.stringify(dataObject)}, success);
+        if (selection.hasClass('secondary')) {
+           const payload = [selection.attr('data-entry-title'), selection.attr('data-subsidiary-title')];
+           doPost("/services/backpack/delete/"  + selection.attr('data-type'), {'packagePath': packagePath, 'payload': JSON.stringify(payload)}, success);
+        } else {
+           doPost("/services/backpack/delete", {'packagePath': packagePath, 'payload': selection.attr('data-entry-title')}, success);
         }
     });
 
