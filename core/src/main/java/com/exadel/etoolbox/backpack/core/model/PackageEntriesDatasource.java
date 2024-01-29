@@ -68,7 +68,7 @@ public class PackageEntriesDatasource {
 
                     addSubsidiaries(subsidiaries, pathInfo.getTags(), "tag");
                     addSubsidiaries(subsidiaries, pathInfo.getPages(), "page");
-                    addSubsidiaries(subsidiaries, pathInfo.getPages(), "asset");
+                    addSubsidiaries(subsidiaries, pathInfo.getAssets(), "asset");
                     addSubsidiaries(subsidiaries, pathInfo.getLiveCopies(), "liveCopy");
                     addSubsidiaries(subsidiaries, pathInfo.getChildren(), "child");
 
