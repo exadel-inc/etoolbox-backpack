@@ -154,32 +154,34 @@ public class BasePackageServiceImpl implements BasePackageService {
     @Override
     public PackageInfo getPackageInfo(final ResourceResolver resourceResolver, final PackageModel packageModel) {
         PackageInfo packageInfo = new PackageInfo();
-        final Set<String> validPaths = new HashSet<>();
+        final Set<String> actualPaths = new HashSet<>();
         final Set<String> brokenPaths = new HashSet<>();
         if (packageModel.isToggle()) {
-            validPaths.addAll(queryService.getResourcesPathsFromQuery(resourceResolver, packageModel.getQuery(), packageInfo));
+            actualPaths.addAll(queryService.getResourcesPathsFromQuery(resourceResolver, packageModel.getQuery(), packageInfo));
+            extractReferencedResources(resourceResolver, actualPaths, packageInfo);
         } else {
             packageModel.getPaths().stream()
                     .filter(s -> resourceResolver.getResource(s.getPath()) != null)
                     .forEach(pathModel -> {
                         final ResourceRelationships resourceRelationships = getResourceRelationships(resourceResolver, pathModel);
-                        validPaths.addAll(resourceRelationships.getValidPaths());
+                        actualPaths.addAll(resourceRelationships.getValidPaths());
                         brokenPaths.addAll(resourceRelationships.getBrokenPaths());
             });
+            extractReferencedResources(resourceResolver, filteringPaths(packageModel.getPaths()), packageInfo);
         }
         packageInfo.setPackageName(packageModel.getPackageName());
         packageInfo.setVersion(packageModel.getVersion());
         packageInfo.setThumbnailPath(packageModel.getThumbnailPath());
         packageInfo.setQuery(packageModel.getQuery());
         packageInfo.setToggle(packageModel.isToggle());
-        packageInfo.setDataSize(validPaths.stream().mapToLong(value -> getAssetSize(resourceResolver, value)).sum());
+        packageInfo.setDataSize(actualPaths.stream().mapToLong(value -> getAssetSize(resourceResolver, value)).sum());
 
         if (!brokenPaths.isEmpty()) {
-            validPaths.removeAll(brokenPaths);
+            actualPaths.removeAll(brokenPaths);
             packageInfo.setStatus(Status.warning(brokenPaths));
         }
 
-        packageInfo.setPaths(validPaths);
+        packageInfo.setPaths(actualPaths);
 
         String packageGroupName = DEFAULT_PACKAGE_GROUP;
 
@@ -434,7 +436,7 @@ public class BasePackageServiceImpl implements BasePackageService {
      * @param paths             {@code List<String>}  representing the list of paths for looking references
      * @param packageInfo       {@code PackageInfo} representing the object with info about package
      */
-    private void extractReferencedResources(final ResourceResolver resourceResolver, final List<String> paths, final PackageInfo packageInfo) {
+    private void extractReferencedResources(final ResourceResolver resourceResolver, final Collection<String> paths, final PackageInfo packageInfo) {
         if (paths != null) {
             paths.stream()
                     .filter(path -> resourceResolver.getResource(path) != null)
