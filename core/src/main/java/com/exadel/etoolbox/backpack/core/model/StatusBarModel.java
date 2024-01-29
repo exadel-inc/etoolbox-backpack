@@ -43,9 +43,9 @@ public class StatusBarModel {
             group = packageInfo.getGroupName();
             version = packageInfo.getVersion();
             size = getStringOrEmpty(packageInfo.getDataSize());
-            lastBuilt = getStringOrEmpty(packageInfo.getPackageBuilt());
-            lastInstalled = getStringOrEmpty(packageInfo.getPackageInstalled());
-            lastReplicated = getStringOrEmpty(packageInfo.getPackageReplicated());
+            lastBuilt = packageInfo.getPackageBuilt() == null ? StringUtils.EMPTY : packageInfo.getPackageBuilt().getTime().toString();
+            lastInstalled = packageInfo.getPackageInstalled() == null ? StringUtils.EMPTY : packageInfo.getPackageInstalled().getTime().toString();
+            lastReplicated = packageInfo.getPackageReplicated() == null ? StringUtils.EMPTY : packageInfo.getPackageReplicated().getTime().toString();
         }
     }
 
