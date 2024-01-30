@@ -23,6 +23,7 @@ import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Model(adaptables = SlingHttpServletRequest.class)
 public class PackageEntriesDatasource {
@@ -82,8 +83,8 @@ public class PackageEntriesDatasource {
                 });
             }
         }
-
-        request.setAttribute(DataSource.class.getName(), new SimpleDataSource(resources.iterator()));
+        Set<Resource> filteredResources = filterResources(resources);
+        request.setAttribute(DataSource.class.getName(), new SimpleDataSource(filteredResources.iterator()));
     }
 
     private Resource createPackageEntry(String type, String title, Map<String, Object> additionalProperties) {
@@ -112,5 +113,13 @@ public class PackageEntriesDatasource {
                     .map(path -> createPackageEntry(type, path, ImmutableMap.of("upstream", path)))
                     .collect(Collectors.toList()));
         }
+    }
+
+    private Set<Resource> filterResources(Set<Resource> resources) {
+        Set<String> childrenPaths = resources.stream()
+                .flatMap(resource -> StreamSupport.stream(Spliterators.spliteratorUnknownSize(resource.getChildren().iterator(), 0), false))
+                .map(Resource::getPath)
+                .collect(Collectors.toSet());
+        return resources.stream().filter(resource -> !childrenPaths.contains(resource.getPath())).collect(Collectors.toSet());
     }
 }
