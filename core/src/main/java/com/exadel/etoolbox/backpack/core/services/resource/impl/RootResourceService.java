@@ -50,8 +50,11 @@ public class RootResourceService implements BaseResourceService<PackageInfo> {
             case "add/query":
                 responseWrapper = processQuery(resourceResolver, pathModel.getPayload(), packageInfo);
                 break;
+            case "delete/children":
+                responseWrapper = processDeleteChildren(resourceResolver, pathModel.getPayload(), packageInfo);
+                break;
             case "delete":
-                responseWrapper = processDelete(pathModel.getPayload(), packageInfo);
+                responseWrapper = processDelete(resourceResolver, pathModel.getPayload(), packageInfo);
                 break;
             default:
                 return responseWrapper;
@@ -76,41 +79,60 @@ public class RootResourceService implements BaseResourceService<PackageInfo> {
     }
 
     private ResponseWrapper<PackageInfo> processList(ResourceResolver resourceResolver, String payload, PackageInfo packageInfo) {
-        List<String> parseLog = new ArrayList<>();
+        List<String> log = new ArrayList<>();
 
-        Set<String> paths = parseStringToList(payload, parseLog).stream()
-                .filter(item -> resourceResolver.getResource(item) != null)
+        Set<String> paths = parseStringToList(payload).stream()
+                .filter(item -> {
+                    if (resourceResolver.getResource(item) == null) {
+                        log.add("Resource not found: " + item);
+                        return false;
+                    }
+                    return true;
+                })
                 .collect(Collectors.toSet());
 
         packageInfo.setPaths(Stream.of(paths, packageInfo.getPaths()).flatMap(Collection::stream).collect(Collectors.toSet()));
 
-        if (!parseLog.isEmpty()) {
-            return new ResponseWrapper<>(packageInfo, ResponseWrapper.ResponseStatus.WARNING, parseLog);
+        if (!log.isEmpty()) {
+            return new ResponseWrapper<>(packageInfo, ResponseWrapper.ResponseStatus.WARNING, log);
         }
 
         return new ResponseWrapper<>(packageInfo, ResponseWrapper.ResponseStatus.SUCCESS);
     }
 
-    private ResponseWrapper<PackageInfo> processQuery(ResourceResolver resourceResolver, String payload, PackageInfo packageInfo) {
-        List<String> parseLog = new ArrayList<>();
-        List<String> paths = querySearchService.getResourcesPathsFromQuery(resourceResolver, payload, parseLog);
+    private ResponseWrapper<PackageInfo> processQuery(ResourceResolver resourceResolver, String path, PackageInfo packageInfo) {
+        List<String> log = new ArrayList<>();
+        List<String> paths = querySearchService.getResourcesPathsFromQuery(resourceResolver, path, log);
 
-        if (!parseLog.isEmpty()) {
-            return new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, parseLog);
+        if (!log.isEmpty()) {
+            return new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, log);
         }
 
         packageInfo.setPaths(Stream.of(paths, packageInfo.getPaths()).flatMap(Collection::stream).collect(Collectors.toSet()));
-
         return new ResponseWrapper<>(packageInfo, ResponseWrapper.ResponseStatus.SUCCESS);
     }
 
-    private ResponseWrapper<PackageInfo> processDelete(String payload, PackageInfo packageInfo) {
-        packageInfo.deletePath(payload);
+    private ResponseWrapper<PackageInfo> processDelete(ResourceResolver resourceResolver, String path, PackageInfo packageInfo) {
+        Resource resource = resourceResolver.getResource(path);
+        if (resource == null) {
+            return new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, Collections.singletonList("Resource not found: " + path));
+        }
+        packageInfo.deletePath(path);
         return new ResponseWrapper<>(packageInfo, ResponseWrapper.ResponseStatus.SUCCESS);
     }
 
-    private List<String> parseStringToList(String payload, List<String> log) {
-        //todo log errors and processing
+    private ResponseWrapper<PackageInfo> processDeleteChildren(ResourceResolver resourceResolver, String path, PackageInfo packageInfo) {
+        Resource resource = resourceResolver.getResource(path);
+        if (resource == null) {
+            return new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, Collections.singletonList("Resource not found: " + path));
+        }
+        packageInfo.getPathInfo(path)
+                .getChildren()
+                .clear();
+        return new ResponseWrapper<>(packageInfo, ResponseWrapper.ResponseStatus.SUCCESS);
+    }
+
+    private List<String> parseStringToList(String payload) {
         return Arrays.stream(payload.split(",")).map(String::trim).collect(Collectors.toList());
     }
 }

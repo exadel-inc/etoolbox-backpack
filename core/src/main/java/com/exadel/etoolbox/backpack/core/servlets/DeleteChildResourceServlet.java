@@ -23,13 +23,7 @@ import java.util.Map;
 @Component(
         service = Servlet.class,
         property = {
-                "sling.servlet.paths=/services/backpack/add/children",
-                "sling.servlet.paths=/services/backpack/add/liveCopies",
-                "sling.servlet.paths=/services/backpack/add/tags",
-                "sling.servlet.paths=/services/backpack/add/assets",
-                "sling.servlet.paths=/services/backpack/add/pages",
                 "sling.servlet.paths=/services/backpack/delete/child",
-                "sling.servlet.paths=/services/backpack/delete/children",
                 "sling.servlet.paths=/services/backpack/delete/liveCopy",
                 "sling.servlet.paths=/services/backpack/delete/tag",
                 "sling.servlet.paths=/services/backpack/delete/asset",
@@ -37,7 +31,7 @@ import java.util.Map;
                 "sling.servlet.methods=post"
         })
 @SuppressWarnings("PackageAccessibility")
-public class ChildResourceServlet extends SlingAllMethodsServlet {
+public class DeleteChildResourceServlet extends SlingAllMethodsServlet {
 
     private static final long serialVersionUID = 1L;
 
@@ -51,7 +45,7 @@ public class ChildResourceServlet extends SlingAllMethodsServlet {
     @SuppressWarnings("UnusedDeclaration") // value injected by Sling
     private transient RequestAdapter requestAdapter;
 
-    @Reference(target = "(component.name=com.exadel.etoolbox.backpack.core.services.resource.impl.ChildResourceService)")
+    @Reference(target = "(component.name=com.exadel.etoolbox.backpack.core.services.resource.impl.DeleteChildResourceService)")
     @SuppressWarnings("UnusedDeclaration") // value injected by Sling
     private transient BaseResourceService<PackageInfo> baseResourceService;
 
