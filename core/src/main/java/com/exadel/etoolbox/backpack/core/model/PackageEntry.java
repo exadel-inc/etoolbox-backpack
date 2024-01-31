@@ -24,8 +24,10 @@ public class PackageEntry {
     public String getIcon() {
         if ("livecopy".equals(type)) {
             return "multiple";
-        } else if ("reference".equals(type)) {
+        } else if ("asset".equals(type)) {
             return "gears";
+        } else if ("tag".equals(type)) {
+            return "tag";
         }
         return "page";
     }
