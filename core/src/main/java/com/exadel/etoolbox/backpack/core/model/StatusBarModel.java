@@ -31,6 +31,7 @@ public class StatusBarModel {
     private String lastBuilt;
     private String lastInstalled;
     private String lastReplicated;
+    private String lastModifiedBy;
 
     @PostConstruct
     private void init() {
@@ -46,6 +47,7 @@ public class StatusBarModel {
             lastBuilt = packageInfo.getPackageBuilt() == null ? StringUtils.EMPTY : packageInfo.getPackageBuilt().getTime().toString();
             lastInstalled = packageInfo.getPackageInstalled() == null ? StringUtils.EMPTY : packageInfo.getPackageInstalled().getTime().toString();
             lastReplicated = packageInfo.getPackageReplicated() == null ? StringUtils.EMPTY : packageInfo.getPackageReplicated().getTime().toString();
+            lastModifiedBy = packageInfo.getLastModifiedBy();
         }
     }
 
@@ -75,5 +77,9 @@ public class StatusBarModel {
 
     public String getLastReplicated() {
         return lastReplicated;
+    }
+
+    public String getLastModifiedBy() {
+        return lastModifiedBy;
     }
 }
