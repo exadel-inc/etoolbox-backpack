@@ -20,5 +20,6 @@
     <span ><b>Last installed:</b> ${statusBarModel.lastInstalled}</span>
     |
   </sly>
-  <span data-sly-test="${statusBarModel.lastReplicated}"><b>Last replicated:</b> ${statusBarModel.lastReplicated} <b>by</b> ${statusBarModel.lastModifiedBy}</span>
+  <span data-sly-test="${statusBarModel.lastReplicated}"><b>Last replicated:</b> ${statusBarModel.lastReplicated} <b>by</b> </span>
 </div>
+<sly data-sly-include="/apps/etoolbox-backpack/admin/new/components/package/install/install.html"></sly>

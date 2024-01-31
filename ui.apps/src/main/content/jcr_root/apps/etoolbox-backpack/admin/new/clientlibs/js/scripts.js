@@ -91,11 +91,12 @@
     });
 
     $(document).on('click', '#testBuildAction', function() {
-        showTestBuildDialog();
+        showLogsDialog();
         buildPackage(true);
     });
 
     $(document).on('click', '#buildAction', function() {
+        showLogsDialog();
         buildPackage(false);
     });
 
@@ -201,9 +202,31 @@
         }
     });
 
+    $(document).ready(function() {
+        $('#installAction').click(function () {
+            var dialog = document.querySelector('#installDialog');
+            dialog.show();
+        });
+
+        console.log( "ready!" );
+        $("#installForm").submit(function(e) {
+            showLogsDialog();
+            e.preventDefault();
+            var form = $(this);
+            var url = form.attr('action');
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: form.serialize(),
+                success: function(data) {
+                    updateLog(0);
+                }
+            });
+        });
+    });
 
     function buildPackage(testBuild) {
-        var container = testBuild ? $('#testBuildLogsContainer') : $('#buildLogsContainer');
+        var container = $('#LogsContainer');
         var referencedResources = [];
         $('.reference').each(function () {
             referencedResources.push(this.innerText);
@@ -223,7 +246,7 @@
                         });
                         const assetText = data.dataSize === 0 ? 'There are no assets in the package' : '<h4>Approximate size of the assets in the package: ' + bytesToSize(data.dataSize) + '</h4>';
                         container.append(assetText);
-                        $('#testBuildLogsContainer')[0].scrollIntoView(false)
+                        $('#LogsContainer')[0].scrollIntoView(false)
                     }
                 } else {
                     updateLog(0);
@@ -234,7 +257,7 @@
     }
 
     function updateLog(logIndex) {
-        var container = $('#buildLogsContainer');
+        var container = $('#LogsContainer');
         $.ajax({
             url: '/services/backpack/package/build',
             data: {packagePath: packagePath, latestLogIndex: logIndex},
@@ -244,7 +267,7 @@
                         container.append('<div>' + value + '</div>');
                     });
                     logIndex = logIndex + data.log.length;
-                    $('#buildLogsContainer')[0].scrollIntoView(false)
+                        $('#LogsContainer')[0].scrollIntoView(false)
                 }
                 if (data.packageStatus === BUILD_IN_PROGRESS || data.packageStatus === INSTALL_IN_PROGRESS) {
                     setTimeout(function () {
@@ -263,19 +286,19 @@
         return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
     }
 
-    function showTestBuildDialog() {
-        var dialog = $('#testBuildDialog')[0];
+    function showLogsDialog() {
+        var dialog = $('#LogsDialog')[0];
         if (dialog) {
-            $('#testBuildLogsContainer')[0].innerHTML = '';
+            $('#LogsContainer')[0].innerHTML = '';
             dialog.show();
         } else {
             dialog = new Coral.Dialog().set({
-                id: 'testBuildDialog',
+                id: 'LogsDialog',
                 header: {
                     innerHTML: 'Logs'
                 },
                 content: {
-                    innerHTML: '<div id="testBuildLogsContainer"></div>'
+                    innerHTML: '<div id="LogsContainer"></div>'
                 },
                 footer: {
                     innerHTML: '<button is="coral-button" variant="primary" coral-close>Ok</button>'
