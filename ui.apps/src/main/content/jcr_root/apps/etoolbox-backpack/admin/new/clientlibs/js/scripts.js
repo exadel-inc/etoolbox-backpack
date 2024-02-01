@@ -273,7 +273,6 @@
                     setTimeout(function () {
                         updateLog(logIndex);
                     }, 1000);
-
                 }
             }
         })
@@ -308,5 +307,36 @@
             dialog.show();
         }
     }
+
+    function openPackageDialog(success, error) {
+         //todo looking for another way for opening
+         $('#editDialogButton').trigger('click');
+    }
+
+    function updatePackageData(data) {
+         //todo set package info to editDialog or delete method
+         console.log(data);
+    }
+
+    function getPackageInfo(packagePath, updateFunction, errorFunction) {
+        $.ajax({
+            url: '/services/backpack/package',
+            data: {'packagePath': packagePath},
+            success: updateFunction,
+            error: errorFunction
+        });
+    }
+
+    $(window).on('load', function() {
+       if (packagePath && packagePath.length > 0) {
+           getPackageInfo(packagePath, function (data) {
+               updatePackageData(data);
+           }, function (data) {
+               openPackageDialog()
+           });
+       } else {
+            openPackageDialog()
+       }
+    });
 
 })(Granite, Granite.$);

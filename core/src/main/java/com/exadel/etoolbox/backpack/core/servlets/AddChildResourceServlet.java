@@ -18,7 +18,6 @@ import org.osgi.service.component.annotations.Reference;
 import javax.servlet.Servlet;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Map;
 
 @Component(
         service = Servlet.class,
@@ -54,10 +53,8 @@ public class AddChildResourceServlet extends SlingAllMethodsServlet {
 
         response.setContentType(APPLICATION_JSON);
 
-        Map<String, String[]> parameterMap = RequestUtils
-                .modifyParameterMap(request.getParameterMap(), "type", StringUtils.substringAfter(request.getPathInfo(), SERVLET_PATH_BASE));
-
-        ValidatorResponse<PathModel> validatorResponse = requestAdapter.adaptValidate(parameterMap, PathModel.class);
+        ValidatorResponse<PathModel> validatorResponse = requestAdapter
+                .adaptValidate(RequestUtils.addActionTypeToParameterMap(request.getParameterMap(), StringUtils.substringAfter(request.getPathInfo(), SERVLET_PATH_BASE)), PathModel.class);
 
         if (!validatorResponse.isValid()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

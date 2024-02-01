@@ -45,7 +45,7 @@ public class PackageEntriesDatasource {
     @PostConstruct
     private void initModel() {
 
-        Set<Resource> resources = new HashSet<>();
+        List<Resource> resources = new ArrayList<>();
 
         ValidatorResponse<PackageInfoModel> validatorResponse = requestAdapter.adaptValidate(request.getParameterMap(), PackageInfoModel.class);
 
@@ -83,7 +83,7 @@ public class PackageEntriesDatasource {
                 });
             }
         }
-        Set<Resource> filteredResources = filterResources(resources);
+        List<Resource> filteredResources = filterResources(resources);
         request.setAttribute(DataSource.class.getName(), new SimpleDataSource(filteredResources.iterator()));
     }
 
@@ -115,11 +115,11 @@ public class PackageEntriesDatasource {
         }
     }
 
-    private Set<Resource> filterResources(Set<Resource> resources) {
-        Set<String> childrenPaths = resources.stream()
+    private List<Resource> filterResources(List<Resource> resources) {
+        List<String> childrenPaths = resources.stream()
                 .flatMap(resource -> StreamSupport.stream(Spliterators.spliteratorUnknownSize(resource.getChildren().iterator(), 0), false))
                 .map(Resource::getPath)
-                .collect(Collectors.toSet());
-        return resources.stream().filter(resource -> !childrenPaths.contains(resource.getPath())).collect(Collectors.toSet());
+                .collect(Collectors.toList());
+        return resources.stream().filter(resource -> !childrenPaths.contains(resource.getPath())).collect(Collectors.toList());
     }
 }
