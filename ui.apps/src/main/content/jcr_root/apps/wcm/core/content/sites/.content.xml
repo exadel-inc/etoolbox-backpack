@@ -9,7 +9,7 @@
                         granite:title="Pack by Backpack"
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/collection/action"
-                        action="foundation.dialog"
+                        action="cq.wcm.open"
                         activeSelectionCount="multiple"
                         icon="backpack-sites"
                         target=".cq-siteadmin-admin-childpages"
@@ -17,7 +17,7 @@
                         variant="actionBar">
                     <data
                             jcr:primaryType="nt:unstructured"
-                            src.uritemplate="/apps/etoolbox-backpack/admin/new.html?initialResource={+item}"/>
+                            href.uritemplate="/apps/etoolbox-backpack/admin/new.html?initialResource={+item}"/>
                 </backpack>
             </selection>
         </actions>
