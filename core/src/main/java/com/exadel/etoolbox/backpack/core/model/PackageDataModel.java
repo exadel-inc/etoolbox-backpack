@@ -53,8 +53,8 @@ public class PackageDataModel {
         if (StringUtils.isNotBlank(packagePath)) {
             packageModel = packageInfoService.getPackageModelByPath(packagePath, request.getResourceResolver());
         }
-        if (StringUtils.isNotBlank(request.getParameter("initialResource"))) {
-            initialResources = Arrays.stream(request.getParameterValues("initialResource"))
+        if (StringUtils.isNotBlank(request.getParameter("item"))) {
+            initialResources = Arrays.stream(request.getParameterValues("item"))
                     .filter(StringUtils::isNotBlank)
                     .collect(Collectors.toList());
         }
