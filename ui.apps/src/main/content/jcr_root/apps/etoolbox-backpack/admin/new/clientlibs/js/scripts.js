@@ -295,7 +295,6 @@
         let dialog = $('#LogsDialog')[0];
         if (dialog) {
             dialog.show();
-            $('#LogsContainer')[0].innerHTML = '';
             return $('#LogsContainer')[0];
         } else {
             dialog = new Coral.Dialog().set({
@@ -310,12 +309,13 @@
                     innerHTML: '<button onclick="window.location.reload();" is="coral-button" variant="primary" coral-close>Ok</button>'
                 }
             });
-            if (onClose) {
-               dialog.on('coral-overlay:close', function(event) {
-                 event.preventDefault();
-                 onClose();
-               });
-            }
+            dialog.on('coral-overlay:close', function(event) {
+              event.preventDefault();
+              $(dialog.content).find('#LogsContainer').innerHTML = '';
+                if (onClose) {
+                   onClose();
+                }
+            });
             document.body.appendChild(dialog);
             dialog.show();
             return $(dialog.content).find('#LogsContainer');
