@@ -48,7 +48,10 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -316,13 +319,12 @@ public class BasePackageServiceImpl implements BasePackageService {
 
     @Override
     public void modifyPackage(final Session userSession,
-                               final String packagePath,
-                               final PackageInfo packageInfo) {
+                              final String packagePath,
+                              final PackageInfo packageInfo) {
 
         JcrPackage jcrPackage = null;
 
-        //todo clear cache
-        getPackageCacheAsMap().remove(packagePath);
+        clearCache(packagePath);
 
         try {
             JcrPackageManager packMgr = PackagingService.getPackageManager(userSession);
@@ -378,5 +380,9 @@ public class BasePackageServiceImpl implements BasePackageService {
      */
     private String getPackageId(final String packageGroupName, final String packageName, final String version) {
         return packageGroupName + ":" + packageName + (StringUtils.isNotBlank(version) ? ":" + version : StringUtils.EMPTY);
+    }
+
+    private void clearCache(String key) {
+        getPackageCacheAsMap().remove(key);
     }
 }

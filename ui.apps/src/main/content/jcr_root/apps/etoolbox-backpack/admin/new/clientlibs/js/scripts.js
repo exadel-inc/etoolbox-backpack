@@ -82,24 +82,54 @@
         }
     });
 
-    $(document).on('click', '#buildAndDownloadAction', function() {
-        showLogsDialog();
-        buildPackage(false, true);
-    });
-
     $(document).on('click', '#downloadAction', function() {
         window.location.href = packagePath;
     });
 
     $(document).on('click', '#testBuildAction', function() {
-        showLogsDialog();
-        buildPackage(true, false);
+        buildPackage(true, function(data) {
+            const container = openLogsDialog();
+            if (data.log) {
+                $.each(data.log, function (index, value) {
+                    $(container).append(value + '<br>');
+                });
+                const assetText = data.dataSize === 0
+                ? 'There are no assets in the package'
+                : '<h4>Approximate size of the assets in the package: ' + bytesToSize(data.dataSize) + '</h4>';
+                container.append(assetText);
+                container.scrollIntoView(false)
+            }
+        });
     });
 
     $(document).on('click', '#buildAction', function() {
-        showLogsDialog();
-        buildPackage(false, false);
+        buildPackage(false, function(data) {
+            updateLog(0);
+        });
     });
+
+    $(document).on('click', '#buildAndDownloadAction', function() {
+        buildPackage(false, function(data) {
+            updateLog(0, function() {
+                window.location.href = packagePath;
+            });
+        });
+    });
+
+    $(document).on('click', '#installAction', function() {
+        const dialog = document.querySelector('#installDialog');
+        if (dialog) {
+            dialog.show();
+        }
+    });
+
+    $(document).on('submit', '#installForm', function (e) {
+        e.preventDefault();
+        const form = $(this);
+        doPost(form.attr('action'), form.serialize(), function() {
+              updateLog(0);
+        });
+    })
 
     function doPost(url, data, success) {
        $.ajax({
@@ -114,7 +144,6 @@
     }
 
     function success() {
-        // todo change loading on success
         window.location.reload();
     }
 
@@ -163,10 +192,19 @@
     $(window).adaptTo('foundation-registry').register('foundation.form.response.ui.success', {
         name: 'foundation.prompt.open',
         handler: function (form, config, data, textStatus, xhr) {
-            //todo change loading on success
-            if (data && data.packagePath) {
-                const paramPath = 'packagePath=' + data.packagePath;
-                window.location.search = paramPath;
+            if (data.status == "ERROR" || data.status == "WARNING") {
+                const container = openLogsDialog(function() {
+                   if (data.status == "WARNING") {
+                       window.location.reload();
+                   }
+                });
+                $.each(data.logs, function (index, value) {
+                    $(container).append(value + '<br>');
+                });
+                return;
+            }
+            if (data.packagePath) {
+                window.location.search = 'packagePath=' + data.packagePath;
             } else {
                 window.location.reload();
             }
@@ -203,32 +241,8 @@
         }
     });
 
-    $(document).ready(function() {
-        $('#installAction').click(function () {
-            var dialog = document.querySelector('#installDialog');
-            dialog.show();
-        });
-
-        console.log( "ready!" );
-        $("#installForm").submit(function(e) {
-            showLogsDialog();
-            e.preventDefault();
-            var form = $(this);
-            var url = form.attr('action');
-            $.ajax({
-                type: "POST",
-                url: url,
-                data: form.serialize(),
-                success: function(data) {
-                    updateLog(0);
-                }
-            });
-        });
-    });
-
-    function buildPackage(testBuild, downloadAfterBuild) {
-        var container = $('#LogsContainer');
-        var referencedResources = [];
+    function buildPackage(testBuild, callback) {
+        const referencedResources = [];
         $('.reference').each(function () {
             referencedResources.push(this.innerText);
         });
@@ -240,59 +254,49 @@
                 referencedResources: JSON.stringify(referencedResources),
                 testBuild: testBuild
             }, success: function (data) {
-                if (testBuild) {
-                    if (data.log) {
-                        $.each(data.log, function (index, value) {
-                            container.append('<div>' + value + '</div>');
-                        });
-                        const assetText = data.dataSize === 0 ? 'There are no assets in the package' : '<h4>Approximate size of the assets in the package: ' + bytesToSize(data.dataSize) + '</h4>';
-                        container.append(assetText);
-                        $('#LogsContainer')[0].scrollIntoView(false)
-                    }
-                } else {
-                    updateLog(0, downloadAfterBuild);
-                }
+                callback(data);
             },
             dataType: 'json'
         });
     }
 
-    function updateLog(logIndex, downloadAfterBuild) {
-        var container = $('#LogsContainer');
+    function updateLog(logIndex, callback) {
+        const container = openLogsDialog();
         $.ajax({
             url: '/services/backpack/package/build',
             data: {packagePath: packagePath, latestLogIndex: logIndex},
             success: function (data) {
                 if (data.log && data.log.length) {
                     $.each(data.log, function (index, value) {
-                        container.append('<div>' + value + '</div>');
+                        $(container).append(value + '<br>');
                     });
                     logIndex = logIndex + data.log.length;
-                        $('#LogsContainer')[0].scrollIntoView(false)
+                    container.scrollIntoView(false);
                 }
                 if (data.packageStatus === BUILD_IN_PROGRESS || data.packageStatus === INSTALL_IN_PROGRESS) {
                     setTimeout(function () {
-                        updateLog(logIndex, downloadAfterBuild);
+                        updateLog(logIndex, callback);
                     }, 1000);
-                } else if (downloadAfterBuild){
-                    window.location.href = packagePath;
+                } else if (callback){
+                    callback();
                 }
             }
         })
     }
 
     function bytesToSize(bytes) {
-        var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
         if (bytes === 0) return '0 Bytes';
-        var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+        const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
         return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
     }
 
-    function showLogsDialog() {
-        var dialog = $('#LogsDialog')[0];
+    function openLogsDialog(onClose) {
+        let dialog = $('#LogsDialog')[0];
         if (dialog) {
-            $('#LogsContainer')[0].innerHTML = '';
             dialog.show();
+            $('#LogsContainer')[0].innerHTML = '';
+            return $('#LogsContainer')[0];
         } else {
             dialog = new Coral.Dialog().set({
                 id: 'LogsDialog',
@@ -306,8 +310,15 @@
                     innerHTML: '<button onclick="window.location.reload();" is="coral-button" variant="primary" coral-close>Ok</button>'
                 }
             });
+            if (onClose) {
+               dialog.on('coral-overlay:close', function(event) {
+                 event.preventDefault();
+                 onClose();
+               });
+            }
             document.body.appendChild(dialog);
             dialog.show();
+            return $(dialog.content).find('#LogsContainer');
         }
     }
 
