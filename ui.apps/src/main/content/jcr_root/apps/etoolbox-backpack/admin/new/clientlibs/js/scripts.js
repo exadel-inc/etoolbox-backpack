@@ -83,7 +83,8 @@
     });
 
     $(document).on('click', '#buildAndDownloadAction', function() {
-        console.log("buildAndDownloadAction")
+        showLogsDialog();
+        buildPackage(false, true);
     });
 
     $(document).on('click', '#downloadAction', function() {
@@ -92,12 +93,12 @@
 
     $(document).on('click', '#testBuildAction', function() {
         showLogsDialog();
-        buildPackage(true);
+        buildPackage(true, false);
     });
 
     $(document).on('click', '#buildAction', function() {
         showLogsDialog();
-        buildPackage(false);
+        buildPackage(false, false);
     });
 
     function doPost(url, data, success) {
@@ -225,7 +226,7 @@
         });
     });
 
-    function buildPackage(testBuild) {
+    function buildPackage(testBuild, downloadAfterBuild) {
         var container = $('#LogsContainer');
         var referencedResources = [];
         $('.reference').each(function () {
@@ -249,14 +250,14 @@
                         $('#LogsContainer')[0].scrollIntoView(false)
                     }
                 } else {
-                    updateLog(0);
+                    updateLog(0, downloadAfterBuild);
                 }
             },
             dataType: 'json'
         });
     }
 
-    function updateLog(logIndex) {
+    function updateLog(logIndex, downloadAfterBuild) {
         var container = $('#LogsContainer');
         $.ajax({
             url: '/services/backpack/package/build',
@@ -271,8 +272,10 @@
                 }
                 if (data.packageStatus === BUILD_IN_PROGRESS || data.packageStatus === INSTALL_IN_PROGRESS) {
                     setTimeout(function () {
-                        updateLog(logIndex);
+                        updateLog(logIndex, downloadAfterBuild);
                     }, 1000);
+                } else if (downloadAfterBuild){
+                    window.location.href = packagePath;
                 }
             }
         })
