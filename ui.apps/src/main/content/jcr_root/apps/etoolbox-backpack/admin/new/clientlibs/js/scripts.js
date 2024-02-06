@@ -303,7 +303,7 @@
                     innerHTML: '<div id="LogsContainer"></div>'
                 },
                 footer: {
-                    innerHTML: '<button is="coral-button" variant="primary" coral-close>Ok</button>'
+                    innerHTML: '<button onclick="window.location.reload();" is="coral-button" variant="primary" coral-close>Ok</button>'
                 }
             });
             document.body.appendChild(dialog);
