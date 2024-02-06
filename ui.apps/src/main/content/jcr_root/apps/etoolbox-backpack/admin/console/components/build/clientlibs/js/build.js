@@ -233,7 +233,7 @@ $(function () {
 
     function buildPackage(testBuild) {
         var referencedResources = {};
-        $('input[name="referencedResources"]:checked').each(function () {
+        $('input[name="referencedResources"]').each(function () {
             var resources = [];
             var currentResourceType = this.value;
             $(this).closest('coral-accordion-item').find('input[name="referencedResourcesItem"]:checked').each(function () {
