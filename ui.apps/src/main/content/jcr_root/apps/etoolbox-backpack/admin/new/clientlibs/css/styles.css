@@ -130,3 +130,10 @@
 .foundation-collection-selectall {
     display: none;
 }
+
+#LogsContainer {
+    width: 400px;
+    max-height: 400px;
+    overflow: scroll;
+    overflow-x: hidden;
+}
