@@ -15,12 +15,11 @@
 package com.exadel.etoolbox.backpack.core.dto.response;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Data model containing comprehensive data required to manage a package.
- *
- * @see CreatePackageServlet
- * @see BuildPackageServlet
  */
 public class PackageInfo {
 
@@ -124,6 +123,15 @@ public class PackageInfo {
      */
     public Collection<String> getPaths() {
         return Collections.unmodifiableCollection(pathInfoMap != null ? pathInfoMap.keySet() : Collections.emptyList());
+    }
+
+    public Collection<String> getReferences() {
+        return Collections.unmodifiableCollection(pathInfoMap != null
+                ? pathInfoMap.values().stream()
+                .flatMap(pathInfo -> Stream.of(pathInfo.getAssets(), pathInfo.getChildren(), pathInfo.getLiveCopies(), pathInfo.getPages(), pathInfo.getTags()))
+                .flatMap(Set::stream)
+                .collect(Collectors.toSet())
+                : Collections.emptyList());
     }
 
     /**

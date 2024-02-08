@@ -89,30 +89,35 @@ public class AddChildResourceService implements BaseResourceService<PathInfo> {
             Page page = iterator.next();
             packageInfo.getPathInfo(path).getChildren().add(page.getPath());
         }
+        basePackageService.modifyPackage(resourceResolver.adaptTo(Session.class), packageInfo.getPackagePath(), packageInfo);
         return new ResponseWrapper<>(packageInfo.getPathInfo(path), ResponseWrapper.ResponseStatus.SUCCESS);
     }
 
     private ResponseWrapper<PathInfo> processAddLiveCopies(ResourceResolver resourceResolver, String path, PackageInfo packageInfo) {
         List<String> paths = liveCopySearchService.getLiveCopies(resourceResolver, path, StringUtils.EMPTY);
         packageInfo.getPathInfo(path).getLiveCopies().addAll(paths);
+        basePackageService.modifyPackage(resourceResolver.adaptTo(Session.class), packageInfo.getPackagePath(), packageInfo);
         return new ResponseWrapper<>(packageInfo.getPathInfo(path), ResponseWrapper.ResponseStatus.SUCCESS);
     }
 
     private ResponseWrapper<PathInfo> processAddPages(ResourceResolver resourceResolver, String path, PackageInfo packageInfo) {
         referencesSearchService.getPageReferences(resourceResolver, path)
                 .forEach(page -> packageInfo.getPathInfo(path).getPages().add(page.getPath()));
+        basePackageService.modifyPackage(resourceResolver.adaptTo(Session.class), packageInfo.getPackagePath(), packageInfo);
         return new ResponseWrapper<>(packageInfo.getPathInfo(path), ResponseWrapper.ResponseStatus.SUCCESS);
     }
 
     private ResponseWrapper<PathInfo> processAddAssets(ResourceResolver resourceResolver, String path, PackageInfo packageInfo) {
         referencesSearchService.getAssetReferences(resourceResolver, path)
                 .forEach(asset -> packageInfo.getPathInfo(path).getAssets().add(asset.getPath()));
+        basePackageService.modifyPackage(resourceResolver.adaptTo(Session.class), packageInfo.getPackagePath(), packageInfo);
         return new ResponseWrapper<>(packageInfo.getPathInfo(path), ResponseWrapper.ResponseStatus.SUCCESS);
     }
 
     private ResponseWrapper<PathInfo> processAddTags(ResourceResolver resourceResolver, String path, PackageInfo packageInfo) {
         referencesSearchService.getTagReferences(resourceResolver, path)
                 .forEach(tag -> packageInfo.getPathInfo(path).getTags().add(tag.getPath()));
+        basePackageService.modifyPackage(resourceResolver.adaptTo(Session.class), packageInfo.getPackagePath(), packageInfo);
         return new ResponseWrapper<>(packageInfo.getPathInfo(path), ResponseWrapper.ResponseStatus.SUCCESS);
     }
 }
