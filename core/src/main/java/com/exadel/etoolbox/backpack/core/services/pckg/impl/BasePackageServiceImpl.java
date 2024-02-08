@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Implements {@link BasePackageService} to provide base operation with package
@@ -242,6 +243,7 @@ public class BasePackageServiceImpl implements BasePackageService {
                                final DefaultWorkspaceFilter filter) {
         jcrPackageDefinition.set(PACKAGE_METADATA, GSON.toJson(packageInfo.getPathInfoMap()), true);
         jcrPackageDefinition.set(THUMBNAIL_PATH_PARAMETER, GSON.toJson(packageInfo.getThumbnailPath()), true);
+        jcrPackageDefinition.set(GENERAL_RESOURCES, GSON.toJson(packageInfo.getPaths()), true);
         jcrPackageDefinition.setFilter(filter, true);
 
         String thumbnailPath = StringUtils.defaultIfBlank(packageInfo.getThumbnailPath(), getDefaultThumbnailPath(true));
@@ -333,7 +335,8 @@ public class BasePackageServiceImpl implements BasePackageService {
                 jcrPackage = packMgr.open(packageNode);
                 JcrPackageDefinition jcrPackageDefinition = jcrPackage.getDefinition();
                 if (jcrPackageDefinition != null) {
-                    setPackageInfo(jcrPackageDefinition, userSession, packageInfo, buildWorkspaceFilter(packageInfo.getPaths()));
+                    setPackageInfo(jcrPackageDefinition, userSession, packageInfo,
+                            buildWorkspaceFilter(Stream.concat(packageInfo.getPaths().stream(), packageInfo.getReferences().stream()).collect(Collectors.toList())));
                     packageInfo.setPackageStatus(PackageStatus.MODIFIED);
                 }
             }
