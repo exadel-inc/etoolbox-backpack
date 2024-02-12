@@ -131,9 +131,11 @@
     display: none;
 }
 
-#LogsContainer {
-    width: 400px;
-    max-height: 400px;
+#LogsDialog .coral3-Dialog-content {
+    width: 700px;
+    height: 500px;
     overflow: scroll;
-    overflow-x: hidden;
+    white-space: nowrap;
+    overflow-x: auto;
+    overflow-y: auto;
 }

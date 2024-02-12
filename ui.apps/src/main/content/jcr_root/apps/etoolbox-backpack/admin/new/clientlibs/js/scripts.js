@@ -88,31 +88,33 @@
 
     $(document).on('click', '#testBuildAction', function() {
         buildPackage(true, function(data) {
-            const container = openLogsDialog();
             if (data.log) {
-                $.each(data.log, function (index, value) {
-                    $(container).append(value + '<br>');
-                });
+                const dialog = openLogsDialog(data.log);
                 const assetText = data.dataSize === 0
                 ? 'There are no assets in the package'
                 : '<h4>Approximate size of the assets in the package: ' + bytesToSize(data.dataSize) + '</h4>';
-                container.append(assetText);
-                container.scrollIntoView(false)
+                $(dialog.content).append('<div>' + assetText + '</div>');
+                setTimeout(function () {
+                   $(dialog.content).children("div").last()[0].scrollIntoView(false);
+                })
             }
         });
     });
 
     $(document).on('click', '#buildAction', function() {
         buildPackage(false, function(data) {
-            updateLog(0);
+            const dialog = openLogsDialog(data.log);
+            updateLog(data.packageStatus, data.log.length, dialog);
         });
     });
 
     $(document).on('click', '#buildAndDownloadAction', function() {
         buildPackage(false, function(data) {
-            updateLog(0, function() {
-                window.location.href = packagePath;
+            const dialog = openLogsDialog(data.log);
+            dialog.on('coral-overlay:beforeclose', function(event) {
+                 window.location.href = packagePath;
             });
+            updateLog(data.packageStatus, data.log.length, dialog);
         });
     });
 
@@ -126,8 +128,9 @@
     $(document).on('submit', '#installForm', function (e) {
         e.preventDefault();
         const form = $(this);
-        doPost(form.attr('action'), form.serialize(), function() {
-              updateLog(0);
+        doPost(form.attr('action'), form.serialize(), function(data) {
+              const dialog = openLogsDialog(data.log);
+              updateLog(data.packageStatus, data.log.length, dialog);
         });
     })
 
@@ -193,13 +196,10 @@
         name: 'foundation.prompt.open',
         handler: function (form, config, data, textStatus, xhr) {
             if (data.status == "ERROR" || data.status == "WARNING") {
-                const container = openLogsDialog(function() {
+                openLogsDialog(data.logs, function() {
                    if (data.status == "WARNING") {
                        window.location.reload();
                    }
-                });
-                $.each(data.logs, function (index, value) {
-                    $(container).append(value + '<br>');
                 });
                 return;
             }
@@ -260,28 +260,25 @@
         });
     }
 
-    function updateLog(logIndex, callback) {
-        const container = openLogsDialog();
-        $.ajax({
-            url: '/services/backpack/package/build',
-            data: {packagePath: packagePath, latestLogIndex: logIndex},
-            success: function (data) {
-                if (data.log && data.log.length) {
-                    $.each(data.log, function (index, value) {
-                        $(container).append(value + '<br>');
-                    });
-                    logIndex = logIndex + data.log.length;
-                    container.scrollIntoView(false);
-                }
-                if (data.packageStatus === BUILD_IN_PROGRESS || data.packageStatus === INSTALL_IN_PROGRESS) {
-                    setTimeout(function () {
-                        updateLog(logIndex, callback);
-                    }, 1000);
-                } else if (callback){
-                    callback();
-                }
-            }
-        })
+    function updateLog(packageStatus, logIndex, dialog) {
+        if (packageStatus === BUILD_IN_PROGRESS || packageStatus === INSTALL_IN_PROGRESS) {
+            setTimeout(function () {
+                $.ajax({
+                    url: '/services/backpack/package/build',
+                    data: {packagePath: packagePath, latestLogIndex: logIndex},
+                    success: function (data) {
+                        if (data.log && data.log.length) {
+                            $.each(data.log, function (index, value) {
+                                $(dialog.content).append('<div>' + value + '</div>');
+                            });
+                            logIndex = logIndex + data.log.length;
+                            $(dialog.content).children("div").last()[0].scrollIntoView(false);
+                        }
+                        updateLog(data.packageStatus, logIndex, dialog);
+                    }
+                });
+            }, 1000);
+        }
     }
 
     function bytesToSize(bytes) {
@@ -291,35 +288,36 @@
         return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
     }
 
-    function openLogsDialog(onClose) {
-        let dialog = $('#LogsDialog')[0];
-        if (dialog) {
-            dialog.show();
-            return $('#LogsContainer')[0];
-        } else {
-            dialog = new Coral.Dialog().set({
-                id: 'LogsDialog',
-                header: {
-                    innerHTML: 'Logs'
-                },
-                content: {
-                    innerHTML: '<div id="LogsContainer"></div>'
-                },
-                footer: {
-                    innerHTML: '<button onclick="window.location.reload();" is="coral-button" variant="primary" coral-close>Ok</button>'
-                }
-            });
-            dialog.on('coral-overlay:close', function(event) {
-              event.preventDefault();
-              $(dialog.content).find('#LogsContainer').innerHTML = '';
-                if (onClose) {
-                   onClose();
-                }
-            });
-            document.body.appendChild(dialog);
-            dialog.show();
-            return $(dialog.content).find('#LogsContainer');
+    function openLogsDialog(init) {
+
+        const dialog = new Coral.Dialog().set({
+           id: 'LogsDialog',
+           header: {
+               innerHTML: 'Logs'
+           },
+           footer: {
+               innerHTML: '<button is="coral-button" variant="primary" coral-close>Ok</button>'
+           }
+        });
+
+        if (init && init.length > 0) {
+           $.each(init, function (index, value) {
+               $(dialog.content).append('<div>' + value + '</div>');
+           });
         }
+
+        dialog.on('coral-overlay:close', function(event) {
+          event.preventDefault();
+          setTimeout(function () {
+            dialog.remove();
+            window.location.reload();
+          });
+        });
+
+        document.body.appendChild(dialog);
+        dialog.show();
+
+        return dialog;
     }
 
     function openPackageDialog(success, error) {
