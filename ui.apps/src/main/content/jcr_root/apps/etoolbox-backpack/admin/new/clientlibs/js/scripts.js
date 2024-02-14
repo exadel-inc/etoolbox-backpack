@@ -196,7 +196,8 @@
         name: 'foundation.prompt.open',
         handler: function (form, config, data, textStatus, xhr) {
             if (data.status == "ERROR" || data.status == "WARNING") {
-                openLogsDialog(data.logs, function() {
+                const dialog = openLogsDialog(data.logs);
+                dialog.on('coral-overlay:close', function(event) {
                    if (data.status == "WARNING") {
                        window.location.reload();
                    }
@@ -321,20 +322,13 @@
     }
 
     function openPackageDialog(success, error) {
-         //todo looking for another way for opening
          $('#editDialogButton').trigger('click');
     }
 
-    function updatePackageData(data) {
-         //todo set package info to editDialog or delete method
-         console.log(data);
-    }
-
-    function getPackageInfo(packagePath, updateFunction, errorFunction) {
+    function getPackageInfo(packagePath, errorFunction) {
         $.ajax({
             url: '/services/backpack/package',
             data: {'packagePath': packagePath},
-            success: updateFunction,
             error: errorFunction
         });
     }
@@ -342,8 +336,6 @@
     $(window).on('load', function() {
        if (packagePath && packagePath.length > 0) {
            getPackageInfo(packagePath, function (data) {
-               updatePackageData(data);
-           }, function (data) {
                openPackageDialog()
            });
        } else {
