@@ -30,10 +30,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import javax.jcr.Node;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -101,7 +98,7 @@ public class ReferenceServiceImpl implements ReferenceService {
         TagManager tagManager = resourceResolve.adaptTo(TagManager.class);
         Set<ReferencedItem> tagsReferencedItemSet = new LinkedHashSet<>();
 
-        if (pageResource != null) {
+        if (pageResource != null && tagManager != null) {
             Tag[] tags = tagManager.getTagsForSubtree(pageResource, false);
             if (tags != null) {
                 for (int i = 0; i < tags.length; i++) {

@@ -55,7 +55,7 @@ public class EditPackageServiceTest extends Base {
         packageInfo.setPaths(Collections.singletonList(PAGE_1));
         packageInfo.setPackagePath(PACKAGE_PATH);
         resourceResolver = context.resourceResolver();
-        createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, true, false)), new DefaultWorkspaceFilter());
+        createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, true, false, true)), new DefaultWorkspaceFilter());
         editPackageService = context.registerInjectActivateService(new EditPackageServiceImpl());
     }
 
@@ -79,7 +79,7 @@ public class EditPackageServiceTest extends Base {
         assertNotNull(PACKAGE_2_2_ZIP, aPackage.getPackageNodeName());
         Node packageNode = session.getNode("/etc/packages/testGroup2/testPackage2-2.zip");
         assertNotNull(packageNode);
-        verifyPackageFilters(packageNode, Collections.singletonList(PAGE_2), Collections.singletonList(new PathModel(PAGE_2, true, false)), modifiedReferencedResources);
+        verifyPackageFilters(packageNode, Collections.singletonList(PAGE_2), Collections.singletonList(new PathModel(PAGE_2, true, true, false)), modifiedReferencedResources);
     }
 
     @Test
@@ -87,7 +87,7 @@ public class EditPackageServiceTest extends Base {
         packageInfo.setGroupName(TEST_GROUP_2);
         packageInfo.setPackageName(TEST_PACKAGE_2);
         packageInfo.setVersion(PACKAGE_VERSION_2);
-        createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, false, false)), new DefaultWorkspaceFilter());
+        createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, false, false, true)), new DefaultWorkspaceFilter());
         PackageModel packageModel = new PackageModel();
         initBasePackageModel(packageModel, Collections.singletonList(PAGE_2), false);
 
@@ -109,7 +109,7 @@ public class EditPackageServiceTest extends Base {
         assertNotNull(PACKAGE_2_2_ZIP, aPackage.getPackageNodeName());
         Node packageNode = session.getNode("/etc/packages/testGroup2/testPackage2-2.zip");
         assertNotNull(packageNode);
-        verifyPackageFilters(packageNode, Collections.singletonList(PAGE_1 + "/jcr:content"), Collections.singletonList(new PathModel(PAGE_1, false, false)), referencedResources);
+        verifyPackageFilters(packageNode, Collections.singletonList(PAGE_1 + "/jcr:content"), Collections.singletonList(new PathModel(PAGE_1, false, false, false)), referencedResources);
     }
 
     @Test
@@ -123,7 +123,7 @@ public class EditPackageServiceTest extends Base {
     }
 
     private void initBasePackageModel(final PackageModel model, final List<String> strings, final boolean includeChildren) {
-        model.setPaths(strings.stream().map(s -> new PathModel(s, includeChildren, false)).collect(Collectors.toList()));
+        model.setPaths(strings.stream().map(s -> new PathModel(s, includeChildren, false, true)).collect(Collectors.toList()));
         model.setPackageName(TEST_PACKAGE_2);
         model.setGroup(TEST_GROUP_2);
         model.setThumbnailPath(THUMBNAIL);

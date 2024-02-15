@@ -13,7 +13,6 @@
  */
 package com.exadel.etoolbox.backpack.core.services.pckg.impl;
 
-import com.exadel.etoolbox.backpack.core.dto.repository.ReferencedItem;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
@@ -35,9 +34,7 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Implements {@link CreatePackageService} to provide create package operation
@@ -77,9 +74,7 @@ public class CreatePackageServiceImpl implements CreatePackageService {
             return packageInfo;
         }
 
-        Set<ReferencedItem> referencedAssets = basePackageService.getReferencedResources(resourceResolver, packageInfo.getPaths());
-        Collection<String> resultingPaths = basePackageService.initAssets(packageInfo.getPaths(), referencedAssets, packageInfo);
-        DefaultWorkspaceFilter filter = basePackageService.getWorkspaceFilter(resultingPaths);
+        DefaultWorkspaceFilter filter = basePackageService.getWorkspaceFilter(packageInfo.getPaths());
         createPackage(session, packageInfo, packageModel.getPaths(), filter);
 
         if (PackageStatus.CREATED.equals(packageInfo.getPackageStatus())) {
@@ -131,6 +126,5 @@ public class CreatePackageServiceImpl implements CreatePackageService {
             }
         }
     }
-
 
 }

@@ -36,7 +36,7 @@ import static org.junit.Assert.*;
 
 public class CreatePackageServiceImplTest extends Base {
 
-    private List<PathModel> expectedInitialFiltersModels = Collections.singletonList(new PathModel(PAGE_1, true, false));
+    private List<PathModel> expectedInitialFiltersModels = Collections.singletonList(new PathModel(PAGE_1, true, false, false));
 
     private CreatePackageService createPackage;
 
@@ -76,7 +76,7 @@ public class CreatePackageServiceImplTest extends Base {
         assertNotNull("testPackage-1.zip", aPackage.getPackageNodeName());
         Node packageNode = session.getNode("/etc/packages/testGroup/testPackage-1.zip");
         assertNotNull(packageNode);
-        verifyPackageFilters(packageNode, Collections.singletonList(PAGE_1 + "/jcr:content"), Collections.singletonList(new PathModel(PAGE_1, false, false)), referencedResources);
+        verifyPackageFilters(packageNode, Collections.singletonList(PAGE_1 + "/jcr:content"), Collections.singletonList(new PathModel(PAGE_1, false, false, false)), referencedResources);
     }
 
     @Test
@@ -101,7 +101,7 @@ public class CreatePackageServiceImplTest extends Base {
         packageInfo.setVersion(PACKAGE_VERSION);
         packageInfo.setReferencedResources(new HashMap<>());
         packageInfo.setPaths(new ArrayList<>());
-        createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, true, false)), new DefaultWorkspaceFilter());
+        createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, true, false, true)), new DefaultWorkspaceFilter());
 
         PackageModel packageModel = new PackageModel();
         initBasePackageInfo(packageModel, Collections.singletonList(PAGE_1), false);
@@ -124,7 +124,7 @@ public class CreatePackageServiceImplTest extends Base {
     }
 
     private void initBasePackageInfo(final PackageModel model, final List<String> strings, final boolean includeChildren) {
-        model.setPaths(strings.stream().map(s -> new PathModel(s, includeChildren, false)).collect(Collectors.toList()));
+        model.setPaths(strings.stream().map(s -> new PathModel(s, includeChildren, false, true)).collect(Collectors.toList()));
         model.setPackageName(TEST_PACKAGE);
         model.setThumbnailPath(THUMBNAIL);
         model.setVersion(PACKAGE_VERSION);

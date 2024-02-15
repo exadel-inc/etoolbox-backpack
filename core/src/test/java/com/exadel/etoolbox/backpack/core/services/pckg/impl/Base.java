@@ -86,6 +86,7 @@ public class Base {
     public AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
     protected PackageInfoService packageInfoService;
     protected ResourceResolver resourceResolver;
+    protected ResourceResolver resourceResolverMock;
     protected JcrPackageManager packMgr;
     protected Session session;
     protected ReferenceService referenceServiceMock = mock(ReferenceService.class);
@@ -130,6 +131,9 @@ public class Base {
         resourceResolver = context.resourceResolver();
         session = resourceResolver.adaptTo(Session.class);
         packMgr = PackagingService.getPackageManager(session);
+
+        resourceResolverMock = mock(ResourceResolver.class);
+        when(resourceResolverMock.adaptTo(Session.class)).thenReturn(null);
     }
 
 

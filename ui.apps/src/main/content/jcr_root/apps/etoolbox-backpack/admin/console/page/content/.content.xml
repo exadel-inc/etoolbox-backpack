@@ -160,7 +160,7 @@
                         jcr:primaryType="nt:unstructured"
                         jcr:title="Success"
                         jcr:titleError="Error"
-                        sling:resourceType="granite/ui/components/coral/foundation/form/responses/openprompt"
+                        sling:resourceType="etoolbox-backpack/admin/console/components/openprompt"
                         open="/tools/etoolbox/backpack/package.html?path={packagePath}"
                         redirect="/tools/etoolbox/backpack.html/?group=/etc/packages/{groupName}"
                         text="Your package has been created."/>
@@ -234,6 +234,13 @@
                                                                          fieldDescription="Check to include child pages to package filter"
                                                                          name="includeChildren"
                                                                          text="Include child pages?"
+                                                                         uncheckedValue="false" value="true"
+                                                                         checked="{Boolean}true"
+                                                                         sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"/>
+                                                        <includeReferences jcr:primaryType="nt:unstructured"
+                                                                         fieldDescription="Check to include pages and assets referenced by the current page"
+                                                                         name="includeReferences"
+                                                                         text="Include references of page?"
                                                                          uncheckedValue="false" value="true"
                                                                          checked="{Boolean}true"
                                                                          sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"/>

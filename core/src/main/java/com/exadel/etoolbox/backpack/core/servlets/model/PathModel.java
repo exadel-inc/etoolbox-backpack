@@ -37,10 +37,13 @@ public class PathModel {
     @RequestParam
     private boolean includeLiveCopies;
 
+    @RequestParam
+    private boolean includeReferences;
+
     public PathModel() {
     }
 
-    public PathModel(final String path, final boolean includeChildren, final boolean includeLiveCopies) {
+    public PathModel(final String path, final boolean includeChildren, final boolean includeLiveCopies, final boolean includeReferences) {
         this.path = path;
         this.includeChildren = includeChildren;
         this.includeLiveCopies = includeLiveCopies;
@@ -69,4 +72,10 @@ public class PathModel {
     public boolean includeLiveCopies() {
         return includeLiveCopies;
     }
+
+    /**
+     * Gets the whether or not references of the page included to the package build
+     * @return boolean value
+     */
+    public boolean includeReferences() {return includeReferences;}
 }

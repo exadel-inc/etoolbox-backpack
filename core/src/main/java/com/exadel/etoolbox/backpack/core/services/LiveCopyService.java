@@ -1,10 +1,9 @@
 package com.exadel.etoolbox.backpack.core.services;
 
+import com.exadel.etoolbox.backpack.core.dto.response.ResourceRelationships;
 import org.apache.sling.api.resource.ResourceResolver;
-
-import java.util.List;
 
 public interface LiveCopyService {
 
-    List<String> getPaths(ResourceResolver resourceResolver, String path, boolean includeLiveCopies);
+    ResourceRelationships getResourceRelationships(ResourceResolver resourceResolver, String path, boolean includeLiveCopies);
 }

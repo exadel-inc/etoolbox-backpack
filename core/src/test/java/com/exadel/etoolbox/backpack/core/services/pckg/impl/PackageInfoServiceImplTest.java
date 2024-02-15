@@ -65,7 +65,7 @@ public class PackageInfoServiceImplTest extends Base {
             packageInfo.setReferencedResources(referencedResources);
             packageInfo.setPaths(Collections.singletonList(PAGE_1));
             packageInfo.setPackagePath(PACKAGE_PATH);
-            aPackage = createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, false, false)), new DefaultWorkspaceFilter());
+            aPackage = createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, false, false, true)), new DefaultWorkspaceFilter());
 
         }
 
@@ -177,7 +177,7 @@ public class PackageInfoServiceImplTest extends Base {
             PackageInfo packageInfo = getDefaultPackageInfo();
             DefaultWorkspaceFilter defaultWorkspaceFilter = new DefaultWorkspaceFilter();
             defaultWorkspaceFilter.add(new PathFilterSet(PAGE_1));
-            createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, true, false)), defaultWorkspaceFilter);
+            createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, true, false, true)), defaultWorkspaceFilter);
 
             PackageInfoModel packageInfoModel = new PackageInfoModel();
             packageInfoModel.setPackagePath(PACKAGE_PATH);
@@ -200,7 +200,7 @@ public class PackageInfoServiceImplTest extends Base {
             PackageInfo packageInfo = getDefaultPackageInfo();
             DefaultWorkspaceFilter defaultWorkspaceFilter = new DefaultWorkspaceFilter();
             defaultWorkspaceFilter.add(new PathFilterSet(PAGE_1));
-            createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, true, false)), defaultWorkspaceFilter);
+            createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, true, false, true)), defaultWorkspaceFilter);
 
             PackageInfoModel packageInfoModel = new PackageInfoModel();
             packageInfoModel.setPackagePath(PACKAGE_PATH);
@@ -209,7 +209,7 @@ public class PackageInfoServiceImplTest extends Base {
 
             packMgr.remove(packMgr.listPackages().get(0));
             defaultWorkspaceFilter.add(new PathFilterSet(PICTURE_1));
-            createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, true, false)), defaultWorkspaceFilter);
+            createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, true, false, true)), defaultWorkspaceFilter);
 
             PackageInfo result2 = packageInfoService.getPackageInfo(resourceResolver, packageInfoModel);
 
@@ -294,7 +294,7 @@ public class PackageInfoServiceImplTest extends Base {
             PackageInfo packageInfo = getDefaultPackageInfo();
             DefaultWorkspaceFilter defaultWorkspaceFilter = new DefaultWorkspaceFilter();
             defaultWorkspaceFilter.add(new PathFilterSet(PAGE_1));
-            createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, true, false)), defaultWorkspaceFilter);
+            createPackage(packageInfo, Collections.singletonList(new PathModel(PAGE_1, true, false, true)), defaultWorkspaceFilter);
 
             PackageInfoModel packageInfoModel = new PackageInfoModel();
             packageInfoModel.setPackagePath(PACKAGE_PATH);

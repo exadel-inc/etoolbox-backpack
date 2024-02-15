@@ -233,7 +233,7 @@ $(function () {
 
     function buildPackage(testBuild) {
         var referencedResources = {};
-        $('input[name="referencedResources"]:checked').each(function () {
+        $('input[name="referencedResources"]').each(function () {
             var resources = [];
             var currentResourceType = this.value;
             $(this).closest('coral-accordion-item').find('input[name="referencedResourcesItem"]:checked').each(function () {
@@ -387,7 +387,7 @@ $(function () {
         var intro = createEl("p").appendTo(message);
 
         intro.text(Granite.I18n.get("You are going to delete the following package:"));
-        createEl("p").html(createEl("b")).text(packageName).appendTo(message);
+        createEl("p").html(createEl("b").text(packageName)).appendTo(message);
         ui.prompt(Granite.I18n.get("Delete"), message.html(), "notice", [{
             text: Granite.I18n.get("Cancel")
         }, {
@@ -402,18 +402,14 @@ $(function () {
 
 
     function deleteAction() {
-
-        var data = {
-            _charset_: "UTF-8",
-            cmd: "deletePage",
-            path: path,
-            force: true
-        };
-
-        $.post(COMMAND_URL, data).done(function () {
-            showAlert("Package deleted", "Delete", "warning", function () {
-                window.location.href = goBackLink;
-            });
+        $.ajax({
+            url: '/services/backpack/package?path=' + path,
+            type: 'DELETE',
+            success: function(result) {
+                showAlert("Package deleted", "Delete", "warning", function () {
+                    window.location.href = goBackLink;
+                });
+            }
         });
     }
 

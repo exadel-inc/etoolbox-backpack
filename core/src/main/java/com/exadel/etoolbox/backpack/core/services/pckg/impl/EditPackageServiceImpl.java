@@ -13,7 +13,6 @@
  */
 package com.exadel.etoolbox.backpack.core.services.pckg.impl;
 
-import com.exadel.etoolbox.backpack.core.dto.repository.ReferencedItem;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
@@ -33,9 +32,7 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Implements {@link EditPackageService} to provide edit package operations
@@ -78,9 +75,7 @@ public class EditPackageServiceImpl implements EditPackageService {
             return packageInfo;
         }
 
-        Set<ReferencedItem> referencedAssets = basePackageService.getReferencedResources(resourceResolver, packageInfo.getPaths());
-        Collection<String> resultingPaths = basePackageService.initAssets(packageInfo.getPaths(), referencedAssets, packageInfo);
-        DefaultWorkspaceFilter filter = basePackageService.getWorkspaceFilter(resultingPaths);
+        DefaultWorkspaceFilter filter = basePackageService.getWorkspaceFilter(packageInfo.getPaths());
         modifyPackage(session, modificationPackageModel.getPackagePath(), packageInfo, modificationPackageModel.getPaths(), filter);
 
         if (PackageStatus.MODIFIED.equals(packageInfo.getPackageStatus())) {
