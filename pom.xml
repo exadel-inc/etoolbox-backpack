@@ -329,6 +329,11 @@
                 <groupId>org.apache.geronimo.specs</groupId>
                 <scope>provided</scope>
             </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.2.1</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>

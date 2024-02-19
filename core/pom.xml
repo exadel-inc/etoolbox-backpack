@@ -198,5 +198,11 @@
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.testing.sling-mock-oak</artifactId>
         </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.1</version>
+        </dependency>
+
     </dependencies>
 </project>
