@@ -20,6 +20,7 @@ import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
 import com.exadel.etoolbox.backpack.core.servlets.model.BuildPackageModel;
 import com.exadel.etoolbox.backpack.core.servlets.model.LatestPackageInfoModel;
 import com.exadel.etoolbox.backpack.core.util.CalendarAdapter;
+import com.exadel.etoolbox.backpack.core.util.ServletUtils;
 import com.exadel.etoolbox.backpack.request.RequestAdapter;
 import com.exadel.etoolbox.backpack.request.validator.ValidatorResponse;
 import com.google.gson.Gson;
@@ -52,10 +53,12 @@ import java.util.Calendar;
 @SuppressWarnings("PackageAccessibility")
 // because Servlet and HttpServletResponse classes reported as a non-bundle dependency
 public class BuildPackageServlet extends SlingAllMethodsServlet {
+
     private static final long serialVersionUID = 1L;
 
-    private static final Gson GSON = new GsonBuilder().registerTypeHierarchyAdapter(Calendar.class, new CalendarAdapter()).create();
-    static final String APPLICATION_JSON = "application/json";
+    private static final Gson GSON = new GsonBuilder()
+            .registerTypeHierarchyAdapter(Calendar.class, new CalendarAdapter())
+            .create();
 
     @Reference
     @SuppressWarnings("UnusedDeclaration") // value injected by Sling
@@ -81,7 +84,7 @@ public class BuildPackageServlet extends SlingAllMethodsServlet {
     @Override
     protected void doPost(final SlingHttpServletRequest request,
                           final SlingHttpServletResponse response) throws IOException {
-        response.setContentType(APPLICATION_JSON);
+        response.setContentType(ServletUtils.APPLICATION_JSON_CONTENT_TYPE);
         ValidatorResponse<BuildPackageModel> validatorResponse = requestAdapter.adaptValidate(request.getParameterMap(), BuildPackageModel.class);
         if (!validatorResponse.isValid()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -112,7 +115,7 @@ public class BuildPackageServlet extends SlingAllMethodsServlet {
                          final SlingHttpServletResponse response) throws IOException {
         ValidatorResponse<LatestPackageInfoModel> validatorResponse = requestAdapter.adaptValidate(request.getParameterMap(), LatestPackageInfoModel.class);
 
-        response.setContentType(APPLICATION_JSON);
+        response.setContentType(ServletUtils.APPLICATION_JSON_CONTENT_TYPE);
 
         if (!validatorResponse.isValid()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

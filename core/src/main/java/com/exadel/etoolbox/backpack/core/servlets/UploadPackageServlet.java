@@ -16,6 +16,7 @@ package com.exadel.etoolbox.backpack.core.servlets;
 
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.services.pckg.UploadPackageService;
+import com.exadel.etoolbox.backpack.core.util.ServletUtils;
 import com.google.gson.Gson;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -48,10 +49,10 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 @SuppressWarnings("PackageAccessibility")
 // because Servlet and HttpServletResponse classes reported as a non-bundle dependency
 public class UploadPackageServlet extends SlingAllMethodsServlet {
-    static final String APPLICATION_JSON = "application/json";
+
+    private static final long serialVersionUID = 1L;
     private static final String PARAM_FORCE_UPDATE = "forceUpdate";
     private static final String PARAM_FILEUPLOAD = "fileupload";
-    private static final long serialVersionUID = 1L;
     private static final Gson GSON = new Gson();
 
     @Reference
@@ -89,7 +90,7 @@ public class UploadPackageServlet extends SlingAllMethodsServlet {
     }
 
     private void writeResponse(final SlingHttpServletResponse response, final PackageInfo packageInfo) throws IOException {
-        response.setContentType(APPLICATION_JSON);
+        response.setContentType(ServletUtils.APPLICATION_JSON_CONTENT_TYPE);
         response.setCharacterEncoding(UTF_8.name());
         if (ERROR.equals(packageInfo.getPackageStatus())) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

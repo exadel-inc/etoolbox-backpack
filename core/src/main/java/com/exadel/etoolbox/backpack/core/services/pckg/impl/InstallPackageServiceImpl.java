@@ -7,6 +7,7 @@ import com.exadel.etoolbox.backpack.core.services.pckg.InstallPackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
 import com.exadel.etoolbox.backpack.core.services.util.LoggerService;
 import com.exadel.etoolbox.backpack.core.services.util.SessionService;
+import com.exadel.etoolbox.backpack.core.services.util.constants.BackpackConstants;
 import com.exadel.etoolbox.backpack.core.servlets.model.InstallPackageModel;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.jackrabbit.vault.fs.api.ProgressTrackerListener;
@@ -34,7 +35,6 @@ import java.util.Calendar;
 public class InstallPackageServiceImpl implements InstallPackageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstallPackageServiceImpl.class);
-    private static final String SERVICE_NAME = "backpack-service";
     private static final String START_INSTALL_MESSAGE = "Install Package: ";
 
     @Reference
@@ -70,9 +70,9 @@ public class InstallPackageServiceImpl implements InstallPackageService {
      * Called from {@link InstallPackageServiceImpl#installPackage(ResourceResolver, InstallPackageModel)}.
      * Encapsulates installing package in a separate execution thread
      *
-     * @param userId User ID per the effective {@code ResourceResolver}
+     * @param userId              User ID per the effective {@code ResourceResolver}
      * @param installPackageModel {@link InstallPackageModel} object containing user-set options for the package installing
-     * @param packageInfo {@link PackageInfo} object to store package installation status information in
+     * @param packageInfo         {@link PackageInfo} object to store package installation status information in
      */
     private void installPackageAsync(String userId, InstallPackageModel installPackageModel, PackageInfo packageInfo) {
         new Thread(() -> installPackage(userId, installPackageModel, packageInfo)).start();
@@ -81,9 +81,9 @@ public class InstallPackageServiceImpl implements InstallPackageService {
     /**
      * Performs the internal package installing procedure and stores status information
      *
-     * @param userId User ID per the effective {@code ResourceResolver}
+     * @param userId              User ID per the effective {@code ResourceResolver}
      * @param installPackageModel {@link InstallPackageModel} object containing user-set options for the package installing
-     * @param packageInfo {@link PackageInfo} object to store package installation status information in
+     * @param packageInfo         {@link PackageInfo} object to store package installation status information in
      */
     private void installPackage(String userId, InstallPackageModel installPackageModel, PackageInfo packageInfo) {
         Session session = null;
@@ -93,7 +93,7 @@ public class InstallPackageServiceImpl implements InstallPackageService {
             JcrPackage jcrPackage = packMgr.open(session.getNode(packageInfo.getPackagePath()));
             if (jcrPackage == null) {
                 packageInfo.setPackageStatus(PackageStatus.ERROR);
-                packageInfo.addLogMessage(BasePackageServiceImpl.ERROR + String.format(BasePackageServiceImpl.PACKAGE_DOES_NOT_EXIST_MESSAGE, packageInfo.getPackagePath()));
+                packageInfo.addLogMessage(BackpackConstants.ERROR + String.format(BackpackConstants.PACKAGE_DOES_NOT_EXIST_MESSAGE, packageInfo.getPackagePath()));
                 return;
             }
             StopWatch stopWatch = StopWatch.createStarted();
@@ -117,7 +117,7 @@ public class InstallPackageServiceImpl implements InstallPackageService {
      * instance with options that control the package import
      *
      * @param installPackageModel {@link InstallPackageModel} object containing user-set options for the package installing
-     * @param packageInfo {@link PackageInfo} object to store package installation status information in
+     * @param packageInfo         {@link PackageInfo} object to store package installation status information in
      * @return {@code ImportOptions} object
      */
     private ImportOptions getImportOptions(InstallPackageModel installPackageModel, PackageInfo packageInfo) {

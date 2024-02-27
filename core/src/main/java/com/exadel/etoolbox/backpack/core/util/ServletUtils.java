@@ -5,11 +5,13 @@ import org.apache.commons.lang3.ArrayUtils;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RequestUtils {
+public class ServletUtils {
 
-    private static final String PARAMETER_NAME_TYPE = "type";
+    public static final String PARAMETER_NAME_TYPE = "type";
+    public static final String APPLICATION_JSON_CONTENT_TYPE = "application/json";
+    public static final String SERVLET_PATH_BASE = "services/backpack/";
 
-    private RequestUtils() {
+    private ServletUtils() {
     }
 
     public static Map<String, String[]> addActionTypeToParameterMap(Map<String, String[]> paramMap, String value) {

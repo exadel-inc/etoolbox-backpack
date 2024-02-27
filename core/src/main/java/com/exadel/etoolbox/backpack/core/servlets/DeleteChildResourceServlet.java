@@ -4,7 +4,7 @@ import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.ResponseWrapper;
 import com.exadel.etoolbox.backpack.core.services.resource.BaseResourceService;
 import com.exadel.etoolbox.backpack.core.servlets.model.PathModel;
-import com.exadel.etoolbox.backpack.core.util.RequestUtils;
+import com.exadel.etoolbox.backpack.core.util.ServletUtils;
 import com.exadel.etoolbox.backpack.request.RequestAdapter;
 import com.exadel.etoolbox.backpack.request.validator.ValidatorResponse;
 import com.google.gson.Gson;
@@ -36,10 +36,6 @@ public class DeleteChildResourceServlet extends SlingAllMethodsServlet {
 
     private static final Gson GSON = new Gson();
 
-    private static final String SERVLET_PATH_BASE = "services/backpack/";
-
-    private static final String APPLICATION_JSON = "application/json";
-
     @Reference
     @SuppressWarnings("UnusedDeclaration") // value injected by Sling
     private transient RequestAdapter requestAdapter;
@@ -51,10 +47,10 @@ public class DeleteChildResourceServlet extends SlingAllMethodsServlet {
     @Override
     protected void doPost(final SlingHttpServletRequest request, final SlingHttpServletResponse response) throws IOException {
 
-        response.setContentType(APPLICATION_JSON);
+        response.setContentType(ServletUtils.APPLICATION_JSON_CONTENT_TYPE);
 
         ValidatorResponse<PathModel> validatorResponse = requestAdapter
-                .adaptValidate(RequestUtils.addActionTypeToParameterMap(request.getParameterMap(), StringUtils.substringAfter(request.getPathInfo(), SERVLET_PATH_BASE)), PathModel.class);
+                .adaptValidate(ServletUtils.addActionTypeToParameterMap(request.getParameterMap(), StringUtils.substringAfter(request.getPathInfo(), ServletUtils.SERVLET_PATH_BASE)), PathModel.class);
 
         if (!validatorResponse.isValid()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

@@ -28,6 +28,9 @@ import java.util.stream.StreamSupport;
 @Model(adaptables = SlingHttpServletRequest.class)
 public class PackageEntriesDatasource {
 
+    private static final String PAGE_ENTRY_TYPE = "page";
+    private static final String HAS_CHILDREN_PROPERTY = "hasChildren";
+
     @SlingObject
     private SlingHttpServletRequest request;
 
@@ -61,22 +64,22 @@ public class PackageEntriesDatasource {
                 packageInfo.getPaths().forEach(path -> {
                     PathInfo pathInfo = packageInfo.getPathInfo(path);
                     if (pathInfo == null) {
-                        resources.add(createPackageEntry("page", path, ImmutableMap.of("hasChildren", false)));
+                        resources.add(createPackageEntry(PAGE_ENTRY_TYPE, path, ImmutableMap.of(HAS_CHILDREN_PROPERTY, false)));
                         return;
                     }
 
                     List<Resource> subsidiaries = new ArrayList<>();
 
                     addSubsidiaries(subsidiaries, pathInfo.getTags(), "tag");
-                    addSubsidiaries(subsidiaries, pathInfo.getPages(), "page");
+                    addSubsidiaries(subsidiaries, pathInfo.getPages(), PAGE_ENTRY_TYPE);
                     addSubsidiaries(subsidiaries, pathInfo.getAssets(), "asset");
                     addSubsidiaries(subsidiaries, pathInfo.getLiveCopies(), "liveCopy");
                     addSubsidiaries(subsidiaries, pathInfo.getChildren(), "child");
 
                     if (subsidiaries.isEmpty()) {
-                        resources.add(createPackageEntry("page", path, ImmutableMap.of("hasChildren", pathInfo.hasChildren())));
+                        resources.add(createPackageEntry(PAGE_ENTRY_TYPE, path, ImmutableMap.of(HAS_CHILDREN_PROPERTY, pathInfo.hasChildren())));
                     } else {
-                        resources.add(createPackageEntry("page", path, ImmutableMap.of("hasChildren", pathInfo.hasChildren()),
+                        resources.add(createPackageEntry(PAGE_ENTRY_TYPE, path, ImmutableMap.of(HAS_CHILDREN_PROPERTY, pathInfo.hasChildren()),
                                 subsidiaries)
                         );
                     }

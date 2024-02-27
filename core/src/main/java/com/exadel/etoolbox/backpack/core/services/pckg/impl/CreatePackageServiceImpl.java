@@ -4,6 +4,7 @@ import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.CreatePackageService;
+import com.exadel.etoolbox.backpack.core.services.util.constants.BackpackConstants;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageModel;
 import org.apache.jackrabbit.vault.fs.config.DefaultWorkspaceFilter;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;
@@ -40,7 +41,7 @@ public class CreatePackageServiceImpl implements CreatePackageService {
             if (basePackageService.isPackageExist(packMgr, packageModel.getPackageName(), packageInfo.getGroupName(), packageModel.getVersion())) {
                 String packageExistMsg = "Package with this name already exists in the " + packageInfo.getGroupName() + " group.";
 
-                packageInfo.addLogMessage(BasePackageServiceImpl.ERROR + packageExistMsg);
+                packageInfo.addLogMessage(BackpackConstants.ERROR + packageExistMsg);
                 packageInfo.setPackageStatus(PackageStatus.ERROR);
                 LOGGER.error(packageExistMsg);
                 return packageInfo;

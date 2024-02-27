@@ -5,12 +5,12 @@ import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.Replicator;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
-import com.exadel.etoolbox.backpack.core.services.util.LoggerService;
-import com.exadel.etoolbox.backpack.core.services.util.SessionService;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
 import com.exadel.etoolbox.backpack.core.services.pckg.ReplicatePackageService;
-import com.exadel.etoolbox.backpack.core.services.util.constants.Constants;
+import com.exadel.etoolbox.backpack.core.services.util.LoggerService;
+import com.exadel.etoolbox.backpack.core.services.util.SessionService;
+import com.exadel.etoolbox.backpack.core.services.util.constants.BackpackConstants;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageInfoModel;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;
@@ -68,7 +68,7 @@ public class ReplicatePackageServiceImpl implements ReplicatePackageService {
             basePackageService.getPackageCacheAsMap().put(packageInfoModel.getPackagePath(), packageInfo);
             replicatePackage(resourceResolver.getUserID(), packageInfo);
         } else {
-            packageInfo.addLogMessage(Constants.ERROR + PACKAGE_IS_NOT_BUILT_MESSAGE);
+            packageInfo.addLogMessage(BackpackConstants.ERROR + PACKAGE_IS_NOT_BUILT_MESSAGE);
         }
         return packageInfo;
     }
@@ -77,7 +77,7 @@ public class ReplicatePackageServiceImpl implements ReplicatePackageService {
      * Called from {@link ReplicatePackageServiceImpl#replicatePackage(ResourceResolver, PackageInfoModel)}
      * Encapsulates installing package in a separate execution thread
      *
-     * @param userId User ID per the effective {@code ResourceResolver}
+     * @param userId      User ID per the effective {@code ResourceResolver}
      * @param packageInfo {@link PackageInfo} object to store package building status information in
      */
     private void replicatePackageAsync(final String userId, PackageInfo packageInfo) {
@@ -88,7 +88,7 @@ public class ReplicatePackageServiceImpl implements ReplicatePackageService {
      * Called from {@link ReplicatePackageServiceImpl#replicatePackageAsync(String, PackageInfo)}
      * Performs the internal package replication procedure
      *
-     * @param userId User ID per the effective {@code ResourceResolver}
+     * @param userId      User ID per the effective {@code ResourceResolver}
      * @param packageInfo {@link PackageInfo} object to store package building status information in
      */
     private void replicatePackage(final String userId, PackageInfo packageInfo) {
@@ -106,10 +106,10 @@ public class ReplicatePackageServiceImpl implements ReplicatePackageService {
                     packageInfo.addLogMessage(FINISH_REPLICATE_MESSAGE + stopWatch);
                     packageInfo.setPackageReplicated(Calendar.getInstance());
                 } else {
-                    packageInfo.addLogMessage(Constants.ERROR + NODE_NOT_ACCESSIBLE_MESSAGE);
+                    packageInfo.addLogMessage(BackpackConstants.ERROR + NODE_NOT_ACCESSIBLE_MESSAGE);
                 }
             } else {
-                packageInfo.addLogMessage(Constants.ERROR + String.format(BasePackageServiceImpl.PACKAGE_DOES_NOT_EXIST_MESSAGE, packageInfo.getPackagePath()));
+                packageInfo.addLogMessage(BackpackConstants.ERROR + String.format(BackpackConstants.PACKAGE_DOES_NOT_EXIST_MESSAGE, packageInfo.getPackagePath()));
             }
         } catch (RepositoryException | ReplicationException e) {
             loggerService.addExceptionToLog(packageInfo, e);

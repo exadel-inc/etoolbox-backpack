@@ -6,6 +6,7 @@ import com.exadel.etoolbox.backpack.core.dto.response.ResponseWrapper;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
 import com.exadel.etoolbox.backpack.core.services.resource.BaseResourceService;
+import com.exadel.etoolbox.backpack.core.services.util.constants.BackpackConstants;
 import com.exadel.etoolbox.backpack.core.servlets.model.PathModel;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -35,7 +36,7 @@ public class DeleteChildResourceService implements BaseResourceService<PathInfo>
         PackageInfo packageInfo = packageInfoService.getPackageInfo(resourceResolver, pathModel.getPackagePath());
 
         if (packageInfo == null) {
-            return new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, Collections.singletonList("Package not found: " + pathModel.getPackagePath()));
+            return new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, Collections.singletonList(BackpackConstants.PACKAGE_NOT_FOUND + pathModel.getPackagePath()));
         }
 
         LinkedList<String> params = parsePayloadToList(pathModel.getPayload());
@@ -44,7 +45,7 @@ public class DeleteChildResourceService implements BaseResourceService<PathInfo>
             return new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, Collections.singletonList("Invalid payload: " + pathModel.getPayload()));
         }
 
-        ResponseWrapper<PathInfo> responseWrapper = new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, Collections.singletonList("Unknown action type: " + pathModel.getType()));
+        ResponseWrapper<PathInfo> responseWrapper = new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, Collections.singletonList(BackpackConstants.UNKNOWN_ACTION_TYPE + pathModel.getType()));
 
         switch (pathModel.getType()) {
             case "delete/child":

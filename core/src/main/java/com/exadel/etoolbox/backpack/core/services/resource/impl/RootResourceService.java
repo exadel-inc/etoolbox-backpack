@@ -6,6 +6,7 @@ import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
 import com.exadel.etoolbox.backpack.core.services.resource.BaseResourceService;
 import com.exadel.etoolbox.backpack.core.services.resource.QuerySearchService;
+import com.exadel.etoolbox.backpack.core.services.util.constants.BackpackConstants;
 import com.exadel.etoolbox.backpack.core.servlets.model.PathModel;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -35,10 +36,10 @@ public class RootResourceService implements BaseResourceService<PackageInfo> {
         PackageInfo packageInfo = packageInfoService.getPackageInfo(resourceResolver, pathModel.getPackagePath());
 
         if (packageInfo == null) {
-            return new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, Collections.singletonList("Package not found: " + pathModel.getPackagePath()));
+            return new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, Collections.singletonList(BackpackConstants.PACKAGE_NOT_FOUND + pathModel.getPackagePath()));
         }
 
-        ResponseWrapper<PackageInfo> responseWrapper = new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, Collections.singletonList("Unknown action type: " + pathModel.getType()));
+        ResponseWrapper<PackageInfo> responseWrapper = new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, Collections.singletonList(BackpackConstants.UNKNOWN_ACTION_TYPE + pathModel.getType()));
 
         switch (pathModel.getType()) {
             case "add/path":
@@ -68,7 +69,7 @@ public class RootResourceService implements BaseResourceService<PackageInfo> {
     private ResponseWrapper<PackageInfo> processPath(ResourceResolver resourceResolver, String payload, PackageInfo packageInfo) {
         Resource resource = resourceResolver.getResource(payload);
         if (resource == null) {
-            return new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, Collections.singletonList("Resource not found: " + payload));
+            return new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, Collections.singletonList(BackpackConstants.RESOURCE_NOT_FOUND + payload));
         }
         packageInfo.setPaths(Stream.of(
                         Collections.singletonList(resource.getPath()),
@@ -84,7 +85,7 @@ public class RootResourceService implements BaseResourceService<PackageInfo> {
         Set<String> paths = parseStringToList(payload).stream()
                 .filter(item -> {
                     if (resourceResolver.getResource(item) == null) {
-                        log.add("Resource not found: " + item);
+                        log.add(BackpackConstants.RESOURCE_NOT_FOUND + item);
                         return false;
                     }
                     return true;
@@ -115,7 +116,7 @@ public class RootResourceService implements BaseResourceService<PackageInfo> {
     private ResponseWrapper<PackageInfo> processDelete(ResourceResolver resourceResolver, String path, PackageInfo packageInfo) {
         Resource resource = resourceResolver.getResource(path);
         if (resource == null) {
-            return new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, Collections.singletonList("Resource not found: " + path));
+            return new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, Collections.singletonList(BackpackConstants.RESOURCE_NOT_FOUND + path));
         }
         packageInfo.deletePath(path);
         return new ResponseWrapper<>(packageInfo, ResponseWrapper.ResponseStatus.SUCCESS);
@@ -124,7 +125,7 @@ public class RootResourceService implements BaseResourceService<PackageInfo> {
     private ResponseWrapper<PackageInfo> processDeleteChildren(ResourceResolver resourceResolver, String path, PackageInfo packageInfo) {
         Resource resource = resourceResolver.getResource(path);
         if (resource == null) {
-            return new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, Collections.singletonList("Resource not found: " + path));
+            return new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, Collections.singletonList(BackpackConstants.RESOURCE_NOT_FOUND + path));
         }
         packageInfo.getPathInfo(path)
                 .getChildren()

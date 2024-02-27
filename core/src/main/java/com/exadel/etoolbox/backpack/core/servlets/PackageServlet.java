@@ -7,6 +7,7 @@ import com.exadel.etoolbox.backpack.core.services.pckg.EditPackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageInfoModel;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageModel;
+import com.exadel.etoolbox.backpack.core.util.ServletUtils;
 import com.exadel.etoolbox.backpack.request.RequestAdapter;
 import com.exadel.etoolbox.backpack.request.validator.ValidatorResponse;
 import com.google.gson.Gson;
@@ -32,8 +33,6 @@ public class PackageServlet extends SlingAllMethodsServlet {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String APPLICATION_JSON = "application/json";
-
     private static final Gson GSON = new Gson();
 
     @Reference
@@ -57,7 +56,7 @@ public class PackageServlet extends SlingAllMethodsServlet {
     @Override
     protected void doGet(final SlingHttpServletRequest request,
                          final SlingHttpServletResponse response) throws IOException {
-        response.setContentType(APPLICATION_JSON);
+        response.setContentType(ServletUtils.APPLICATION_JSON_CONTENT_TYPE);
         ValidatorResponse<PackageInfoModel> validatorResponse = requestAdapter.adaptValidate(request.getParameterMap(), PackageInfoModel.class);
 
         if (!validatorResponse.isValid()) {
@@ -76,7 +75,7 @@ public class PackageServlet extends SlingAllMethodsServlet {
     @Override
     protected void doPost(final SlingHttpServletRequest request,
                           final SlingHttpServletResponse response) throws IOException {
-        response.setContentType(APPLICATION_JSON);
+        response.setContentType(ServletUtils.APPLICATION_JSON_CONTENT_TYPE);
         ValidatorResponse<PackageModel> validatorResponse = requestAdapter.adaptValidate(request.getParameterMap(), PackageModel.class);
         if (!validatorResponse.isValid()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -95,7 +94,7 @@ public class PackageServlet extends SlingAllMethodsServlet {
 
     @Override
     protected void doPut(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
-        response.setContentType(APPLICATION_JSON);
+        response.setContentType(ServletUtils.APPLICATION_JSON_CONTENT_TYPE);
         ValidatorResponse<PackageModel> validatorResponse = requestAdapter.adaptValidate(request.getParameterMap(), PackageModel.class);
         if (!validatorResponse.isValid()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

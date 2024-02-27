@@ -18,6 +18,7 @@ import com.day.cq.dam.api.Asset;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
+import com.exadel.etoolbox.backpack.core.services.util.constants.BackpackConstants;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageModel;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -65,22 +66,6 @@ import java.util.stream.Stream;
 public class BasePackageServiceImpl implements BasePackageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasePackageServiceImpl.class);
-
-    protected static final String PACKAGE_METADATA = "metadata";
-    protected static final String GENERAL_RESOURCES = "generalResources";
-    protected static final String DEFAULT_PACKAGE_GROUP = "EToolbox_BackPack";
-
-    public static final String ERROR = "ERROR: ";
-
-
-    protected static final String REFERENCED_RESOURCES = "referencedResources";
-
-    protected static final String PACKAGE_DOES_NOT_EXIST_MESSAGE = "Package by this path %s doesn't exist in the repository.";
-    private static final String THUMBNAIL_FILE = "thumbnail.png";
-    private static final String DEFAULT_THUMBNAILS_LOCATION = "/apps/etoolbox-backpack/assets/";
-    private static final String THUMBNAIL_PATH_TEMPLATE = DEFAULT_THUMBNAILS_LOCATION + "backpack_%s.png";
-
-    protected static final String THUMBNAIL_PATH_PARAMETER = "thumbnailPath";
 
     protected static final Gson GSON = new Gson();
 
@@ -159,7 +144,7 @@ public class BasePackageServiceImpl implements BasePackageService {
         if (StringUtils.isNotBlank(packageModel.getGroup())) {
             packageInfo.setGroupName(packageModel.getGroup());
         } else {
-            packageInfo.setGroupName(DEFAULT_PACKAGE_GROUP);
+            packageInfo.setGroupName(BackpackConstants.DEFAULT_PACKAGE_GROUP);
         }
 
         return packageInfo;
@@ -218,7 +203,7 @@ public class BasePackageServiceImpl implements BasePackageService {
                 return;
             }
 
-            JcrUtil.copy(thumbnailNode, packageNode, THUMBNAIL_FILE);
+            JcrUtil.copy(thumbnailNode, packageNode, BackpackConstants.THUMBNAIL_FILE);
             packageNode.getSession().save();
         } catch (RepositoryException e) {
             LOGGER.error("A repository exception occurred: ", e);
@@ -230,7 +215,7 @@ public class BasePackageServiceImpl implements BasePackageService {
      */
     @Override
     public String getDefaultThumbnailPath(boolean isEmpty) {
-        return String.format(THUMBNAIL_PATH_TEMPLATE, isEmpty ? "empty" : "full");
+        return String.format(BackpackConstants.THUMBNAIL_PATH_TEMPLATE, isEmpty ? "empty" : "full");
     }
 
     /**
@@ -241,9 +226,9 @@ public class BasePackageServiceImpl implements BasePackageService {
                                final Session userSession,
                                final PackageInfo packageInfo,
                                final DefaultWorkspaceFilter filter) {
-        jcrPackageDefinition.set(PACKAGE_METADATA, GSON.toJson(packageInfo.getPathInfoMap()), true);
-        jcrPackageDefinition.set(THUMBNAIL_PATH_PARAMETER, GSON.toJson(packageInfo.getThumbnailPath()), true);
-        jcrPackageDefinition.set(GENERAL_RESOURCES, GSON.toJson(packageInfo.getPaths()), true);
+        jcrPackageDefinition.set(BackpackConstants.PACKAGE_METADATA, GSON.toJson(packageInfo.getPathInfoMap()), true);
+        jcrPackageDefinition.set(BackpackConstants.THUMBNAIL_PATH_PARAMETER, GSON.toJson(packageInfo.getThumbnailPath()), true);
+        jcrPackageDefinition.set(BackpackConstants.GENERAL_RESOURCES, GSON.toJson(packageInfo.getPaths()), true);
         jcrPackageDefinition.setFilter(filter, true);
 
         String thumbnailPath = StringUtils.defaultIfBlank(packageInfo.getThumbnailPath(), getDefaultThumbnailPath(true));
@@ -255,7 +240,7 @@ public class BasePackageServiceImpl implements BasePackageService {
      */
     @Override
     public void addExceptionToLog(final PackageInfo packageInfo, final Exception e) {
-        packageInfo.addLogMessage(ERROR + e.getMessage());
+        packageInfo.addLogMessage(BackpackConstants.ERROR + e.getMessage());
         if (enableStackTrace) {
             packageInfo.addLogMessage(ExceptionUtils.getStackTrace(e));
         }

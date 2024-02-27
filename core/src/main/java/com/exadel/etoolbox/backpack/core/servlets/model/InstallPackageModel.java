@@ -11,7 +11,7 @@ import org.apache.sling.api.resource.ResourceResolver;
  * @see InstallPackageServlet
  */
 @RequestMapping
-public class InstallPackageModel extends PackageInfoModel{
+public class InstallPackageModel extends PackageInfoModel {
 
     @RequestParam
     private int threshold;
@@ -21,6 +21,7 @@ public class InstallPackageModel extends PackageInfoModel{
 
     /**
      * Gets the auto-save threshold of the installed package
+     *
      * @return int value
      */
     public int getThreshold() {
@@ -29,6 +30,7 @@ public class InstallPackageModel extends PackageInfoModel{
 
     /**
      * Gets the dependency handling of the installed package
+     *
      * @return String value
      */
     public String getDependencyHandling() {

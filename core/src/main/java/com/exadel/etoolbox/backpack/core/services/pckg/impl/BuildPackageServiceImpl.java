@@ -20,6 +20,7 @@ import com.exadel.etoolbox.backpack.core.services.pckg.BuildPackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
 import com.exadel.etoolbox.backpack.core.services.util.LoggerService;
 import com.exadel.etoolbox.backpack.core.services.util.SessionService;
+import com.exadel.etoolbox.backpack.core.services.util.constants.BackpackConstants;
 import com.exadel.etoolbox.backpack.core.servlets.model.BuildPackageModel;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
@@ -43,7 +44,10 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -81,7 +85,7 @@ public class BuildPackageServiceImpl implements BuildPackageService {
 
         final Session session = resourceResolver.adaptTo(Session.class);
         if (session == null) {
-            packageInfo.addLogMessage(BasePackageServiceImpl.ERROR + " session is null");
+            packageInfo.addLogMessage(BackpackConstants.ERROR + " session is null");
             return packageInfo;
         }
         JcrPackageManager packMgr = basePackageService.getPackageManager(session);
@@ -98,7 +102,7 @@ public class BuildPackageServiceImpl implements BuildPackageService {
                 if (jcrPackage != null) {
                     JcrPackageDefinition definition = jcrPackage.getDefinition();
                     if (definition == null) {
-                        packageInfo.addLogMessage(BasePackageServiceImpl.ERROR + " package definition is null");
+                        packageInfo.addLogMessage(BackpackConstants.ERROR + " package definition is null");
                         return packageInfo;
                     }
                     includeGeneralResources(definition, s -> {
@@ -171,7 +175,7 @@ public class BuildPackageServiceImpl implements BuildPackageService {
                 packageBuildInfo.addLogMessage("Package built in " + stopWatch);
             } else {
                 packageBuildInfo.setPackageStatus(PackageStatus.ERROR);
-                packageBuildInfo.addLogMessage(BasePackageServiceImpl.ERROR + String.format(BasePackageServiceImpl.PACKAGE_DOES_NOT_EXIST_MESSAGE, packageBuildInfo.getPackagePath()));
+                packageBuildInfo.addLogMessage(BackpackConstants.ERROR + String.format(BackpackConstants.PACKAGE_DOES_NOT_EXIST_MESSAGE, packageBuildInfo.getPackagePath()));
             }
         } catch (RepositoryException | PackageException | IOException e) {
             packageBuildInfo.setPackageStatus(PackageStatus.ERROR);
@@ -249,7 +253,7 @@ public class BuildPackageServiceImpl implements BuildPackageService {
     private void includeGeneralResources(final JcrPackageDefinition definition, final Consumer<String> pathConsumer) {
         Type listType = new TypeToken<List<String>>() {
         }.getType();
-        List<String> packageGeneralResources = GSON.fromJson(definition.get(BasePackageServiceImpl.GENERAL_RESOURCES), listType);
+        List<String> packageGeneralResources = GSON.fromJson(definition.get(BackpackConstants.GENERAL_RESOURCES), listType);
         if (packageGeneralResources != null) {
             packageGeneralResources.forEach(pathConsumer);
         }

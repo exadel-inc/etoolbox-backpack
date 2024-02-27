@@ -18,7 +18,7 @@ import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.EditPackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
-import com.exadel.etoolbox.backpack.core.services.util.constants.Constants;
+import com.exadel.etoolbox.backpack.core.services.util.constants.BackpackConstants;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageModel;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.vault.fs.config.DefaultWorkspaceFilter;
@@ -62,7 +62,7 @@ public class EditPackageServiceImpl implements EditPackageService {
                     && basePackageService.isPackageExist(packMgr, modificationPackageModel.getPackageName(), modificationPackageModel.getGroup(), modificationPackageModel.getVersion())) {
                 String packageExistMsg = "Package with this name already exists in the " + packageInfo.getGroupName() + " group.";
 
-                packageInfo.addLogMessage(Constants.ERROR + packageExistMsg);
+                packageInfo.addLogMessage(BackpackConstants.ERROR + packageExistMsg);
                 packageInfo.setPackageStatus(PackageStatus.ERROR);
                 LOGGER.error(packageExistMsg);
                 return packageInfo;
