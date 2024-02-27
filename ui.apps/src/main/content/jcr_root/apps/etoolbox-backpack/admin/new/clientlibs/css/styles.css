@@ -139,3 +139,7 @@
     overflow-x: auto;
     overflow-y: auto;
 }
+
+#installSubmitBtn {
+    margin-top: 0;
+}

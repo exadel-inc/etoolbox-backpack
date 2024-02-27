@@ -159,7 +159,7 @@
                         sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
                         granite:class="split-start"
                         granite:id="buildAndDownloadAction"
-                        text="Build / Download"
+                        text="Build &amp; Download"
                         variant="primary"/>
                 <buildVariants
                         jcr:primaryType="nt:unstructured"

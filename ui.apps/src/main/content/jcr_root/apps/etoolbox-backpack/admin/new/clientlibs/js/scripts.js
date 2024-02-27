@@ -212,6 +212,25 @@
         }
     });
 
+    $(window).adaptTo("foundation-registry").register("foundation.form.response.ui.error", {
+        name: "errorResponseCreated",
+        handler: function (form, data, xhr) {
+            const title = Granite.I18n.get("Error");
+            let message = "";
+            if (xhr.responseJSON) {
+                message = xhr.responseJSON.log;
+            } else if (xhr.responseText) {
+                const response = JSON.parse(xhr.responseText);
+                if (response && response.log) {
+                    message = response.log;
+                }
+            }
+
+            const ui = $(window).adaptTo("foundation-ui");
+            ui.alert(title, message, "error");
+        }
+    });
+
     // Avoid collection-related exceptions when using Granite Action API with a non-collection UI element
 
     registry.register('foundation.adapters', {
