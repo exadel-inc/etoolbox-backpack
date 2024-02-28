@@ -27,8 +27,8 @@
     align-items: center;
     display: flex;
     gap: 1rem;
-    height: 3.5rem;
-    padding: 0.25rem 1rem;
+    height: 2.5rem;
+    padding: 0.5rem 1rem;
 }
 
 .package-entry.foundation-selections-item {
@@ -37,7 +37,7 @@
 
 .toggler {
     cursor: pointer;
-    width: 0.75rem;
+    width: 0.7rem;
 }
 
 [data-tree-state="none"] .toggler {
@@ -79,12 +79,12 @@
 
 .package-entry.primary .path {
     color: #666;
-    font-size: 1.1rem;
+    font-size: 1.0rem;
 }
 
 .package-entry.secondary .path {
     color: #6D6D6D;
-    font-size: 1.05rem;
+    font-size: 0.9rem;
 }
 
 .parents {
@@ -94,6 +94,7 @@
 .children {
     color: #84adff;
     font-weight: 600;
+    font-size: 0.8rem;
 }
 
 .split-start {

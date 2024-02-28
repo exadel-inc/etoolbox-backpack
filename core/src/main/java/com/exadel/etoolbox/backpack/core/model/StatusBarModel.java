@@ -43,16 +43,12 @@ public class StatusBarModel {
             }
             group = packageInfo.getGroupName();
             version = packageInfo.getVersion();
-            size = getStringOrEmpty(packageInfo.getDataSize());
+            size = convertBytesToMegabytes(packageInfo.getDataSize());
             lastBuilt = packageInfo.getPackageBuilt() == null ? StringUtils.EMPTY : packageInfo.getPackageBuilt().getTime().toString();
             lastInstalled = packageInfo.getPackageInstalled() == null ? StringUtils.EMPTY : packageInfo.getPackageInstalled().getTime().toString();
             lastReplicated = packageInfo.getPackageReplicated() == null ? StringUtils.EMPTY : packageInfo.getPackageReplicated().getTime().toString();
             lastModifiedBy = packageInfo.getLastModifiedBy();
         }
-    }
-
-    private String getStringOrEmpty(Object object) {
-        return object == null ? StringUtils.EMPTY : object.toString();
     }
 
     public String getGroup() {
@@ -81,5 +77,9 @@ public class StatusBarModel {
 
     public String getLastModifiedBy() {
         return lastModifiedBy;
+    }
+
+    private String convertBytesToMegabytes(long bytes) {
+        return String.format("%.3f Mb", ((double) bytes) / 1024 / 1024);
     }
 }
