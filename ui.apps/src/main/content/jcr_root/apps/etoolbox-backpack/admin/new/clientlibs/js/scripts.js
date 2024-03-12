@@ -62,8 +62,9 @@
     $(document).on('click', '.add-references-action', function(event) {
         const selection = $('.foundation-selections-item');
         const referenceType = event.target.closest('[data-type]').getAttribute('data-type');
+        const payload = selection.attr('data-entry-title');
         if (selection) {
-            doPost("/services/backpack/add/" + referenceType, {'packagePath': packagePath, 'payload': selection.attr('data-entry-title')}, success);
+            doPost("/services/backpack/add/" + referenceType, {'packagePath': packagePath, 'payload': payload}, success(payload));
         }
     });
 
@@ -146,8 +147,8 @@
        });
     }
 
-    function success() {
-        window.location.reload();
+    function success(path) {
+        openSuccessDialog(path);
     }
 
     // Register visibility conditions for package entries' actions
@@ -332,6 +333,35 @@
             dialog.remove();
             window.location.reload();
           });
+        });
+
+        document.body.appendChild(dialog);
+        dialog.show();
+
+        return dialog;
+    }
+
+    function openSuccessDialog(path) {
+
+        const dialog = new Coral.Dialog().set({
+            id: 'SuccessDialog',
+            header: {
+                innerHTML: 'Success'
+            },
+            content: {
+                innerHTML: `<div>References for ${path} were successfully added</div>`
+            },
+            footer: {
+                innerHTML: '<button is="coral-button" variant="primary" coral-close>Ok</button>'
+            }
+        });
+
+        dialog.on('coral-overlay:close', function(event) {
+            event.preventDefault();
+            setTimeout(function () {
+                dialog.remove();
+                window.location.reload();
+            });
         });
 
         document.body.appendChild(dialog);
