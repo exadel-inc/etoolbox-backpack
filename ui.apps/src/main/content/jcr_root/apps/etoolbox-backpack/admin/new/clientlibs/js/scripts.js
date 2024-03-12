@@ -9,11 +9,11 @@
 
     // Make package entries selectable
 
-    $(document).on('click', '.foundation-collection-item', function(e) {
+    $(document).on('click', '.foundation-collection-custom-item', function(e) {
         const $this = $(this);
         const $pulldown = $('.selection-pulldown');
         const mustSelect = !$this.hasClass('foundation-selections-item');
-        $('.foundation-collection-item').removeClass('foundation-selections-item');
+        $('.foundation-collection-custom-item').removeClass('foundation-selections-item');
         $pulldown.addClass('foundation-collection-action-hidden');
         if (mustSelect) {
             $this.addClass('foundation-selections-item');
@@ -27,7 +27,7 @@
 
     $(document).on('click', '.toggler', function() {
         const $this = $(this);
-        const $togglable = $this.closest('.foundation-collection-item');
+        const $togglable = $this.closest('.foundation-collection-custom-item');
         const treeState = $togglable.attr('data-tree-state');
         if (treeState === 'collapsed') {
             $togglable.attr('data-tree-state', 'expanded');
@@ -246,7 +246,7 @@
                 },
 
                 clear: function() {
-                    collection.find(".foundation-collection-item").remove();
+                    collection.find(".foundation-collection-custom-item").remove();
                 },
 
                 getPagination: function () {
