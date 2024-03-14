@@ -9,7 +9,7 @@
 
     // Make package entries selectable
 
-    $(document).on('click', '.foundation-collection-item', function(e) {
+    $(document).on('click', '.foundation-collection-item.result-row', function(e) {
         const $this = $(this);
         const $pulldown = $('.selection-pulldown');
         const mustSelect = !$this.hasClass('foundation-selections-item');
