@@ -39,7 +39,7 @@ public class DeleteChildResourceService implements BaseResourceService<PathInfo>
             return new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, Collections.singletonList(BackpackConstants.PACKAGE_NOT_FOUND + pathModel.getPackagePath()));
         }
 
-        LinkedList<String> params = parsePayloadToList(pathModel.getPayload());
+        LinkedList<String> params = parsePayloadToList(pathModel.getPayload().get(0));
 
         if (params.size() != 2 || params.getFirst() == null || params.getLast() == null) {
             return new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, Collections.singletonList("Invalid payload: " + pathModel.getPayload()));

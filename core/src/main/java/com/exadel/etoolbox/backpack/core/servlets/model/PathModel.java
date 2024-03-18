@@ -26,6 +26,7 @@ import javax.annotation.PostConstruct;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /**
  * Represents the set of user-defined options for a path filter creation.
@@ -44,7 +45,7 @@ public class PathModel {
     @RequestParam
     @Validate(validator = RequiredValidator.class,
             invalidMessages = "Payload is required")
-    private String payload;
+    private List<String> payload;
 
     @RequestParam
     @Validate(validator = RequiredValidator.class,
@@ -54,7 +55,7 @@ public class PathModel {
     public PathModel() {
     }
 
-    public PathModel(final String packagePath, final String payload, final String type) {
+    public PathModel(final String packagePath, final List<String> payload, final String type) {
         this.packagePath = packagePath;
         this.payload = payload;
         this.type = type;
@@ -72,7 +73,7 @@ public class PathModel {
         }
     }
 
-    public String getPayload() {
+    public List<String> getPayload() {
         return payload;
     }
 

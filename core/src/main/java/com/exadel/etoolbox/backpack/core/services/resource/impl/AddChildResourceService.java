@@ -47,7 +47,7 @@ public class AddChildResourceService implements BaseResourceService<PathInfo> {
             return new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, Collections.singletonList(BackpackConstants.PACKAGE_NOT_FOUND + pathModel.getPackagePath()));
         }
 
-        Resource resource = resourceResolver.getResource(pathModel.getPayload());
+        Resource resource = resourceResolver.getResource(pathModel.getPayload().get(0));
 
         if (resource == null) {
             return new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, Collections.singletonList(BackpackConstants.PACKAGE_NOT_FOUND + pathModel.getPayload()));

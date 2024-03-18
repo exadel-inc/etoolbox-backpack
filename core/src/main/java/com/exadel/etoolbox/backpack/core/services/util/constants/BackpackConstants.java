@@ -17,4 +17,7 @@ public class BackpackConstants {
     public static final String THUMBNAIL_PATH_TEMPLATE = "/apps/etoolbox-backpack/assets/backpack_%s.png";
     public static final String PACKAGES_ROOT_PATH = "/etc/packages";
     public static final String THUMBNAIL_PATH_PARAMETER = "thumbnailPath";
+    public static final String OPEN_BRACKET = "[";
+    public static final String CLOSE_BRACKET = "]";
+    public static final String COMMA = ",";
 }

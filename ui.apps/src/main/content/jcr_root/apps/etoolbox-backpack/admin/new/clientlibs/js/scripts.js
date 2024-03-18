@@ -12,12 +12,14 @@
     $(document).on('click', '.foundation-collection-item.result-row', function(e) {
         const $this = $(this);
         const $pulldown = $('.selection-pulldown');
-        const mustSelect = !$this.hasClass('foundation-selections-item');
-        $('.foundation-collection-item').removeClass('foundation-selections-item');
         $pulldown.addClass('foundation-collection-action-hidden');
-        if (mustSelect) {
+        if ($this.hasClass('foundation-selections-item')) {
+            $this.removeClass('foundation-selections-item');
+        } else {
             $this.addClass('foundation-selections-item');
-            $this.hasClass('primary') &&  $pulldown.removeClass('foundation-collection-action-hidden');
+        }
+        if ($('.primary.foundation-selections-item').length > 0) {
+            $pulldown.removeClass('foundation-collection-action-hidden');
         }
         $this.closest('.foundation-collection').trigger("foundation-selections-change");
         e.stopPropagation();
@@ -75,12 +77,32 @@
             return;
         }
 
-        if (selection.hasClass('secondary')) {
-           const payload = [selection.attr('data-entry-title'), selection.attr('data-subsidiary-title')];
-           doPost("/services/backpack/delete/"  + selection.attr('data-type'), {'packagePath': packagePath, 'payload': JSON.stringify(payload)}, success);
-        } else {
-           doPost("/services/backpack/delete", {'packagePath': packagePath, 'payload': selection.attr('data-entry-title')}, success);
-        }
+        const payload = [];
+        selection.each(function () {
+            if ($(this).hasClass('secondary')) {
+                // payload.push($(this).attr('data-subsidiary-title'));
+                payload.push('[' + $(this).attr('data-entry-title') + ',' + $(this).attr('data-subsidiary-title') + ']');
+            } else {
+                payload.push($(this).attr('data-entry-title'));
+                var children = $(this).find('.secondary');
+                children.each(function () {
+                    // payload.push($(this).attr('data-subsidiary-title'));
+                    payload.push('[' + $(this).attr('data-entry-title') + ',' + $(this).attr('data-subsidiary-title') + ']');
+                });
+            }
+        });
+        doPost("/services/backpack/delete", {'packagePath': packagePath, 'payload': payload}, success);
+
+        // if (selection.hasClass('secondary')) {
+        //     const payload = [selection.attr('data-entry-title'), selection.attr('data-subsidiary-title')];
+        //     doPost("/services/backpack/delete/"  + selection.attr('data-type'), {'packagePath': packagePath, 'payload': JSON.stringify(payload)}, success);
+        // } else {
+        //     const payload = [];
+        //     selection.each(function () {
+        //         payload.push($(this).attr('data-entry-title'));
+        //     });
+        //     doPost("/services/backpack/delete", {'packagePath': packagePath, 'payload': payload}, success);
+        // }
     });
 
     $(document).on('click', '#downloadAction', function() {
@@ -92,11 +114,11 @@
             if (data.log) {
                 const dialog = openLogsDialog(data.log);
                 const assetText = data.dataSize === 0
-                ? 'There are no assets in the package'
-                : '<h4>Approximate size of the assets in the package: ' + bytesToSize(data.dataSize) + '</h4>';
+                    ? 'There are no assets in the package'
+                    : '<h4>Approximate size of the assets in the package: ' + bytesToSize(data.dataSize) + '</h4>';
                 $(dialog.content).append('<div>' + assetText + '</div>');
                 setTimeout(function () {
-                   $(dialog.content).children("div").last()[0].scrollIntoView(false);
+                    $(dialog.content).children("div").last()[0].scrollIntoView(false);
                 })
             }
         });
@@ -113,7 +135,7 @@
         buildPackage(false, function(data) {
             const dialog = openLogsDialog(data.log);
             dialog.on('coral-overlay:beforeclose', function(event) {
-                 window.location.href = packagePath;
+                window.location.href = packagePath;
             });
             updateLog(data.packageStatus, data.log.length, dialog);
         });
@@ -130,21 +152,21 @@
         e.preventDefault();
         const form = $(this);
         doPost(form.attr('action'), form.serialize(), function(data) {
-              const dialog = openLogsDialog(data.log);
-              updateLog(data.packageStatus, data.log.length, dialog);
+            const dialog = openLogsDialog(data.log);
+            updateLog(data.packageStatus, data.log.length, dialog);
         });
     })
 
     function doPost(url, data, success) {
-       $.ajax({
-         type: "POST",
-         url: url,
-         data: data,
-         success: success,
-         error: function(data) {
-            console.log(data);
-         }
-       });
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: data,
+            success: success,
+            error: function(data) {
+                console.log(data);
+            }
+        });
     }
 
     function success(path) {
@@ -199,9 +221,9 @@
             if (data.status == "ERROR" || data.status == "WARNING") {
                 const dialog = openLogsDialog(data.logs);
                 dialog.on('coral-overlay:close', function(event) {
-                   if (data.status == "WARNING") {
-                       window.location.reload();
-                   }
+                    if (data.status == "WARNING") {
+                        window.location.reload();
+                    }
                 });
                 return;
             }
@@ -255,8 +277,8 @@
                 },
 
                 reload: function () {
-                   collection.trigger("coral-collection:remove")
-                   collection.trigger("foundation-collection-reload");
+                    collection.trigger("coral-collection:remove")
+                    collection.trigger("foundation-collection-reload");
                 }
             };
         }
@@ -312,27 +334,27 @@
     function openLogsDialog(init) {
 
         const dialog = new Coral.Dialog().set({
-           id: 'LogsDialog',
-           header: {
-               innerHTML: 'Logs'
-           },
-           footer: {
-               innerHTML: '<button is="coral-button" variant="primary" coral-close>Ok</button>'
-           }
+            id: 'LogsDialog',
+            header: {
+                innerHTML: 'Logs'
+            },
+            footer: {
+                innerHTML: '<button is="coral-button" variant="primary" coral-close>Ok</button>'
+            }
         });
 
         if (init && init.length > 0) {
-           $.each(init, function (index, value) {
-               $(dialog.content).append('<div>' + value + '</div>');
-           });
+            $.each(init, function (index, value) {
+                $(dialog.content).append('<div>' + value + '</div>');
+            });
         }
 
         dialog.on('coral-overlay:close', function(event) {
-          event.preventDefault();
-          setTimeout(function () {
-            dialog.remove();
-            window.location.reload();
-          });
+            event.preventDefault();
+            setTimeout(function () {
+                dialog.remove();
+                window.location.reload();
+            });
         });
 
         document.body.appendChild(dialog);
@@ -371,7 +393,7 @@
     }
 
     function openPackageDialog(success, error) {
-         $('#editDialogButton').trigger('click');
+        $('#editDialogButton').trigger('click');
     }
 
     function getPackageInfo(packagePath, errorFunction) {
@@ -383,13 +405,13 @@
     }
 
     $(window).on('load', function() {
-       if (packagePath && packagePath.length > 0) {
-           getPackageInfo(packagePath, function (data) {
-               openPackageDialog()
-           });
-       } else {
+        if (packagePath && packagePath.length > 0) {
+            getPackageInfo(packagePath, function (data) {
+                openPackageDialog()
+            });
+        } else {
             openPackageDialog()
-       }
+        }
     });
 
 })(Granite, Granite.$);

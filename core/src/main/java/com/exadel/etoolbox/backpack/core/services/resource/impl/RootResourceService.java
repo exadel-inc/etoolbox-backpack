@@ -1,6 +1,7 @@
 package com.exadel.etoolbox.backpack.core.services.resource.impl;
 
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
+import com.exadel.etoolbox.backpack.core.dto.response.PathInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.ResponseWrapper;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
@@ -8,6 +9,7 @@ import com.exadel.etoolbox.backpack.core.services.resource.BaseResourceService;
 import com.exadel.etoolbox.backpack.core.services.resource.QuerySearchService;
 import com.exadel.etoolbox.backpack.core.services.util.constants.BackpackConstants;
 import com.exadel.etoolbox.backpack.core.servlets.model.PathModel;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Component;
@@ -43,16 +45,16 @@ public class RootResourceService implements BaseResourceService<PackageInfo> {
 
         switch (pathModel.getType()) {
             case "add/path":
-                responseWrapper = processPath(resourceResolver, pathModel.getPayload(), packageInfo);
+                responseWrapper = processPath(resourceResolver, pathModel.getPayload().get(0), packageInfo);
                 break;
             case "add/list":
-                responseWrapper = processList(resourceResolver, pathModel.getPayload(), packageInfo);
+                responseWrapper = processList(resourceResolver, pathModel.getPayload().get(0), packageInfo);
                 break;
             case "add/query":
-                responseWrapper = processQuery(resourceResolver, pathModel.getPayload(), packageInfo);
+                responseWrapper = processQuery(resourceResolver, pathModel.getPayload().get(0), packageInfo);
                 break;
             case "delete/children":
-                responseWrapper = processDeleteChildren(resourceResolver, pathModel.getPayload(), packageInfo);
+                responseWrapper = processDeleteChildren(resourceResolver, pathModel.getPayload().get(0), packageInfo);
                 break;
             case "delete":
                 responseWrapper = processDelete(resourceResolver, pathModel.getPayload(), packageInfo);
@@ -113,12 +115,18 @@ public class RootResourceService implements BaseResourceService<PackageInfo> {
         return new ResponseWrapper<>(packageInfo, ResponseWrapper.ResponseStatus.SUCCESS);
     }
 
-    private ResponseWrapper<PackageInfo> processDelete(ResourceResolver resourceResolver, String path, PackageInfo packageInfo) {
-        Resource resource = resourceResolver.getResource(path);
-        if (resource == null) {
-            return new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, Collections.singletonList(BackpackConstants.RESOURCE_NOT_FOUND + path));
+    private ResponseWrapper<PackageInfo> processDelete(ResourceResolver resourceResolver, List<String> paths, PackageInfo packageInfo) {
+        for (String path : paths) {
+            if (path.startsWith(BackpackConstants.OPEN_BRACKET) && path.endsWith(BackpackConstants.CLOSE_BRACKET)) {
+                String[] split = StringUtils.substringBetween(path, BackpackConstants.OPEN_BRACKET, BackpackConstants.CLOSE_BRACKET).split(BackpackConstants.COMMA);
+                if (split.length == 2) {
+                    packageInfo.getPathInfoMap().getOrDefault(split[0], new PathInfo()).getAssets().remove(split[1]);
+                    packageInfo.deletePath(split[1]);
+                }
+            } else {
+                packageInfo.deletePath(path);
+            }
         }
-        packageInfo.deletePath(path);
         return new ResponseWrapper<>(packageInfo, ResponseWrapper.ResponseStatus.SUCCESS);
     }
 
