@@ -64,7 +64,12 @@
     $(document).on('click', '.add-references-action', function(event) {
         const selection = $('.foundation-selections-item');
         const referenceType = event.target.closest('[data-type]').getAttribute('data-type');
-        const payload = selection.attr('data-entry-title');
+        const payload = [];
+        selection.each(function () {
+            if (!$(this).hasClass('secondary')) {
+                payload.push($(this).attr('data-entry-title'));
+            }
+        });
         if (selection) {
             doPost("/services/backpack/add/" + referenceType, {'packagePath': packagePath, 'payload': payload}, success(payload));
         }
@@ -80,29 +85,16 @@
         const payload = [];
         selection.each(function () {
             if ($(this).hasClass('secondary')) {
-                // payload.push($(this).attr('data-subsidiary-title'));
                 payload.push('[' + $(this).attr('data-entry-title') + ',' + $(this).attr('data-subsidiary-title') + ']');
             } else {
                 payload.push($(this).attr('data-entry-title'));
                 var children = $(this).find('.secondary');
                 children.each(function () {
-                    // payload.push($(this).attr('data-subsidiary-title'));
                     payload.push('[' + $(this).attr('data-entry-title') + ',' + $(this).attr('data-subsidiary-title') + ']');
                 });
             }
         });
         doPost("/services/backpack/delete", {'packagePath': packagePath, 'payload': payload}, success);
-
-        // if (selection.hasClass('secondary')) {
-        //     const payload = [selection.attr('data-entry-title'), selection.attr('data-subsidiary-title')];
-        //     doPost("/services/backpack/delete/"  + selection.attr('data-type'), {'packagePath': packagePath, 'payload': JSON.stringify(payload)}, success);
-        // } else {
-        //     const payload = [];
-        //     selection.each(function () {
-        //         payload.push($(this).attr('data-entry-title'));
-        //     });
-        //     doPost("/services/backpack/delete", {'packagePath': packagePath, 'payload': payload}, success);
-        // }
     });
 
     $(document).on('click', '#downloadAction', function() {
