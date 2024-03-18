@@ -42,8 +42,14 @@
 
     $(document).on('click', '#includeChildrenAction', function() {
         const selection = $('.foundation-selections-item');
+        const payload = [];
+        selection.each(function () {
+            if (!$(this).hasClass('secondary')) {
+                payload.push($(this).attr('data-entry-title'));
+            }
+        });
         if (selection) {
-            doPost("/services/backpack/add/children", {'packagePath': packagePath, 'payload': selection.attr('data-entry-title')}, success);
+            doPost("/services/backpack/add/children", {'packagePath': packagePath, 'payload': payload}, success);
         }
     });
 
@@ -56,8 +62,14 @@
 
     $(document).on('click', '#liveCopiesAction', function() {
         const selection = $('.foundation-selections-item');
+        const payload = [];
+        selection.each(function () {
+            if (!$(this).hasClass('secondary')) {
+                payload.push($(this).attr('data-entry-title'));
+            }
+        });
         if (selection) {
-            doPost("/services/backpack/add/liveCopies", {'packagePath': packagePath, 'payload': selection.attr('data-entry-title')}, success);
+            doPost("/services/backpack/add/liveCopies", {'packagePath': packagePath, 'payload': payload}, success);
         }
     });
 
