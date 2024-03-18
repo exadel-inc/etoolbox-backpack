@@ -128,6 +128,34 @@
         });
     });
 
+    $(document).on('click', '#replicateAction', function() {
+        var fui = $(window).adaptTo("foundation-ui");
+        fui.prompt("Please confirm", "Replicate this package?", "notice", [{
+            text: Granite.I18n.get("Cancel")
+        }, {
+            text: "Replicate",
+            primary: true,
+            handler: function () {
+                replicatePackage(function(data) {
+                    if (data.log) {
+                        const dialog = openLogsDialog(data.log);
+                        const assetText = data.dataSize === 0
+                            ? 'There are no assets in the package'
+                            : '<h4>Approximate size of the assets in the package: ' + bytesToSize(data.dataSize) + '</h4>';
+                        $(dialog.content).append('<div>' + assetText + '</div>');
+                        setTimeout(function () {
+                            $(dialog.content).children("div").last()[0].scrollIntoView(false);
+                        })
+                    }
+                });
+            }
+        }]);
+    });
+
+    $(document).on('click', '#mainMenuAction', function() {
+        window.location.replace("/tools/etoolbox/backpack.html");
+    });
+
     $(document).on('click', '#buildAction', function() {
         buildPackage(false, function(data) {
             const dialog = openLogsDialog(data.log);
@@ -151,6 +179,76 @@
             dialog.show();
         }
     });
+
+    $(document).on('click', '#deletePackageAction', function() {
+        if (!packagePath) {
+            return;
+        }
+        var packageName = packagePath.split('/').pop();
+
+        var ui = $(window).adaptTo("foundation-ui");
+        var message = createEl("div");
+        var intro = createEl("p").appendTo(message);
+
+        intro.text(Granite.I18n.get("You are going to delete the following package:"));
+        createEl("p").html(createEl("b")).text(packageName).appendTo(message);
+        ui.prompt(Granite.I18n.get("Delete"), message.html(), "notice", [{
+            text: Granite.I18n.get("Cancel")
+        }, {
+            text: Granite.I18n.get("Delete"),
+            warning: true,
+            handler: function () {
+                deleteAction();
+            }
+        }]);
+    });
+
+    function deleteAction() {
+
+        var data = {
+            _charset_: "UTF-8",
+            cmd: "deletePage",
+            path: packagePath,
+            force: true
+        };
+
+        $.post(Granite.HTTP.externalize("/bin/wcmcommand"), data).done(function () {
+            showAlert("Package deleted", "Delete", "warning", function () {
+                window.location.replace("/tools/etoolbox/backpack.html");
+            });
+        });
+    }
+
+    function showAlert(message, title, type, callback) {
+        var fui = $(window).adaptTo("foundation-ui"),
+            options = [{
+                id: "ok",
+                text: "OK",
+                primary: true
+            }];
+
+        message = message || "Unknown Error";
+        title = title || "Error";
+
+        fui.prompt(title, message, type, options, callback);
+    }
+
+    function createEl(name) {
+        return $(document.createElement(name));
+    }
+
+    function replicatePackage(callback) {
+        $.ajax({
+            url: '/services/backpack/replicatePackage',
+            type: "POST",
+            dataType: "json",
+            ContentType : 'application/json',
+            data: {packagePath: packagePath},
+            success: function (data) {
+                callback(data);
+            }
+        })
+    }
 
     $(document).on('submit', '#installForm', function (e) {
         e.preventDefault();
