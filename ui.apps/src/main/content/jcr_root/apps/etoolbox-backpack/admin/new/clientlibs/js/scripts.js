@@ -55,8 +55,17 @@
 
     $(document).on('click', '#excludeChildrenAction', function() {
         const selection = $('.foundation-selections-item');
+        if (!selection) {
+            return;
+        }
+        const payload = [];
+        selection.each(function () {
+            if (!$(this).hasClass('secondary')) {
+                payload.push($(this).attr('data-entry-title'));
+            }
+        });
         if (selection) {
-            doPost("/services/backpack/delete/children", {'packagePath': packagePath, 'payload': selection.attr('data-entry-title')}, success);
+            doPost("/services/backpack/delete/children", {'packagePath': packagePath, 'payload': payload}, success);
         }
     });
 
@@ -83,7 +92,7 @@
             }
         });
         if (selection) {
-            doPost("/services/backpack/add/" + referenceType, {'packagePath': packagePath, 'payload': payload}, success(payload));
+            doPost("/services/backpack/add/" + referenceType, {'packagePath': packagePath, 'payload': payload}, success(payload, true));
         }
     });
 
@@ -106,7 +115,7 @@
                 });
             }
         });
-        doPost("/services/backpack/delete", {'packagePath': packagePath, 'payload': payload}, success);
+        doPost("/services/backpack/delete", {'packagePath': packagePath, 'payload': payload}, success());
     });
 
     $(document).on('click', '#downloadAction', function() {
@@ -271,8 +280,12 @@
         });
     }
 
-    function success(path) {
-        openSuccessDialog(path);
+    function success(path, showSuccessDialog) {
+        if (showSuccessDialog) {
+            openSuccessDialog(path);
+        } else {
+            window.location.reload();
+        }
     }
 
     // Register visibility conditions for package entries' actions

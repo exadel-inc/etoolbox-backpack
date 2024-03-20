@@ -54,7 +54,7 @@ public class RootResourceService implements BaseResourceService<PackageInfo> {
                 responseWrapper = processQuery(resourceResolver, pathModel.getPayload().get(0), packageInfo);
                 break;
             case "delete/children":
-                responseWrapper = processDeleteChildren(resourceResolver, pathModel.getPayload().get(0), packageInfo);
+                responseWrapper = processDeleteChildren(resourceResolver, pathModel.getPayload(), packageInfo);
                 break;
             case "delete":
                 responseWrapper = processDelete(resourceResolver, pathModel.getPayload(), packageInfo);
@@ -121,6 +121,10 @@ public class RootResourceService implements BaseResourceService<PackageInfo> {
                 String[] split = StringUtils.substringBetween(path, BackpackConstants.OPEN_BRACKET, BackpackConstants.CLOSE_BRACKET).split(BackpackConstants.COMMA);
                 if (split.length == 2) {
                     packageInfo.getPathInfoMap().getOrDefault(split[0], new PathInfo()).getAssets().remove(split[1]);
+                    packageInfo.getPathInfoMap().getOrDefault(split[0], new PathInfo()).getLiveCopies().remove(split[1]);
+                    packageInfo.getPathInfoMap().getOrDefault(split[0], new PathInfo()).getPages().remove(split[1]);
+                    packageInfo.getPathInfoMap().getOrDefault(split[0], new PathInfo()).getChildren().remove(split[1]);
+                    packageInfo.getPathInfoMap().getOrDefault(split[0], new PathInfo()).getTags().remove(split[1]);
                     packageInfo.deletePath(split[1]);
                 }
             } else {
@@ -130,16 +134,14 @@ public class RootResourceService implements BaseResourceService<PackageInfo> {
         return new ResponseWrapper<>(packageInfo, ResponseWrapper.ResponseStatus.SUCCESS);
     }
 
-    private ResponseWrapper<PackageInfo> processDeleteChildren(ResourceResolver resourceResolver, String path, PackageInfo packageInfo) {
-        Resource resource = resourceResolver.getResource(path);
-        if (resource == null) {
-            return new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, Collections.singletonList(BackpackConstants.RESOURCE_NOT_FOUND + path));
-        }
-        packageInfo.getPathInfo(path)
-                .getChildren()
-                .clear();
-        return new ResponseWrapper<>(packageInfo, ResponseWrapper.ResponseStatus.SUCCESS);
-    }
+    private ResponseWrapper<PackageInfo> processDeleteChildren(ResourceResolver resourceResolver, List<String> paths, PackageInfo packageInfo) {
+    paths.forEach(path -> {
+        Set<String> children = packageInfo.getPathInfoMap().getOrDefault(path, new PathInfo()).getChildren();
+        children.forEach(packageInfo::deletePath);
+        children.clear();
+    });
+    return new ResponseWrapper<>(packageInfo, ResponseWrapper.ResponseStatus.SUCCESS);
+}
 
     private List<String> parseStringToList(String payload) {
         return Arrays.stream(payload.split(",")).map(String::trim).collect(Collectors.toList());
