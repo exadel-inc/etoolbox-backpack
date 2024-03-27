@@ -7,15 +7,7 @@
               class="coral-Form coral-Form--vertical foundation-layout-util-maximized-container foundation-form">
             <div class="coral-FixedColumn">
                 <div class="coral-FixedColumn-column">
-                    <div class="coral-Form-fieldwrapper">
-                        <label class="coral-Form-fieldlabel">Save Threshold: </label>
-                        <input class="coral-Form-field" type="text" name="threshold"
-                               value="${installPackageModel.threshold}"
-                               aria-required="true"
-                               data-foundation-validation
-                               data-validation
-                               is="coral-textfield">
-                    </div>
+                    <input name="threshold" value="${installPackageModel.threshold}" type="hidden">
                     <input name="packagePath" value="${installPackageModel.packagePath}" type="hidden">
                     <input name="dependencyHandling" value="${installPackageModel.dependencyHandling}" type="hidden">
                     <coral-buttongroup name="button-group">
