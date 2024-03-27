@@ -7,22 +7,49 @@
     const BUILD_IN_PROGRESS = 'BUILD_IN_PROGRESS';
     const INSTALL_IN_PROGRESS = 'INSTALL_IN_PROGRESS';
 
+    $(() => {
+        const $pulldown = $('.selection-pulldown');
+        $pulldown.attr('disabled', 'disabled');
+    });
+
     // Make package entries selectable
 
     $(document).on('click', '.foundation-collection-item.result-row', function(e) {
         const $this = $(this);
         const $pulldown = $('.selection-pulldown');
-        $pulldown.addClass('foundation-collection-action-hidden');
+        $pulldown.attr('disabled', 'disabled');
         if ($this.hasClass('foundation-selections-item')) {
             $this.removeClass('foundation-selections-item');
         } else {
             $this.addClass('foundation-selections-item');
         }
         if ($('.primary.foundation-selections-item').length > 0) {
-            $pulldown.removeClass('foundation-collection-action-hidden');
+            $pulldown.removeAttr('disabled');
         }
         $this.closest('.foundation-collection').trigger("foundation-selections-change");
         e.stopPropagation();
+
+        const selection = $('.foundation-selections-item');
+        if (selection && selection.length > 0) {
+            $('#deleteAction').removeAttr('disabled');
+            selection.each((index, item) => {
+                const $item = $(item);
+                if ($item.is('.primary') && $item.is('[data-has-children]')) {
+                    $('#excludeChildrenAction').removeAttr('disabled');
+                }
+                if ($item.is('.primary')) {
+                    $('#liveCopiesAction').removeAttr('disabled');
+                }
+                if ($item.is('.primary') && !$item.is('[data-has-children]')) {
+                    $('#includeChildrenAction').removeAttr('disabled');
+                }
+            });
+        } else {
+            $('#liveCopiesAction').attr('disabled', 'disabled');
+            $('#deleteAction').attr('disabled', 'disabled');
+            $('#includeChildrenAction').attr('disabled', 'disabled');
+            $('#excludeChildrenAction').attr('disabled', 'disabled');
+        }
     });
 
     // Make top-level package entries collapsible
@@ -92,7 +119,7 @@
             }
         });
         if (selection) {
-            doPost("/services/backpack/add/" + referenceType, {'packagePath': packagePath, 'payload': payload}, success(payload, true));
+            doPost("/services/backpack/add/" + referenceType, {'packagePath': packagePath, 'payload': payload}, success);
         }
     });
 
@@ -115,7 +142,7 @@
                 });
             }
         });
-        doPost("/services/backpack/delete", {'packagePath': packagePath, 'payload': payload}, success());
+        doPost("/services/backpack/delete", {'packagePath': packagePath, 'payload': payload}, success);
     });
 
     $(document).on('click', '#downloadAction', function() {
@@ -280,55 +307,9 @@
         });
     }
 
-    function success(path, showSuccessDialog) {
-        if (showSuccessDialog) {
-            openSuccessDialog(path);
-        } else {
-            window.location.reload();
-        }
+    function success() {
+        showReferencedAlert();
     }
-
-    // Register visibility conditions for package entries' actions
-
-    $(window).adaptTo('foundation-registry').register('foundation.collection.action.activecondition', {
-        name: 'backpack.package.selection',
-        handler: function(name, el, config, collection, selections) {
-            return selections && selections.length > 0;
-        }
-    });
-
-    $(window).adaptTo('foundation-registry').register('foundation.collection.action.activecondition', {
-        name: 'backpack.package.selection.isPrimary',
-        handler: function(name, el, config, collection, selections) {
-            return selections
-                && selections.length > 0
-                && selections.every(item => $(item).is('.primary'));
-        }
-    });
-
-    $(window).adaptTo('foundation-registry').register('foundation.collection.action.activecondition', {
-        name: 'backpack.package.selection.hasChildren',
-        handler: function(name, el, config, collection, selections) {
-            return selections
-                && selections.length > 0
-                && selections.every(item => {
-                    const $item = $(item);
-                    return $item.is('.primary') && $item.is('[data-has-children]');
-                });
-        }
-    });
-
-    $(window).adaptTo('foundation-registry').register('foundation.collection.action.activecondition', {
-        name: 'backpack.package.selection.noChildren',
-        handler: function(name, el, config, collection, selections) {
-            return selections
-                && selections.length > 0
-                && selections.every(item => {
-                    const $item = $(item);
-                    return $item.is('.primary') && !$item.is('[data-has-children]');
-                });
-        }
-    });
 
     $(window).adaptTo('foundation-registry').register('foundation.form.response.ui.success', {
         name: 'foundation.prompt.open',
@@ -478,33 +459,23 @@
         return dialog;
     }
 
-    function openSuccessDialog(path) {
+    function showReferencedAlert() {
 
-        const dialog = new Coral.Dialog().set({
-            id: 'SuccessDialog',
+        var popup = new Coral.Alert().set({
+            variant: 'info',
             header: {
-                innerHTML: 'Success'
+                innerHTML: 'INFO'
             },
             content: {
-                innerHTML: `<div>References for ${path} were successfully added</div>`
+                textContent: `Package was successfully updated`
             },
-            footer: {
-                innerHTML: '<button is="coral-button" variant="primary" coral-close>Ok</button>'
-            }
+            id: 'references-added-alert'
         });
-
-        dialog.on('coral-overlay:close', function(event) {
-            event.preventDefault();
-            setTimeout(function () {
-                dialog.remove();
-                window.location.reload();
-            });
-        });
-
-        document.body.appendChild(dialog);
-        dialog.show();
-
-        return dialog;
+        document.body.append(popup);
+        setTimeout(function () {
+            $(popup).fadeOut();
+            window.location.reload();
+        }, 2000);
     }
 
     function openPackageDialog(success, error) {
