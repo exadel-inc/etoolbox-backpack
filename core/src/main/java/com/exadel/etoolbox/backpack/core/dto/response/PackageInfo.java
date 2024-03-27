@@ -43,7 +43,7 @@ public class PackageInfo {
 
     private List<String> log = new ArrayList<>();
 
-    private Long dataSize;
+    private long dataSize;
 
     private Calendar packageInstalled;
 

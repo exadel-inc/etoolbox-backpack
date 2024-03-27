@@ -5,7 +5,7 @@
         <coral-autocomplete class="coral-Form-field granite-autocomplete" name="group">
             <sly data-sly-list.option="${groupsModel.options}">
                 <coral-autocomplete-item
-                        selected="${option.value == selectedPackageGroup ? 'true' : ''}"
+                        selected="${option.value == selectedPackageGroup || (!selectedPackageGroup && option.value == 'my_packages') ? 'true' : ''}"
                         value="${option.value}">
                     ${option.text}
                 </coral-autocomplete-item>
