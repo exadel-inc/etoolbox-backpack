@@ -39,9 +39,9 @@ public class CreatePackageServiceImpl implements CreatePackageService {
         try {
             JcrPackageManager packMgr = basePackageService.getPackageManager(session);
             if (basePackageService.isPackageExist(packMgr, packageModel.getPackageName(), packageInfo.getGroupName(), packageModel.getVersion())) {
-                String packageExistMsg = "Package with this name already exists in the " + packageInfo.getGroupName() + " group.";
+                String packageExistMsg = "Package with this name already exists. Consider changing package name or package group";
 
-                packageInfo.addLogMessage(BackpackConstants.ERROR + packageExistMsg);
+                packageInfo.addLogMessage(packageExistMsg);
                 packageInfo.setPackageStatus(PackageStatus.ERROR);
                 LOGGER.error(packageExistMsg);
                 return packageInfo;

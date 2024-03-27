@@ -60,9 +60,9 @@ public class EditPackageServiceImpl implements EditPackageService {
             JcrPackageManager packMgr = basePackageService.getPackageManager(session);
             if (isPackageLocationUpdated(packageInfo, modificationPackageModel)
                     && basePackageService.isPackageExist(packMgr, modificationPackageModel.getPackageName(), modificationPackageModel.getGroup(), modificationPackageModel.getVersion())) {
-                String packageExistMsg = "Package with this name already exists in the " + packageInfo.getGroupName() + " group.";
+                String packageExistMsg = "Package with this name already exists. Consider changing package name or package group";
 
-                packageInfo.addLogMessage(BackpackConstants.ERROR + packageExistMsg);
+                packageInfo.addLogMessage(packageExistMsg);
                 packageInfo.setPackageStatus(PackageStatus.ERROR);
                 LOGGER.error(packageExistMsg);
                 return packageInfo;
