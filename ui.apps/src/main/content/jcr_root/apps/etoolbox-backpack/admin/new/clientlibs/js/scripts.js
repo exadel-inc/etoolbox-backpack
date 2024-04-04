@@ -52,6 +52,16 @@
         }
     });
 
+    const foundationUi = $(window).adaptTo('foundation-ui');
+
+    $(document)
+        .ajaxStart(function () {
+            foundationUi.wait();
+        })
+        .ajaxStop(function () {
+            foundationUi.clearWait();
+        });
+
     // Make top-level package entries collapsible
 
     $(document).on('click', '.toggler', function() {
@@ -152,7 +162,7 @@
     $(document).on('click', '#testBuildAction', function() {
         buildPackage(true, function(data) {
             if (data.log) {
-                const dialog = openLogsDialog(data.log);
+                const dialog = openLogsDialog(data.log, 'Test Build');
                 const assetText = data.dataSize === 0
                     ? 'There are no assets in the package'
                     : '<h4>Approximate size of the assets in the package: ' + bytesToSize(data.dataSize) + '</h4>';
@@ -174,7 +184,7 @@
             handler: function () {
                 replicatePackage(function(data) {
                     if (data.log) {
-                        const dialog = openLogsDialog(data.log);
+                        const dialog = openLogsDialog(data.log, 'Replication');
                         const assetText = data.dataSize === 0
                             ? 'There are no assets in the package'
                             : '<h4>Approximate size of the assets in the package: ' + bytesToSize(data.dataSize) + '</h4>';
@@ -194,14 +204,14 @@
 
     $(document).on('click', '#buildAction', function() {
         buildPackage(false, function(data) {
-            const dialog = openLogsDialog(data.log);
+            const dialog = openLogsDialog(data.log, 'Build');
             updateLog(data.packageStatus, data.log.length, dialog);
         });
     });
 
     $(document).on('click', '#buildAndDownloadAction', function() {
         buildPackage(false, function(data) {
-            const dialog = openLogsDialog(data.log);
+            const dialog = openLogsDialog(data.log, 'Build');
             dialog.on('coral-overlay:beforeclose', function(event) {
                 window.location.href = packagePath;
             });
@@ -290,7 +300,7 @@
         e.preventDefault();
         const form = $(this);
         doPost(form.attr('action'), form.serialize(), function(data) {
-            const dialog = openLogsDialog(data.log);
+            const dialog = openLogsDialog(data.log, 'Install');
             updateLog(data.packageStatus, data.log.length, dialog);
         });
     })
@@ -427,12 +437,12 @@
         return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
     }
 
-    function openLogsDialog(init) {
+    function openLogsDialog(init, title) {
 
         const dialog = new Coral.Dialog().set({
             id: 'LogsDialog',
             header: {
-                innerHTML: 'Logs'
+                innerHTML: `${title} Logs`
             },
             footer: {
                 innerHTML: '<button is="coral-button" variant="primary" coral-close>Ok</button>'
