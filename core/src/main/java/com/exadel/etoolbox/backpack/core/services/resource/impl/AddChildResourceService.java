@@ -19,9 +19,12 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import javax.jcr.Session;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component(service = BaseResourceService.class)
 public class AddChildResourceService implements BaseResourceService<PackageInfo> {
@@ -75,17 +78,17 @@ public class AddChildResourceService implements BaseResourceService<PackageInfo>
     }
 
     private ResponseWrapper<PackageInfo> processAddChild(ResourceResolver resourceResolver, List<String> paths, PackageInfo packageInfo) {
-        PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
-        if (pageManager == null) {
-            return new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, Collections.singletonList("Page manager not found"));
-        }
         for (String path : paths) {
-            Iterator<Page> iterator = pageManager.getPage(path).listChildren();
-            while (iterator.hasNext()) {
-                Page page = iterator.next();
-                packageInfo.getPathInfo(path).getChildren().add(page.getPath());
+            Resource resource = resourceResolver.getResource(StringUtils.substringBefore(path, BackpackConstants.JCR_CONTENT));
+            if (resource == null) {
+                continue;
             }
-            basePackageService.modifyPackage(resourceResolver.adaptTo(Session.class), packageInfo.getPackagePath(), packageInfo);
+            packageInfo.setPaths(Stream.of(
+                            Collections.singletonList(resource.getPath()),
+                            packageInfo.getPaths())
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toList()));
+            packageInfo.getPathInfoMap().remove(path);
         }
         return new ResponseWrapper<>(packageInfo, ResponseWrapper.ResponseStatus.SUCCESS);
     }

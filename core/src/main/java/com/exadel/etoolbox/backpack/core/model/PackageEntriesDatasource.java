@@ -29,7 +29,6 @@ import java.util.stream.StreamSupport;
 public class PackageEntriesDatasource {
 
     private static final String PAGE_ENTRY_TYPE = "page";
-    private static final String HAS_CHILDREN_PROPERTY = "hasChildren";
 
     @SlingObject
     private SlingHttpServletRequest request;
@@ -64,7 +63,7 @@ public class PackageEntriesDatasource {
                 packageInfo.getPaths().forEach(path -> {
                     PathInfo pathInfo = packageInfo.getPathInfo(path);
                     if (pathInfo == null) {
-                        resources.add(createPackageEntry(PAGE_ENTRY_TYPE, path, ImmutableMap.of(HAS_CHILDREN_PROPERTY, false)));
+                        resources.add(createPackageEntry(PAGE_ENTRY_TYPE, path, null));
                         return;
                     }
 
@@ -74,13 +73,11 @@ public class PackageEntriesDatasource {
                     addSubsidiaries(subsidiaries, pathInfo.getPages(), PAGE_ENTRY_TYPE);
                     addSubsidiaries(subsidiaries, pathInfo.getAssets(), "asset");
                     addSubsidiaries(subsidiaries, pathInfo.getLiveCopies(), "liveCopy");
-                    addSubsidiaries(subsidiaries, pathInfo.getChildren(), "child");
 
                     if (subsidiaries.isEmpty()) {
-                        resources.add(createPackageEntry(PAGE_ENTRY_TYPE, path, ImmutableMap.of(HAS_CHILDREN_PROPERTY, pathInfo.hasChildren())));
+                        resources.add(createPackageEntry(PAGE_ENTRY_TYPE, path, null));
                     } else {
-                        resources.add(createPackageEntry(PAGE_ENTRY_TYPE, path, ImmutableMap.of(HAS_CHILDREN_PROPERTY, pathInfo.hasChildren()),
-                                subsidiaries)
+                        resources.add(createPackageEntry(PAGE_ENTRY_TYPE, path, null, subsidiaries)
                         );
                     }
                 });

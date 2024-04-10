@@ -123,7 +123,6 @@ public class RootResourceService implements BaseResourceService<PackageInfo> {
                     packageInfo.getPathInfoMap().getOrDefault(split[0], new PathInfo()).getAssets().remove(split[1]);
                     packageInfo.getPathInfoMap().getOrDefault(split[0], new PathInfo()).getLiveCopies().remove(split[1]);
                     packageInfo.getPathInfoMap().getOrDefault(split[0], new PathInfo()).getPages().remove(split[1]);
-                    packageInfo.getPathInfoMap().getOrDefault(split[0], new PathInfo()).getChildren().remove(split[1]);
                     packageInfo.getPathInfoMap().getOrDefault(split[0], new PathInfo()).getTags().remove(split[1]);
                     packageInfo.deletePath(split[1]);
                 }
@@ -135,11 +134,18 @@ public class RootResourceService implements BaseResourceService<PackageInfo> {
     }
 
     private ResponseWrapper<PackageInfo> processDeleteChildren(ResourceResolver resourceResolver, List<String> paths, PackageInfo packageInfo) {
-    paths.forEach(path -> {
-        Set<String> children = packageInfo.getPathInfoMap().getOrDefault(path, new PathInfo()).getChildren();
-        children.forEach(packageInfo::deletePath);
-        children.clear();
-    });
+        for (String path : paths) {
+            Resource resource = resourceResolver.getResource(path + BackpackConstants.JCR_CONTENT);
+            if (resource == null) {
+                continue;
+            }
+            packageInfo.setPaths(Stream.of(
+                            Collections.singletonList(resource.getPath()),
+                            packageInfo.getPaths())
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toList()));
+            packageInfo.getPathInfoMap().remove(path);
+        }
     return new ResponseWrapper<>(packageInfo, ResponseWrapper.ResponseStatus.SUCCESS);
 }
 

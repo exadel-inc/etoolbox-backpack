@@ -6,14 +6,12 @@ import java.util.Set;
 public class PathInfo {
 
     private Set<String> liveCopies;
-    private Set<String> children;
     private Set<String> pages;
     private Set<String> tags;
     private Set<String> assets;
 
     public PathInfo() {
         this.liveCopies = new HashSet<>();
-        this.children = new HashSet<>();
         this.pages = new HashSet<>();
         this.tags = new HashSet<>();
         this.assets = new HashSet<>();
@@ -21,10 +19,6 @@ public class PathInfo {
 
     public Set<String> getLiveCopies() {
         return liveCopies;
-    }
-
-    public Set<String> getChildren() {
-        return children;
     }
 
     public Set<String> getPages() {
@@ -37,9 +31,5 @@ public class PathInfo {
 
     public Set<String> getAssets() {
         return assets;
-    }
-
-    public boolean hasChildren() {
-        return children != null && !children.isEmpty();
     }
 }

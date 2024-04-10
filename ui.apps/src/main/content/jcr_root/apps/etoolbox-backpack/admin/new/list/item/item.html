@@ -13,7 +13,7 @@
         </div>
         <div class="title">
             <span class="path">${entry.title}</span>
-            <span data-sly-test="${entry.hasChildren}" class="children">Children included</span>
+            <span class="children">${'/jcr:content' in entry.title ? '' : 'Children included'}</span>
         </div>
     </div>
     <div class="subsidiaries" data-sly-list.subsidiary="${entry.subsidiaries}">

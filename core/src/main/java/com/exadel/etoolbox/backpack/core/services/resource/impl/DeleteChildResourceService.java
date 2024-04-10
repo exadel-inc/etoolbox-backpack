@@ -48,9 +48,6 @@ public class DeleteChildResourceService implements BaseResourceService<PathInfo>
         ResponseWrapper<PathInfo> responseWrapper = new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, Collections.singletonList(BackpackConstants.UNKNOWN_ACTION_TYPE + pathModel.getType()));
 
         switch (pathModel.getType()) {
-            case "delete/child":
-                responseWrapper = processDeleteChild(params.getFirst(), params.getLast(), packageInfo);
-                break;
             case "delete/liveCopy":
                 responseWrapper = processDeleteLiveCopies(params.getFirst(), params.getLast(), packageInfo);
                 break;
@@ -70,13 +67,6 @@ public class DeleteChildResourceService implements BaseResourceService<PathInfo>
         basePackageService.modifyPackage(resourceResolver.adaptTo(Session.class), pathModel.getPackagePath(), packageInfo);
 
         return responseWrapper;
-    }
-
-    private ResponseWrapper<PathInfo> processDeleteChild(String root, String child, PackageInfo packageInfo) {
-        packageInfo.getPathInfo(root)
-                .getChildren()
-                .remove(child);
-        return new ResponseWrapper<>(packageInfo.getPathInfo(root), ResponseWrapper.ResponseStatus.SUCCESS);
     }
 
     private ResponseWrapper<PathInfo> processDeleteLiveCopies(String root, String child, PackageInfo packageInfo) {

@@ -34,13 +34,9 @@
             $('#deleteAction').removeAttr('disabled');
             selection.each((index, item) => {
                 const $item = $(item);
-                if ($item.is('.primary') && $item.is('[data-has-children]')) {
-                    $('#excludeChildrenAction').removeAttr('disabled');
-                }
                 if ($item.is('.primary')) {
+                    $('#excludeChildrenAction').removeAttr('disabled');
                     $('#liveCopiesAction').removeAttr('disabled');
-                }
-                if ($item.is('.primary') && !$item.is('[data-has-children]')) {
                     $('#includeChildrenAction').removeAttr('disabled');
                 }
             });

@@ -128,7 +128,7 @@ public class PackageInfo {
     public Collection<String> getReferences() {
         return Collections.unmodifiableCollection(pathInfoMap != null
                 ? pathInfoMap.values().stream()
-                .flatMap(pathInfo -> Stream.of(pathInfo.getAssets(), pathInfo.getChildren(), pathInfo.getLiveCopies(), pathInfo.getPages(), pathInfo.getTags()))
+                .flatMap(pathInfo -> Stream.of(pathInfo.getAssets(), pathInfo.getLiveCopies(), pathInfo.getPages(), pathInfo.getTags()))
                 .flatMap(Set::stream)
                 .collect(Collectors.toSet())
                 : Collections.emptyList());
