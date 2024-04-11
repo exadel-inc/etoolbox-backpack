@@ -15,12 +15,6 @@ public class PackageEntry {
     @ValueMapValue
     private String type;
 
-    @ValueMapValue
-    private String upstream;
-
-    @ValueMapValue
-    private boolean hasChildren;
-
     public String getIcon() {
         if ("livecopy".equals(type)) {
             return "multiple";
@@ -38,13 +32,5 @@ public class PackageEntry {
 
     public String getType() {
         return type;
-    }
-
-    public String getUpstream() {
-        return upstream;
-    }
-
-    public boolean hasChildren() {
-        return hasChildren;
     }
 }
