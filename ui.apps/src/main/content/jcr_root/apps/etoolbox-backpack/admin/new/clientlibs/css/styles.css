@@ -179,3 +179,7 @@
     margin-right: auto;
     display: block;
 }
+
+.granite-title {
+    display: none;
+}

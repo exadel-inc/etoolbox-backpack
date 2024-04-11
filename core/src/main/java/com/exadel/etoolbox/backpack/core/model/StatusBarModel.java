@@ -25,6 +25,7 @@ public class StatusBarModel {
     @OSGiService
     private RequestAdapter requestAdapter;
 
+    private String name;
     private String group;
     private String version;
     private String size;
@@ -41,6 +42,7 @@ public class StatusBarModel {
             if (packageInfo == null) {
                 return;
             }
+            name = packageInfo.getPackageName();
             group = packageInfo.getGroupName();
             version = packageInfo.getVersion();
             size = convertBytesToMegabytes(packageInfo.getDataSize());
@@ -49,6 +51,10 @@ public class StatusBarModel {
             lastReplicated = packageInfo.getPackageReplicated() == null ? StringUtils.EMPTY : packageInfo.getPackageReplicated().getTime().toString();
             lastModifiedBy = packageInfo.getLastModifiedBy();
         }
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getGroup() {

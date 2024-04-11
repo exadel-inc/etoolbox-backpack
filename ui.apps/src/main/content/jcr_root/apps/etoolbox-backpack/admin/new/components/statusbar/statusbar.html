@@ -1,5 +1,7 @@
 <sly data-sly-use.statusBarModel="com.exadel.etoolbox.backpack.core.model.StatusBarModel"/>
 <div class="package-status">
+    <span><b>Name:</b> ${statusBarModel.name}</span>
+    |
   <sly data-sly-test="${statusBarModel.group}">
     <span><b>Group:</b> ${statusBarModel.group}</span>
     |

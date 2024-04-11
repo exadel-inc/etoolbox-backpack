@@ -14,9 +14,6 @@
                     sling:resourceType="granite/ui/components/coral/foundation/includeclientlibs"
                     categories="[cq.common.wcm,backpack.new-ui]"/>
         </head>
-        <title
-                jcr:primaryType="nt:unstructured"
-                sling:resourceType="/apps/etoolbox-backpack/admin/new/components/title"/>
         <actions jcr:primaryType="nt:unstructured">
             <primary jcr:primaryType="nt:unstructured">
                 <menu
