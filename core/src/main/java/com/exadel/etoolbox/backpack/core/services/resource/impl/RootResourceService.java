@@ -7,6 +7,7 @@ import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
 import com.exadel.etoolbox.backpack.core.services.resource.BaseResourceService;
 import com.exadel.etoolbox.backpack.core.services.resource.QuerySearchService;
+import com.exadel.etoolbox.backpack.core.services.resource.ReferencesSearchService;
 import com.exadel.etoolbox.backpack.core.services.util.constants.BackpackConstants;
 import com.exadel.etoolbox.backpack.core.servlets.model.PathModel;
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +29,9 @@ public class RootResourceService implements BaseResourceService<PackageInfo> {
 
     @Reference
     private PackageInfoService packageInfoService;
+
+    @Reference
+    private ReferencesSearchService referencesSearchService;
 
     @Reference
     private QuerySearchService querySearchService;
@@ -139,12 +143,29 @@ public class RootResourceService implements BaseResourceService<PackageInfo> {
             if (resource == null) {
                 continue;
             }
+            Set<String> assets = packageInfo.getPathInfoMap().getOrDefault(path, new PathInfo()).getAssets();
+            assets.forEach(packageInfo::deletePath);
+            Set<String> pages = packageInfo.getPathInfoMap().getOrDefault(path, new PathInfo()).getPages();
+            pages.forEach(packageInfo::deletePath);
+            Set<String> tags = packageInfo.getPathInfoMap().getOrDefault(path, new PathInfo()).getTags();
+            tags.forEach(packageInfo::deletePath);
+            Set<String> liveCopies = packageInfo.getPathInfoMap().getOrDefault(path, new PathInfo()).getLiveCopies();
+            liveCopies.forEach(packageInfo::deletePath);
+            packageInfo.getPathInfoMap().remove(path);
+
             packageInfo.setPaths(Stream.of(
                             Collections.singletonList(resource.getPath()),
                             packageInfo.getPaths())
                     .flatMap(Collection::stream)
                     .collect(Collectors.toList()));
-            packageInfo.getPathInfoMap().remove(path);
+
+            referencesSearchService.getAssetReferences(resourceResolver, resource.getPath())
+                    .stream().filter(asset -> assets.contains(asset.getPath())).peek(asset -> packageInfo.getPathInfo(resource.getPath()).getAssets().add(asset.getPath()));
+            referencesSearchService.getPageReferences(resourceResolver, resource.getPath())
+                    .stream().filter(page -> pages.contains(page.getPath())).peek(page -> packageInfo.getPathInfo(resource.getPath()).getPages().add(page.getPath()));
+            referencesSearchService.getTagReferences(resourceResolver, resource.getPath())
+                    .stream().filter(tag -> tags.contains(tag.getPath())).peek(tag -> packageInfo.getPathInfo(resource.getPath()).getTags().add(tag.getPath()));
+            packageInfo.getPathInfo(resource.getPath()).getLiveCopies().addAll(liveCopies);
         }
     return new ResponseWrapper<>(packageInfo, ResponseWrapper.ResponseStatus.SUCCESS);
 }

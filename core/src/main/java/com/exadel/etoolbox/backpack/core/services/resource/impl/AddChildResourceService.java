@@ -19,10 +19,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import javax.jcr.Session;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -88,6 +85,20 @@ public class AddChildResourceService implements BaseResourceService<PackageInfo>
                             packageInfo.getPaths())
                     .flatMap(Collection::stream)
                     .collect(Collectors.toList()));
+            PathInfo oldPathInfo = packageInfo.getPathInfoMap().getOrDefault(path, new PathInfo());
+            Set<String> tags = oldPathInfo.getTags();
+            Set<String> assets = oldPathInfo.getAssets();
+            Set<String> pages = oldPathInfo.getPages();
+            Set<String> liveCopies = oldPathInfo.getLiveCopies();
+            PathInfo newPathInfo = packageInfo.getPathInfoMap().getOrDefault(resource.getPath(), new PathInfo());
+            newPathInfo.getTags().addAll(tags);
+            newPathInfo.getAssets().addAll(assets);
+            newPathInfo.getPages().addAll(pages);
+            newPathInfo.getLiveCopies().addAll(liveCopies);
+            tags.forEach(packageInfo::deletePath);
+            assets.forEach(packageInfo::deletePath);
+            pages.forEach(packageInfo::deletePath);
+            liveCopies.forEach(packageInfo::deletePath);
             packageInfo.getPathInfoMap().remove(path);
         }
         return new ResponseWrapper<>(packageInfo, ResponseWrapper.ResponseStatus.SUCCESS);
