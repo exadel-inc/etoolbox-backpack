@@ -24,7 +24,6 @@
                         sling:resourceType="granite/ui/components/coral/foundation/button"
                         granite:id="mainMenuAction"
                         icon="back"
-                        text="back to list"
                         variant="secondary"/>
                 <add
                         jcr:primaryType="nt:unstructured"
