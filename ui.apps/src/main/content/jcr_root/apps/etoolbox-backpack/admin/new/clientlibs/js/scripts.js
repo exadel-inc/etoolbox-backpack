@@ -12,6 +12,19 @@
         $pulldown.attr('disabled', 'disabled');
     });
 
+    $(() => {
+        const items = $('.foundation-collection-item');
+        if (items && items.length > 0) {
+            $('.build-options').removeClass('disabled');
+            $('#installAction').removeAttr('disabled');
+            $('#replicateAction').removeAttr('disabled');
+        } else {
+            $('.build-options').addClass('disabled');
+            $('#installAction').attr('disabled', 'disabled');
+            $('#replicateAction').attr('disabled', 'disabled');
+        }
+    });
+
     // Make package entries selectable
 
     $(document).on('click', '.foundation-collection-item.result-row', function(e) {
