@@ -6,6 +6,7 @@ import com.exadel.etoolbox.backpack.core.dto.response.ResponseWrapper;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
 import com.exadel.etoolbox.backpack.core.services.resource.BaseResourceService;
+import com.exadel.etoolbox.backpack.core.services.resource.LiveCopySearchService;
 import com.exadel.etoolbox.backpack.core.services.resource.QuerySearchService;
 import com.exadel.etoolbox.backpack.core.services.resource.ReferencesSearchService;
 import com.exadel.etoolbox.backpack.core.services.util.constants.BackpackConstants;
@@ -32,6 +33,9 @@ public class RootResourceService implements BaseResourceService<PackageInfo> {
 
     @Reference
     private ReferencesSearchService referencesSearchService;
+
+    @Reference
+    private LiveCopySearchService liveCopySearchService;
 
     @Reference
     private QuerySearchService querySearchService;
@@ -160,12 +164,13 @@ public class RootResourceService implements BaseResourceService<PackageInfo> {
                     .collect(Collectors.toList()));
 
             referencesSearchService.getAssetReferences(resourceResolver, resource.getPath())
-                    .stream().filter(asset -> assets.contains(asset.getPath())).peek(asset -> packageInfo.getPathInfo(resource.getPath()).getAssets().add(asset.getPath()));
+                    .stream().filter(asset -> assets.contains(asset.getPath())).forEach(asset -> packageInfo.getPathInfo(resource.getPath()).getAssets().add(asset.getPath()));
             referencesSearchService.getPageReferences(resourceResolver, resource.getPath())
-                    .stream().filter(page -> pages.contains(page.getPath())).peek(page -> packageInfo.getPathInfo(resource.getPath()).getPages().add(page.getPath()));
+                    .stream().filter(page -> pages.contains(page.getPath())).forEach(page -> packageInfo.getPathInfo(resource.getPath()).getPages().add(page.getPath()));
             referencesSearchService.getTagReferences(resourceResolver, resource.getPath())
-                    .stream().filter(tag -> tags.contains(tag.getPath())).peek(tag -> packageInfo.getPathInfo(resource.getPath()).getTags().add(tag.getPath()));
-            packageInfo.getPathInfo(resource.getPath()).getLiveCopies().addAll(liveCopies);
+                    .stream().filter(tag -> tags.contains(tag.getPath())).forEach(tag -> packageInfo.getPathInfo(resource.getPath()).getTags().add(tag.getPath()));
+            List<String> LiveCopiesPaths = liveCopySearchService.getLiveCopies(resourceResolver, resource.getPath(), StringUtils.EMPTY);
+            packageInfo.getPathInfo(resource.getPath()).getLiveCopies().addAll(LiveCopiesPaths);
         }
     return new ResponseWrapper<>(packageInfo, ResponseWrapper.ResponseStatus.SUCCESS);
 }

@@ -94,12 +94,13 @@ public class AddChildResourceService implements BaseResourceService<PackageInfo>
             newPathInfo.getTags().addAll(tags);
             newPathInfo.getAssets().addAll(assets);
             newPathInfo.getPages().addAll(pages);
-            newPathInfo.getLiveCopies().addAll(liveCopies);
             tags.forEach(packageInfo::deletePath);
             assets.forEach(packageInfo::deletePath);
             pages.forEach(packageInfo::deletePath);
             liveCopies.forEach(packageInfo::deletePath);
             packageInfo.getPathInfoMap().remove(path);
+            List<String> LiveCopiesPaths = liveCopySearchService.getLiveCopies(resourceResolver, resource.getPath(), StringUtils.EMPTY);
+            packageInfo.getPathInfo(resource.getPath()).getLiveCopies().addAll(LiveCopiesPaths);
         }
         return new ResponseWrapper<>(packageInfo, ResponseWrapper.ResponseStatus.SUCCESS);
     }
