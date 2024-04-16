@@ -199,7 +199,7 @@
     $(document).on('click', '#testBuildAction', function() {
         buildPackage(true, function(data) {
             if (data.log) {
-                const dialog = openLogsDialog(data.log, 'Test Build');
+                const dialog = openLogsDialog(data.log, 'Test Build', 'Close');
                 const assetText = data.dataSize === 0
                     ? 'There are no assets in the package'
                     : '<h4>Approximate size of the assets in the package: ' + bytesToSize(data.dataSize) + '</h4>';
@@ -221,7 +221,7 @@
             handler: function () {
                 replicatePackage(function(data) {
                     if (data.log) {
-                        const dialog = openLogsDialog(data.log, 'Replication');
+                        const dialog = openLogsDialog(data.log, 'Replication', 'Close');
                         const assetText = data.dataSize === 0
                             ? 'There are no assets in the package'
                             : '<h4>Approximate size of the assets in the package: ' + bytesToSize(data.dataSize) + '</h4>';
@@ -241,14 +241,14 @@
 
     $(document).on('click', '#buildAction', function() {
         buildPackage(false, function(data) {
-            const dialog = openLogsDialog(data.log, 'Build');
+            const dialog = openLogsDialog(data.log, 'Build', 'Close');
             updateLog(data.packageStatus, data.log.length, dialog);
         });
     });
 
     $(document).on('click', '#buildAndDownloadAction', function() {
         buildPackage(false, function(data) {
-            const dialog = openLogsDialog(data.log, 'Build');
+            const dialog = openLogsDialog(data.log, 'Build', 'Download');
             dialog.on('coral-overlay:beforeclose', function(event) {
                 window.location.href = packagePath;
             });
@@ -337,7 +337,7 @@
         e.preventDefault();
         const form = $(this);
         doPost(form.attr('action'), form.serialize(), function(data) {
-            const dialog = openLogsDialog(data.log, 'Install');
+            const dialog = openLogsDialog(data.log, 'Install', 'Close');
             updateLog(data.packageStatus, data.log.length, dialog);
         });
     })
@@ -474,7 +474,7 @@
         return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
     }
 
-    function openLogsDialog(init, title) {
+    function openLogsDialog(init, title, submitText) {
 
         const dialog = new Coral.Dialog().set({
             id: 'LogsDialog',
@@ -482,7 +482,7 @@
                 innerHTML: `${title} Logs`
             },
             footer: {
-                innerHTML: '<button is="coral-button" variant="primary" coral-close>Ok</button>'
+                innerHTML: `<button is="coral-button" variant="primary" coral-close>${submitText}</button>`
             }
         });
 
