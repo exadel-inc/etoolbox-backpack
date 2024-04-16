@@ -49,7 +49,11 @@
                         <sly data-sly-repeat.initialResource="${initialResources}">
                             <input type="hidden" name="initialResource" value="${initialResource}">
                         </sly>
-                        <button class="foundation-ui-notification coral-Form-fieldwrapper" type="submit" autocomplete="off" is="coral-button" variant="primary" trackingfeature="" trackingelement="save" tracking="ON">Save</button>
+                        <div>
+                            <button type="submit" autocomplete="off" is="coral-button" variant="primary" trackingfeature="" trackingelement="save" tracking="ON">Save</button>
+                            <button data-sly-test="${packageModel}" is="coral-button" type="button" variant="secondary" coral-close="">Cancel</button>
+                            <button data-sly-test="${!packageModel}" id="cancelButton" is="coral-button" type="button" variant="secondary">Cancel</button>
+                        </div>
                     </div>
                 </div>
             </form>

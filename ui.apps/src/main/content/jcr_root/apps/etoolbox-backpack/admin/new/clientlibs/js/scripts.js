@@ -239,6 +239,10 @@
         window.location.replace("/tools/etoolbox/backpack.html");
     });
 
+    $(document).on('click', '#cancelButton', function() {
+        window.location.replace("/tools/etoolbox/backpack.html");
+    });
+
     $(document).on('click', '#buildAction', function() {
         buildPackage(false, function(data) {
             const dialog = openLogsDialog(data.log, 'Build', 'Close');

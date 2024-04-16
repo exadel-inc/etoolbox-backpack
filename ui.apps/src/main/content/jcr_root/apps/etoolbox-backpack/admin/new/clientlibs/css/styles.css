@@ -152,10 +152,6 @@
     bottom: 2.5rem;
 }
 
-.modal-form [type="submit"] {
-    margin-top: 2rem;
-}
-
 .foundation-collection-selectall {
     display: none;
 }

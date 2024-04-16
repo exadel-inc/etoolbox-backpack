@@ -328,7 +328,7 @@
                                     <okButton
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/button"
-                                            text="Submit"
+                                            text="Add"
                                             type="submit"
                                             variant="primary"
                                             granite:class="foundation-ui-notification coral-Form-fieldwrapper"/>
@@ -382,7 +382,7 @@
                                     <okButton
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/button"
-                                            text="Submit"
+                                            text="Add"
                                             type="submit"
                                             variant="primary"
                                             granite:class="foundation-ui-notification coral-Form-fieldwrapper"/>
