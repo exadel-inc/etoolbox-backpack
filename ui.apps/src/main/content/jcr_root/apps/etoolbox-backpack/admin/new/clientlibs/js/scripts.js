@@ -31,15 +31,42 @@
         const $this = $(this);
         const $pulldown = $('.selection-pulldown');
         $pulldown.attr('disabled', 'disabled');
-        if ($this.hasClass('foundation-selections-item')) {
-            $this.removeClass('foundation-selections-item');
-        } else {
+
+        if (e.ctrlKey) {
+            $('.foundation-collection-item').removeClass('last-selected');
+            if ($this.hasClass('foundation-selections-item')) {
+                $this.removeClass('foundation-selections-item');
+            } else {
+                $this.addClass('foundation-selections-item');
+                $this.addClass('last-selected');
+            }
+        }
+        if (e.shiftKey) {
+            $('.foundation-collection-item').removeClass('foundation-selections-item');
             $this.addClass('foundation-selections-item');
+            var $lastSelected = $('.last-selected');
+            $('.foundation-collection-item').removeClass('last-selected');
+            if ($this.index() > $lastSelected.index()) {
+                $lastSelected.nextUntil($this).addClass('foundation-selections-item');
+                $lastSelected.addClass('last-selected');
+            } else {
+                $lastSelected.prevUntil($this).addClass('foundation-selections-item');
+                $this.addClass('last-selected');
+            }
+            $lastSelected.addClass('foundation-selections-item');
+
+
         }
-        if ($('.primary.foundation-selections-item').length > 0) {
-            $pulldown.removeAttr('disabled');
+
+        if (!e.ctrlKey && !e.shiftKey) {
+            const mustSelect = !$this.hasClass('foundation-selections-item');
+            $('.foundation-collection-item').removeClass('foundation-selections-item last-selected');
+            if (mustSelect) {
+                $this.addClass('foundation-selections-item');
+                $this.addClass('last-selected');
+                $this.hasClass('primary') &&  $pulldown.removeAttr('disabled');
+            }
         }
-        $this.closest('.foundation-collection').trigger("foundation-selections-change");
         e.stopPropagation();
 
         const selection = $('.foundation-selections-item');
@@ -51,6 +78,7 @@
                     $('#excludeChildrenAction').removeAttr('disabled');
                     $('#liveCopiesAction').removeAttr('disabled');
                     $('#includeChildrenAction').removeAttr('disabled');
+                    $pulldown.removeAttr('disabled');
                 }
             });
         } else {
