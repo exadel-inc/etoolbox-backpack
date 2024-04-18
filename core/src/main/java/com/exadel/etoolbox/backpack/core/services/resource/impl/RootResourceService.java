@@ -35,9 +35,6 @@ public class RootResourceService implements BaseResourceService<PackageInfo> {
     private ReferencesSearchService referencesSearchService;
 
     @Reference
-    private LiveCopySearchService liveCopySearchService;
-
-    @Reference
     private QuerySearchService querySearchService;
 
     @Override
@@ -169,7 +166,7 @@ public class RootResourceService implements BaseResourceService<PackageInfo> {
                     .stream().filter(page -> pages.contains(page.getPath())).forEach(page -> packageInfo.getPathInfo(resource.getPath()).getPages().add(page.getPath()));
             referencesSearchService.getTagReferences(resourceResolver, resource.getPath())
                     .stream().filter(tag -> tags.contains(tag.getPath())).forEach(tag -> packageInfo.getPathInfo(resource.getPath()).getTags().add(tag.getPath()));
-            List<String> LiveCopiesPaths = liveCopySearchService.getLiveCopies(resourceResolver, resource.getPath(), StringUtils.EMPTY);
+            List<String> LiveCopiesPaths = liveCopies.stream().map(liveCopyPath -> liveCopyPath + BackpackConstants.JCR_CONTENT).collect(Collectors.toList());
             packageInfo.getPathInfo(resource.getPath()).getLiveCopies().addAll(LiveCopiesPaths);
         }
     return new ResponseWrapper<>(packageInfo, ResponseWrapper.ResponseStatus.SUCCESS);

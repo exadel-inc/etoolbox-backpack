@@ -70,6 +70,10 @@
         e.stopPropagation();
 
         const selection = $('.foundation-selections-item');
+        $('#liveCopiesAction').attr('disabled', 'disabled');
+        $('#deleteAction').attr('disabled', 'disabled');
+        $('#includeChildrenAction').attr('disabled', 'disabled');
+        $('#excludeChildrenAction').attr('disabled', 'disabled');
         if (selection && selection.length > 0) {
             $('#deleteAction').removeAttr('disabled');
             selection.each((index, item) => {
@@ -81,11 +85,6 @@
                     $pulldown.removeAttr('disabled');
                 }
             });
-        } else {
-            $('#liveCopiesAction').attr('disabled', 'disabled');
-            $('#deleteAction').attr('disabled', 'disabled');
-            $('#includeChildrenAction').attr('disabled', 'disabled');
-            $('#excludeChildrenAction').attr('disabled', 'disabled');
         }
     });
 
