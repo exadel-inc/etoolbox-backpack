@@ -96,7 +96,7 @@
 
     if (hasPermission(acm, resource, Privilege.JCR_REMOVE_NODE)) {
 %>
-    <coral-quickactions-item icon="delete" class="foundation-collection-action" data-foundation-collection-action='{"action": "cq.wcm.delete"}'
+    <coral-quickactions-item icon="delete" class="foundation-collection-action" data-foundation-collection-action='{"action":"backpack.delete","data":{"packagePath":"<%= xssAPI.getValidHref(path) %>"}}'
     ><%= xssAPI.encodeForHTML(i18n.get("Delete")) %></coral-quickactions-item>
     <%
         }

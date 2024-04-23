@@ -22,6 +22,7 @@ import com.exadel.etoolbox.backpack.core.services.util.LoggerService;
 import com.exadel.etoolbox.backpack.core.services.util.SessionService;
 import com.exadel.etoolbox.backpack.core.services.util.constants.BackpackConstants;
 import com.exadel.etoolbox.backpack.core.servlets.model.BuildPackageModel;
+import com.exadel.etoolbox.backpack.core.util.ProgressTrackerUtil;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
@@ -159,7 +160,10 @@ public class BuildPackageServiceImpl implements BuildPackageService {
                 packMgr.assemble(jcrPackage, new ProgressTrackerListener() {
                     @Override
                     public void onMessage(final Mode mode, final String statusCode, final String path) {
-                        packageBuildInfo.addLogMessage(statusCode + " " + path);
+                        if (ProgressTrackerUtil.isContainAggregationStatus(path)) {
+                            return;
+                        }
+                        packageBuildInfo.addLogMessage(ProgressTrackerUtil.buildLogMessage(statusCode, path));
                     }
 
                     @Override

@@ -43,9 +43,10 @@ public interface PackageInfoService {
      * to a JSON-coded HTTP response
      *
      * @param jcrPackage {@code JcrPackage} instance containing requisites of the required package
+     * @param resourceResolver {@code ResourceResolver} instance used to access resources
      * @return {@link PackageInfo} instance
      */
-    PackageInfo getPackageInfo(JcrPackage jcrPackage);
+    PackageInfo getPackageInfo(JcrPackage jcrPackage, ResourceResolver resourceResolver);
 
     /**
      * Gets a chunk of rolling package building process update according to options specified in the HTTP request
