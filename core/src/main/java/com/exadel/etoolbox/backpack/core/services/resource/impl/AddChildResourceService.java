@@ -1,7 +1,5 @@
 package com.exadel.etoolbox.backpack.core.services.resource.impl;
 
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageManager;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.PathInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.ResponseWrapper;
@@ -43,7 +41,7 @@ public class AddChildResourceService implements BaseResourceService<PackageInfo>
 
         PackageInfo packageInfo = packageInfoService.getPackageInfo(resourceResolver, pathModel.getPackagePath());
 
-        if (packageInfo == null) {
+        if (packageInfo == null || packageInfo.getPackagePath() == null) {
             return new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, Collections.singletonList(BackpackConstants.PACKAGE_NOT_FOUND + pathModel.getPackagePath()));
         }
 

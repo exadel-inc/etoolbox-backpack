@@ -6,7 +6,6 @@ import com.exadel.etoolbox.backpack.core.dto.response.ResponseWrapper;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
 import com.exadel.etoolbox.backpack.core.services.resource.BaseResourceService;
-import com.exadel.etoolbox.backpack.core.services.resource.LiveCopySearchService;
 import com.exadel.etoolbox.backpack.core.services.resource.QuerySearchService;
 import com.exadel.etoolbox.backpack.core.services.resource.ReferencesSearchService;
 import com.exadel.etoolbox.backpack.core.services.util.constants.BackpackConstants;
@@ -42,7 +41,7 @@ public class RootResourceService implements BaseResourceService<PackageInfo> {
 
         PackageInfo packageInfo = packageInfoService.getPackageInfo(resourceResolver, pathModel.getPackagePath());
 
-        if (packageInfo == null) {
+        if (packageInfo == null || packageInfo.getPackagePath() == null) {
             return new ResponseWrapper<>(null, ResponseWrapper.ResponseStatus.ERROR, Collections.singletonList(BackpackConstants.PACKAGE_NOT_FOUND + pathModel.getPackagePath()));
         }
 
@@ -62,7 +61,7 @@ public class RootResourceService implements BaseResourceService<PackageInfo> {
                 responseWrapper = processDeleteChildren(resourceResolver, pathModel.getPayload(), packageInfo);
                 break;
             case "delete":
-                responseWrapper = processDelete(resourceResolver, pathModel.getPayload(), packageInfo);
+                responseWrapper = processDelete(pathModel.getPayload(), packageInfo);
                 break;
             default:
                 return responseWrapper;
@@ -120,7 +119,7 @@ public class RootResourceService implements BaseResourceService<PackageInfo> {
         return new ResponseWrapper<>(packageInfo, ResponseWrapper.ResponseStatus.SUCCESS);
     }
 
-    private ResponseWrapper<PackageInfo> processDelete(ResourceResolver resourceResolver, List<String> paths, PackageInfo packageInfo) {
+    private ResponseWrapper<PackageInfo> processDelete(List<String> paths, PackageInfo packageInfo) {
         for (String path : paths) {
             if (path.startsWith(BackpackConstants.OPEN_BRACKET) && path.endsWith(BackpackConstants.CLOSE_BRACKET)) {
                 String[] split = StringUtils.substringBetween(path, BackpackConstants.OPEN_BRACKET, BackpackConstants.CLOSE_BRACKET).split(BackpackConstants.COMMA);
