@@ -1,4 +1,5 @@
 #base=js
 
+delete-action.js
 download-action.js
 regex-validator.js
