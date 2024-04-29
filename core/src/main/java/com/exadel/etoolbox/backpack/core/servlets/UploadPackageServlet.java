@@ -24,6 +24,7 @@ import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import javax.jcr.Session;
 import javax.servlet.Servlet;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -71,10 +72,11 @@ public class UploadPackageServlet extends SlingAllMethodsServlet {
     @Override
     protected void doPost(final SlingHttpServletRequest request,
                           final SlingHttpServletResponse response) throws IOException {
+        Session session = request.getResourceResolver().adaptTo(Session.class);
         byte[] fileUploadBytesArray = getFileUploadBytesArray(request);
         boolean forceUpdate = getForceUpdate(request);
 
-        PackageInfo packageInfo = uploadPackageService.uploadPackage(request.getResourceResolver(), fileUploadBytesArray, forceUpdate);
+        PackageInfo packageInfo = uploadPackageService.uploadPackage(session, fileUploadBytesArray, forceUpdate);
 
         writeResponse(response, packageInfo);
     }
@@ -104,5 +106,3 @@ public class UploadPackageServlet extends SlingAllMethodsServlet {
         return Boolean.parseBoolean(forceUpdate);
     }
 }
-
-

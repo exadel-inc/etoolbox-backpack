@@ -19,7 +19,6 @@ import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
 import com.exadel.etoolbox.backpack.core.services.pckg.UploadPackageService;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;
 import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
-import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -51,10 +50,9 @@ public class UploadPackageServiceImpl implements UploadPackageService {
      * @return
      */
     @Override
-    public PackageInfo uploadPackage(final ResourceResolver resourceResolver,
+    public PackageInfo uploadPackage(final Session session,
                                      final byte[] fileUploadBytesArray,
                                      final boolean forceUpdate) {
-        final Session session = resourceResolver.adaptTo(Session.class);
         File fileUpload = null;
         JcrPackage uploadedPackage = null;
 
@@ -69,9 +67,8 @@ public class UploadPackageServiceImpl implements UploadPackageService {
                 final boolean strict = true;
 
                 uploadedPackage = packageManager.upload(fileUpload, isTempFile, forceUpdate, nameHint, strict);
-                packageInfo = packageInfoService.getPackageInfo(uploadedPackage, resourceResolver);
 
-                basePackageService.getPackageInfos().put(packageInfo.getPackagePath(), packageInfo);
+                return packageInfoService.getPackageInfo(uploadedPackage);
             } catch (Exception e) {
                 LOGGER.error("Cannot upload package: {}", e.getMessage(), e);
                 packageInfo.addLogMessage(e.getMessage());
