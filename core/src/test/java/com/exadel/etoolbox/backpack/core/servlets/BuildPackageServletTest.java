@@ -1,30 +1,16 @@
-/*
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.exadel.etoolbox.backpack.core.servlets;
 
 import com.day.cq.wcm.api.WCMException;
 import com.day.cq.wcm.msm.api.LiveRelationshipManager;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
-import com.exadel.etoolbox.backpack.core.services.ReferenceService;
-import com.exadel.etoolbox.backpack.core.services.impl.LiveCopyServiceImpl;
-import com.exadel.etoolbox.backpack.core.services.impl.QueryServiceImpl;
-import com.exadel.etoolbox.backpack.core.services.impl.ReferenceServiceImpl;
 import com.exadel.etoolbox.backpack.core.services.pckg.BuildPackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.impl.BasePackageServiceImpl;
 import com.exadel.etoolbox.backpack.core.services.pckg.impl.PackageInfoServiceImpl;
+import com.exadel.etoolbox.backpack.core.services.resource.ReferencesSearchService;
+import com.exadel.etoolbox.backpack.core.services.resource.impl.LiveCopySearchServiceImpl;
+import com.exadel.etoolbox.backpack.core.services.resource.impl.QuerySearchServiceImpl;
+import com.exadel.etoolbox.backpack.core.services.resource.impl.ReferencesSearchServiceImpl;
 import com.exadel.etoolbox.backpack.core.servlets.model.BuildPackageModel;
 import com.exadel.etoolbox.backpack.core.util.CalendarAdapter;
 import com.exadel.etoolbox.backpack.request.RequestAdapter;
@@ -73,16 +59,16 @@ public class BuildPackageServletTest {
 
     @Before
     public void beforeTest() throws WCMException {
-        context.registerInjectActivateService(new QueryServiceImpl());
+        context.registerInjectActivateService(new QuerySearchServiceImpl());
         liveRelationshipManager = mock(LiveRelationshipManager.class);
         context.registerService(LiveRelationshipManager.class, liveRelationshipManager);
         RangeIterator relationships = mock(RangeIterator.class);
         when(relationships.hasNext()).thenReturn(false);
         when(liveRelationshipManager.getLiveRelationships(any(Resource.class), any(), any())).thenReturn(relationships);
-        context.registerInjectActivateService(new LiveCopyServiceImpl());
+        context.registerInjectActivateService(new LiveCopySearchServiceImpl());
         context.registerService(BuildPackageService.class, buildPackageServiceMock);
         context.registerService(RequestAdapter.class, new RequestAdapterImpl());
-        context.registerService(ReferenceService.class, new ReferenceServiceImpl());
+        context.registerService(ReferencesSearchService.class, new ReferencesSearchServiceImpl());
         Map<String, Object> properties = new HashMap<>();
         properties.put("buildInfoTTL", 1);
         context.registerInjectActivateService(new BasePackageServiceImpl(), properties);
@@ -108,6 +94,8 @@ public class BuildPackageServletTest {
     public void doGetShouldReturnOkWithLatestPackageBuildInfo() throws IOException {
         createBaseRequest();
         context.request().addRequestParameter("latestLogIndex", "1");
+        context.request().addRequestParameter("referencedResources", "[]");
+        context.request().addRequestParameter("packagePath", PACKAGE_PATH);
 
         servlet.doGet(context.request(), context.response());
 
@@ -126,6 +114,8 @@ public class BuildPackageServletTest {
         when(buildPackageServiceMock.testBuildPackage(any(ResourceResolver.class), any(BuildPackageModel.class))).thenReturn(packageInfoTestBuilt);
 
         context.request().addRequestParameter("testBuild", "true");
+        context.request().addRequestParameter("referencedResources", "[]");
+        context.request().addRequestParameter("packagePath", PACKAGE_PATH);
 
         servlet.doPost(context.request(), context.response());
 
@@ -138,6 +128,9 @@ public class BuildPackageServletTest {
     public void doPostShouldReturnOkWhenRequestIsValid() throws IOException {
         createBaseRequest();
         when(buildPackageServiceMock.buildPackage(any(ResourceResolver.class), any(BuildPackageModel.class))).thenReturn(packageInfoWithBuiltStatus);
+
+        context.request().addRequestParameter("referencedResources", "[]");
+        context.request().addRequestParameter("packagePath", PACKAGE_PATH);
 
         servlet.doPost(context.request(), context.response());
 

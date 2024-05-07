@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import javax.jcr.Session;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
@@ -36,37 +37,26 @@ public class UploadPackageServletTest {
     }
 
     @Test
-    public void shouldReturnBadRequest_whenPackageServiceGetPackageInfoReturnNull() throws IOException {
-        when(uploadPackageService.uploadPackage(context.request().getResourceResolver(), null, false)).thenReturn(getPackageInfoObj());
-
-        servlet.doPost(context.request(), context.response());
-
-        assertEquals(HttpServletResponse.SC_OK, context.response().getStatus());
-        assertEquals("application/json;charset=UTF-8", context.response().getContentType());
-        assertEquals("{\"packageName\":\"some-name.zip\",\"version\":\"some-version\",\"packageStatus\":\"BUILT\",\"packagePath\":\"/some/path\",\"referencedResources\":{},\"log\":[],\"toggle\":false}", context.response().getOutputAsString());
-    }
-
-    @Test
     public void shouldReturnSuccessRequest() throws IOException {
-        when(uploadPackageService.uploadPackage(context.request().getResourceResolver(), null, false)).thenReturn(getPackageInfoObj());
+        when(uploadPackageService.uploadPackage(context.request().getResourceResolver().adaptTo(Session.class), null, false)).thenReturn(getPackageInfoObj());
 
         servlet.doPost(context.request(), context.response());
 
         assertEquals(HttpServletResponse.SC_OK, context.response().getStatus());
         assertEquals("application/json;charset=UTF-8", context.response().getContentType());
-        assertEquals("{\"packageName\":\"some-name.zip\",\"version\":\"some-version\",\"packageStatus\":\"BUILT\",\"packagePath\":\"/some/path\",\"referencedResources\":{},\"log\":[],\"toggle\":false}", context.response().getOutputAsString());
+        assertEquals("{\"packageName\":\"some-name.zip\",\"version\":\"some-version\",\"packagePath\":\"/some/path\",\"pathInfoMap\":{},\"packageStatus\":\"BUILT\",\"log\":[],\"dataSize\":0}", context.response().getOutputAsString());
     }
 
 
     @Test
     public void shouldReturnBadRequest_whenRequestIsEmpty() throws IOException {
-        when(uploadPackageService.uploadPackage(context.request().getResourceResolver(), null, false)).thenReturn(getErrorPackageInfoObj());
+        when(uploadPackageService.uploadPackage(context.request().getResourceResolver().adaptTo(Session.class), null, false)).thenReturn(getErrorPackageInfoObj());
 
         servlet.doPost(context.request(), context.response());
 
         assertEquals(HttpServletResponse.SC_BAD_REQUEST, context.response().getStatus());
         assertEquals("application/json;charset=UTF-8", context.response().getContentType());
-        assertEquals("{\"packageStatus\":\"ERROR\",\"referencedResources\":{},\"log\":[],\"toggle\":false}", context.response().getOutputAsString());
+        assertEquals("{\"pathInfoMap\":{},\"packageStatus\":\"ERROR\",\"log\":[],\"dataSize\":0}", context.response().getOutputAsString());
     }
 
     private PackageInfo getErrorPackageInfoObj() {

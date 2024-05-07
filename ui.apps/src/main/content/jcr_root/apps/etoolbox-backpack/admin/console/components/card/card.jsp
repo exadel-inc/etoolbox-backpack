@@ -86,17 +86,17 @@
 </coral-card>
 
 <coral-quickactions target="_prev" alignmy="left top" alignat="left top">
-    <coral-quickactions-item icon="dataRefresh" class="foundation-collection-action" data-foundation-collection-action='{"action": "cq.wcm.open", "data": {"cookiePath":"<%= request.getContextPath() %>/","href":"/tools/etoolbox/backpack/package.html?path=<%= xssAPI.getValidHref(path) %>"}}'><%= xssAPI.encodeForHTML(i18n.get("Package")) %></coral-quickactions-item><%
+    <%
 
     if (resource != null && hasPermission(acm, resource, Privilege.JCR_READ)) {
 %>
-    <coral-quickactions-item icon="edit" class="foundation-collection-action" data-foundation-collection-action='{"action":"foundation.dialog","data":{"nesting":"hide","src":"/mnt/overlay/etoolbox-backpack/admin/console/page/content/editpackagedialog.html?packagePath=<%= xssAPI.getValidHref(path) %>"}}'
+    <coral-quickactions-item icon="edit" class="foundation-collection-action" data-foundation-collection-action='{"action": "cq.wcm.open", "data": {"cookiePath":"<%= request.getContextPath() %>/","href":"/apps/etoolbox-backpack/admin/new.html?packagePath=<%= xssAPI.getValidHref(path) %>"}}'
     ><%= xssAPI.encodeForHTML(i18n.get("Edit")) %></coral-quickactions-item><%
     }
 
     if (hasPermission(acm, resource, Privilege.JCR_REMOVE_NODE)) {
 %>
-    <coral-quickactions-item icon="delete" class="foundation-collection-action" data-foundation-collection-action='{"action":"backpack.delete","data":{"packagePath":"<%= xssAPI.getValidHref(path) %>"}}'
+    <coral-quickactions-item icon="delete" class="foundation-collection-action" data-foundation-collection-action='{"action": "cq.wcm.delete"}'
     ><%= xssAPI.encodeForHTML(i18n.get("Delete")) %></coral-quickactions-item>
     <%
         }

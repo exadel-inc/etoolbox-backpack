@@ -15,11 +15,14 @@ package com.exadel.etoolbox.backpack.core.services.pckg.impl;
 
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
+import com.exadel.etoolbox.backpack.core.dto.response.PathInfo;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
-import com.exadel.etoolbox.backpack.core.servlets.model.*;
+import com.exadel.etoolbox.backpack.core.services.util.constants.BackpackConstants;
+import com.exadel.etoolbox.backpack.core.servlets.model.LatestPackageInfoModel;
+import com.exadel.etoolbox.backpack.core.servlets.model.PackageInfoModel;
+import com.exadel.etoolbox.backpack.core.servlets.model.PackageModel;
 import com.google.gson.reflect.TypeToken;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.vault.fs.api.FilterSet;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
 import org.apache.jackrabbit.vault.fs.api.WorkspaceFilter;
@@ -38,7 +41,10 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -53,13 +59,9 @@ public class PackageInfoServiceImpl implements PackageInfoService {
     @Reference
     private BasePackageService basePackageService;
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public PackageInfo getPackageInfo(final ResourceResolver resourceResolver, final PackageInfoModel packageInfoModel) {
-        String packagePath = packageInfoModel.getPackagePath();
-        PackageInfo packageInfo = basePackageService.getPackageInfos().asMap().get(packagePath);
+    public PackageInfo getPackageInfo(final ResourceResolver resourceResolver, final String packagePath) {
+        PackageInfo packageInfo = basePackageService.getPackageCacheAsMap().get(packagePath);
         if (packageInfo != null) {
             return packageInfo;
         }
@@ -76,7 +78,8 @@ public class PackageInfoServiceImpl implements PackageInfoService {
                 Node packageNode = session.getNode(packagePath);
                 if (packageNode != null) {
                     jcrPackage = packMgr.open(packageNode);
-                    getPackageInfo(packageInfo, jcrPackage, packageNode, resourceResolver);
+                    getPackageInfo(packageInfo, jcrPackage, packageNode);
+                    basePackageService.getPackageCacheAsMap().put(packagePath, packageInfo);
                 }
             }
         } catch (RepositoryException e) {
@@ -90,16 +93,15 @@ public class PackageInfoServiceImpl implements PackageInfoService {
         return packageInfo;
     }
 
-
     /**
      * {@inheritDoc}
      */
     @Override
-    public PackageInfo getPackageInfo(final JcrPackage jcrPackage, final ResourceResolver resourceResolver) {
+    public PackageInfo getPackageInfo(final JcrPackage jcrPackage) {
         PackageInfo packageInfo = new PackageInfo();
         try {
             if (jcrPackage != null) {
-                getPackageInfo(packageInfo, jcrPackage, jcrPackage.getNode(), resourceResolver);
+                getPackageInfo(packageInfo, jcrPackage, jcrPackage.getNode());
 
                 return packageInfo;
             }
@@ -158,7 +160,7 @@ public class PackageInfoServiceImpl implements PackageInfoService {
                 }
             }
         } catch (RepositoryException e) {
-            LOGGER.error(String.format(BasePackageServiceImpl.PACKAGE_DOES_NOT_EXIST_MESSAGE, packageInfoModel.getPackagePath()));
+            LOGGER.error(String.format(BackpackConstants.PACKAGE_DOES_NOT_EXIST_MESSAGE, packageInfoModel.getPackagePath()));
         }
         return false;
     }
@@ -170,7 +172,7 @@ public class PackageInfoServiceImpl implements PackageInfoService {
     @Override
     public List<Resource> getPackageFolders(final ResourceResolver resourceResolver) {
         List<Resource> packageGroups = new ArrayList<>();
-        Resource resource = resourceResolver.getResource(BasePackageServiceImpl.PACKAGES_ROOT_PATH);
+        Resource resource = resourceResolver.getResource(BackpackConstants.PACKAGES_ROOT_PATH);
         return getFolderResources(packageGroups, resource);
     }
 
@@ -213,30 +215,17 @@ public class PackageInfoServiceImpl implements PackageInfoService {
      * @throws RepositoryException in case {@code JcrPackageManager} could not  retrieve a packages's info
      */
     private PackageModel getPackageModel(final JcrPackage jcrPackage) throws RepositoryException {
-        if (jcrPackage != null) {
+        if (jcrPackage != null && jcrPackage.getNode() != null) {
             JcrPackageDefinition definition = jcrPackage.getDefinition();
             if (definition != null) {
                 WorkspaceFilter filter = definition.getMetaInf().getFilter();
-                Type listType = new TypeToken<ArrayList<PathModel>>() {
-                }.getType();
                 if (filter != null) {
                     PackageModel packageModel = new PackageModel();
+                    packageModel.setPackagePath(jcrPackage.getNode().getPath());
                     packageModel.setPackageName(definition.get(JcrPackageDefinition.PN_NAME));
                     packageModel.setGroup(definition.get(JcrPackageDefinition.PN_GROUP));
                     packageModel.setVersion(definition.get(JcrPackageDefinition.PN_VERSION));
-                    packageModel.setThumbnailPath(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.THUMBNAIL_PATH_PARAMETER), String.class));
-                    if (StringUtils.isNotBlank(definition.get(BasePackageServiceImpl.SWITCH_PARAMETER))) {
-                        packageModel.setToggle(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.SWITCH_PARAMETER), Boolean.class));
-                    }
-                    if (definition.get(BasePackageServiceImpl.QUERY_PARAMETER) != null) {
-                        packageModel.setQuery(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.QUERY_PARAMETER), String.class));
-                    }
-                    if (definition.get(BasePackageServiceImpl.INITIAL_FILTERS) != null) {
-                        packageModel.setPaths(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.INITIAL_FILTERS), listType));
-                    } else {
-                        List<PathFilterSet> filterSets = filter.getFilterSets();
-                        packageModel.setPaths(filterSets.stream().map(pathFilterSet -> new PathModel(pathFilterSet.getRoot(), false, false, false)).collect(Collectors.toList()));
-                    }
+                    packageModel.setThumbnailPath(BasePackageServiceImpl.GSON.fromJson(definition.get(BackpackConstants.THUMBNAIL_PATH_PARAMETER), String.class));
                     return packageModel;
                 }
             }
@@ -253,36 +242,30 @@ public class PackageInfoServiceImpl implements PackageInfoService {
      * @param jcrPackage  The standard {@link JcrPackage} model used to retrieve information for the {@code PackageInfo} object
      * @param packageNode The corresponding JCR {@code Node} used to retrieve path requisite
      *                    for the {@code PackageInfo} object
-     * @param resourceResolver {@code ResourceResolver} instance used to access resources
      * @throws RepositoryException in case retrieving of JCR node detail fails
      */
-    private void getPackageInfo(final PackageInfo packageInfo, final JcrPackage jcrPackage, final Node packageNode, final ResourceResolver resourceResolver) throws RepositoryException {
+    private void getPackageInfo(final PackageInfo packageInfo, final JcrPackage jcrPackage, final Node packageNode) throws RepositoryException {
         if (jcrPackage != null) {
             JcrPackageDefinition definition = jcrPackage.getDefinition();
             if (definition != null) {
                 WorkspaceFilter filter = definition.getMetaInf().getFilter();
                 if (filter != null) {
                     List<PathFilterSet> filterSets = filter.getFilterSets();
-                    Type mapType = new TypeToken<Map<String, List<String>>>() {
+                    Type mapType = new TypeToken<Map<String, PathInfo>>() {
                     }.getType();
 
                     packageInfo.setPackagePath(packageNode.getPath());
                     packageInfo.setPackageName(definition.get(JcrPackageDefinition.PN_NAME));
                     packageInfo.setGroupName(definition.get(JcrPackageDefinition.PN_GROUP));
                     packageInfo.setVersion(definition.get(JcrPackageDefinition.PN_VERSION));
-                    packageInfo.setReferencedResources(
-                            validateReferencesResources(
-                                    BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.REFERENCED_RESOURCES), mapType),
-                                    resourceResolver
-                            )
-                    );
+                    if (definition.get(BackpackConstants.PACKAGE_METADATA) != null) {
+                        packageInfo.setPathInfoMap(BasePackageServiceImpl.GSON.fromJson(definition.get(BackpackConstants.PACKAGE_METADATA), mapType));
+                    }
                     packageInfo.setPaths(filterSets.stream().map(FilterSet::getRoot).collect(Collectors.toList()));
                     packageInfo.setDataSize(jcrPackage.getSize());
                     packageInfo.setPackageBuilt(definition.getLastWrapped());
-                    packageInfo.setQuery(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.QUERY_PARAMETER), String.class));
-                    if (StringUtils.isNotBlank(definition.get(BasePackageServiceImpl.SWITCH_PARAMETER))) {
-                        packageInfo.setToggle(BasePackageServiceImpl.GSON.fromJson(definition.get(BasePackageServiceImpl.SWITCH_PARAMETER), Boolean.class));
-                    }
+                    packageInfo.setLastModifiedBy(definition.getLastModifiedBy());
+
                     if (definition.getBuildCount() > 0) {
                         packageInfo.setPackageStatus(PackageStatus.BUILT);
                     } else {
@@ -301,8 +284,8 @@ public class PackageInfoServiceImpl implements PackageInfoService {
     @Override
     public PackageInfo getLatestPackageBuildInfo(final LatestPackageInfoModel latestPackageInfoModel) {
         String packagePath = latestPackageInfoModel.getPackagePath();
-        String packageNotExistMsg = String.format(BasePackageServiceImpl.PACKAGE_DOES_NOT_EXIST_MESSAGE, packagePath);
-        PackageInfo completeBuildInfo = basePackageService.getPackageInfos().asMap().get(packagePath);
+        String packageNotExistMsg = String.format(BackpackConstants.PACKAGE_DOES_NOT_EXIST_MESSAGE, packagePath);
+        PackageInfo completeBuildInfo = basePackageService.getPackageCacheAsMap().get(packagePath);
         PackageInfo partialBuildInfo;
 
         if (completeBuildInfo != null) {
@@ -311,31 +294,11 @@ public class PackageInfoServiceImpl implements PackageInfoService {
         } else {
             partialBuildInfo = new PackageInfo();
             partialBuildInfo.setPackagePath(packagePath);
-            partialBuildInfo.addLogMessage(BasePackageServiceImpl.ERROR + packageNotExistMsg);
+            partialBuildInfo.addLogMessage(BackpackConstants.ERROR + packageNotExistMsg);
             partialBuildInfo.setPackageStatus(PackageStatus.ERROR);
             LOGGER.error(packageNotExistMsg);
         }
         return partialBuildInfo;
     }
 
-    /**
-     * Validate the availability of referenced resources for pages
-     *
-     * @param resources {@code Map} representing references types and paths
-     * @param resourceResolver {@code ResourceResolver} object used to check the actual information about the validity of the resource
-     *
-     * @return {@code Map} instance
-     */
-    private Map<String, List<String>> validateReferencesResources(Map<String, List<String>> resources, ResourceResolver resourceResolver) {
-        Map<String, List<String>> filteredMap = new HashMap<>();
-        if (resources != null) {
-            resources.forEach(
-                    (key, value) -> filteredMap.put(
-                            key,
-                            value.stream().filter(path -> resourceResolver.getResource(path) != null).collect(Collectors.toList())
-                    )
-            );
-        }
-        return filteredMap;
-    }
 }

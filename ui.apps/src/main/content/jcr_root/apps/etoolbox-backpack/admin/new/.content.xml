@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0"
+          xmlns:granite="http://www.adobe.com/jcr/granite/1.0"
+          xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+          xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+          jcr:primaryType="cq:Page">
+    <jcr:content
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/shell/collectionpage"
+            targetCollection=".package-list">
+        <head jcr:primaryType="nt:unstructured">
+            <clientlibs
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/includeclientlibs"
+                    categories="[cq.common.wcm,backpack.new-ui]"/>
+        </head>
+        <actions jcr:primaryType="nt:unstructured">
+            <primary jcr:primaryType="nt:unstructured">
+                <menu
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/button"
+                        granite:id="mainMenuAction"
+                        icon="back"
+                        variant="secondary"/>
+                <add
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/pulldown"
+                        icon="addCircle"
+                        text="Add"
+                        variant="primary">
+                    <items jcr:primaryType="nt:unstructured">
+                        <path
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
+                                action="foundation.dialog"
+                                target=".package-list"
+                                text="Path...">
+                            <data jcr:primaryType="nt:unstructured"
+                                  nesting="hide"
+                                  src.uritemplate="/mnt/overlay/etoolbox-backpack/admin/new/addPath.html?packagePath=${granite:encodeURIPath(param.packagePath)}"/>
+                        </path>
+                        <query
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
+                                action="foundation.dialog"
+                                text="Query...">
+                            <data jcr:primaryType="nt:unstructured"
+                                  nesting="hide"
+                                  src.uritemplate="/mnt/overlay/etoolbox-backpack/admin/new/addQuery.html?packagePath=${granite:encodeURIPath(param.packagePath)}"/>
+                        </query>
+                        <list
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
+                                action="foundation.dialog"
+                                text="List...">
+                            <data jcr:primaryType="nt:unstructured"
+                                  nesting="hide"
+                                  src.uritemplate="/mnt/overlay/etoolbox-backpack/admin/new/addList.html?packagePath=${granite:encodeURIPath(param.packagePath)}"/>
+                        </list>
+                    </items>
+                </add>
+                <edit
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
+                        granite:class="coral3-Button coral3-Button--secondary _coral-Button _coral-Button--secondary"
+                        granite:id="editDialogButton"
+                        action="foundation.dialog"
+                        icon="edit"
+                        text="Edit"
+                        variant="secondary">
+                    <data jcr:primaryType="nt:unstructured"
+                          nesting="hide"
+                          src.uritemplate="/mnt/overlay/etoolbox-backpack/admin/new/editpackagedialog.html?${querystring}"/>
+                </edit>
+                <excludeChildren
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                        granite:class="selection-action"
+                        granite:id="excludeChildrenAction"
+                        disabled="{Boolean}true"
+                        target=".package-list"
+                        icon="pagesExclude"
+                        text="Exclude Children"
+                        variant="actionBar"/>
+                <includeChildren
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                        granite:class="selection-action"
+                        granite:id="includeChildrenAction"
+                        disabled="{Boolean}true"
+                        target=".package-list"
+                        icon="pages"
+                        text="Include Children"
+                        variant="actionBar"/>
+                <liveCopies
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                        granite:class="selection-action"
+                        granite:id="liveCopiesAction"
+                        disabled="{Boolean}true"
+                        target=".package-list"
+                        icon="multiple"
+                        text="Add Live Copies"
+                        variant="actionBar"/>
+                <references
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/pulldown"
+                        granite:class="selection-action selection-pulldown"
+                        icon="gears"
+                        text="Add References"
+                        variant="actionBar">
+                    <items jcr:primaryType="nt:unstructured">
+                        <images
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
+                                granite:class="add-references-action"
+                                text="Pages">
+                            <granite:data
+                                    jcr:primaryType="nt:unstructured"
+                                    type="pages"/>
+                        </images>
+                        <assets
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
+                                granite:class="add-references-action"
+                                text="Assets">
+                            <granite:data
+                                    jcr:primaryType="nt:unstructured"
+                                    type="assets"/>
+                        </assets>
+                        <tags
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
+                                granite:class="add-references-action"
+                                text="Tags">
+                            <granite:data
+                                    jcr:primaryType="nt:unstructured"
+                                    type="tags"/>
+                        </tags>
+                    </items>
+                </references>
+                <delete
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                        granite:class="selection-action"
+                        granite:id="deleteAction"
+                        disabled="{Boolean}true"
+                        target=".package-list"
+                        icon="delete"
+                        text="Delete"
+                        variant="actionBar"/>
+            </primary>
+            <secondary jcr:primaryType="nt:unstructured">
+                <download
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
+                        granite:class="split-start build-options disabled"
+                        granite:id="buildAndDownloadAction"
+                        text="Build &amp; Download"
+                        variant="primary"/>
+                <buildVariants
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/pulldown"
+                        granite:class="split-end build-options disabled"
+                        icon="triangleDown"
+                        variant="primary">
+                    <items jcr:primaryType="nt:unstructured">
+                        <onlyBuild
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
+                                granite:class="build-options disabled"
+                                granite:id="buildAction"
+                                text="Only build"/>
+                        <test
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
+                                granite:class="build-options disabled"
+                                granite:id="testBuildAction"
+                                text="Test build"/>
+                        <onlyDownload
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
+                                granite:class="build-options disabled"
+                                granite:id="downloadAction"
+                                text="Download (without building)"/>
+                    </items>
+                </buildVariants>
+                <install
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/button"
+                        granite:id="installAction"
+                        text="Install"
+                        variant="secondary"/>
+                <replicate
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/button"
+                        granite:id="replicateAction"
+                        text="Replicate"
+                        variant="secondary"/>
+                <delete
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/button"
+                        granite:id="deletePackageAction"
+                        text="Delete"
+                        variant="secondary"/>
+            </secondary>
+        </actions>
+        <views jcr:primaryType="nt:unstructured">
+            <stack
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/foundation/container">
+                <items jcr:primaryType="nt:unstructured">
+                    <list
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/foundation/container"
+                            granite:class="package-list stub-collection"
+                            foundation-selections-mode="single">
+                        <datasource
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="/apps/etoolbox-backpack/admin/new/list/datasource"
+                                itemResourceType="/apps/etoolbox-backpack/admin/new/list/item"/>
+                        <layout jcr:primaryType="nt:unstructured"
+                                sling:resourceType = "granite/ui/components/foundation/layouts/listview"
+                                itemprop="item"
+                                layoutId="list"
+                                maximized="{Boolean}true"/>
+                    </list>
+                    <status
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="/apps/etoolbox-backpack/admin/new/components/statusbar"/>
+                </items>
+            </stack>
+        </views>
+    </jcr:content>
+
+    <addPath
+            jcr:primaryType="nt:unstructured"
+            jcr:title="Add Path"
+            sling:resourceType="granite/ui/components/coral/foundation/dialog"
+            granite:class="modal-form">
+        <items jcr:primaryType="nt:unstructured">
+            <form jcr:primaryType="nt:unstructured"
+                  sling:resourceType="granite/ui/components/coral/foundation/form"
+                  action="/services/backpack/add/path"
+                  foundationForm="{Boolean}true"
+                  method="post"
+                  style="vertical">
+                  <successresponse
+                          jcr:primaryType="nt:unstructured"
+                          jcr:title="Success"
+                          jcr:titleError="Error"
+                          sling:resourceType="granite/ui/components/coral/foundation/form/responses/openprompt"/>
+                <items jcr:primaryType="nt:unstructured">
+                    <content jcr:primaryType="nt:unstructured"
+                             jcr:title="Add Path"
+                             sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns">
+                        <items jcr:primaryType="nt:unstructured">
+                            <column jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container">
+                                <items jcr:primaryType="nt:unstructured">
+                                    <payload
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                                            name="payload"
+                                            fieldLabel="Path"
+                                            required="{Boolean}true">
+                                    </payload>
+                                    <path
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                            disabled="false"
+                                            name="packagePath"
+                                            value="${granite:encodeURIPath(param.packagePath)}"/>
+                                    <okButton
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                                            text="Add"
+                                            type="submit"
+                                            variant="primary"
+                                            granite:class="foundation-ui-notification coral-Form-fieldwrapper"/>
+                                </items>
+                            </column>
+                        </items>
+                    </content>
+                </items>
+            </form>
+        </items>
+    </addPath>
+
+    <addQuery
+            jcr:primaryType="nt:unstructured"
+            jcr:title="Add by Query"
+            sling:resourceType="granite/ui/components/coral/foundation/dialog"
+            granite:class="modal-form">
+        <items jcr:primaryType="nt:unstructured">
+            <form jcr:primaryType="nt:unstructured"
+                  sling:resourceType="granite/ui/components/coral/foundation/form"
+                  action="/services/backpack/add/query"
+                  foundationForm="{Boolean}true"
+                  method="post"
+                  style="vertical">
+                <successresponse
+                        jcr:primaryType="nt:unstructured"
+                        jcr:title="Success"
+                        jcr:titleError="Error"
+                        sling:resourceType="granite/ui/components/coral/foundation/form/responses/openprompt"/>
+                <items jcr:primaryType="nt:unstructured">
+                    <content jcr:primaryType="nt:unstructured"
+                             jcr:title="Add by Query"
+                             sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns">
+                        <items jcr:primaryType="nt:unstructured">
+                            <column jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container">
+                                <items jcr:primaryType="nt:unstructured">
+                                    <payload
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
+                                            name="payload"
+                                            fieldLabel="Query (in JCR-SQL2 format)"
+                                            required="{Boolean}true"
+                                            rows="{Long}10"/>
+                                    <path
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                            disabled="false"
+                                            name="packagePath"
+                                            value="${granite:encodeURIPath(param.packagePath)}"/>
+                                    <okButton
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                                            text="Add"
+                                            type="submit"
+                                            variant="primary"
+                                            granite:class="foundation-ui-notification coral-Form-fieldwrapper"/>
+                                </items>
+                            </column>
+                        </items>
+                    </content>
+                </items>
+            </form>
+        </items>
+    </addQuery>
+
+    <addList
+            jcr:primaryType="nt:unstructured"
+            jcr:title="Add by List"
+            sling:resourceType="granite/ui/components/coral/foundation/dialog"
+            granite:class="modal-form">
+        <items jcr:primaryType="nt:unstructured">
+            <form jcr:primaryType="nt:unstructured"
+                  sling:resourceType="granite/ui/components/coral/foundation/form"
+                  action="/services/backpack/add/list"
+                  foundationForm="{Boolean}true"
+                  method="post"
+                  style="vertical">
+                <successresponse
+                        jcr:primaryType="nt:unstructured"
+                        jcr:title="Success"
+                        jcr:titleError="Error"
+                        sling:resourceType="granite/ui/components/coral/foundation/form/responses/openprompt"/>
+                <items jcr:primaryType="nt:unstructured">
+                    <content jcr:primaryType="nt:unstructured"
+                             jcr:title="Add by List"
+                             sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns">
+                        <items jcr:primaryType="nt:unstructured">
+                            <column jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container">
+                                <items jcr:primaryType="nt:unstructured">
+                                    <payload
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
+                                            name="payload"
+                                            fieldLabel="List"
+                                            required="{Boolean}true"
+                                            rows="{Long}10"/>
+                                    <path
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                            disabled="false"
+                                            name="packagePath"
+                                            value="${granite:encodeURIPath(param.packagePath)}"/>
+                                    <okButton
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                                            text="Add"
+                                            type="submit"
+                                            variant="primary"
+                                            granite:class="foundation-ui-notification coral-Form-fieldwrapper"/>
+                                </items>
+                            </column>
+                        </items>
+                    </content>
+                </items>
+            </form>
+        </items>
+    </addList>
+    <buildLogs
+            jcr:primaryType="nt:unstructured"
+            jcr:title="Logs"
+            sling:resourceType="granite/ui/components/coral/foundation/dialog"
+            granite:class="modal-form">
+        <items jcr:primaryType="nt:unstructured">
+            <column jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/container"
+                    granite:id="buildLogsContainer"/>
+        </items>
+    </buildLogs>
+    <editpackagedialog
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="/apps/etoolbox-backpack/admin/new/components/package/info">
+    </editpackagedialog>
+</jcr:root>

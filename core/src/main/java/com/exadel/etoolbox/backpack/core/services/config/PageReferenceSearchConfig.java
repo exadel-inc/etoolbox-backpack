@@ -14,7 +14,7 @@
 
 package com.exadel.etoolbox.backpack.core.services.config;
 
-import com.exadel.etoolbox.backpack.core.services.impl.PageReferenceSearchServiceImpl;
+import com.exadel.etoolbox.backpack.core.services.resource.impl.PageReferenceSearchServiceImpl;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.AttributeType;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;

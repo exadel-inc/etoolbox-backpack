@@ -14,19 +14,20 @@
 package com.exadel.etoolbox.backpack.core.services.pckg;
 
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
-import org.apache.sling.api.resource.ResourceResolver;
+
+import javax.jcr.Session;
 
 /**
  * Represents a service running in an AEM instance responsible for uploading package
  */
 public interface UploadPackageService {
     /**
-     * Uploads a content package as an array of bytes
+     * Method upload package by byte[] array representation
      *
-     * @param resourceResolver     {@code ResourceResolver} instance used to adapt to Session object and access resources
-     * @param fileUploadBytesArray {@code byte[]} content of the package
+     * @param session              {@code Session} instance used to adapt to JcrPackageManager object.
+     * @param fileUploadBytesArray {@code byte[]} instance used provides the content of the package.
      * @param forceUpdate          {@code boolean} if true existing packages will be replaced
      * @return {@code JcrPackageWrapper} the jcr-package with additional information
      */
-    PackageInfo uploadPackage(ResourceResolver resourceResolver, byte[] fileUploadBytesArray, boolean forceUpdate);
+    PackageInfo uploadPackage(Session session, byte[] fileUploadBytesArray, boolean forceUpdate);
 }

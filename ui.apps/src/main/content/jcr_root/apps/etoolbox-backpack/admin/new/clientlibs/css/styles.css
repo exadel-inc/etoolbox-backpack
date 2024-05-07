@@ -1,0 +1,186 @@
+.package-status {
+    bottom: 0;
+    color: #666;
+    display: block;
+    font-size: 0.9rem;
+    padding: 1rem 1rem 0.5rem 1rem;
+    position: absolute;
+}
+
+.package-status span {
+    margin: 0 0.5rem;
+}
+
+.package-entry {
+    background-color: #FFF;
+    border-top: 1px solid #DDD;
+    margin: 0;
+    padding: 0;
+    position: relative;
+}
+
+.package-entry.primary[data-tree-state="collapsed"] .references {
+    display: none;
+}
+
+.package-entry.primary[data-tree-state="collapsed"] .livecopies {
+    display: none;
+}
+
+.package-entry.references[data-tree-state="collapsed"] .reference-type {
+    display: none;
+}
+
+.package-entry.reference-type[data-tree-state="collapsed"] .secondary {
+    display: none;
+}
+
+.package-entry.livecopies[data-tree-state="collapsed"] .secondary {
+    display: none;
+}
+
+.package-entry .header {
+    align-items: center;
+    display: flex;
+    gap: 1rem;
+    height: 2.5rem;
+    padding: 0.5rem 1rem;
+}
+
+.package-entry.foundation-selections-item {
+    background-color: #e1eff8;
+}
+
+.toggler {
+    cursor: pointer;
+    width: 0.7rem;
+}
+
+[data-tree-state="none"] .toggler {
+    visibility: hidden;
+}
+
+.toggler coral-icon {
+    transition: transform 0.25s ease-in-out;
+}
+
+[data-tree-state="collapsed"] .toggler coral-icon {
+    transform: rotate(-90deg);
+}
+
+.icon {
+    text-align: center;
+    transform: translateY(0.2rem);
+    width: 2.5rem;
+}
+
+.package-entry.primary .icon .coral3-Icon--sizeM {
+    font-size: 1.9rem;
+}
+
+.package-entry.references .header {
+    padding-left: 2rem;
+}
+
+.package-entry.livecopies .header {
+    padding-left: 2rem;
+}
+
+.package-entry.reference-type .header {
+    padding-left: 3rem;
+}
+
+.package-entry.secondary {
+    padding-left: 4rem;
+}
+
+.package-entry.secondary .icon .coral3-Icon {
+    opacity: 0.6;
+}
+
+.path {
+    color: #666;
+    display: block;
+    font-weight: 600;
+    margin: 0 0 0.25rem 0;
+}
+
+.package-entry.primary .path {
+    color: #666;
+    font-size: 1.0rem;
+}
+
+.package-entry.secondary .path {
+    color: #6D6D6D;
+    font-size: 0.9rem;
+}
+
+.parents {
+    color: #666;
+}
+
+.children {
+    color: #84adff;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.split-start {
+    border-radius: 0.25rem 0 0 0.25rem;
+}
+
+.split-end {
+    border-radius: 0 0.25rem 0.25rem 0;
+    margin-left: 2px !important;
+    min-width: 1.375rem;
+    padding: 0.625rem 0.2rem;
+}
+
+.selection-action {
+    display: flex;
+    align-items: center;
+}
+
+.selection-action coral-button-label {
+    max-width: 4rem;
+    display: inline-block;
+    text-align: left;
+    text-wrap: wrap;
+}
+
+.foundation-collection-container.foundation-layout-util-maximized {
+    bottom: 2.5rem;
+}
+
+.foundation-collection-selectall {
+    display: none;
+}
+
+#LogsDialog .coral3-Dialog-content {
+    width: 700px;
+    height: 500px;
+    overflow: scroll;
+    white-space: nowrap;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+#installSubmitBtn {
+    margin-top: 0;
+}
+
+#references-added-alert {
+    width: max-content;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+.granite-title {
+    display: none;
+}
+
+a.disabled {
+    pointer-events: none;
+    cursor: default;
+}

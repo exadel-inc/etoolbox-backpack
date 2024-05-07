@@ -16,7 +16,7 @@ package com.exadel.etoolbox.backpack.core.servlets;
 
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.services.pckg.UploadPackageService;
-import com.exadel.etoolbox.backpack.core.servlets.model.PackageModel;
+import com.exadel.etoolbox.backpack.core.util.ServletUtils;
 import com.google.gson.Gson;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -24,6 +24,7 @@ import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import javax.jcr.Session;
 import javax.servlet.Servlet;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -49,9 +50,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 // because Servlet and HttpServletResponse classes reported as a non-bundle dependency
 public class UploadPackageServlet extends SlingAllMethodsServlet {
 
+    private static final long serialVersionUID = 1L;
     private static final String PARAM_FORCE_UPDATE = "forceUpdate";
     private static final String PARAM_FILEUPLOAD = "fileupload";
-    private static final long serialVersionUID = 1L;
     private static final Gson GSON = new Gson();
 
     @Reference
@@ -71,10 +72,11 @@ public class UploadPackageServlet extends SlingAllMethodsServlet {
     @Override
     protected void doPost(final SlingHttpServletRequest request,
                           final SlingHttpServletResponse response) throws IOException {
+        Session session = request.getResourceResolver().adaptTo(Session.class);
         byte[] fileUploadBytesArray = getFileUploadBytesArray(request);
         boolean forceUpdate = getForceUpdate(request);
 
-        PackageInfo packageInfo = uploadPackageService.uploadPackage(request.getResourceResolver(), fileUploadBytesArray, forceUpdate);
+        PackageInfo packageInfo = uploadPackageService.uploadPackage(session, fileUploadBytesArray, forceUpdate);
 
         writeResponse(response, packageInfo);
     }
@@ -88,7 +90,7 @@ public class UploadPackageServlet extends SlingAllMethodsServlet {
     }
 
     private void writeResponse(final SlingHttpServletResponse response, final PackageInfo packageInfo) throws IOException {
-        response.setContentType(BuildPackageServlet.APPLICATION_JSON);
+        response.setContentType(ServletUtils.APPLICATION_JSON_CONTENT_TYPE);
         response.setCharacterEncoding(UTF_8.name());
         if (ERROR.equals(packageInfo.getPackageStatus())) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -104,5 +106,3 @@ public class UploadPackageServlet extends SlingAllMethodsServlet {
         return Boolean.parseBoolean(forceUpdate);
     }
 }
-
-
