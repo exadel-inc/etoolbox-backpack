@@ -16,8 +16,6 @@ package com.exadel.etoolbox.backpack.core.services.pckg;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.servlets.model.BuildPackageModel;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageModel;
-import com.exadel.etoolbox.backpack.core.servlets.model.PathModel;
-import com.google.common.cache.Cache;
 import org.apache.jackrabbit.vault.fs.config.DefaultWorkspaceFilter;
 import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
 import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
@@ -27,7 +25,7 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.util.Collection;
-import java.util.List;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Represents a service running in an AEM instance responsible for base operation with package
@@ -42,14 +40,14 @@ public interface BasePackageService {
     boolean isEnableStackTrace();
 
     /**
-     * Called from {@link CreatePackageService#createPackage(ResourceResolver, PackageModel)} and {@link EditPackageService#editPackage(ResourceResolver, PackageModel)}
+     * Called from {@link com.exadel.etoolbox.backpack.core.services.pckg.CreatePackageService#createPackage(ResourceResolver, PackageModel)} and {@link EditPackageService#editPackage(ResourceResolver, PackageModel)}
      * in order to convert {@link PackageModel} into {@link PackageInfo}
      *
      * @param resourceResolver {@code ResourceResolver} used to convert the model
      * @param packageModel     {@code PackageModel} that will be converted
      * @return {@link PackageInfo} instance
      */
-    PackageInfo getPackageInfo(ResourceResolver resourceResolver, PackageModel packageModel);
+    PackageInfo initPackageInfo(ResourceResolver resourceResolver, PackageModel packageModel);
 
     /**
      * Gets {@link JcrPackageManager} instance associated with the current {@code Session}
@@ -60,7 +58,7 @@ public interface BasePackageService {
     JcrPackageManager getPackageManager(Session userSession);
 
     /**
-     * Called by {@link CreatePackageService#createPackage(ResourceResolver, PackageModel)} or
+     * Called by {@link com.exadel.etoolbox.backpack.core.services.pckg.CreatePackageService#createPackage(ResourceResolver, PackageModel)} or
      * {@link BuildPackageService#buildPackage(ResourceResolver, BuildPackageModel)} to add a thumbnail to package
      *
      * @param packageNode   {@code Node} representing content package as a JCR storage item
@@ -91,7 +89,6 @@ public interface BasePackageService {
     void setPackageInfo(JcrPackageDefinition jcrPackageDefinition,
                         Session userSession,
                         PackageInfo packageInfo,
-                        List<PathModel> paths,
                         DefaultWorkspaceFilter filter);
 
     /**
@@ -108,7 +105,7 @@ public interface BasePackageService {
      * @param paths Collection of JCR paths of resources
      * @return {@code DefaultWorkspaceFilter} object
      */
-    DefaultWorkspaceFilter getWorkspaceFilter(Collection<String> paths);
+    DefaultWorkspaceFilter buildWorkspaceFilter(Collection<String> paths);
 
     /**
      * Called from {@link CreatePackageService#createPackage(ResourceResolver, PackageModel)} to get whether
@@ -134,13 +131,14 @@ public interface BasePackageService {
      */
     @SuppressWarnings("UnstableApiUsage")
     // sticking to Guava Cache version bundled in uber-jar; still safe to use
-    Cache<String, PackageInfo> getPackageInfos();
+    ConcurrentMap<String, PackageInfo> getPackageCacheAsMap();
 
     /**
-     *
      * @param resourceResolver {@code ResourceResolver} used to collect assets details
-     * @param path Collection of JCR paths of resources
+     * @param path             Collection of JCR paths of resources
      * @return Data size
      */
     long getAssetSize(ResourceResolver resourceResolver, String path);
+
+    void modifyPackage(Session userSession, String packagePath, PackageInfo packageInfo);
 }

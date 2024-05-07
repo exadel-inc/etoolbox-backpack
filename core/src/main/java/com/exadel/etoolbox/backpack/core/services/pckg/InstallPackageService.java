@@ -1,7 +1,6 @@
 package com.exadel.etoolbox.backpack.core.services.pckg;
 
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
-import com.exadel.etoolbox.backpack.core.servlets.model.BuildPackageModel;
 import com.exadel.etoolbox.backpack.core.servlets.model.InstallPackageModel;
 import org.apache.sling.api.resource.ResourceResolver;
 

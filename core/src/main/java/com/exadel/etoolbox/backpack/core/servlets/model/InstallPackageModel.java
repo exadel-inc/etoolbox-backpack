@@ -1,7 +1,5 @@
 package com.exadel.etoolbox.backpack.core.servlets.model;
 
-import com.exadel.etoolbox.backpack.core.services.pckg.InstallPackageService;
-import com.exadel.etoolbox.backpack.core.servlets.InstallPackageServlet;
 import com.exadel.etoolbox.backpack.request.annotations.RequestMapping;
 import com.exadel.etoolbox.backpack.request.annotations.RequestParam;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -13,7 +11,7 @@ import org.apache.sling.api.resource.ResourceResolver;
  * @see InstallPackageServlet
  */
 @RequestMapping
-public class InstallPackageModel extends PackageInfoModel{
+public class InstallPackageModel extends PackageInfoModel {
 
     @RequestParam
     private int threshold;
@@ -23,6 +21,7 @@ public class InstallPackageModel extends PackageInfoModel{
 
     /**
      * Gets the auto-save threshold of the installed package
+     *
      * @return int value
      */
     public int getThreshold() {
@@ -31,6 +30,7 @@ public class InstallPackageModel extends PackageInfoModel{
 
     /**
      * Gets the dependency handling of the installed package
+     *
      * @return String value
      */
     public String getDependencyHandling() {

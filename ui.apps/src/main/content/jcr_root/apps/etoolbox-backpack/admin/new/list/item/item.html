@@ -1,0 +1,97 @@
+<sly data-sly-use.entry="com.exadel.etoolbox.backpack.core.model.ParentPackageEntry"/>
+<div class="foundation-collection-item package-entry primary result-row"
+     data-type="${entry.type}"
+     data-entry-title="${entry.title}"
+     data-tree-state="collapsed">
+    <div class="header">
+        <div data-sly-test="${entry.hasReferences || entry.hasLiveCopies}" class="toggler">
+            <coral-icon icon="triangleDown" size="S"></coral-icon>
+        </div>
+        <div class="icon">
+            <coral-icon icon="${entry.icon}" size="M"></coral-icon>
+        </div>
+        <div class="title">
+            <span class="path">${entry.title}</span>
+            <span class="children">${'/jcr:content' in entry.title ? '' : 'Children included'}</span>
+        </div>
+    </div>
+    <div data-sly-test="${entry.hasReferences}"
+         class="foundation-collection-item package-entry result-row references"
+         data-entry-title="References (${entry.referenceCount})"
+         data-tree-state="collapsed">
+        <div class="header">
+            <div class="toggler">
+                <coral-icon icon="triangleDown" size="S"></coral-icon>
+            </div>
+            <div class="icon">
+                <coral-icon icon="${entry.icon}" size="M"></coral-icon>
+            </div>
+            <div class="title">
+                <span class="path">References (${entry.referenceCount})</span>
+            </div>
+        </div>
+        <sly data-sly-list.reference="${entry.referencesByType.keySet.iterator}">
+            <div class="reference-type foundation-collection-item package-entry result-row"
+                 data-entry-title="${reference} (${entry.referencesByType[reference].size})"
+                 data-tree-state="collapsed">
+                <div class="reference-type-header header">
+                    <div class="toggler">
+                        <coral-icon icon="triangleDown" size="S"></coral-icon>
+                    </div>
+                    <div class="icon">
+                        <coral-icon icon="${entry.icon}" size="M"></coral-icon>
+                    </div>
+                    <div class="title">
+                        <span class="path">${reference} (${entry.referencesByType[reference].size})</span>
+                    </div>
+                </div>
+                <sly data-sly-list="${entry.referencesByType[reference]}">
+                    <div class="foundation-collection-item package-entry secondary result-row"
+                         data-type="${item.type}"
+                         data-entry-title="${entry.title}"
+                         data-subsidiary-title="${item.title}">
+                        <div class="header">
+                            <div class="icon">
+                                <coral-icon icon="${item.icon}" size="M"></coral-icon>
+                            </div>
+                            <div class="title">
+                                <span class="path reference">${item.title}</span>
+                            </div>
+                        </div>
+                    </div>
+                </sly>
+            </div>
+        </sly>
+    </div>
+    <div data-sly-test="${entry.hasLiveCopies}"
+         class="foundation-collection-item package-entry result-row livecopies"
+         data-entry-title="Live Copies (${entry.liveCopies.size})"
+         data-tree-state="collapsed">
+        <div class="header">
+            <div class="toggler">
+                <coral-icon icon="triangleDown" size="S"></coral-icon>
+            </div>
+            <div class="icon">
+                <coral-icon icon="${entry.icon}" size="M"></coral-icon>
+            </div>
+            <div class="title">
+                <span class="path">Live Copies (${entry.liveCopies.size})</span>
+            </div>
+        </div>
+        <sly data-sly-list.livecopy="${entry.liveCopies}">
+            <div class="foundation-collection-item package-entry secondary result-row"
+                 data-type="${livecopy.type}"
+                 data-entry-title="${entry.title}"
+                 data-subsidiary-title="${livecopy.title}">
+                <div class="header">
+                    <div class="icon">
+                        <coral-icon icon="${livecopy.icon}" size="M"></coral-icon>
+                    </div>
+                    <div class="title">
+                        <span class="path reference">${livecopy.title}</span>
+                    </div>
+                </div>
+            </div>
+        </sly>
+    </div>
+</div>

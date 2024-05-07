@@ -14,19 +14,12 @@
 
 package com.exadel.etoolbox.backpack.core.dto.response;
 
-import com.exadel.etoolbox.backpack.core.dto.repository.AssetReferencedItem;
-import com.exadel.etoolbox.backpack.core.dto.repository.ReferencedItem;
-import com.exadel.etoolbox.backpack.core.servlets.BuildPackageServlet;
-import com.exadel.etoolbox.backpack.core.servlets.CreatePackageServlet;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Data model containing comprehensive data required to manage a package.
- *
- * @see CreatePackageServlet
- * @see BuildPackageServlet
  */
 public class PackageInfo {
 
@@ -40,29 +33,23 @@ public class PackageInfo {
 
     private Calendar packageBuilt;
 
-    private PackageStatus packageStatus;
-
     private String packagePath;
 
     private String thumbnailPath;
 
-    private Collection<String> paths;
+    private Map<String, PathInfo> pathInfoMap = new HashMap<>();
 
-    private Status status;
-
-    private Map<String, List<String>> referencedResources = new TreeMap<>();
+    private PackageStatus packageStatus;
 
     private List<String> log = new ArrayList<>();
 
-    private Long dataSize;
-
-    private String query;
-
-    private boolean toggle;
+    private long dataSize;
 
     private Calendar packageInstalled;
 
     private Calendar packageReplicated;
+
+    private String lastModifiedBy;
 
     /**
      * Default constructor
@@ -87,13 +74,9 @@ public class PackageInfo {
         this.packageStatus = packageInfo.packageStatus;
         this.packagePath = packageInfo.getPackagePath();
         this.thumbnailPath = packageInfo.thumbnailPath;
-        this.referencedResources = new HashMap<>(packageInfo.getReferencedResources());
+        this.pathInfoMap = new HashMap<>(packageInfo.getPathInfoMap());
         this.log = packageInfo.log;
         this.dataSize = packageInfo.dataSize;
-        this.paths = packageInfo.paths;
-        this.status = packageInfo.status;
-        this.query = packageInfo.query;
-        this.toggle = packageInfo.toggle;
         if (packageInfo.packageInstalled != null) {
             this.packageInstalled = Calendar.getInstance();
             this.packageInstalled.setTime(packageInfo.packageInstalled.getTime());
@@ -103,6 +86,7 @@ public class PackageInfo {
             this.packageReplicated = Calendar.getInstance();
             this.packageReplicated.setTime(packageInfo.packageReplicated.getTime());
         }
+        this.lastModifiedBy = packageInfo.lastModifiedBy;
     }
 
     /**
@@ -138,16 +122,16 @@ public class PackageInfo {
      * @return {@code Collection<String>} object, read-only
      */
     public Collection<String> getPaths() {
-        return Collections.unmodifiableCollection(paths);
+        return Collections.unmodifiableCollection(pathInfoMap != null ? pathInfoMap.keySet() : Collections.emptyList());
     }
 
-    /**
-     * Gets the collection of paths representing assets to be embedded in the current package, grouped by their MIME types
-     *
-     * @return {@code Collection<String>} object, read-only
-     */
-    public Map<String, List<String>> getReferencedResources() {
-        return referencedResources != null ? Collections.unmodifiableMap(referencedResources) : Collections.emptyMap();
+    public Collection<String> getReferences() {
+        return Collections.unmodifiableCollection(pathInfoMap != null
+                ? pathInfoMap.values().stream()
+                .flatMap(pathInfo -> Stream.of(pathInfo.getAssets(), pathInfo.getLiveCopies(), pathInfo.getPages(), pathInfo.getTags()))
+                .flatMap(Set::stream)
+                .collect(Collectors.toSet())
+                : Collections.emptyList());
     }
 
     /**
@@ -199,21 +183,6 @@ public class PackageInfo {
      */
     public void clearLog() {
         log.clear();
-    }
-
-    /**
-     * Appends a path to a referenced asset to the current {@link PackageInfo}
-     *
-     * @param item {@link AssetReferencedItem} object containing asset's MIME type and path
-     */
-    public void addAssetReferencedItem(final ReferencedItem item) {
-        if (referencedResources == null) {
-            referencedResources = new TreeMap<>();
-        }
-        if (StringUtils.isNotBlank(item.getPath()) && StringUtils.isNotBlank(item.getType())) {
-            List<String> assetsPaths = referencedResources.computeIfAbsent(item.getType(), k -> new ArrayList<>());
-            assetsPaths.add(item.getPath());
-        }
     }
 
     /**
@@ -321,16 +290,15 @@ public class PackageInfo {
      * @param paths {@code Collection<String>} object
      */
     public void setPaths(final Collection<String> paths) {
-        this.paths = paths;
-    }
-
-    /**
-     * Sets the collection of paths representing assets to be embedded in the current package, grouped by their MIME types
-     *
-     * @param referencedResources {@code Collection<String>} object
-     */
-    public void setReferencedResources(final Map<String, List<String>> referencedResources) {
-        this.referencedResources = referencedResources;
+        if (paths == null || paths.isEmpty()) {
+            return;
+        }
+        for (String path : paths) {
+            if (this.pathInfoMap.containsKey(path)) {
+                continue;
+            }
+            this.pathInfoMap.put(path, new PathInfo());
+        }
     }
 
     /**
@@ -372,42 +340,6 @@ public class PackageInfo {
     }
 
     /**
-     * Gets the SQL2 query of the current package
-     *
-     * @return String value
-     */
-    public String getQuery() {
-        return query;
-    }
-
-    /**
-     * Sets the SQL2 query of the current package
-     *
-     * @param query String value
-     */
-    public void setQuery(String query) {
-        this.query = query;
-    }
-
-    /**
-     * Gets the toggle between SQL2 (true) and Path Filter (false)
-     *
-     * @return boolean value
-     */
-    public boolean isToggle() {
-        return toggle;
-    }
-
-    /**
-     * Sets the toggle between SQL2 (true) and Path Filter (false)
-     *
-     * @param toggle boolean value
-     */
-    public void setToggle(boolean toggle) {
-        this.toggle = toggle;
-    }
-
-    /**
      * Gets the value representing when the package was installed
      *
      * @return {@code Calendar} instance
@@ -444,15 +376,6 @@ public class PackageInfo {
     }
 
     /**
-     * Sets the status of the package creation result
-     *
-     * @param  {@code Status} object
-     */
-    public void setStatus(final Status status) {
-        this.status = status;
-    }
-
-    /**
      * Overrides the standard {@code equals()} routine to implement packages comparison by their name and group name
      * requisites
      *
@@ -476,5 +399,29 @@ public class PackageInfo {
     @Override
     public int hashCode() {
         return Objects.hash(packageName, groupName);
+    }
+
+    public PathInfo getPathInfo(String path) {
+        return pathInfoMap.computeIfAbsent(path, k -> new PathInfo());
+    }
+
+    public void deletePath(String path) {
+        pathInfoMap.remove(path);
+    }
+
+    public Map<String, PathInfo> getPathInfoMap() {
+        return pathInfoMap;
+    }
+
+    public void setPathInfoMap(Map<String, PathInfo> pathInfoMap) {
+        this.pathInfoMap = pathInfoMap;
+    }
+
+    public String getLastModifiedBy() {
+        return lastModifiedBy;
+    }
+
+    public void setLastModifiedBy(String lastModifiedBy) {
+        this.lastModifiedBy = lastModifiedBy;
     }
 }

@@ -13,19 +13,13 @@
  */
 package com.exadel.etoolbox.backpack.core.services.pckg.impl;
 
-import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.dam.api.Asset;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
-import com.exadel.etoolbox.backpack.core.dto.response.ResourceRelationships;
-import com.exadel.etoolbox.backpack.core.dto.response.Status;
-import com.exadel.etoolbox.backpack.core.services.LiveCopyService;
-import com.exadel.etoolbox.backpack.core.services.QueryService;
-import com.exadel.etoolbox.backpack.core.services.ReferenceService;
+import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
-import com.exadel.etoolbox.backpack.core.services.pckg.CreatePackageService;
+import com.exadel.etoolbox.backpack.core.services.util.constants.BackpackConstants;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageModel;
-import com.exadel.etoolbox.backpack.core.servlets.model.PathModel;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.Gson;
@@ -55,9 +49,14 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Implements {@link BasePackageService} to provide base operation with package
@@ -67,22 +66,6 @@ import java.util.stream.Collectors;
 public class BasePackageServiceImpl implements BasePackageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasePackageServiceImpl.class);
-
-
-    protected static final String DEFAULT_PACKAGE_GROUP = "EToolbox_BackPack";
-    protected static final String JCR_CONTENT_NODE = "/" + JcrConstants.JCR_CONTENT;
-    public static final String ERROR = "ERROR: ";
-    protected static final String REFERENCED_RESOURCES = "referencedResources";
-    protected static final String GENERAL_RESOURCES = "generalResources";
-    protected static final String PACKAGE_DOES_NOT_EXIST_MESSAGE = "Package by this path %s doesn't exist in the repository.";
-    private static final String THUMBNAIL_FILE = "thumbnail.png";
-    private static final String DEFAULT_THUMBNAILS_LOCATION = "/apps/etoolbox-backpack/assets/";
-    protected static final String INITIAL_FILTERS = "initialFilters";
-    private static final String THUMBNAIL_PATH_TEMPLATE = DEFAULT_THUMBNAILS_LOCATION + "backpack_%s.png";
-    public static final String PACKAGES_ROOT_PATH = "/etc/packages";
-    protected static final String QUERY_PARAMETER = "queryPackage";
-    protected static final String SWITCH_PARAMETER = "toggle";
-    protected static final String THUMBNAIL_PATH_PARAMETER = "thumbnailPath";
 
     protected static final Gson GSON = new Gson();
 
@@ -94,18 +77,10 @@ public class BasePackageServiceImpl implements BasePackageService {
     @SuppressWarnings("UnusedDeclaration") // value injected by Sling
     private SlingRepository slingRepository;
 
-    @Reference
-    @SuppressWarnings("UnusedDeclaration") // value injected by Sling
-    private ReferenceService referenceService;
-
-    @Reference
-    private QueryService queryService;
-
-    @Reference
-    private LiveCopyService liveCopyService;
 
     @SuppressWarnings("UnstableApiUsage") // sticking to Guava Cache version bundled in uber-jar; still safe to use
     protected Cache<String, PackageInfo> packageInfos;
+
     protected boolean enableStackTrace;
 
     /**
@@ -152,72 +127,27 @@ public class BasePackageServiceImpl implements BasePackageService {
      * {@inheritDoc}
      */
     @Override
-    public PackageInfo getPackageInfo(final ResourceResolver resourceResolver, final PackageModel packageModel) {
+    public PackageInfo initPackageInfo(final ResourceResolver resourceResolver, final PackageModel packageModel) {
         PackageInfo packageInfo = new PackageInfo();
-        final Set<String> actualPaths = new HashSet<>();
-        final Set<String> brokenPaths = new HashSet<>();
-        if (packageModel.isToggle()) {
-            actualPaths.addAll(queryService.getResourcesPathsFromQuery(resourceResolver, packageModel.getQuery(), packageInfo));
-            extractReferencedResources(resourceResolver, actualPaths, packageInfo);
-        } else {
-            packageModel.getPaths().stream()
-                    .filter(s -> resourceResolver.getResource(s.getPath()) != null)
-                    .forEach(pathModel -> {
-                        final ResourceRelationships resourceRelationships = getResourceRelationships(resourceResolver, pathModel);
-                        actualPaths.addAll(resourceRelationships.getValidPaths());
-                        brokenPaths.addAll(resourceRelationships.getBrokenPaths());
-            });
-            extractReferencedResources(resourceResolver, filteringPaths(packageModel.getPaths()), packageInfo);
-        }
         packageInfo.setPackageName(packageModel.getPackageName());
         packageInfo.setVersion(packageModel.getVersion());
         packageInfo.setThumbnailPath(packageModel.getThumbnailPath());
-        packageInfo.setQuery(packageModel.getQuery());
-        packageInfo.setToggle(packageModel.isToggle());
-        packageInfo.setDataSize(actualPaths.stream().mapToLong(value -> getAssetSize(resourceResolver, value)).sum());
 
-        if (!brokenPaths.isEmpty()) {
-            actualPaths.removeAll(brokenPaths);
-            packageInfo.setStatus(Status.warning(brokenPaths));
+        if (packageModel.getInitialResources() != null) {
+            packageInfo.setPaths(packageModel
+                    .getInitialResources().stream()
+                    .filter(path -> resourceResolver.getResource(path) != null)
+                    .collect(Collectors.toSet())
+            );
         }
-
-        packageInfo.setPaths(actualPaths);
-
-        String packageGroupName = DEFAULT_PACKAGE_GROUP;
 
         if (StringUtils.isNotBlank(packageModel.getGroup())) {
-            packageGroupName = packageModel.getGroup();
+            packageInfo.setGroupName(packageModel.getGroup());
+        } else {
+            packageInfo.setGroupName(BackpackConstants.DEFAULT_PACKAGE_GROUP);
         }
-        packageInfo.setGroupName(packageGroupName);
+
         return packageInfo;
-    }
-
-    /**
-     * Called by {@link CreatePackageService#createPackage(ResourceResolver, PackageModel)} to adjust paths to resources
-     * intended for the package, Whether a resource does not require its children to be included, its path is brought down
-     * to the underlying {@code jcr:content} node
-     *
-     * @param path             Resource path to inspect
-     * @param includeChildren  Flag indicating if this resource's children must be included
-     * @param resourceResolver Current {@code ResourceResolver} object
-     * @return Source path, or the adjusted resource path
-     */
-    private String getActualPath(final String path, final boolean includeChildren, final ResourceResolver resourceResolver) {
-        Resource res = resourceResolver.getResource(path);
-
-        if (includeChildren) {
-            return path;
-        }
-        if (res != null && res.getChild(JcrConstants.JCR_CONTENT) != null) {
-            return path + JCR_CONTENT_NODE;
-        }
-        return path;
-    }
-
-    private ResourceRelationships getResourceRelationships(ResourceResolver resourceResolver, PathModel pathModel) {
-        ResourceRelationships resourceRelationships = liveCopyService.getResourceRelationships(resourceResolver, pathModel.getPath(), pathModel.includeLiveCopies());
-        resourceRelationships.setValidPaths(resourceRelationships.getValidPaths().stream().map(path -> getActualPath(path, pathModel.includeChildren(), resourceResolver)).collect(Collectors.toList()));
-        return resourceRelationships;
     }
 
     /**
@@ -273,7 +203,7 @@ public class BasePackageServiceImpl implements BasePackageService {
                 return;
             }
 
-            JcrUtil.copy(thumbnailNode, packageNode, THUMBNAIL_FILE);
+            JcrUtil.copy(thumbnailNode, packageNode, BackpackConstants.THUMBNAIL_FILE);
             packageNode.getSession().save();
         } catch (RepositoryException e) {
             LOGGER.error("A repository exception occurred: ", e);
@@ -285,7 +215,7 @@ public class BasePackageServiceImpl implements BasePackageService {
      */
     @Override
     public String getDefaultThumbnailPath(boolean isEmpty) {
-        return String.format(THUMBNAIL_PATH_TEMPLATE, isEmpty ? "empty" : "full");
+        return String.format(BackpackConstants.THUMBNAIL_PATH_TEMPLATE, isEmpty ? "empty" : "full");
     }
 
     /**
@@ -295,15 +225,11 @@ public class BasePackageServiceImpl implements BasePackageService {
     public void setPackageInfo(final JcrPackageDefinition jcrPackageDefinition,
                                final Session userSession,
                                final PackageInfo packageInfo,
-                               final List<PathModel> paths,
                                final DefaultWorkspaceFilter filter) {
-        jcrPackageDefinition.set(REFERENCED_RESOURCES, GSON.toJson(packageInfo.getReferencedResources()), true);
-        jcrPackageDefinition.set(GENERAL_RESOURCES, GSON.toJson(packageInfo.getPaths()), true);
-        jcrPackageDefinition.set(INITIAL_FILTERS, GSON.toJson(paths), true);
-        jcrPackageDefinition.set(QUERY_PARAMETER, GSON.toJson(packageInfo.getQuery()), true);
-        jcrPackageDefinition.set(SWITCH_PARAMETER, GSON.toJson(packageInfo.isToggle()), true);
+        jcrPackageDefinition.set(BackpackConstants.PACKAGE_METADATA, GSON.toJson(packageInfo.getPathInfoMap()), true);
+        jcrPackageDefinition.set(BackpackConstants.THUMBNAIL_PATH_PARAMETER, GSON.toJson(packageInfo.getThumbnailPath()), true);
+        jcrPackageDefinition.set(BackpackConstants.GENERAL_RESOURCES, GSON.toJson(packageInfo.getPaths()), true);
         jcrPackageDefinition.setFilter(filter, true);
-        jcrPackageDefinition.set(THUMBNAIL_PATH_PARAMETER, GSON.toJson(packageInfo.getThumbnailPath()), true);
 
         String thumbnailPath = StringUtils.defaultIfBlank(packageInfo.getThumbnailPath(), getDefaultThumbnailPath(true));
         addThumbnail(jcrPackageDefinition.getNode(), thumbnailPath, userSession);
@@ -314,18 +240,17 @@ public class BasePackageServiceImpl implements BasePackageService {
      */
     @Override
     public void addExceptionToLog(final PackageInfo packageInfo, final Exception e) {
-        packageInfo.addLogMessage(ERROR + e.getMessage());
+        packageInfo.addLogMessage(BackpackConstants.ERROR + e.getMessage());
         if (enableStackTrace) {
             packageInfo.addLogMessage(ExceptionUtils.getStackTrace(e));
         }
     }
 
-
     /**
      * {@inheritDoc}
      */
     @Override
-    public DefaultWorkspaceFilter getWorkspaceFilter(final Collection<String> paths) {
+    public DefaultWorkspaceFilter buildWorkspaceFilter(final Collection<String> paths) {
         DefaultWorkspaceFilter filter = new DefaultWorkspaceFilter();
         paths.forEach(path -> {
             PathFilterSet pathFilterSet = new PathFilterSet(path);
@@ -357,7 +282,7 @@ public class BasePackageServiceImpl implements BasePackageService {
     }
 
     /**
-     * Called by {@link BasePackageService#getPackageInfo(ResourceResolver, PackageModel)} to compute size
+     * Called by {@link BasePackageService#initPackageInfo(ResourceResolver, PackageModel)} to compute size
      * of the asset specified by path
      *
      * @param resourceResolver {@code ResourceResolver} used to retrieve path-specified {@code Resource}s
@@ -366,8 +291,7 @@ public class BasePackageServiceImpl implements BasePackageService {
      */
     @Override
     public long getAssetSize(ResourceResolver resourceResolver, String path) {
-        Resource rootResource = resourceResolver.getResource(path);
-        return getAssetSize(rootResource);
+        return getAssetSize(resourceResolver.getResource(path));
     }
 
     /**
@@ -376,8 +300,40 @@ public class BasePackageServiceImpl implements BasePackageService {
     @SuppressWarnings("UnstableApiUsage")
     // sticking to Guava Cache version bundled in uber-jar; still safe to use
     @Override
-    public Cache<String, PackageInfo> getPackageInfos() {
-        return packageInfos;
+    public ConcurrentMap<String, PackageInfo> getPackageCacheAsMap() {
+        return packageInfos.asMap();
+    }
+
+    @Override
+    public void modifyPackage(final Session userSession,
+                              final String packagePath,
+                              final PackageInfo packageInfo) {
+
+        JcrPackage jcrPackage = null;
+
+        clearCache(packagePath);
+
+        try {
+            JcrPackageManager packMgr = PackagingService.getPackageManager(userSession);
+            Node packageNode = userSession.getNode(packagePath);
+            if (packageNode != null) {
+                jcrPackage = packMgr.open(packageNode);
+                JcrPackageDefinition jcrPackageDefinition = jcrPackage.getDefinition();
+                if (jcrPackageDefinition != null) {
+                    setPackageInfo(jcrPackageDefinition, userSession, packageInfo,
+                            buildWorkspaceFilter(Stream.concat(packageInfo.getPaths().stream(), packageInfo.getReferences().stream()).collect(Collectors.toList())));
+                    packageInfo.setPackageStatus(PackageStatus.MODIFIED);
+                }
+            }
+        } catch (RepositoryException e) {
+            packageInfo.setPackageStatus(PackageStatus.ERROR);
+            addExceptionToLog(packageInfo, e);
+            LOGGER.error("Error during package modification", e);
+        } finally {
+            if (jcrPackage != null) {
+                jcrPackage.close();
+            }
+        }
     }
 
     /**
@@ -414,35 +370,7 @@ public class BasePackageServiceImpl implements BasePackageService {
         return packageGroupName + ":" + packageName + (StringUtils.isNotBlank(version) ? ":" + version : StringUtils.EMPTY);
     }
 
-    /**
-     * Filtering paths by includeReferences param for looking resources referenced {@link PackageInfo}
-     *
-     * @param paths   {@code List<PathModel>} representing the list of {@link PathModel}
-     */
-    private List<String> filteringPaths(final List<PathModel> paths) {
-        if (paths != null) {
-            return paths.stream()
-                    .filter(PathModel::includeReferences)
-                    .map(PathModel::getPath)
-                    .collect(Collectors.toList());
-        }
-        return Collections.emptyList();
-    }
-
-    /**
-     * Looks for the resources referenced by the given path models and includes them in the provided {@link PackageInfo}
-     *
-     * @param resourceResolver  {@code ResourceResolver} used to access JCR resources
-     * @param paths             {@code List<String>}  representing the list of paths for looking references
-     * @param packageInfo       {@code PackageInfo} representing the object with info about package
-     */
-    private void extractReferencedResources(final ResourceResolver resourceResolver, final Collection<String> paths, final PackageInfo packageInfo) {
-        if (paths != null) {
-            paths.stream()
-                    .filter(path -> resourceResolver.getResource(path) != null)
-                    .flatMap(path -> referenceService.getReferences(resourceResolver, path).stream())
-                    .collect(Collectors.toSet())
-                    .forEach(packageInfo::addAssetReferencedItem);
-        }
+    private void clearCache(String key) {
+        getPackageCacheAsMap().remove(key);
     }
 }

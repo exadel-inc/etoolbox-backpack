@@ -14,23 +14,13 @@
 
 package com.exadel.etoolbox.backpack.core.servlets.model;
 
-import com.exadel.etoolbox.backpack.core.services.pckg.CreatePackageService;
-import com.exadel.etoolbox.backpack.request.annotations.FieldType;
 import com.exadel.etoolbox.backpack.request.annotations.RequestMapping;
 import com.exadel.etoolbox.backpack.request.annotations.RequestParam;
 import com.exadel.etoolbox.backpack.request.annotations.Validate;
 import com.exadel.etoolbox.backpack.request.validator.impl.RequiredValidator;
-import com.exadel.etoolbox.backpack.core.servlets.CreatePackageServlet;
-import org.apache.sling.api.resource.ResourceResolver;
 
 import java.util.List;
 
-/**
- * Represents the set of user-defined options for a request to build a package. Upon initialization, passed
- * as a parameter to the {@link CreatePackageService#createPackage(ResourceResolver, PackageModel)}
- *
- * @see CreatePackageServlet
- */
 @RequestMapping
 public class PackageModel {
 
@@ -40,7 +30,7 @@ public class PackageModel {
     private String packageName;
 
     @RequestParam
-    private String thumbnailPath;
+    private String packagePath;
 
     @RequestParam
     private String group;
@@ -48,19 +38,12 @@ public class PackageModel {
     @RequestParam
     private String version;
 
-    @RequestParam(type = FieldType.MULTIFIELD)
-    @Validate(validator = RequiredValidator.class,
-            invalidMessages = "Resource filter(s) is required")
-    private List<PathModel> paths;
-
     @RequestParam
-    private String packagePath;
+    private String thumbnailPath;
 
-    @RequestParam
-    private String query;
+    @RequestParam(name = "initialResource")
+    private List<String> initialResources;
 
-    @RequestParam
-    private boolean toggle;
 
     /**
      * Gets the name of the current package
@@ -100,15 +83,6 @@ public class PackageModel {
 
 
     /**
-     * Gets the collection of JCR paths indicating separate resources (resource trees) to be included in this package
-     *
-     * @return {@code List} of {@link PathModel}
-     */
-    public List<PathModel> getPaths() {
-        return paths;
-    }
-
-    /**
      * Assigns package name value to the current instance
      *
      * @param packageName String value, non-blank string expected
@@ -144,67 +118,15 @@ public class PackageModel {
         this.version = version;
     }
 
-    /**
-     * Assigns to the current instance the collection of JCR paths indicating separate resources (resource trees)
-     * to be included in the package
-     *
-     * @param paths {@code List<String>} object, non-empty list expected
-     */
-    public void setPaths(final List<PathModel> paths) {
-        this.paths = paths;
-    }
-
-    /**
-     * Gets the package path
-     *
-     * @return String value
-     */
     public String getPackagePath() {
         return packagePath;
     }
 
-    /**
-     * Assigns package path to the current instance
-     *
-     * @param packagePath current package path to assign
-     */
-    public void setPackagePath(final String packagePath) {
+    public void setPackagePath(String packagePath) {
         this.packagePath = packagePath;
     }
 
-    /**
-     * Gets the SQL2 query
-     *
-     * @return String value
-     */
-    public String getQuery() {
-        return query;
-    }
-
-    /**
-     * Assigns SQL2 query to the current instance
-     *
-     * @param query current SQL2 query to assign
-     */
-    public void setQuery(final String query) {
-        this.query = query;
-    }
-
-    /**
-     * Gets the toggle between SQL2 (true) and Path Filter (false)
-     *
-     * @return boolean value
-     */
-    public boolean isToggle() {
-        return toggle;
-    }
-
-    /**
-     * Sets the toggle between SQL2 (true) and Path Filter (false)
-     *
-     * @param toggle boolean value
-     */
-    public void setToggle(boolean toggle) {
-        this.toggle = toggle;
+    public List<String> getInitialResources() {
+        return initialResources;
     }
 }

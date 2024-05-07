@@ -18,8 +18,8 @@ import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.EditPackageService;
 import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
+import com.exadel.etoolbox.backpack.core.services.util.constants.BackpackConstants;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageModel;
-import com.exadel.etoolbox.backpack.core.servlets.model.PathModel;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.vault.fs.config.DefaultWorkspaceFilter;
 import org.apache.jackrabbit.vault.packaging.*;
@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import java.util.List;
 
 /**
  * Implements {@link EditPackageService} to provide edit package operations
@@ -40,7 +39,6 @@ import java.util.List;
 @Component(service = EditPackageService.class)
 public class EditPackageServiceImpl implements EditPackageService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EditPackageServiceImpl.class);
-
 
     @Reference
     private PackageInfoService packageInfoService;
@@ -53,18 +51,18 @@ public class EditPackageServiceImpl implements EditPackageService {
      */
     @Override
     public PackageInfo editPackage(final ResourceResolver resourceResolver, final PackageModel modificationPackageModel) {
+
         final Session session = resourceResolver.adaptTo(Session.class);
 
-        PackageInfo packageInfo = basePackageService.getPackageInfo(resourceResolver, modificationPackageModel);
+        PackageInfo packageInfo = packageInfoService.getPackageInfo(resourceResolver, modificationPackageModel.getPackagePath());
 
-        PackageModel oldPackageModel = packageInfoService.getPackageModelByPath(modificationPackageModel.getPackagePath(), resourceResolver);
         try {
             JcrPackageManager packMgr = basePackageService.getPackageManager(session);
-            if (isPackageLocationUpdated(modificationPackageModel, oldPackageModel)
-                    && basePackageService.isPackageExist(packMgr, packageInfo.getPackageName(), packageInfo.getGroupName(), packageInfo.getVersion())) {
-                String packageExistMsg = "Package with this name already exists in the " + packageInfo.getGroupName() + " group.";
+            if (isPackageLocationUpdated(packageInfo, modificationPackageModel)
+                    && basePackageService.isPackageExist(packMgr, modificationPackageModel.getPackageName(), modificationPackageModel.getGroup(), modificationPackageModel.getVersion())) {
+                String packageExistMsg = "Package with this name already exists. Consider changing package name or package group";
 
-                packageInfo.addLogMessage(BasePackageServiceImpl.ERROR + packageExistMsg);
+                packageInfo.addLogMessage(packageExistMsg);
                 packageInfo.setPackageStatus(PackageStatus.ERROR);
                 LOGGER.error(packageExistMsg);
                 return packageInfo;
@@ -75,53 +73,33 @@ public class EditPackageServiceImpl implements EditPackageService {
             return packageInfo;
         }
 
-        DefaultWorkspaceFilter filter = basePackageService.getWorkspaceFilter(packageInfo.getPaths());
-        modifyPackage(session, modificationPackageModel.getPackagePath(), packageInfo, modificationPackageModel.getPaths(), filter);
+        packageInfo.setPackageName(modificationPackageModel.getPackageName());
+        packageInfo.setGroupName(modificationPackageModel.getGroup());
+        packageInfo.setVersion(modificationPackageModel.getVersion());
+        packageInfo.setThumbnailPath(modificationPackageModel.getThumbnailPath());
+
+        modifyPackage(session, modificationPackageModel.getPackagePath(), packageInfo, basePackageService.buildWorkspaceFilter(packageInfo.getPaths()));
 
         if (PackageStatus.MODIFIED.equals(packageInfo.getPackageStatus())) {
-            basePackageService.getPackageInfos().asMap().remove(modificationPackageModel.getPackagePath());
-            basePackageService.getPackageInfos().asMap().put(packageInfo.getPackagePath(), packageInfo);
+            basePackageService.getPackageCacheAsMap().remove(modificationPackageModel.getPackagePath());
+            basePackageService.getPackageCacheAsMap().put(packageInfo.getPackagePath(), packageInfo);
         }
 
         return packageInfo;
     }
 
-    /**
-     * Called from {@link EditPackageService#editPackage(ResourceResolver, PackageModel)} to check whether
-     * properties that affect package location were updated during modification
-     *
-     * @param newPackage {@link PackageModel} model with package modification info
-     * @param oldPackage {@link PackageModel} model with existing package info
-     * @return {@code boolean}
-     */
-    private boolean isPackageLocationUpdated(final PackageModel newPackage, final PackageModel oldPackage) {
-        return !StringUtils.equals(oldPackage.getPackageName(), newPackage.getPackageName()) ||
-                !StringUtils.equals(oldPackage.getGroup(), newPackage.getGroup()) ||
-                !StringUtils.equals(oldPackage.getVersion(), newPackage.getVersion());
+    private boolean isPackageLocationUpdated(final PackageInfo packageInfo, final PackageModel modificationPackageModel) {
+        return !StringUtils.equals(packageInfo.getPackageName(), modificationPackageModel.getPackageName()) ||
+                !StringUtils.equals(packageInfo.getGroupName(), modificationPackageModel.getGroup()) ||
+                !StringUtils.equals(packageInfo.getVersion(), modificationPackageModel.getVersion());
     }
 
 
-    /**
-     * Called from {@link EditPackageService#editPackage(ResourceResolver, PackageModel)} in order to update package location and information
-     *
-     * @param userSession Current user {@code Session} as adapted from the acting {@code ResourceResolver}
-     * @param packagePath Modified package path
-     * @param packageInfo {@code PackageInfo} object to store status information in
-     * @param paths       {@code List} of {@code PathModel} will be stored in package metadata information and used in future package modifications
-     * @param filter      {@code DefaultWorkspaceFilter} instance representing resource selection mechanism for the package
-     */
     private void modifyPackage(final Session userSession,
                                final String packagePath,
                                final PackageInfo packageInfo,
-                               final List<PathModel> paths,
                                final DefaultWorkspaceFilter filter) {
 
-        if (filter.getFilterSets().isEmpty()) {
-            packageInfo.setPackageStatus(PackageStatus.ERROR);
-            packageInfo.addLogMessage(BasePackageServiceImpl.ERROR + "Package does not contain any valid filters.");
-            return;
-
-        }
         JcrPackage jcrPackage = null;
 
         try {
@@ -132,7 +110,7 @@ public class EditPackageServiceImpl implements EditPackageService {
                 jcrPackage = packMgr.rename(jcrPackage, packageInfo.getGroupName(), packageInfo.getPackageName(), packageInfo.getVersion());
                 JcrPackageDefinition jcrPackageDefinition = jcrPackage.getDefinition();
                 if (jcrPackageDefinition != null) {
-                    basePackageService.setPackageInfo(jcrPackageDefinition, userSession, packageInfo, paths, filter);
+                    basePackageService.setPackageInfo(jcrPackageDefinition, userSession, packageInfo, filter);
                     packageInfo.setPackageStatus(PackageStatus.MODIFIED);
                     Node movedPackageNode = jcrPackage.getNode();
                     if (movedPackageNode != null) {
@@ -150,6 +128,5 @@ public class EditPackageServiceImpl implements EditPackageService {
                 jcrPackage.close();
             }
         }
-
     }
 }

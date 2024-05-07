@@ -33,7 +33,7 @@ public class InstallPackageModel {
      */
     @PostConstruct
     private void init() {
-        packagePath = request.getParameter("path");
+        packagePath = request.getParameter("packagePath");
     }
 
     /**

@@ -18,6 +18,15 @@ import com.exadel.etoolbox.backpack.request.annotations.RequestMapping;
 import com.exadel.etoolbox.backpack.request.annotations.RequestParam;
 import com.exadel.etoolbox.backpack.request.annotations.Validate;
 import com.exadel.etoolbox.backpack.request.validator.impl.RequiredValidator;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.PostConstruct;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /**
  * Represents the set of user-defined options for a path filter creation.
@@ -26,56 +35,53 @@ import com.exadel.etoolbox.backpack.request.validator.impl.RequiredValidator;
 @RequestMapping
 public class PathModel {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(PathModel.class);
+
     @RequestParam
     @Validate(validator = RequiredValidator.class,
-            invalidMessages = "Path is required")
-    private String path;
+            invalidMessages = "Path field is required")
+    private String packagePath;
 
     @RequestParam
-    private boolean includeChildren;
+    @Validate(validator = RequiredValidator.class,
+            invalidMessages = "Payload is required")
+    private List<String> payload;
 
     @RequestParam
-    private boolean includeLiveCopies;
-
-    @RequestParam
-    private boolean includeReferences;
+    @Validate(validator = RequiredValidator.class,
+            invalidMessages = "Type is required")
+    private String type;
 
     public PathModel() {
     }
 
-    public PathModel(final String path, final boolean includeChildren, final boolean includeLiveCopies, final boolean includeReferences) {
-        this.path = path;
-        this.includeChildren = includeChildren;
-        this.includeLiveCopies = includeLiveCopies;
+    public PathModel(final String packagePath, final List<String> payload, final String type) {
+        this.packagePath = packagePath;
+        this.payload = payload;
+        this.type = type;
     }
 
-    /**
-     * Gets the filter path.
-     * @return String value
-     */
-    public String getPath() {
-        return path;
+    @PostConstruct
+    @SuppressWarnings("PackageAccessibility") // because PostConstruct class reported as a non-bundle dependency
+    private void init() {
+        if (StringUtils.isNotBlank(packagePath)) {
+            try {
+                packagePath = URLDecoder.decode(packagePath, StandardCharsets.UTF_8.displayName());
+            } catch (UnsupportedEncodingException e) {
+                LOGGER.error("Path decode exception", e);
+            }
+        }
     }
 
-    /**
-     * Gets the whether or not child pages are included to a package build
-     * @return boolean value
-     */
-    public boolean includeChildren() {
-        return includeChildren;
+    public List<String> getPayload() {
+        return payload;
     }
 
-    /**
-     * Gets the whether or not live copies of the page included to the package build
-     * @return boolean value
-     */
-    public boolean includeLiveCopies() {
-        return includeLiveCopies;
+    public String getType() {
+        return type;
     }
 
-    /**
-     * Gets the whether or not references of the page included to the package build
-     * @return boolean value
-     */
-    public boolean includeReferences() {return includeReferences;}
+    public String getPackagePath() {
+        return packagePath;
+    }
 }

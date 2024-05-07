@@ -33,20 +33,19 @@ public interface PackageInfoService {
      * to a JSON-coded HTTP response
      *
      * @param resourceResolver {@code ResourceResolver} instance used to collect data for a package as a JCR repository item
-     * @param packageInfoModel {@link PackageInfoModel} instance containing requisites of the required package
+     * @param packagePath {@link String} instance containing requisites of the required package
      * @return {@link PackageInfo} instance
      */
-    PackageInfo getPackageInfo(ResourceResolver resourceResolver, PackageInfoModel packageInfoModel);
+    PackageInfo getPackageInfo(final ResourceResolver resourceResolver, String packagePath);
 
     /**
      * Gets structured information about a package specified in a jcr-package object. This information can be subsequently serialized
      * to a JSON-coded HTTP response
      *
      * @param jcrPackage {@code JcrPackage} instance containing requisites of the required package
-     * @param resourceResolver {@code ResourceResolver} instance used to access resources
      * @return {@link PackageInfo} instance
      */
-    PackageInfo getPackageInfo(JcrPackage jcrPackage, ResourceResolver resourceResolver);
+    PackageInfo getPackageInfo(JcrPackage jcrPackage);
 
     /**
      * Gets a chunk of rolling package building process update according to options specified in the HTTP request
