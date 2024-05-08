@@ -365,7 +365,7 @@
         name: 'foundation.prompt.open',
         handler: function (form, config, data, textStatus, xhr) {
             if (data.status == "ERROR" || data.status == "WARNING") {
-                const dialog = openLogsDialog(data.logs);
+                const dialog = openLogsDialog(data.logs, 'WARNING', 'Close');
                 dialog.on('coral-overlay:close', function(event) {
                     if (data.status == "WARNING") {
                         window.location.reload();
