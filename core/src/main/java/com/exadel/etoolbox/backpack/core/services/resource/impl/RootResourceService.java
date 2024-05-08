@@ -172,6 +172,6 @@ public class RootResourceService implements BaseResourceService<PackageInfo> {
 }
 
     private List<String> parseStringToList(String payload) {
-        return Arrays.stream(payload.split(",")).map(String::trim).collect(Collectors.toList());
+        return Arrays.stream(payload.split("[\\s,]")).filter(StringUtils::isNoneBlank).map(String::trim).collect(Collectors.toList());
     }
 }
