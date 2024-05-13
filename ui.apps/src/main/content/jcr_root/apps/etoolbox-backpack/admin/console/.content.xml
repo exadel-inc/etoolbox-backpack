@@ -61,7 +61,7 @@
                 </add>
                 <edit
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
+                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
                         granite:class="coral3-Button coral3-Button--secondary _coral-Button _coral-Button--secondary"
                         granite:id="editDialogButton"
                         action="foundation.dialog"
