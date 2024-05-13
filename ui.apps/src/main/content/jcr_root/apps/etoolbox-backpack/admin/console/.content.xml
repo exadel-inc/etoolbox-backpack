@@ -37,7 +37,7 @@
                                 text="Path...">
                             <data jcr:primaryType="nt:unstructured"
                                   nesting="hide"
-                                  src.uritemplate="/mnt/overlay/etoolbox-backpack/admin/new/addPath.html?packagePath=${granite:encodeURIPath(param.packagePath)}"/>
+                                  src.uritemplate="/mnt/overlay/etoolbox-backpack/admin/console/addPath.html?packagePath=${granite:encodeURIPath(param.packagePath)}"/>
                         </path>
                         <query
                                 jcr:primaryType="nt:unstructured"
@@ -46,7 +46,7 @@
                                 text="Query...">
                             <data jcr:primaryType="nt:unstructured"
                                   nesting="hide"
-                                  src.uritemplate="/mnt/overlay/etoolbox-backpack/admin/new/addQuery.html?packagePath=${granite:encodeURIPath(param.packagePath)}"/>
+                                  src.uritemplate="/mnt/overlay/etoolbox-backpack/admin/console/addQuery.html?packagePath=${granite:encodeURIPath(param.packagePath)}"/>
                         </query>
                         <list
                                 jcr:primaryType="nt:unstructured"
@@ -55,7 +55,7 @@
                                 text="List...">
                             <data jcr:primaryType="nt:unstructured"
                                   nesting="hide"
-                                  src.uritemplate="/mnt/overlay/etoolbox-backpack/admin/new/addList.html?packagePath=${granite:encodeURIPath(param.packagePath)}"/>
+                                  src.uritemplate="/mnt/overlay/etoolbox-backpack/admin/console/addList.html?packagePath=${granite:encodeURIPath(param.packagePath)}"/>
                         </list>
                     </items>
                 </add>
@@ -70,7 +70,7 @@
                         variant="secondary">
                     <data jcr:primaryType="nt:unstructured"
                           nesting="hide"
-                          src.uritemplate="/mnt/overlay/etoolbox-backpack/admin/new/editpackagedialog.html?${querystring}"/>
+                          src.uritemplate="/mnt/overlay/etoolbox-backpack/admin/console/editpackagedialog.html?${querystring}"/>
                 </edit>
                 <excludeChildren
                         jcr:primaryType="nt:unstructured"
@@ -217,8 +217,8 @@
                             foundation-selections-mode="single">
                         <datasource
                                 jcr:primaryType="nt:unstructured"
-                                sling:resourceType="/apps/etoolbox-backpack/admin/new/list/datasource"
-                                itemResourceType="/apps/etoolbox-backpack/admin/new/list/item"/>
+                                sling:resourceType="/apps/etoolbox-backpack/admin/console/list/datasource"
+                                itemResourceType="/apps/etoolbox-backpack/admin/console/list/item"/>
                         <layout jcr:primaryType="nt:unstructured"
                                 sling:resourceType = "granite/ui/components/foundation/layouts/listview"
                                 itemprop="item"
@@ -227,7 +227,7 @@
                     </list>
                     <status
                             jcr:primaryType="nt:unstructured"
-                            sling:resourceType="/apps/etoolbox-backpack/admin/new/components/statusbar"/>
+                            sling:resourceType="/apps/etoolbox-backpack/admin/console/components/statusbar"/>
                 </items>
             </stack>
         </views>
@@ -407,6 +407,6 @@
     </buildLogs>
     <editpackagedialog
             jcr:primaryType="nt:unstructured"
-            sling:resourceType="/apps/etoolbox-backpack/admin/new/components/package/info">
+            sling:resourceType="/apps/etoolbox-backpack/admin/console/components/package/info">
     </editpackagedialog>
 </jcr:root>
