@@ -316,6 +316,7 @@
                                             sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
                                             name="payload"
                                             fieldLabel="Query (in JCR-SQL2 format)"
+                                            validation="text-validation"
                                             required="{Boolean}true"
                                             rows="{Long}10"/>
                                     <path
@@ -370,6 +371,7 @@
                                             sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
                                             name="payload"
                                             fieldLabel="List"
+                                            validation="text-validation"
                                             required="{Boolean}true"
                                             rows="{Long}10"/>
                                     <path

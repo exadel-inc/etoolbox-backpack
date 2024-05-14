@@ -560,4 +560,13 @@
         }
     });
 
+    $(window).adaptTo("foundation-registry").register("foundation.validation.validator", {
+        selector: "[data-validation='text-validation']",
+        validate: function(el) {
+            if (!el.value || !el.value.trim()) {
+                return "Please enter a value";
+            }
+        }
+    });
+
 })(Granite, Granite.$);
