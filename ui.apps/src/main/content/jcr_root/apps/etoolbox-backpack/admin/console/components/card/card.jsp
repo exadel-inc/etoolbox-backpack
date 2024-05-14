@@ -90,7 +90,7 @@
 
     if (resource != null && hasPermission(acm, resource, Privilege.JCR_READ)) {
 %>
-    <coral-quickactions-item icon="edit" class="foundation-collection-action" data-foundation-collection-action='{"action": "cq.wcm.open", "data": {"cookiePath":"<%= request.getContextPath() %>/","href":"/apps/etoolbox-backpack/admin/new.html?packagePath=<%= xssAPI.getValidHref(path) %>"}}'
+    <coral-quickactions-item icon="edit" class="foundation-collection-action" data-foundation-collection-action='{"action": "cq.wcm.open", "data": {"cookiePath":"<%= request.getContextPath() %>/","href":"/apps/etoolbox-backpack/admin/console.html?packagePath=<%= xssAPI.getValidHref(path) %>"}}'
     ><%= xssAPI.encodeForHTML(i18n.get("Edit")) %></coral-quickactions-item><%
     }
 

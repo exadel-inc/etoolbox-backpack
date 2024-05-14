@@ -103,17 +103,10 @@
                 rootPath="/etc/packages"/>
         <actions jcr:primaryType="nt:unstructured">
             <secondary jcr:primaryType="nt:unstructured">
-                <crxPM
-                        jcr:primaryType="nt:unstructured"
-                        sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
-                        href="/crx/packmgr"
-                        x-cq-linkchecker="valid"
-                        text="CRX Package Manager">
-                </crxPM>
                 <create
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
-                        href="/apps/etoolbox-backpack/admin/new.html"
+                        href="/apps/etoolbox-backpack/admin/console.html"
                         target=".screens-dcc-collection-resources"
                         text="Create"
                         variant="primary">
@@ -131,6 +124,14 @@
                             nesting="hide"
                             src.uritemplate="/apps/etoolbox-backpack/admin/console/page/content/uploadpackagedialog.html"/>
                 </upload>
+                <crxPM
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
+                        target="_blank"
+                        href="/crx/packmgr"
+                        x-cq-linkchecker="valid"
+                        text="CRX Package Manager">
+                </crxPM>
             </secondary>
         </actions>
     </jcr:content>
