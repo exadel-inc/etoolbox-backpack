@@ -37,7 +37,7 @@
                                 text="Path...">
                             <data jcr:primaryType="nt:unstructured"
                                   nesting="hide"
-                                  src.uritemplate="/mnt/overlay/etoolbox-backpack/admin/new/addPath.html?packagePath=${granite:encodeURIPath(param.packagePath)}"/>
+                                  src.uritemplate="/mnt/overlay/etoolbox-backpack/admin/console/addPath.html?packagePath=${granite:encodeURIPath(param.packagePath)}"/>
                         </path>
                         <query
                                 jcr:primaryType="nt:unstructured"
@@ -46,7 +46,7 @@
                                 text="Query...">
                             <data jcr:primaryType="nt:unstructured"
                                   nesting="hide"
-                                  src.uritemplate="/mnt/overlay/etoolbox-backpack/admin/new/addQuery.html?packagePath=${granite:encodeURIPath(param.packagePath)}"/>
+                                  src.uritemplate="/mnt/overlay/etoolbox-backpack/admin/console/addQuery.html?packagePath=${granite:encodeURIPath(param.packagePath)}"/>
                         </query>
                         <list
                                 jcr:primaryType="nt:unstructured"
@@ -55,33 +55,10 @@
                                 text="List...">
                             <data jcr:primaryType="nt:unstructured"
                                   nesting="hide"
-                                  src.uritemplate="/mnt/overlay/etoolbox-backpack/admin/new/addList.html?packagePath=${granite:encodeURIPath(param.packagePath)}"/>
+                                  src.uritemplate="/mnt/overlay/etoolbox-backpack/admin/console/addList.html?packagePath=${granite:encodeURIPath(param.packagePath)}"/>
                         </list>
                     </items>
                 </add>
-                <edit
-                        jcr:primaryType="nt:unstructured"
-                        sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
-                        granite:class="coral3-Button coral3-Button--secondary _coral-Button _coral-Button--secondary"
-                        granite:id="editDialogButton"
-                        action="foundation.dialog"
-                        icon="edit"
-                        text="Edit"
-                        variant="secondary">
-                    <data jcr:primaryType="nt:unstructured"
-                          nesting="hide"
-                          src.uritemplate="/mnt/overlay/etoolbox-backpack/admin/new/editpackagedialog.html?${querystring}"/>
-                </edit>
-                <excludeChildren
-                        jcr:primaryType="nt:unstructured"
-                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
-                        granite:class="selection-action"
-                        granite:id="excludeChildrenAction"
-                        disabled="{Boolean}true"
-                        target=".package-list"
-                        icon="pagesExclude"
-                        text="Exclude Children"
-                        variant="actionBar"/>
                 <includeChildren
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/collection/action"
@@ -91,6 +68,16 @@
                         target=".package-list"
                         icon="pages"
                         text="Include Children"
+                        variant="actionBar"/>
+                <excludeChildren
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                        granite:class="selection-action"
+                        granite:id="excludeChildrenAction"
+                        disabled="{Boolean}true"
+                        target=".package-list"
+                        icon="pagesExclude"
+                        text="Exclude Children"
                         variant="actionBar"/>
                 <liveCopies
                         jcr:primaryType="nt:unstructured"
@@ -147,7 +134,7 @@
                         disabled="{Boolean}true"
                         target=".package-list"
                         icon="delete"
-                        text="Delete"
+                        text="Delete item"
                         variant="actionBar"/>
             </primary>
             <secondary jcr:primaryType="nt:unstructured">
@@ -197,6 +184,18 @@
                         granite:id="replicateAction"
                         text="Replicate"
                         variant="secondary"/>
+                <edit
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                        granite:class="coral3-Button coral3-Button--secondary _coral-Button _coral-Button--secondary"
+                        granite:id="editDialogButton"
+                        action="foundation.dialog"
+                        text="Package properties"
+                        variant="secondary">
+                    <data jcr:primaryType="nt:unstructured"
+                          nesting="hide"
+                          src.uritemplate="/mnt/overlay/etoolbox-backpack/admin/console/editpackagedialog.html?${querystring}"/>
+                </edit>
                 <delete
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/button"
@@ -217,8 +216,8 @@
                             foundation-selections-mode="single">
                         <datasource
                                 jcr:primaryType="nt:unstructured"
-                                sling:resourceType="/apps/etoolbox-backpack/admin/new/list/datasource"
-                                itemResourceType="/apps/etoolbox-backpack/admin/new/list/item"/>
+                                sling:resourceType="/apps/etoolbox-backpack/admin/console/list/datasource"
+                                itemResourceType="/apps/etoolbox-backpack/admin/console/list/item"/>
                         <layout jcr:primaryType="nt:unstructured"
                                 sling:resourceType = "granite/ui/components/foundation/layouts/listview"
                                 itemprop="item"
@@ -227,7 +226,7 @@
                     </list>
                     <status
                             jcr:primaryType="nt:unstructured"
-                            sling:resourceType="/apps/etoolbox-backpack/admin/new/components/statusbar"/>
+                            sling:resourceType="/apps/etoolbox-backpack/admin/console/components/statusbar"/>
                 </items>
             </stack>
         </views>
@@ -235,7 +234,7 @@
 
     <addPath
             jcr:primaryType="nt:unstructured"
-            jcr:title="Add Path"
+            jcr:title="Add by Path"
             sling:resourceType="granite/ui/components/coral/foundation/dialog"
             granite:class="modal-form">
         <items jcr:primaryType="nt:unstructured">
@@ -252,7 +251,7 @@
                           sling:resourceType="granite/ui/components/coral/foundation/form/responses/openprompt"/>
                 <items jcr:primaryType="nt:unstructured">
                     <content jcr:primaryType="nt:unstructured"
-                             jcr:title="Add Path"
+                             jcr:title="Add by Path"
                              sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns">
                         <items jcr:primaryType="nt:unstructured">
                             <column jcr:primaryType="nt:unstructured"
@@ -317,6 +316,7 @@
                                             sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
                                             name="payload"
                                             fieldLabel="Query (in JCR-SQL2 format)"
+                                            validation="text-validation"
                                             required="{Boolean}true"
                                             rows="{Long}10"/>
                                     <path
@@ -371,6 +371,7 @@
                                             sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
                                             name="payload"
                                             fieldLabel="List"
+                                            validation="text-validation"
                                             required="{Boolean}true"
                                             rows="{Long}10"/>
                                     <path
@@ -407,6 +408,6 @@
     </buildLogs>
     <editpackagedialog
             jcr:primaryType="nt:unstructured"
-            sling:resourceType="/apps/etoolbox-backpack/admin/new/components/package/info">
+            sling:resourceType="/apps/etoolbox-backpack/admin/console/components/package/info">
     </editpackagedialog>
 </jcr:root>

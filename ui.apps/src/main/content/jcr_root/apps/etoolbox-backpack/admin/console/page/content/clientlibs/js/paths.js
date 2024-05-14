@@ -16,6 +16,6 @@ $(function () {
 
     $(document).on("click", '.js-create-package-activator', function(event) {
         var path = $('.js-create-package-activator').data('path');
-        window.location.replace('/apps/etoolbox-backpack/admin/new.html?item=' + path);
+        window.location.replace('/apps/etoolbox-backpack/admin/console.html?item=' + path);
     });
 });

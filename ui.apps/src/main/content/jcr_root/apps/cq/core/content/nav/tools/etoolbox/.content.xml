@@ -19,7 +19,7 @@
           jcr:title="EToolbox">
 
     <backpack jcr:primaryType="nt:unstructured"
-              jcr:title="Backpack"
+              jcr:title="EToolbox Backpack"
               jcr:description="Create packages with referenced resources"
               order="{Long}101"
               href="/tools/etoolbox/backpack.html"

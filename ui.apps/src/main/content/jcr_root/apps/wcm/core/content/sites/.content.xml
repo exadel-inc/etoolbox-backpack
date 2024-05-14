@@ -17,7 +17,7 @@
                         variant="actionBar">
                     <data
                             jcr:primaryType="nt:unstructured"
-                            href.uritemplate="/apps/etoolbox-backpack/admin/new.html{?item*}"/>
+                            href.uritemplate="/apps/etoolbox-backpack/admin/console.html{?item*}"/>
                 </backpack>
             </selection>
         </actions>
