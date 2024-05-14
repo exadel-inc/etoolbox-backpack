@@ -90,14 +90,6 @@
 
     const foundationUi = $(window).adaptTo('foundation-ui');
 
-    $(document)
-        .ajaxStart(function () {
-            foundationUi.wait();
-        })
-        .ajaxStop(function () {
-            foundationUi.clearWait();
-        });
-
     // Make top-level package entries collapsible
 
     $(document).on('click', '.toggler', function() {
@@ -201,7 +193,7 @@
                 const dialog = openLogsDialog(data.log, 'Test Build', 'Close');
                 const assetText = data.dataSize === 0
                     ? 'There are no assets in the package'
-                    : '<h4>Approximate size of the assets in the package: ' + bytesToSize(data.dataSize) + '</h4>';
+                    : '<h4>Approximate size of the package: ' + bytesToSize(data.dataSize) + '</h4>';
                 $(dialog.content).append('<div>' + assetText + '</div>');
                 setTimeout(function () {
                     $(dialog.content).children("div").last()[0].scrollIntoView(false);
@@ -223,7 +215,7 @@
                         const dialog = openLogsDialog(data.log, 'Replication', 'Close');
                         const assetText = data.dataSize === 0
                             ? 'There are no assets in the package'
-                            : '<h4>Approximate size of the assets in the package: ' + bytesToSize(data.dataSize) + '</h4>';
+                            : '<h4>Approximate size of the package: ' + bytesToSize(data.dataSize) + '</h4>';
                         $(dialog.content).append('<div>' + assetText + '</div>');
                         setTimeout(function () {
                             $(dialog.content).children("div").last()[0].scrollIntoView(false);
@@ -332,6 +324,12 @@
             data: {packagePath: packagePath},
             success: function (data) {
                 callback(data);
+            },
+            beforeSend: function () {
+                foundationUi.wait();
+            },
+            complete: function () {
+                foundationUi.clearWait();
             }
         })
     }
@@ -353,6 +351,12 @@
             success: success,
             error: function(data) {
                 console.log(data);
+            },
+            beforeSend: function () {
+                foundationUi.wait();
+            },
+            complete: function () {
+                foundationUi.clearWait();
             }
         });
     }
@@ -444,6 +448,12 @@
                 testBuild: testBuild
             }, success: function (data) {
                 callback(data);
+            },
+            beforeSend: function () {
+                foundationUi.wait();
+            },
+            complete: function () {
+                foundationUi.clearWait();
             },
             dataType: 'json'
         });
@@ -547,6 +557,15 @@
             });
         } else {
             openPackageDialog()
+        }
+    });
+
+    $(window).adaptTo("foundation-registry").register("foundation.validation.validator", {
+        selector: "[data-validation='text-validation']",
+        validate: function(el) {
+            if (!el.value || !el.value.trim()) {
+                return "Please enter a value";
+            }
         }
     });
 
