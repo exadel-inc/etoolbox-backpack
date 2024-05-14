@@ -234,7 +234,7 @@
 
     <addPath
             jcr:primaryType="nt:unstructured"
-            jcr:title="Add Path"
+            jcr:title="Add by Path"
             sling:resourceType="granite/ui/components/coral/foundation/dialog"
             granite:class="modal-form">
         <items jcr:primaryType="nt:unstructured">
@@ -251,7 +251,7 @@
                           sling:resourceType="granite/ui/components/coral/foundation/form/responses/openprompt"/>
                 <items jcr:primaryType="nt:unstructured">
                     <content jcr:primaryType="nt:unstructured"
-                             jcr:title="Add Path"
+                             jcr:title="Add by Path"
                              sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns">
                         <items jcr:primaryType="nt:unstructured">
                             <column jcr:primaryType="nt:unstructured"
