@@ -248,6 +248,7 @@
                           jcr:primaryType="nt:unstructured"
                           jcr:title="Success"
                           jcr:titleError="Error"
+                          granite:class="backpack-meta"
                           sling:resourceType="granite/ui/components/coral/foundation/form/responses/openprompt"/>
                 <items jcr:primaryType="nt:unstructured">
                     <content jcr:primaryType="nt:unstructured"
@@ -302,6 +303,7 @@
                         jcr:primaryType="nt:unstructured"
                         jcr:title="Success"
                         jcr:titleError="Error"
+                        granite:class="backpack-meta"
                         sling:resourceType="granite/ui/components/coral/foundation/form/responses/openprompt"/>
                 <items jcr:primaryType="nt:unstructured">
                     <content jcr:primaryType="nt:unstructured"
@@ -357,6 +359,7 @@
                         jcr:primaryType="nt:unstructured"
                         jcr:title="Success"
                         jcr:titleError="Error"
+                        granite:class="backpack-meta"
                         sling:resourceType="granite/ui/components/coral/foundation/form/responses/openprompt"/>
                 <items jcr:primaryType="nt:unstructured">
                     <content jcr:primaryType="nt:unstructured"
