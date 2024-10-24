@@ -569,4 +569,12 @@
         }
     });
 
+    if (window.DOMPurify) {
+        window.DOMPurify.addHook('uponSanitizeElement', function (node, hookEvent ) {
+            if (hookEvent && hookEvent.tagName === 'meta' && node.classList.contains('backpack-meta')) {
+                hookEvent.allowedTags.meta = true;
+            }
+        });
+    }
+
 })(Granite, Granite.$);
