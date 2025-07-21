@@ -3,87 +3,84 @@
 
     const registry = Granite.UI.Foundation.Registry;
     const packagePath = new URL(window.location.href).searchParams.get('packagePath');
+    const backpackPath = '/tools/etoolbox/backpack.html';
 
     const BUILD_IN_PROGRESS = 'BUILD_IN_PROGRESS';
     const INSTALL_IN_PROGRESS = 'INSTALL_IN_PROGRESS';
 
+    const DISABLED_MARKER = 'disabled';
+    const LAST_SELECTED_CLASS = 'last-selected';
+    const SELECTIONS_ITEM_CLASS = 'foundation-selections-item';
+    const COLLECTION_ITEM_CLASS = 'foundation-collection-item';
+
+    const LIVE_COPIES_SEL = '#liveCopiesAction';
+    const INCLUDE_CHILDREN_SEL = '#includeChildrenAction';
+    const EXCLUDE_CHILDREN_SEL = '#excludeChildrenAction';
+    const DELETE_SEL = '#deleteAction';
+
     $(() => {
         const $pulldown = $('.selection-pulldown');
-        $pulldown.attr('disabled', 'disabled');
+        $pulldown.attr(DISABLED_MARKER, true);
     });
 
     $(() => {
-        const items = $('.foundation-collection-item');
-        if (items && items.length > 0) {
-            $('.build-options').removeClass('disabled');
-            $('#installAction').removeAttr('disabled');
-            $('#replicateAction').removeAttr('disabled');
-        } else {
-            $('.build-options').addClass('disabled');
-            $('#installAction').attr('disabled', 'disabled');
-            $('#replicateAction').attr('disabled', 'disabled');
-        }
+        const items = !!$(`.${COLLECTION_ITEM_CLASS}`).length;
+        $('.build-options').toggleClass(DISABLED_MARKER, !items);
+        $([$('#installAction'), $('#replicateAction')]).each((i, item) => {
+            if (items) item.removeAttr(DISABLED_MARKER);
+            else item.attr(DISABLED_MARKER, true);
+        });
     });
+
+    function ctrlKeyClick($this, $collectionItem) {
+        $collectionItem.removeClass(LAST_SELECTED_CLASS);
+        $this.toggleClass(SELECTIONS_ITEM_CLASS);
+        !$this.hasClass(SELECTIONS_ITEM_CLASS) && $this.addClass(LAST_SELECTED_CLASS);
+    }
+
+    function shiftKeyClick($this, $collectionItem) {
+        const $lastSelected = $('.last-selected');
+        $collectionItem.removeClass(`${SELECTIONS_ITEM_CLASS} ${LAST_SELECTED_CLASS}`);
+        $this.addClass(SELECTIONS_ITEM_CLASS);
+        if ($this.index() > $lastSelected.index()) {
+            $lastSelected.nextUntil($this).addClass(SELECTIONS_ITEM_CLASS);
+            $lastSelected.addClass(LAST_SELECTED_CLASS);
+        } else {
+            $lastSelected.prevUntil($this).addClass(SELECTIONS_ITEM_CLASS);
+            $this.addClass(LAST_SELECTED_CLASS);
+        }
+        $lastSelected.addClass(SELECTIONS_ITEM_CLASS);
+    }
+
+    function otherKeyClick($this, $collectionItem) {
+        const mustSelect = !$this.hasClass(SELECTIONS_ITEM_CLASS);
+        $collectionItem.removeClass(`${SELECTIONS_ITEM_CLASS} ${LAST_SELECTED_CLASS}`);
+        if (mustSelect) {
+            $this.addClass(`${SELECTIONS_ITEM_CLASS} ${LAST_SELECTED_CLASS}`);
+            $this.hasClass('primary') && $pulldown.removeAttr(DISABLED_MARKER);
+        }
+    }
 
     // Make package entries selectable
 
-    $(document).on('click', '.foundation-collection-item.result-row', function(e) {
+    $(document).on('click', `.${COLLECTION_ITEM_CLASS}.result-row`, function(e) {
         const $this = $(this);
         const $pulldown = $('.selection-pulldown');
-        $pulldown.attr('disabled', 'disabled');
+        const $collectionItem = $(`.${COLLECTION_ITEM_CLASS}`);
+        $pulldown.attr(DISABLED_MARKER, true);
 
-        if (e.ctrlKey) {
-            $('.foundation-collection-item').removeClass('last-selected');
-            if ($this.hasClass('foundation-selections-item')) {
-                $this.removeClass('foundation-selections-item');
-            } else {
-                $this.addClass('foundation-selections-item');
-                $this.addClass('last-selected');
-            }
-        }
-        if (e.shiftKey) {
-            $('.foundation-collection-item').removeClass('foundation-selections-item');
-            $this.addClass('foundation-selections-item');
-            var $lastSelected = $('.last-selected');
-            $('.foundation-collection-item').removeClass('last-selected');
-            if ($this.index() > $lastSelected.index()) {
-                $lastSelected.nextUntil($this).addClass('foundation-selections-item');
-                $lastSelected.addClass('last-selected');
-            } else {
-                $lastSelected.prevUntil($this).addClass('foundation-selections-item');
-                $this.addClass('last-selected');
-            }
-            $lastSelected.addClass('foundation-selections-item');
-
-
-        }
-
-        if (!e.ctrlKey && !e.shiftKey) {
-            const mustSelect = !$this.hasClass('foundation-selections-item');
-            $('.foundation-collection-item').removeClass('foundation-selections-item last-selected');
-            if (mustSelect) {
-                $this.addClass('foundation-selections-item');
-                $this.addClass('last-selected');
-                $this.hasClass('primary') &&  $pulldown.removeAttr('disabled');
-            }
-        }
+        if (e.ctrlKey) ctrlKeyClick($this, $collectionItem);
+        if (e.shiftKey) shiftKeyClick($this, $collectionItem);
+        if (!e.ctrlKey && !e.shiftKey) otherKeyClick($this, $collectionItem);
         e.stopPropagation();
 
-        const selection = $('.foundation-selections-item');
-        $('#liveCopiesAction').attr('disabled', 'disabled');
-        $('#deleteAction').attr('disabled', 'disabled');
-        $('#includeChildrenAction').attr('disabled', 'disabled');
-        $('#excludeChildrenAction').attr('disabled', 'disabled');
+        const selection = $(`${SELECTIONS_ITEM_CLASS}`);
+        $([$(LIVE_COPIES_SEL), $(DELETE_SEL), $(INCLUDE_CHILDREN_SEL), $(EXCLUDE_CHILDREN_SEL)]).each((i, item) => item.attr(DISABLED_MARKER, true));
         if (selection && selection.length > 0) {
-            $('#deleteAction').removeAttr('disabled');
+            $(DELETE_SEL).removeAttr(DISABLED_MARKER);
             selection.each((index, item) => {
-                const $item = $(item);
-                if ($item.is('.primary')) {
-                    $('#excludeChildrenAction').removeAttr('disabled');
-                    $('#liveCopiesAction').removeAttr('disabled');
-                    $('#includeChildrenAction').removeAttr('disabled');
-                    $pulldown.removeAttr('disabled');
-                }
+                if (!$(item).is('.primary')) return;
+                $([$(EXCLUDE_CHILDREN_SEL), $(LIVE_COPIES_SEL), $(INCLUDE_CHILDREN_SEL), $pulldown]).each((i, item) => item.removeAttr(DISABLED_MARKER));
             });
         }
     });
@@ -91,22 +88,18 @@
     const foundationUi = $(window).adaptTo('foundation-ui');
 
     // Make top-level package entries collapsible
-
     $(document).on('click', '.toggler', function() {
-        const $this = $(this);
-        const $togglable = $this.closest('.foundation-collection-item');
+        const $togglable = $(this).closest(`.${COLLECTION_ITEM_CLASS}`);
         const treeState = $togglable.attr('data-tree-state');
-        if (treeState === 'collapsed') {
-            $togglable.attr('data-tree-state', 'expanded');
-        } else if (treeState === 'expanded') {
-            $togglable.attr('data-tree-state', 'collapsed');
+        if (treeState === 'collapsed' || treeState === 'expanded') {
+          $togglable.attr('data-tree-state', treeState === 'collapsed' ? 'expanded' : 'collapsed');
         }
     });
 
     // Actions
 
-    $(document).on('click', '#includeChildrenAction', function() {
-        const selection = $('.foundation-selections-item');
+    $(document).on('click', INCLUDE_CHILDREN_SEL, function() {
+        const selection = $(`.${SELECTIONS_ITEM_CLASS}`);
         const payload = [];
         selection.each(function () {
             if (!$(this).hasClass('secondary')) {
@@ -114,15 +107,13 @@
             }
         });
         if (selection) {
-            doPost("/services/backpack/add/children", {'packagePath': packagePath, 'payload': payload}, success);
+            doPost("/services/backpack/add/children", {packagePath, payload}, success);
         }
     });
 
-    $(document).on('click', '#excludeChildrenAction', function() {
-        const selection = $('.foundation-selections-item');
-        if (!selection) {
-            return;
-        }
+    $(document).on('click', EXCLUDE_CHILDREN_SEL, function() {
+        const selection = $(`.${SELECTIONS_ITEM_CLASS}`);
+        if (!selection) return;
         const payload = [];
         selection.each(function () {
             if (!$(this).hasClass('secondary')) {
@@ -130,11 +121,11 @@
             }
         });
         if (selection) {
-            doPost("/services/backpack/delete/children", {'packagePath': packagePath, 'payload': payload}, success);
+            doPost("/services/backpack/delete/children", {packagePath, payload}, success);
         }
     });
 
-    $(document).on('click', '#liveCopiesAction', function() {
+    $(document).on('click', LIVE_COPIES_SEL, function() {
         const selection = $('.foundation-selections-item');
         const payload = [];
         selection.each(function () {
@@ -143,30 +134,25 @@
             }
         });
         if (selection) {
-            doPost("/services/backpack/add/liveCopies", {'packagePath': packagePath, 'payload': payload}, success);
+            doPost("/services/backpack/add/liveCopies", {packagePath, payload}, success);
         }
     });
 
     $(document).on('click', '.add-references-action', function(event) {
         const selection = $('.foundation-selections-item');
+        if (!selection) return;
         const referenceType = event.target.closest('[data-type]').getAttribute('data-type');
         const payload = [];
         selection.each(function () {
-            if (!$(this).hasClass('secondary')) {
-                payload.push($(this).attr('data-entry-title'));
-            }
+            if ($(this).hasClass('secondary')) return;
+            payload.push($(this).attr('data-entry-title'));
         });
-        if (selection) {
-            doPost("/services/backpack/add/" + referenceType, {'packagePath': packagePath, 'payload': payload}, success);
-        }
+        doPost("/services/backpack/add/" + referenceType, {packagePath, payload}, success);
     });
 
-    $(document).on('click', '#deleteAction', function(event) {
-        const selection = $('.foundation-selections-item');
-
-        if (!selection) {
-            return;
-        }
+    $(document).on('click', DELETE_SEL, function(event) {
+        const selection = $(`${SELECTIONS_ITEM_CLASS}`);
+        if (!selection) return;
 
         const payload = [];
         selection.each(function () {
@@ -180,12 +166,10 @@
                 });
             }
         });
-        doPost("/services/backpack/delete", {'packagePath': packagePath, 'payload': payload}, success);
+        doPost("/services/backpack/delete", {packagePath, payload}, success);
     });
 
-    $(document).on('click', '#downloadAction', function() {
-        window.location.href = packagePath;
-    });
+    $(document).on('click', '#downloadAction', () => window.location.href = packagePath);
 
     $(document).on('click', '#testBuildAction', function() {
         buildPackage(true, function(data) {
@@ -226,12 +210,8 @@
         }]);
     });
 
-    $(document).on('click', '#mainMenuAction', function() {
-        window.location.replace("/tools/etoolbox/backpack.html");
-    });
-
-    $(document).on('click', '#cancelButton', function() {
-        window.location.replace("/tools/etoolbox/backpack.html");
+    $(document).on('click', '#mainMenuAction, #cancelButton', function() {
+        window.location.replace(backpackPath);
     });
 
     $(document).on('click', '#buildAction', function() {
@@ -253,15 +233,12 @@
 
     $(document).on('click', '#installAction', function() {
         const dialog = document.querySelector('#installDialog');
-        if (dialog) {
-            dialog.show();
-        }
+        if (dialog) dialog.show();
     });
 
     $(document).on('click', '#deletePackageAction', function() {
-        if (!packagePath) {
-            return;
-        }
+        if (!packagePath) return;
+
         var packageName = packagePath.split('/').pop();
 
         var ui = $(window).adaptTo("foundation-ui");
@@ -292,7 +269,7 @@
 
         $.post(Granite.HTTP.externalize("/bin/wcmcommand"), data).done(function () {
             showAlert("Package deleted", "Delete", "warning", function () {
-                window.location.replace("/tools/etoolbox/backpack.html");
+                window.location.replace(backpackPath);
             });
         });
     }
@@ -443,10 +420,11 @@
             type: 'POST',
             url: '/services/backpack/package/build',
             data: {
-                packagePath: packagePath,
-                referencedResources: JSON.stringify(referencedResources),
-                testBuild: testBuild
-            }, success: function (data) {
+                packagePath,
+                testBuild,
+                referencedResources: JSON.stringify(referencedResources)
+            },
+            success: function (data) {
                 callback(data);
             },
             beforeSend: function () {
@@ -464,7 +442,7 @@
             setTimeout(function () {
                 $.ajax({
                     url: '/services/backpack/package/build',
-                    data: {packagePath: packagePath, latestLogIndex: logIndex},
+                    data: {packagePath, latestLogIndex: logIndex},
                     success: function (data) {
                         if (data.log && data.log.length) {
                             $.each(data.log, function (index, value) {
@@ -545,19 +523,15 @@
     function getPackageInfo(packagePath, errorFunction) {
         $.ajax({
             url: '/services/backpack/package',
-            data: {'packagePath': packagePath},
+            data: {packagePath},
             error: errorFunction
         });
     }
 
     $(window).on('load', function() {
         if (packagePath && packagePath.length > 0) {
-            getPackageInfo(packagePath, function (data) {
-                openPackageDialog()
-            });
-        } else {
-            openPackageDialog()
-        }
+            getPackageInfo(packagePath, () => openPackageDialog());
+        } else openPackageDialog();
     });
 
     $(window).adaptTo("foundation-registry").register("foundation.validation.validator", {
