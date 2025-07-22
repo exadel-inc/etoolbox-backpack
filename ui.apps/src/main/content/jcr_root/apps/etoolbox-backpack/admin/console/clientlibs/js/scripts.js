@@ -3,7 +3,7 @@
 
     const registry = Granite.UI.Foundation.Registry;
     const packagePath = new URL(window.location.href).searchParams.get('packagePath');
-    const backpackPath = '/tools/etoolbox/backpack.html';
+    const BACKPACK_PATH = '/tools/etoolbox/backpack.html';
 
     const BUILD_IN_PROGRESS = 'BUILD_IN_PROGRESS';
     const INSTALL_IN_PROGRESS = 'INSTALL_IN_PROGRESS';
@@ -13,34 +13,36 @@
     const SELECTIONS_ITEM_CLASS = 'foundation-selections-item';
     const COLLECTION_ITEM_CLASS = 'foundation-collection-item';
 
-    const LIVE_COPIES_SEL = '#liveCopiesAction';
-    const INCLUDE_CHILDREN_SEL = '#includeChildrenAction';
-    const EXCLUDE_CHILDREN_SEL = '#excludeChildrenAction';
-    const DELETE_SEL = '#deleteAction';
+    const LIVE_COPIES_SEL = '#liveCopiesAction'; // "Add live copies" button
+    const INCLUDE_CHILDREN_SEL = '#includeChildrenAction'; // "Include children" button
+    const EXCLUDE_CHILDREN_SEL = '#excludeChildrenAction'; // "Exclude children" button
+    const DELETE_SEL = '#deleteAction'; // "Delete button
+    const INSTALL_SEL = '#installAction'; // "Install" button
+    const REPLICATE_SEL = '#replicateAction'; // "Replicate" button
 
+    const $pulldown = $('.selection-pulldown'); // "Add References" button
+    const $collectionItems = $(`.${COLLECTION_ITEM_CLASS}`);
+
+    // calls when dom is loaded
     $(() => {
-        const $pulldown = $('.selection-pulldown');
         $pulldown.attr(DISABLED_MARKER, true);
+        $('.build-options').toggleClass(DISABLED_MARKER, !$collectionItems.length); // "Build and download" options
+        const $jqCollection = $([INSTALL_SEL, REPLICATE_SEL].join(','));
+        if (!!$collectionItems.length) $jqCollection.removeAttr(DISABLED_MARKER);
+        else $jqCollection.attr(DISABLED_MARKER, true);
     });
 
-    $(() => {
-        const items = !!$(`.${COLLECTION_ITEM_CLASS}`).length;
-        $('.build-options').toggleClass(DISABLED_MARKER, !items);
-        $([$('#installAction'), $('#replicateAction')]).each((i, item) => {
-            if (items) item.removeAttr(DISABLED_MARKER);
-            else item.attr(DISABLED_MARKER, true);
-        });
-    });
-
-    function ctrlKeyClick($this, $collectionItem) {
-        $collectionItem.removeClass(LAST_SELECTED_CLASS);
+    function ctrlKeyClick() {
+        const $this = $(this);
+        $collectionItems.removeClass(LAST_SELECTED_CLASS);
         $this.toggleClass(SELECTIONS_ITEM_CLASS);
-        !$this.hasClass(SELECTIONS_ITEM_CLASS) && $this.addClass(LAST_SELECTED_CLASS);
+        $this.hasClass(SELECTIONS_ITEM_CLASS) && $this.addClass(LAST_SELECTED_CLASS);
     }
 
-    function shiftKeyClick($this, $collectionItem) {
+    function shiftKeyClick() {
+        const $this = $(this);
         const $lastSelected = $('.last-selected');
-        $collectionItem.removeClass(`${SELECTIONS_ITEM_CLASS} ${LAST_SELECTED_CLASS}`);
+        $collectionItems.removeClass(`${SELECTIONS_ITEM_CLASS} ${LAST_SELECTED_CLASS}`);
         $this.addClass(SELECTIONS_ITEM_CLASS);
         if ($this.index() > $lastSelected.index()) {
             $lastSelected.nextUntil($this).addClass(SELECTIONS_ITEM_CLASS);
@@ -52,9 +54,10 @@
         $lastSelected.addClass(SELECTIONS_ITEM_CLASS);
     }
 
-    function otherKeyClick($this, $collectionItem) {
+    function otherKeyClick() {
+    const $this = $(this);
         const mustSelect = !$this.hasClass(SELECTIONS_ITEM_CLASS);
-        $collectionItem.removeClass(`${SELECTIONS_ITEM_CLASS} ${LAST_SELECTED_CLASS}`);
+        $collectionItems.removeClass(`${SELECTIONS_ITEM_CLASS} ${LAST_SELECTED_CLASS}`);
         if (mustSelect) {
             $this.addClass(`${SELECTIONS_ITEM_CLASS} ${LAST_SELECTED_CLASS}`);
             $this.hasClass('primary') && $pulldown.removeAttr(DISABLED_MARKER);
@@ -64,23 +67,21 @@
     // Make package entries selectable
 
     $(document).on('click', `.${COLLECTION_ITEM_CLASS}.result-row`, function(e) {
-        const $this = $(this);
-        const $pulldown = $('.selection-pulldown');
-        const $collectionItem = $(`.${COLLECTION_ITEM_CLASS}`);
         $pulldown.attr(DISABLED_MARKER, true);
 
-        if (e.ctrlKey) ctrlKeyClick($this, $collectionItem);
-        if (e.shiftKey) shiftKeyClick($this, $collectionItem);
-        if (!e.ctrlKey && !e.shiftKey) otherKeyClick($this, $collectionItem);
+        if (e.ctrlKey) ctrlKeyClick();
+        if (e.shiftKey) shiftKeyClick();
+        if (!e.ctrlKey && !e.shiftKey) otherKeyClick();
         e.stopPropagation();
 
-        const selection = $(`${SELECTIONS_ITEM_CLASS}`);
-        $([$(LIVE_COPIES_SEL), $(DELETE_SEL), $(INCLUDE_CHILDREN_SEL), $(EXCLUDE_CHILDREN_SEL)]).each((i, item) => item.attr(DISABLED_MARKER, true));
+        const selection = $(`.${SELECTIONS_ITEM_CLASS}`);
+        $([LIVE_COPIES_SEL, DELETE_SEL, INCLUDE_CHILDREN_SEL, EXCLUDE_CHILDREN_SEL].join(',')).attr(DISABLED_MARKER, true);
         if (selection && selection.length > 0) {
             $(DELETE_SEL).removeAttr(DISABLED_MARKER);
             selection.each((index, item) => {
                 if (!$(item).is('.primary')) return;
-                $([$(EXCLUDE_CHILDREN_SEL), $(LIVE_COPIES_SEL), $(INCLUDE_CHILDREN_SEL), $pulldown]).each((i, item) => item.removeAttr(DISABLED_MARKER));
+                $([EXCLUDE_CHILDREN_SEL, LIVE_COPIES_SEL, INCLUDE_CHILDREN_SEL].join(',')).removeAttr(DISABLED_MARKER);
+                $pulldown.removeAttr(DISABLED_MARKER);
             });
         }
     });
@@ -151,7 +152,7 @@
     });
 
     $(document).on('click', DELETE_SEL, function(event) {
-        const selection = $(`${SELECTIONS_ITEM_CLASS}`);
+        const selection = $(`.${SELECTIONS_ITEM_CLASS}`);
         if (!selection) return;
 
         const payload = [];
@@ -186,7 +187,7 @@
         });
     });
 
-    $(document).on('click', '#replicateAction', function() {
+    $(document).on('click', REPLICATE_SEL, function() {
         var fui = $(window).adaptTo("foundation-ui");
         fui.prompt("Please confirm", "Replicate this package?", "notice", [{
             text: Granite.I18n.get("Cancel")
@@ -211,7 +212,7 @@
     });
 
     $(document).on('click', '#mainMenuAction, #cancelButton', function() {
-        window.location.replace(backpackPath);
+        window.location.replace(BACKPACK_PATH);
     });
 
     $(document).on('click', '#buildAction', function() {
@@ -231,7 +232,7 @@
         });
     });
 
-    $(document).on('click', '#installAction', function() {
+    $(document).on('click', INSTALL_SEL, function() {
         const dialog = document.querySelector('#installDialog');
         if (dialog) dialog.show();
     });
@@ -269,7 +270,7 @@
 
         $.post(Granite.HTTP.externalize("/bin/wcmcommand"), data).done(function () {
             showAlert("Package deleted", "Delete", "warning", function () {
-                window.location.replace(backpackPath);
+                window.location.replace(BACKPACK_PATH);
             });
         });
     }
