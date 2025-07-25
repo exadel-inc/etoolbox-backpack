@@ -1,11 +1,12 @@
-(function (Granite, $) {
+(function (Granite, $, EBUtils) {
     'use strict';
 
     const registry = Granite.UI.Foundation.Registry;
     const packagePath = new URL(window.location.href).searchParams.get('packagePath');
 
-    const BUILD_IN_PROGRESS = 'BUILD_IN_PROGRESS';
-    const INSTALL_IN_PROGRESS = 'INSTALL_IN_PROGRESS';
+    const LIVE_COPIES_SEL = '#liveCopiesAction'; // "Add live copies" button
+    const INCLUDE_CHILDREN_SEL = '#includeChildrenAction'; // "Include children" button
+    const EXCLUDE_CHILDREN_SEL = '#excludeChildrenAction'; // "Exclude children" button
 
     $(() => {
         const $pulldown = $('.selection-pulldown');
@@ -103,49 +104,24 @@
         }
     });
 
+    // Click on 'add/delete children' and 'add live copies' buttons
+    function onHandleBtnClick (action) {
+        if ($('.foundation-selections-item')) return;
+        const payload = [];
+        $('.foundation-selections-item').each(function () {
+            if ($(this).hasClass('secondary')) return;
+            payload.push($(this).attr('data-entry-title'));
+        });
+        EBUtils.doPost(`/services/backpack/${action}`, {packagePath, payload}, EBUtils.success);
+    }
+
     // Actions
 
-    $(document).on('click', '#includeChildrenAction', function() {
-        const selection = $('.foundation-selections-item');
-        const payload = [];
-        selection.each(function () {
-            if (!$(this).hasClass('secondary')) {
-                payload.push($(this).attr('data-entry-title'));
-            }
-        });
-        if (selection) {
-            doPost("/services/backpack/add/children", {'packagePath': packagePath, 'payload': payload}, success);
-        }
-    });
+    $(document).on('click', INCLUDE_CHILDREN_SEL, () => onHandleBtnClick('add/children'));
 
-    $(document).on('click', '#excludeChildrenAction', function() {
-        const selection = $('.foundation-selections-item');
-        if (!selection) {
-            return;
-        }
-        const payload = [];
-        selection.each(function () {
-            if (!$(this).hasClass('secondary')) {
-                payload.push($(this).attr('data-entry-title'));
-            }
-        });
-        if (selection) {
-            doPost("/services/backpack/delete/children", {'packagePath': packagePath, 'payload': payload}, success);
-        }
-    });
+    $(document).on('click', EXCLUDE_CHILDREN_SEL, () => onHandleBtnClick('delete/children'));
 
-    $(document).on('click', '#liveCopiesAction', function() {
-        const selection = $('.foundation-selections-item');
-        const payload = [];
-        selection.each(function () {
-            if (!$(this).hasClass('secondary')) {
-                payload.push($(this).attr('data-entry-title'));
-            }
-        });
-        if (selection) {
-            doPost("/services/backpack/add/liveCopies", {'packagePath': packagePath, 'payload': payload}, success);
-        }
-    });
+    $(document).on('click', LIVE_COPIES_SEL, () => onHandleBtnClick('add/liveCopies'));
 
     $(document).on('click', '.add-references-action', function(event) {
         const selection = $('.foundation-selections-item');
@@ -157,7 +133,7 @@
             }
         });
         if (selection) {
-            doPost("/services/backpack/add/" + referenceType, {'packagePath': packagePath, 'payload': payload}, success);
+            EBUtils.doPost("/services/backpack/add/" + referenceType, {'packagePath': packagePath, 'payload': payload}, EBUtils.success);
         }
     });
 
@@ -180,7 +156,7 @@
                 });
             }
         });
-        doPost("/services/backpack/delete", {'packagePath': packagePath, 'payload': payload}, success);
+        EBUtils.doPost("/services/backpack/delete", {'packagePath': packagePath, 'payload': payload}, EBUtils.success);
     });
 
     $(document).on('click', '#downloadAction', function() {
@@ -188,12 +164,12 @@
     });
 
     $(document).on('click', '#testBuildAction', function() {
-        buildPackage(true, function(data) {
+        EBUtils.buildPackage(true, function(data) {
             if (data.log) {
-                const dialog = openLogsDialog(data.log, 'Test Build', 'Close');
+                const dialog = EBUtils.openLogsDialog(data.log, 'Test Build', 'Close');
                 const assetText = data.dataSize === 0
                     ? 'There are no assets in the package'
-                    : '<h4>Approximate size of the package: ' + bytesToSize(data.dataSize) + '</h4>';
+                    : '<h4>Approximate size of the package: ' + EBUtils.bytesToSize(data.dataSize) + '</h4>';
                 $(dialog.content).append('<div>' + assetText + '</div>');
                 setTimeout(function () {
                     $(dialog.content).children("div").last()[0].scrollIntoView(false);
@@ -212,10 +188,10 @@
             handler: function () {
                 replicatePackage(function(data) {
                     if (data.log) {
-                        const dialog = openLogsDialog(data.log, 'Replication', 'Close');
+                        const dialog = EBUtils.openLogsDialog(data.log, 'Replication', 'Close');
                         const assetText = data.dataSize === 0
                             ? 'There are no assets in the package'
-                            : '<h4>Approximate size of the package: ' + bytesToSize(data.dataSize) + '</h4>';
+                            : '<h4>Approximate size of the package: ' + EBUtils.bytesToSize(data.dataSize) + '</h4>';
                         $(dialog.content).append('<div>' + assetText + '</div>');
                         setTimeout(function () {
                             $(dialog.content).children("div").last()[0].scrollIntoView(false);
@@ -234,28 +210,13 @@
         window.location.replace("/tools/etoolbox/backpack.html");
     });
 
-    $(document).on('click', '#buildAction', function() {
-        buildPackage(false, function(data) {
-            const dialog = openLogsDialog(data.log, 'Build', 'Close');
-            updateLog(data.packageStatus, data.log.length, dialog);
-        });
-    });
+    $(document).on('click', '#buildAction', () => EBUtils.onBuildAction(false));
 
-    $(document).on('click', '#buildAndDownloadAction', function() {
-        buildPackage(false, function(data) {
-            const dialog = openLogsDialog(data.log, 'Build', 'Download');
-            dialog.on('coral-overlay:beforeclose', function(event) {
-                window.location.href = packagePath;
-            });
-            updateLog(data.packageStatus, data.log.length, dialog);
-        });
-    });
+    $(document).on('click', '#buildAndDownloadAction', () => EBUtils.onBuildAction(true));
 
     $(document).on('click', '#installAction', function() {
         const dialog = document.querySelector('#installDialog');
-        if (dialog) {
-            dialog.show();
-        }
+        if (dialog) dialog.show();
     });
 
     $(document).on('click', '#deletePackageAction', function() {
@@ -337,39 +298,17 @@
     $(document).on('submit', '#installForm', function (e) {
         e.preventDefault();
         const form = $(this);
-        doPost(form.attr('action'), form.serialize(), function(data) {
-            const dialog = openLogsDialog(data.log, 'Install', 'Close');
-            updateLog(data.packageStatus, data.log.length, dialog);
+        EBUtils.doPost(form.attr('action'), form.serialize(), function(data) {
+            const dialog = EBUtils.openLogsDialog(data.log, 'Install', 'Close');
+            EBUtils.updateLog(data.packageStatus, data.log.length, dialog);
         });
     })
-
-    function doPost(url, data, success) {
-        $.ajax({
-            type: "POST",
-            url: url,
-            data: data,
-            success: success,
-            error: function(data) {
-                console.log(data);
-            },
-            beforeSend: function () {
-                foundationUi.wait();
-            },
-            complete: function () {
-                foundationUi.clearWait();
-            }
-        });
-    }
-
-    function success() {
-        showReferencedAlert();
-    }
 
     $(window).adaptTo('foundation-registry').register('foundation.form.response.ui.success', {
         name: 'foundation.prompt.open',
         handler: function (form, config, data, textStatus, xhr) {
             if (data.status == "ERROR" || data.status == "WARNING") {
-                const dialog = openLogsDialog(data.logs, 'WARNING', 'Close');
+                const dialog = EBUtils.openLogsDialog(data.logs, 'WARNING', 'Close');
                 dialog.on('coral-overlay:close', function(event) {
                     if (data.status == "WARNING") {
                         window.location.reload();
@@ -434,129 +373,13 @@
         }
     });
 
-    function buildPackage(testBuild, callback) {
-        const referencedResources = [];
-        $('.reference').each(function () {
-            referencedResources.push(this.innerText);
-        });
-        $.ajax({
-            type: 'POST',
-            url: '/services/backpack/package/build',
-            data: {
-                packagePath: packagePath,
-                referencedResources: JSON.stringify(referencedResources),
-                testBuild: testBuild
-            }, success: function (data) {
-                callback(data);
-            },
-            beforeSend: function () {
-                foundationUi.wait();
-            },
-            complete: function () {
-                foundationUi.clearWait();
-            },
-            dataType: 'json'
-        });
-    }
-
-    function updateLog(packageStatus, logIndex, dialog) {
-        if (packageStatus === BUILD_IN_PROGRESS || packageStatus === INSTALL_IN_PROGRESS) {
-            setTimeout(function () {
-                $.ajax({
-                    url: '/services/backpack/package/build',
-                    data: {packagePath: packagePath, latestLogIndex: logIndex},
-                    success: function (data) {
-                        if (data.log && data.log.length) {
-                            $.each(data.log, function (index, value) {
-                                $(dialog.content).append('<div>' + value + '</div>');
-                            });
-                            logIndex = logIndex + data.log.length;
-                            $(dialog.content).children("div").last()[0].scrollIntoView(false);
-                        }
-                        updateLog(data.packageStatus, logIndex, dialog);
-                    }
-                });
-            }, 1000);
-        }
-    }
-
-    function bytesToSize(bytes) {
-        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-        if (bytes === 0) return '0 Bytes';
-        const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-        return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
-    }
-
-    function openLogsDialog(init, title, submitText) {
-
-        const dialog = new Coral.Dialog().set({
-            id: 'LogsDialog',
-            header: {
-                innerHTML: `${title} Logs`
-            },
-            footer: {
-                innerHTML: `<button is="coral-button" variant="primary" coral-close>${submitText}</button>`
-            }
-        });
-
-        if (init && init.length > 0) {
-            $.each(init, function (index, value) {
-                $(dialog.content).append('<div>' + value + '</div>');
-            });
-        }
-
-        dialog.on('coral-overlay:close', function(event) {
-            event.preventDefault();
-            setTimeout(function () {
-                dialog.remove();
-                window.location.reload();
-            });
-        });
-
-        document.body.appendChild(dialog);
-        dialog.show();
-
-        return dialog;
-    }
-
-    function showReferencedAlert() {
-
-        var popup = new Coral.Alert().set({
-            variant: 'info',
-            header: {
-                innerHTML: 'INFO'
-            },
-            content: {
-                textContent: `Package was successfully updated`
-            },
-            id: 'references-added-alert'
-        });
-        document.body.append(popup);
-        setTimeout(function () {
-            $(popup).fadeOut();
-            window.location.reload();
-        }, 2000);
-    }
-
-    function openPackageDialog(success, error) {
-        $('#editDialogButton').trigger('click');
-    }
-
-    function getPackageInfo(packagePath, errorFunction) {
-        $.ajax({
-            url: '/services/backpack/package',
-            data: {'packagePath': packagePath},
-            error: errorFunction
-        });
-    }
-
     $(window).on('load', function() {
         if (packagePath && packagePath.length > 0) {
-            getPackageInfo(packagePath, function (data) {
-                openPackageDialog()
+            EBUtils.getPackageInfo(packagePath, function (data) {
+                EBUtils. openPackageDialog()
             });
         } else {
-            openPackageDialog()
+            EBUtils.openPackageDialog()
         }
     });
 
@@ -577,4 +400,4 @@
         });
     }
 
-})(Granite, Granite.$);
+})(Granite, Granite.$, EBUtils = Granite.EBUtils || {});
