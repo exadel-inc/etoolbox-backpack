@@ -2,307 +2,209 @@
     'use strict';
 
     const registry = Granite.UI.Foundation.Registry;
-    const packagePath = new URL(window.location.href).searchParams.get('packagePath');
+    const DELETE_TITLE = Granite.I18n.get("Delete");
+    const CANCEL_TITLE = Granite.I18n.get("Cancel");
 
+    const $window = $(window);
+    const $document = $(document);
+    const FOUNDATION_UI = $window.adaptTo('foundation-ui');
+    const packagePath = new URL(window.location.href).searchParams.get('packagePath');
+    const BACKPACK_PATH = '/tools/etoolbox/backpack.html';
+    const TITLE_ATTR = 'data-entry-title';
+
+    const SELECTIONS_ITEM_CLASS = 'foundation-selections-item';
+    const COLLECTION_ITEM_CLASS = 'foundation-collection-item';
+    const DISABLED_MARKER = 'disabled';
+    const LAST_SELECTED_CLASS = 'last-selected';
     const LIVE_COPIES_SEL = '#liveCopiesAction'; // "Add live copies" button
     const INCLUDE_CHILDREN_SEL = '#includeChildrenAction'; // "Include children" button
     const EXCLUDE_CHILDREN_SEL = '#excludeChildrenAction'; // "Exclude children" button
+    const DELETE_SEL = '#deleteAction'; // "Delete button
+    const INSTALL_SEL = '#installAction'; // "Install" button
+    const REPLICATE_SEL = '#replicateAction'; // "Replicate" button
 
+    // calls when dom is loaded
     $(() => {
-        const $pulldown = $('.selection-pulldown');
-        $pulldown.attr('disabled', 'disabled');
+        const backpack = new EBackpack();
+        backpack.$pulldown.attr(DISABLED_MARKER, true);
+        $('.build-options').toggleClass(DISABLED_MARKER, backpack.$collectionItems.length); // "Build and download" options
+        $([INSTALL_SEL, REPLICATE_SEL].join(',')).attr(DISABLED_MARKER, backpack.$collectionItems.length ? true : null);
     });
 
-    $(() => {
-        const items = $('.foundation-collection-item');
-        if (items && items.length > 0) {
-            $('.build-options').removeClass('disabled');
-            $('#installAction').removeAttr('disabled');
-            $('#replicateAction').removeAttr('disabled');
-        } else {
-            $('.build-options').addClass('disabled');
-            $('#installAction').attr('disabled', 'disabled');
-            $('#replicateAction').attr('disabled', 'disabled');
+    class EBackpack {
+        constructor() {
+            this.bindEvents();
         }
-    });
 
-    // Make package entries selectable
+        get $collectionItems() {
+            return $(`.${COLLECTION_ITEM_CLASS}`);
+        }
 
-    $(document).on('click', '.foundation-collection-item.result-row', function(e) {
-        const $this = $(this);
-        const $pulldown = $('.selection-pulldown');
-        $pulldown.attr('disabled', 'disabled');
+        get $selectionItems() {
+            return $(`.${SELECTIONS_ITEM_CLASS}`);
+        }
 
-        if (e.ctrlKey) {
-            $('.foundation-collection-item').removeClass('last-selected');
-            if ($this.hasClass('foundation-selections-item')) {
-                $this.removeClass('foundation-selections-item');
+        // "Add References" button
+        get $pulldown() {
+            return $('.selection-pulldown');
+        }
+
+        bindEvents() {
+            $document.off('backpack');
+            $document.on('click.backpack', `.${COLLECTION_ITEM_CLASS}.result-row`, this.onPackageEntryClick.bind(this));
+            $document.on('click.backpack', '.toggler', this.onTogglerClick);
+            $document.on('click.backpack', INCLUDE_CHILDREN_SEL, this.onChangePackageEntries.bind(this, 'add/children'));
+            $document.on('click.backpack', EXCLUDE_CHILDREN_SEL, this.onChangePackageEntries.bind(this, 'delete/children'));
+            $document.on('click.backpack', LIVE_COPIES_SEL, this.onChangePackageEntries.bind(this, 'add/liveCopies'));
+            $document.on('click.backpack', '.add-references-action', this.onChangePackageEntries.bind(this, 'add'));
+            $document.on('click.backpack', DELETE_SEL, this.onChangePackageEntries.bind(this, 'delete'));
+            $document.on('click.backpack', '#downloadAction', () => window.location.href = packagePath);
+            $document.on('click.backpack', '#testBuildAction', this.onTestBuild.bind(this));
+            $document.on('click.backpack', REPLICATE_SEL, this.onReplicate.bind(this));
+            $document.on('click.backpack', '#mainMenuAction, #cancelButton', () => window.location.replace(BACKPACK_PATH));
+            $document.on('click.backpack', '#buildAction', () => EBUtils.onBuildAction(false));
+            $document.on('click.backpack', '#buildAndDownloadAction', () => EBUtils.onBuildAction(true));
+            $document.on('click.backpack', INSTALL_SEL, this.onInstallPackage);
+            $document.on('click.backpack', '#deletePackageAction', this.onDeletePackage.bind(this));
+            $document.on('submit.backpack', '#installForm', this.onHandleInstallForm);
+            $window.on('load.backpack', this.onLoad);
+        }
+
+        packageEntriesCtrlClick(target) {
+            this.$collectionItems.removeClass(LAST_SELECTED_CLASS);
+            target.toggleClass(SELECTIONS_ITEM_CLASS);
+            target.hasClass(SELECTIONS_ITEM_CLASS) && target.addClass(LAST_SELECTED_CLASS);
+        }
+
+        packageEntriesShiftClick(target) {
+            this.$collectionItems.removeClass(`${SELECTIONS_ITEM_CLASS}`);
+            target.addClass(SELECTIONS_ITEM_CLASS);
+            const $lastSelected = $('.last-selected');
+            this.$collectionItems.removeClass(`${LAST_SELECTED_CLASS}`);
+            if (target.index() > $lastSelected.index()) {
+                $lastSelected.nextUntil(target).addClass(SELECTIONS_ITEM_CLASS);
+                $lastSelected.addClass(LAST_SELECTED_CLASS);
             } else {
-                $this.addClass('foundation-selections-item');
-                $this.addClass('last-selected');
+                $lastSelected.prevUntil(target).addClass(SELECTIONS_ITEM_CLASS);
+                target.addClass(LAST_SELECTED_CLASS);
             }
-        }
-        if (e.shiftKey) {
-            $('.foundation-collection-item').removeClass('foundation-selections-item');
-            $this.addClass('foundation-selections-item');
-            var $lastSelected = $('.last-selected');
-            $('.foundation-collection-item').removeClass('last-selected');
-            if ($this.index() > $lastSelected.index()) {
-                $lastSelected.nextUntil($this).addClass('foundation-selections-item');
-                $lastSelected.addClass('last-selected');
-            } else {
-                $lastSelected.prevUntil($this).addClass('foundation-selections-item');
-                $this.addClass('last-selected');
-            }
-            $lastSelected.addClass('foundation-selections-item');
-
-
+            $lastSelected.addClass(SELECTIONS_ITEM_CLASS);
         }
 
-        if (!e.ctrlKey && !e.shiftKey) {
-            const mustSelect = !$this.hasClass('foundation-selections-item');
-            $('.foundation-collection-item').removeClass('foundation-selections-item last-selected');
+        packageEntriesClick(target) {
+            const mustSelect = !target.hasClass(SELECTIONS_ITEM_CLASS);
+            this.$collectionItems.removeClass(`${SELECTIONS_ITEM_CLASS} ${LAST_SELECTED_CLASS}`);
             if (mustSelect) {
-                $this.addClass('foundation-selections-item');
-                $this.addClass('last-selected');
-                $this.hasClass('primary') &&  $pulldown.removeAttr('disabled');
+                target.addClass(`${SELECTIONS_ITEM_CLASS} ${LAST_SELECTED_CLASS}`);
+                target.hasClass('primary') && this.$pulldown.removeAttr(DISABLED_MARKER);
             }
         }
-        e.stopPropagation();
 
-        const selection = $('.foundation-selections-item');
-        $('#liveCopiesAction').attr('disabled', 'disabled');
-        $('#deleteAction').attr('disabled', 'disabled');
-        $('#includeChildrenAction').attr('disabled', 'disabled');
-        $('#excludeChildrenAction').attr('disabled', 'disabled');
-        if (selection && selection.length > 0) {
-            $('#deleteAction').removeAttr('disabled');
-            selection.each((index, item) => {
-                const $item = $(item);
-                if ($item.is('.primary')) {
-                    $('#excludeChildrenAction').removeAttr('disabled');
-                    $('#liveCopiesAction').removeAttr('disabled');
-                    $('#includeChildrenAction').removeAttr('disabled');
-                    $pulldown.removeAttr('disabled');
-                }
+        // Make package entries selectable
+        onPackageEntryClick(e) {
+            const target = $(e.target.closest(`.${COLLECTION_ITEM_CLASS}`));
+            this.$pulldown.attr(DISABLED_MARKER, true);
+            (e.ctrlKey ? this.packageEntriesCtrlClick : e.shiftKey ? this.packageEntriesShiftClick : this.packageEntriesClick).call(this, target);
+            e.stopPropagation();
+
+            $([LIVE_COPIES_SEL, DELETE_SEL, INCLUDE_CHILDREN_SEL, EXCLUDE_CHILDREN_SEL].join(',')).attr(DISABLED_MARKER, true);
+            if (!this.$selectionItems) return;
+            $(DELETE_SEL).removeAttr(DISABLED_MARKER);
+            this.$selectionItems.each((index, item) => {
+                if (!$(item).is('.primary')) return;
+                $([EXCLUDE_CHILDREN_SEL, LIVE_COPIES_SEL, INCLUDE_CHILDREN_SEL].join(',')).removeAttr(DISABLED_MARKER);
+                this.$pulldown.removeAttr(DISABLED_MARKER);
             });
-        }
-    });
-
-    const foundationUi = $(window).adaptTo('foundation-ui');
-
-    // Make top-level package entries collapsible
-
-    $(document).on('click', '.toggler', function() {
-        const $this = $(this);
-        const $togglable = $this.closest('.foundation-collection-item');
-        const treeState = $togglable.attr('data-tree-state');
-        if (treeState === 'collapsed') {
-            $togglable.attr('data-tree-state', 'expanded');
-        } else if (treeState === 'expanded') {
-            $togglable.attr('data-tree-state', 'collapsed');
-        }
-    });
-
-    // Click on 'add/delete children' and 'add live copies' buttons
-    function onHandleBtnClick (action) {
-        if ($('.foundation-selections-item')) return;
-        const payload = [];
-        $('.foundation-selections-item').each(function () {
-            if ($(this).hasClass('secondary')) return;
-            payload.push($(this).attr('data-entry-title'));
-        });
-        EBUtils.doPost(`/services/backpack/${action}`, {packagePath, payload}, EBUtils.success);
-    }
-
-    // Actions
-
-    $(document).on('click', INCLUDE_CHILDREN_SEL, () => onHandleBtnClick('add/children'));
-
-    $(document).on('click', EXCLUDE_CHILDREN_SEL, () => onHandleBtnClick('delete/children'));
-
-    $(document).on('click', LIVE_COPIES_SEL, () => onHandleBtnClick('add/liveCopies'));
-
-    $(document).on('click', '.add-references-action', function(event) {
-        const selection = $('.foundation-selections-item');
-        const referenceType = event.target.closest('[data-type]').getAttribute('data-type');
-        const payload = [];
-        selection.each(function () {
-            if (!$(this).hasClass('secondary')) {
-                payload.push($(this).attr('data-entry-title'));
-            }
-        });
-        if (selection) {
-            EBUtils.doPost("/services/backpack/add/" + referenceType, {'packagePath': packagePath, 'payload': payload}, EBUtils.success);
-        }
-    });
-
-    $(document).on('click', '#deleteAction', function(event) {
-        const selection = $('.foundation-selections-item');
-
-        if (!selection) {
-            return;
-        }
-
-        const payload = [];
-        selection.each(function () {
-            if ($(this).hasClass('secondary')) {
-                payload.push('[' + $(this).attr('data-entry-title') + ',' + $(this).attr('data-subsidiary-title') + ']');
-            } else {
-                payload.push($(this).attr('data-entry-title'));
-                var children = $(this).find('.secondary');
-                children.each(function () {
-                    payload.push('[' + $(this).attr('data-entry-title') + ',' + $(this).attr('data-subsidiary-title') + ']');
-                });
-            }
-        });
-        EBUtils.doPost("/services/backpack/delete", {'packagePath': packagePath, 'payload': payload}, EBUtils.success);
-    });
-
-    $(document).on('click', '#downloadAction', function() {
-        window.location.href = packagePath;
-    });
-
-    $(document).on('click', '#testBuildAction', function() {
-        EBUtils.buildPackage(true, function(data) {
-            if (data.log) {
-                const dialog = EBUtils.openLogsDialog(data.log, 'Test Build', 'Close');
-                const assetText = data.dataSize === 0
-                    ? 'There are no assets in the package'
-                    : '<h4>Approximate size of the package: ' + EBUtils.bytesToSize(data.dataSize) + '</h4>';
-                $(dialog.content).append('<div>' + assetText + '</div>');
-                setTimeout(function () {
-                    $(dialog.content).children("div").last()[0].scrollIntoView(false);
-                })
-            }
-        });
-    });
-
-    $(document).on('click', '#replicateAction', function() {
-        var fui = $(window).adaptTo("foundation-ui");
-        fui.prompt("Please confirm", "Replicate this package?", "notice", [{
-            text: Granite.I18n.get("Cancel")
-        }, {
-            text: "Replicate",
-            primary: true,
-            handler: function () {
-                replicatePackage(function(data) {
-                    if (data.log) {
-                        const dialog = EBUtils.openLogsDialog(data.log, 'Replication', 'Close');
-                        const assetText = data.dataSize === 0
-                            ? 'There are no assets in the package'
-                            : '<h4>Approximate size of the package: ' + EBUtils.bytesToSize(data.dataSize) + '</h4>';
-                        $(dialog.content).append('<div>' + assetText + '</div>');
-                        setTimeout(function () {
-                            $(dialog.content).children("div").last()[0].scrollIntoView(false);
-                        })
-                    }
-                });
-            }
-        }]);
-    });
-
-    $(document).on('click', '#mainMenuAction', function() {
-        window.location.replace("/tools/etoolbox/backpack.html");
-    });
-
-    $(document).on('click', '#cancelButton', function() {
-        window.location.replace("/tools/etoolbox/backpack.html");
-    });
-
-    $(document).on('click', '#buildAction', () => EBUtils.onBuildAction(false));
-
-    $(document).on('click', '#buildAndDownloadAction', () => EBUtils.onBuildAction(true));
-
-    $(document).on('click', '#installAction', function() {
-        const dialog = document.querySelector('#installDialog');
-        if (dialog) dialog.show();
-    });
-
-    $(document).on('click', '#deletePackageAction', function() {
-        if (!packagePath) {
-            return;
-        }
-        var packageName = packagePath.split('/').pop();
-
-        var ui = $(window).adaptTo("foundation-ui");
-        var message = createEl("div");
-        var intro = createEl("p").appendTo(message);
-
-        intro.text(Granite.I18n.get("You are going to delete the following package:"));
-        createEl("p").html(createEl("b")).text(packageName).appendTo(message);
-        ui.prompt(Granite.I18n.get("Delete"), message.html(), "notice", [{
-            text: Granite.I18n.get("Cancel")
-        }, {
-            text: Granite.I18n.get("Delete"),
-            warning: true,
-            handler: function () {
-                deleteAction();
-            }
-        }]);
-    });
-
-    function deleteAction() {
-
-        var data = {
-            _charset_: "UTF-8",
-            cmd: "deletePage",
-            path: packagePath,
-            force: true
         };
 
-        $.post(Granite.HTTP.externalize("/bin/wcmcommand"), data).done(function () {
-            showAlert("Package deleted", "Delete", "warning", function () {
-                window.location.replace("/tools/etoolbox/backpack.html");
-            });
-        });
-    }
-
-    function showAlert(message, title, type, callback) {
-        var fui = $(window).adaptTo("foundation-ui"),
-            options = [{
-                id: "ok",
-                text: "OK",
-                primary: true
-            }];
-
-        message = message || "Unknown Error";
-        title = title || "Error";
-
-        fui.prompt(title, message, type, options, callback);
-    }
-
-    function createEl(name) {
-        return $(document.createElement(name));
-    }
-
-    function replicatePackage(callback) {
-        $.ajax({
-            url: '/services/backpack/replicatePackage',
-            type: "POST",
-            dataType: "json",
-            ContentType : 'application/json',
-            data: {packagePath: packagePath},
-            success: function (data) {
-                callback(data);
-            },
-            beforeSend: function () {
-                foundationUi.wait();
-            },
-            complete: function () {
-                foundationUi.clearWait();
+        // Make top-level package entries collapsible
+        onTogglerClick() {
+            const $togglable = $(this).closest(`.${COLLECTION_ITEM_CLASS}`);
+            const treeState = $togglable.attr('data-tree-state');
+            if (treeState === 'collapsed' || treeState === 'expanded') {
+                $togglable.attr('data-tree-state', treeState === 'collapsed' ? 'expanded' : 'collapsed');
             }
-        })
-    }
+        };
 
-    $(document).on('submit', '#installForm', function (e) {
-        e.preventDefault();
-        const form = $(this);
-        EBUtils.doPost(form.attr('action'), form.serialize(), function(data) {
-            const dialog = EBUtils.openLogsDialog(data.log, 'Install', 'Close');
-            EBUtils.updateLog(data.packageStatus, data.log.length, dialog);
-        });
-    })
+        // 'Add/Delete children', 'Add live copies', 'Add references', 'Delete item'
+         onChangePackageEntries(action, e) {
+            if (!this.$selectionItems) return;
+            const payload = [];
+            this.$selectionItems.each((i, item) => {
+                const $item = $(item);
+                if (!$item.hasClass('secondary')) payload.push($item.attr(TITLE_ATTR));
+                if (action === 'delete') this.onDeleteItem.call(this, $item, payload);
+            });
+            const referenceType = action === 'add' ? e.target.closest('[data-type]').getAttribute('data-type') : '';
+            EBUtils.doPost(`/services/backpack/${action}` + referenceType, {packagePath, payload}, EBUtils.showSuccessMessage);
+         }
+
+        onDeleteItem($item, payload) {
+             if (!$item.hasClass('secondary')) {
+                 $item.find('.secondary').each((i, item) => payload.push('[' + $(item).attr(TITLE_ATTR) + ',' + $(item).attr('data-subsidiary-title') + ']'));
+             } else payload.push('[' + $item.attr(TITLE_ATTR) + ',' + $item.attr('data-subsidiary-title') + ']');
+        };
+
+        onHandleData(data, text) {
+            const dialog = EBUtils.openLogsDialog(data.log, text, 'Close');
+            const assetText = data.dataSize === 0
+                ? 'There are no assets in the package'
+                : '<h4>Approximate size of the package: ' + EBUtils.bytesToSize(data.dataSize) + '</h4>';
+            $(dialog.content).append('<div>' + assetText + '</div>');
+            setTimeout(() => $(dialog.content).children("div").last()[0].scrollIntoView(false));
+        }
+
+        onTestBuild() {
+            const callback = (data) => data.log && this.onHandleData(data, 'Test Build');
+            EBUtils.buildPackage(true, callback);
+        }
+
+        onReplicate() {
+            const replicateBtn = {
+                text: "Replicate",
+                primary: true,
+                handler: () => EBUtils.replicatePackage((data) => data.log && this.onHandleData(data, 'Replication'))
+            }
+            FOUNDATION_UI.prompt("Please confirm", "Replicate this package?", "notice", [{text: CANCEL_TITLE}, replicateBtn]);
+        }
+
+        onInstallPackage() {
+            const dialog = document.querySelector('#installDialog');
+            if (dialog) dialog.show();
+        };
+
+        onDeletePackage() {
+            if (!packagePath) return;
+            const packageName = packagePath.split('/').pop();
+            const message = this.createEl("div");
+            this.createEl("p").text(Granite.I18n.get("You are going to delete the following package:")).appendTo(message);
+            this.createEl("p").html(this.createEl("b")).text(packageName).appendTo(message);
+            const deleteBtn = {
+                text: DELETE_TITLE,
+                warning: true,
+                handler: () => EBUtils.deleteAction()
+            }
+            FOUNDATION_UI.prompt(DELETE_TITLE, message.html(), "notice", [{text: CANCEL_TITLE}, deleteBtn]);
+        };
+
+        createEl(name) {
+            return $(document.createElement(name));
+        }
+
+        onHandleInstallForm(e) {
+            e.preventDefault();
+            const form = $(this);
+            EBUtils.doPost(form.attr('action'), form.serialize(), function(data) {
+                const dialog = EBUtils.openLogsDialog(data.log, 'Install', 'Close');
+                EBUtils.updateLog(data.packageStatus, data.log.length, dialog);
+            });
+        }
+
+        onLoad() {
+            if (packagePath && packagePath.length > 0) EBUtils.getPackageInfo(packagePath, () => EBUtils.openPackageDialog());
+            else EBUtils.openPackageDialog();
+        };
+    }
 
     $(window).adaptTo('foundation-registry').register('foundation.form.response.ui.success', {
         name: 'foundation.prompt.open',
@@ -370,16 +272,6 @@
                     collection.trigger("foundation-collection-reload");
                 }
             };
-        }
-    });
-
-    $(window).on('load', function() {
-        if (packagePath && packagePath.length > 0) {
-            EBUtils.getPackageInfo(packagePath, function (data) {
-                EBUtils. openPackageDialog()
-            });
-        } else {
-            EBUtils.openPackageDialog()
         }
     });
 
