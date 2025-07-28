@@ -1,2 +1,3 @@
 js/utils.js
+js/adapters.js
 js/scripts.js

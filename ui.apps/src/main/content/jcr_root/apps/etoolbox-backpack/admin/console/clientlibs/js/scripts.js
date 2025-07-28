@@ -1,7 +1,6 @@
 (function (Granite, $, EBUtils) {
     'use strict';
 
-    const registry = Granite.UI.Foundation.Registry;
     const DELETE_TITLE = Granite.I18n.get("Delete");
     const CANCEL_TITLE = Granite.I18n.get("Cancel");
 
@@ -28,7 +27,7 @@
         const backpack = new EBackpack();
         backpack.$pulldown.attr(DISABLED_MARKER, true);
         $('.build-options').toggleClass(DISABLED_MARKER, backpack.$collectionItems.length); // "Build and download" options
-        $([INSTALL_SEL, REPLICATE_SEL].join(',')).attr(DISABLED_MARKER, backpack.$collectionItems.length ? true : null);
+        $([INSTALL_SEL, REPLICATE_SEL].join(',')).attr(DISABLED_MARKER, backpack.$collectionItems.length ? null : true);
     });
 
     class EBackpack {
@@ -204,92 +203,6 @@
             if (packagePath && packagePath.length > 0) EBUtils.getPackageInfo(packagePath, () => EBUtils.openPackageDialog());
             else EBUtils.openPackageDialog();
         };
-    }
-
-    $(window).adaptTo('foundation-registry').register('foundation.form.response.ui.success', {
-        name: 'foundation.prompt.open',
-        handler: function (form, config, data, textStatus, xhr) {
-            if (data.status == "ERROR" || data.status == "WARNING") {
-                const dialog = EBUtils.openLogsDialog(data.logs, 'WARNING', 'Close');
-                dialog.on('coral-overlay:close', function(event) {
-                    if (data.status == "WARNING") {
-                        window.location.reload();
-                    }
-                });
-                return;
-            }
-            if (data.packagePath) {
-                window.location.search = 'packagePath=' + data.packagePath;
-            } else {
-                window.location.reload();
-            }
-        }
-    });
-
-    $(window).adaptTo("foundation-registry").register("foundation.form.response.ui.error", {
-        name: "errorResponseCreated",
-        handler: function (form, data, xhr) {
-            const title = Granite.I18n.get("Error");
-            let message = "";
-            if (xhr.responseJSON) {
-                message = xhr.responseJSON.log;
-            } else if (xhr.responseText) {
-                const response = JSON.parse(xhr.responseText);
-                if (response && response.log) {
-                    message = response.log;
-                }
-            }
-
-            const ui = $(window).adaptTo("foundation-ui");
-            ui.alert(title, message, "error");
-        }
-    });
-
-    // Avoid collection-related exceptions when using Granite Action API with a non-collection UI element
-
-    registry.register('foundation.adapters', {
-        type: 'foundation-collection',
-        selector: '.foundation-collection.stub-collection',
-        adapter: function (el) {
-            const collection = $(el)
-
-            return {
-                append: function(items) {
-                    collection.append(items);
-                    collection.trigger("foundation-contentloaded");
-                },
-
-                clear: function() {
-                    collection.find(".foundation-collection-item").remove();
-                },
-
-                getPagination: function () {
-                    // No operation
-                },
-
-                reload: function () {
-                    collection.trigger("coral-collection:remove")
-                    collection.trigger("foundation-collection-reload");
-                }
-            };
-        }
-    });
-
-    $(window).adaptTo("foundation-registry").register("foundation.validation.validator", {
-        selector: "[data-validation='text-validation']",
-        validate: function(el) {
-            if (!el.value || !el.value.trim()) {
-                return "Please enter a value";
-            }
-        }
-    });
-
-    if (window.DOMPurify) {
-        window.DOMPurify.addHook('uponSanitizeElement', function (node, hookEvent ) {
-            if (hookEvent && hookEvent.tagName === 'meta' && node.classList.contains('backpack-meta')) {
-                hookEvent.allowedTags.meta = true;
-            }
-        });
     }
 
 })(Granite, Granite.$, EBUtils = Granite.EBUtils || {});
