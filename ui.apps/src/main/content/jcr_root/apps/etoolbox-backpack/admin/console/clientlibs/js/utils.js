@@ -7,17 +7,17 @@
 
   class EBUtils {
     // Handles click on 'Build/download' button
-    static onBuildAction(isDownload) {
+    static onBuildAction(isDownload, referencedResources) {
       this.buildPackage(false, (data) => {
         const dialog = this.openLogsDialog.call(this, data.log, 'Build', isDownload ? 'Download' : 'Close');
         isDownload && dialog.on('coral-overlay:beforeclose', () => window.location.href = packagePath);
         this.updateLog(data.packageStatus, data.log.length, dialog);
-      });
+      }, referencedResources);
     }
 
     static doPost(url, data, success) {
-      $.ajax({
-        type: "POST",
+      return $.ajax({
+        type: 'POST',
         url: url,
         data: data,
         success: success,
@@ -39,24 +39,15 @@
       }, 2000);
     }
 
-
-    static openPackageDialog() {
-      $('#editDialogButton').trigger('click');
-    }
-
     static getPackageInfo(packagePath, errorFunction) {
-      $.ajax({
+      return $.ajax({
         url: '/services/backpack/package',
         data: {packagePath},
         error: errorFunction
       });
     }
 
-    static buildPackage(testBuild, callback) {
-      const referencedResources = [];
-      $('.reference').each(function () {
-        referencedResources.push(this.innerText);
-      });
+    static buildPackage(testBuild, callback, referencedResources) {
       $.ajax({
         type: 'POST',
         url: '/services/backpack/package/build',
@@ -73,10 +64,10 @@
     }
 
     static replicatePackage(callback) {
-      $.ajax({
+      return $.ajax({
         url: '/services/backpack/replicatePackage',
-        type: "POST",
-        dataType: "json",
+        type: 'POST',
+        dataType: 'json',
         ContentType : 'application/json',
         data: {packagePath: packagePath},
         success: (data)  => callback(data),
@@ -87,7 +78,7 @@
 
     static updateLog(packageStatus, logIndex, dialog) {
       if (packageStatus === 'BUILD_IN_PROGRESS' || packageStatus === 'INSTALL_IN_PROGRESS') {
-        setTimeout(() =>{
+        setTimeout(() => {
           $.ajax({
             url: '/services/backpack/package/build',
             data: {packagePath, latestLogIndex: logIndex},
@@ -97,9 +88,9 @@
                   $(dialog.content).append('<div>' + value + '</div>');
                 });
                 logIndex = logIndex + data.log.length;
-                $(dialog.content).children("div").last()[0].scrollIntoView(false);
+                $(dialog.content).children('div').last()[0].scrollIntoView(false);
               }
-              this.updateLog(data.packageStatus, logIndex, dialog);
+              EBUtils.updateLog(data.packageStatus, logIndex, dialog);
             }
           });
         }, 1000);
@@ -108,25 +99,25 @@
 
     static deleteAction() {
       const data = {
-        _charset_: "UTF-8",
-        cmd: "deletePage",
+        _charset_: 'UTF-8',
+        cmd: 'deletePage',
         path: packagePath,
         force: true
       };
 
-      $.post(Granite.HTTP.externalize("/bin/wcmcommand"), data).done(() => {
-        this.showAlert("Package deleted", "Delete", "warning", () => window.location.replace(BACKPACK_PATH));
+      $.post(Granite.HTTP.externalize('/bin/wcmcommand'), data).done(() => {
+        this.showAlert('Package deleted', 'Delete', 'warning', () => window.location.replace(BACKPACK_PATH));
       });
     }
 
     static showAlert(message, title, type, callback) {
       const options = [{
-            id: "ok",
-            text: "OK",
+            id: 'ok',
+            text: 'OK',
             primary: true
           }];
 
-      FOUNDATION_UI.prompt(title || "Error", message || "Unknown Error", type, options, callback);
+      FOUNDATION_UI.prompt(title || 'Error', message || 'Unknown Error', type, options, callback);
     }
 
     static bytesToSize(bytes) {

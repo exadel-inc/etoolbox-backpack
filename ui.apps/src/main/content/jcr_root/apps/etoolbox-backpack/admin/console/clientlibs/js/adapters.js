@@ -7,23 +7,25 @@
     $window.adaptTo('foundation-registry').register('foundation.form.response.ui.success', {
         name: 'foundation.prompt.open',
         handler: function (form, config, data) {
-            const isWarning = data.status === "WARNING";
-            if (data.status == "ERROR" || isWarning) {
+            const isWarning = data.status === 'WARNING';
+            if (data.status == 'ERROR' || isWarning) {
                 const dialog = EBUtils.openLogsDialog(data.logs, 'WARNING', 'Close');
                 dialog.on('coral-overlay:close', () => isWarning && window.location.reload());
                 return;
             }
             if (data.packagePath) {
                 window.location.search = 'packagePath=' + data.packagePath;
-            } else window.location.reload();
+            } else {
+                window.location.reload();
+            }
         }
     });
 
-    $window.adaptTo("foundation-registry").register("foundation.form.response.ui.error", {
-        name: "errorResponseCreated",
+    $window.adaptTo('foundation-registry').register('foundation.form.response.ui.error', {
+        name: 'errorResponseCreated',
         handler: function (form, data, xhr) {
-            const title = Granite.I18n.get("Error");
-            let message = "";
+            const title = Granite.I18n.get('Error');
+            let message = '';
             if (xhr.responseJSON) {
                 message = xhr.responseJSON.log;
             } else if (xhr.responseText) {
@@ -33,8 +35,8 @@
                 }
             }
 
-            const ui = $(window).adaptTo("foundation-ui");
-            ui.alert(title, message, "error");
+            const ui = $(window).adaptTo('foundation-ui');
+            ui.alert(title, message, 'error');
         }
     });
 
@@ -49,26 +51,26 @@
             return {
                 append: function(items) {
                     collection.append(items);
-                    collection.trigger("foundation-contentloaded");
+                    collection.trigger('foundation-contentloaded');
                 },
 
-                clear: () => collection.find(".foundation-collection-item").remove(),
+                clear: () => collection.find('.foundation-collection-item').remove(),
 
                 getPagination: () => { }, // No operation
 
                 reload: function () {
-                    collection.trigger("coral-collection:remove")
-                    collection.trigger("foundation-collection-reload");
+                    collection.trigger('coral-collection:remove')
+                    collection.trigger('foundation-collection-reload');
                 }
             };
         }
     });
 
-    $window.adaptTo("foundation-registry").register("foundation.validation.validator", {
-        selector: "[data-validation='text-validation']",
+    $window.adaptTo('foundation-registry').register('foundation.validation.validator', {
+        selector: `[data-validation='text-validation']`,
         validate: function(el) {
             if (!el.value || !el.value.trim()) {
-                return "Please enter a value";
+                return 'Please enter a value';
             }
         }
     });

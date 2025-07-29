@@ -1,8 +1,8 @@
 (function (Granite, $, EBUtils) {
     'use strict';
 
-    const DELETE_TITLE = Granite.I18n.get("Delete");
-    const CANCEL_TITLE = Granite.I18n.get("Cancel");
+    const DELETE_TITLE = Granite.I18n.get('Delete');
+    const CANCEL_TITLE = Granite.I18n.get('Cancel');
 
     const $window = $(window);
     const $document = $(document);
@@ -48,6 +48,14 @@
             return $('.selection-pulldown');
         }
 
+        get referencedResources () {
+            const referencedResources = [];
+            $('.reference').each(function () {
+                referencedResources.push(this.innerText);
+            });
+            return referencedResources;
+        }
+
         bindEvents() {
             $document.off('backpack');
             $document.on('click.backpack', `.${COLLECTION_ITEM_CLASS}.result-row`, this.onPackageEntryClick.bind(this));
@@ -55,7 +63,7 @@
             $document.on('click.backpack', INCLUDE_CHILDREN_SEL, this.onChangePackageEntries.bind(this, 'add/children'));
             $document.on('click.backpack', EXCLUDE_CHILDREN_SEL, this.onChangePackageEntries.bind(this, 'delete/children'));
             $document.on('click.backpack', LIVE_COPIES_SEL, this.onChangePackageEntries.bind(this, 'add/liveCopies'));
-            $document.on('click.backpack', '.add-references-action', this.onChangePackageEntries.bind(this, 'add'));
+            $document.on('click.backpack', '.add-references-action', this.onChangePackageEntries.bind(this, 'add/'));
             $document.on('click.backpack', DELETE_SEL, this.onChangePackageEntries.bind(this, 'delete'));
             $document.on('click.backpack', '#downloadAction', () => window.location.href = packagePath);
             $document.on('click.backpack', '#testBuildAction', this.onTestBuild.bind(this));
@@ -107,7 +115,7 @@
             e.stopPropagation();
 
             $([LIVE_COPIES_SEL, DELETE_SEL, INCLUDE_CHILDREN_SEL, EXCLUDE_CHILDREN_SEL].join(',')).attr(DISABLED_MARKER, true);
-            if (!this.$selectionItems) return;
+            if (!this.$selectionItems.length) return;
             $(DELETE_SEL).removeAttr(DISABLED_MARKER);
             this.$selectionItems.each((index, item) => {
                 if (!$(item).is('.primary')) return;
@@ -127,14 +135,14 @@
 
         // 'Add/Delete children', 'Add live copies', 'Add references', 'Delete item'
          onChangePackageEntries(action, e) {
-            if (!this.$selectionItems) return;
+            if (!this.$selectionItems.length) return;
             const payload = [];
             this.$selectionItems.each((i, item) => {
                 const $item = $(item);
                 if (!$item.hasClass('secondary')) payload.push($item.attr(TITLE_ATTR));
                 if (action === 'delete') this.onDeleteItem.call(this, $item, payload);
             });
-            const referenceType = action === 'add' ? e.target.closest('[data-type]').getAttribute('data-type') : '';
+            const referenceType = action === 'add' ? e.target.closest('[data-type]').getAttribute('data-type') || '' : '';
             EBUtils.doPost(`/services/backpack/${action}` + referenceType, {packagePath, payload}, EBUtils.showSuccessMessage);
          }
 
@@ -150,21 +158,21 @@
                 ? 'There are no assets in the package'
                 : '<h4>Approximate size of the package: ' + EBUtils.bytesToSize(data.dataSize) + '</h4>';
             $(dialog.content).append('<div>' + assetText + '</div>');
-            setTimeout(() => $(dialog.content).children("div").last()[0].scrollIntoView(false));
+            setTimeout(() => $(dialog.content).children('div').last()[0].scrollIntoView(false));
         }
 
         onTestBuild() {
             const callback = (data) => data.log && this.onHandleData(data, 'Test Build');
-            EBUtils.buildPackage(true, callback);
+            EBUtils.buildPackage(true, callback, this.referencedResources);
         }
 
         onReplicate() {
             const replicateBtn = {
-                text: "Replicate",
+                text: 'Replicate',
                 primary: true,
                 handler: () => EBUtils.replicatePackage((data) => data.log && this.onHandleData(data, 'Replication'))
             }
-            FOUNDATION_UI.prompt("Please confirm", "Replicate this package?", "notice", [{text: CANCEL_TITLE}, replicateBtn]);
+            FOUNDATION_UI.prompt('Please confirm', 'Replicate this package?', 'notice', [{text: CANCEL_TITLE}, replicateBtn]);
         }
 
         onInstallPackage() {
@@ -175,20 +183,16 @@
         onDeletePackage() {
             if (!packagePath) return;
             const packageName = packagePath.split('/').pop();
-            const message = this.createEl("div");
-            this.createEl("p").text(Granite.I18n.get("You are going to delete the following package:")).appendTo(message);
-            this.createEl("p").html(this.createEl("b")).text(packageName).appendTo(message);
+            const message = $(document.createElement('div'));
+            $(document.createElement('p')).text(Granite.I18n.get('You are going to delete the following package:')).appendTo(message);
+            $(document.createElement('p')).html($(document.createElement('b'))).text(packageName).appendTo(message);
             const deleteBtn = {
                 text: DELETE_TITLE,
                 warning: true,
                 handler: () => EBUtils.deleteAction()
             }
-            FOUNDATION_UI.prompt(DELETE_TITLE, message.html(), "notice", [{text: CANCEL_TITLE}, deleteBtn]);
+            FOUNDATION_UI.prompt(DELETE_TITLE, message.html(), 'notice', [{text: CANCEL_TITLE}, deleteBtn]);
         };
-
-        createEl(name) {
-            return $(document.createElement(name));
-        }
 
         onHandleInstallForm(e) {
             e.preventDefault();
@@ -199,9 +203,13 @@
             });
         }
 
+        openPackageDialog() {
+            $('#editDialogButton').trigger('click');
+        }
+
         onLoad() {
-            if (packagePath && packagePath.length > 0) EBUtils.getPackageInfo(packagePath, () => EBUtils.openPackageDialog());
-            else EBUtils.openPackageDialog();
+            if (packagePath && packagePath.length > 0) EBUtils.getPackageInfo(packagePath, () => this.openPackageDialog());
+            else this.openPackageDialog();
         };
     }
 
