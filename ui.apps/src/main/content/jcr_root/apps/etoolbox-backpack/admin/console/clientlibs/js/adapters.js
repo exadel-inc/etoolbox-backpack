@@ -1,10 +1,10 @@
 (function (Granite, $, EBUtils) {
     'use strict';
 
-    const registry = Granite.UI.Foundation.Registry;
-    const $window = $(window);
+    const REGISTRY = Granite.UI.Foundation.Registry;
+    const FOUNDATION_REGISTRY = $(window).adaptTo('foundation-registry');
 
-    $window.adaptTo('foundation-registry').register('foundation.form.response.ui.success', {
+    FOUNDATION_REGISTRY.register('foundation.form.response.ui.success', {
         name: 'foundation.prompt.open',
         handler: function (form, config, data) {
             const isWarning = data.status === 'WARNING';
@@ -21,7 +21,7 @@
         }
     });
 
-    $window.adaptTo('foundation-registry').register('foundation.form.response.ui.error', {
+    FOUNDATION_REGISTRY.register('foundation.form.response.ui.error', {
         name: 'errorResponseCreated',
         handler: function (form, data, xhr) {
             const title = Granite.I18n.get('Error');
@@ -42,7 +42,7 @@
 
     // Avoid collection-related exceptions when using Granite Action API with a non-collection UI element
 
-    registry.register('foundation.adapters', {
+    REGISTRY.register('foundation.adapters', {
         type: 'foundation-collection',
         selector: '.foundation-collection.stub-collection',
         adapter: function (el) {
@@ -66,8 +66,8 @@
         }
     });
 
-    $window.adaptTo('foundation-registry').register('foundation.validation.validator', {
-        selector: `[data-validation='text-validation']`,
+    FOUNDATION_REGISTRY.register('foundation.validation.validator', {
+        selector: "[data-validation='text-validation']",
         validate: function(el) {
             if (!el.value || !el.value.trim()) {
                 return 'Please enter a value';

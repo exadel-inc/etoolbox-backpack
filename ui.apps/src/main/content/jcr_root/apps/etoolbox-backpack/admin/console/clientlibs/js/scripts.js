@@ -74,7 +74,7 @@
             $document.on('click.backpack', INSTALL_SEL, this.onInstallPackage);
             $document.on('click.backpack', '#deletePackageAction', this.onDeletePackage.bind(this));
             $document.on('submit.backpack', '#installForm', this.onHandleInstallForm);
-            $window.on('load.backpack', this.onLoad);
+            $window.on('load.backpack', this.onLoad.bind(this));
         }
 
         packageEntriesCtrlClick(target) {
