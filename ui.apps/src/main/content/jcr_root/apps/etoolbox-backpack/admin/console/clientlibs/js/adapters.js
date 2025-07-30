@@ -8,7 +8,7 @@
         name: 'foundation.prompt.open',
         handler: function (form, config, data) {
             const isWarning = data.status === 'WARNING';
-            if (data.status == 'ERROR' || isWarning) {
+            if (data.status === 'ERROR' || isWarning) {
                 const dialog = EBUtils.openLogsDialog(data.logs, 'WARNING', 'Close');
                 dialog.on('coral-overlay:close', () => isWarning && window.location.reload());
                 return;
@@ -29,9 +29,13 @@
             if (xhr.responseJSON) {
                 message = xhr.responseJSON.log;
             } else if (xhr.responseText) {
-                const response = JSON.parse(xhr.responseText);
-                if (response && response.log) {
-                    message = response.log;
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response && response.log) {
+                        message = response.log;
+                    }
+                } catch (e) {
+                    console.error('Failed to parse responseText:', e);
                 }
             }
 
@@ -67,7 +71,7 @@
     });
 
     FOUNDATION_REGISTRY.register('foundation.validation.validator', {
-        selector: "[data-validation='text-validation']",
+        selector: `[data-validation='text-validation']`,
         validate: function(el) {
             if (!el.value || !el.value.trim()) {
                 return 'Please enter a value';

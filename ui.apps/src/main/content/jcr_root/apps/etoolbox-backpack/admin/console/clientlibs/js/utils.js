@@ -1,7 +1,7 @@
 (function (Granite, $) {
   'use strict';
 
-  const packagePath = new URL(window.location.href).searchParams.get('packagePath');
+  const packagePath = new URL(window.location.href).searchParams.get('packagePath') || ''
   const BACKPACK_PATH = '/tools/etoolbox/backpack.html';
   const FOUNDATION_UI = $(window).adaptTo('foundation-ui');
 
@@ -9,6 +9,7 @@
     // Handles click on 'Build/download' button
     static onBuildAction(isDownload, referencedResources) {
       this.buildPackage(false, (data) => {
+        if (!(data && data.log)) return;
         const dialog = this.openLogsDialog.call(this, data.log, 'Build', isDownload ? 'Download' : 'Close');
         isDownload && dialog.on('coral-overlay:beforeclose', () => window.location.href = packagePath);
         this.updateLog(data.packageStatus, data.log.length, dialog);
@@ -52,6 +53,7 @@
         type: 'POST',
         url: '/services/backpack/package/build',
         dataType: 'json',
+        ContentType : 'application/json',
         data: {
           packagePath,
           testBuild,
@@ -122,7 +124,7 @@
 
     static bytesToSize(bytes) {
       const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-      if (bytes === 0) return '0 Bytes';
+      if (typeof bytes !== 'number' || bytes <= 0) return '0 Bytes';
       const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
       return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
     }
