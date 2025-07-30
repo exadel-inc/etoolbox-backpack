@@ -49,7 +49,7 @@
 
     REGISTRY.register('foundation.adapters', {
         type: 'foundation-collection',
-        selector: '.foundation-collection.stub-collection',
+        selector: '.foundation-collection.js-backpack-package-list',
         adapter: function (el) {
             const collection = $(el)
 

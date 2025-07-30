@@ -15,17 +15,17 @@
     const COLLECTION_ITEM_CLASS = 'foundation-collection-item';
     const DISABLED_MARKER = 'disabled';
     const LAST_SELECTED_CLASS = 'last-selected';
-    const LIVE_COPIES_SEL = '#liveCopiesAction'; // "Add live copies" button
-    const INCLUDE_CHILDREN_SEL = '#includeChildrenAction'; // "Include children" button
-    const EXCLUDE_CHILDREN_SEL = '#excludeChildrenAction'; // "Exclude children" button
-    const DELETE_SEL = '#deleteAction'; // "Delete button
-    const INSTALL_SEL = '#installAction'; // "Install" button
-    const REPLICATE_SEL = '#replicateAction'; // "Replicate" button
+    const LIVE_COPIES_SEL = '.js-backpack-live-copies'; // "Add live copies" button
+    const INCLUDE_CHILDREN_SEL = '.js-backpack-include-children'; // "Include children" button
+    const EXCLUDE_CHILDREN_SEL = '.js-backpack-exclude-children'; // "Exclude children" button
+    const DELETE_SEL = '.js-backpack-delete'; // "Delete button
+    const INSTALL_SEL = '.js-backpack-install'; // "Install" button
+    const REPLICATE_SEL = '.js-backpack-replicate'; // "Replicate" button
 
     // calls when dom is loaded
     $(() => {
         const backpack = new EBackpack();
-        backpack.$pulldown.attr(DISABLED_MARKER, true);
+        backpack.$addReferences.attr(DISABLED_MARKER, true);
         $('.build-options').toggleClass(DISABLED_MARKER, backpack.$collectionItems.length); // "Build and download" options
         $([INSTALL_SEL, REPLICATE_SEL].join(',')).attr(DISABLED_MARKER, backpack.$collectionItems.length ? null : true);
     });
@@ -44,8 +44,8 @@
         }
 
         // "Add References" button
-        get $pulldown() {
-            return $('.selection-pulldown');
+        get $addReferences() {
+            return $('.js-backpack-add-references');
         }
 
         get referencedResources () {
@@ -63,17 +63,17 @@
             $document.on('click.backpack', INCLUDE_CHILDREN_SEL, this.onChangePackageEntries.bind(this, 'add/children'));
             $document.on('click.backpack', EXCLUDE_CHILDREN_SEL, this.onChangePackageEntries.bind(this, 'delete/children'));
             $document.on('click.backpack', LIVE_COPIES_SEL, this.onChangePackageEntries.bind(this, 'add/liveCopies'));
-            $document.on('click.backpack', '.add-references-action', this.onChangePackageEntries.bind(this, 'add/'));
+            $document.on('click.backpack', '.js-backpack-add-references-item', this.onChangePackageEntries.bind(this, 'add/'));
             $document.on('click.backpack', DELETE_SEL, this.onChangePackageEntries.bind(this, 'delete'));
-            $document.on('click.backpack', '#downloadAction', () => window.location.href = packagePath);
-            $document.on('click.backpack', '#testBuildAction', this.onBuildPackage.bind(this, true, false));
+            $document.on('click.backpack', '.js-backpack-download', () => window.location.href = packagePath);
+            $document.on('click.backpack', '.js-backpack-test-build', this.onBuildPackage.bind(this, true, false));
             $document.on('click.backpack', REPLICATE_SEL, this.onReplicatePackage.bind(this));
-            $document.on('click.backpack', '#mainMenuAction, #cancelButton', () => window.location.replace(BACKPACK_PATH));
-            $document.on('click.backpack', '#buildAction', this.onBuildPackage.bind(this, false, false));
-            $document.on('click.backpack', '#buildAndDownloadAction', this.onBuildPackage.bind(this, false, true));
+            $document.on('click.backpack', '.js-backpack-main-menu, .jsBackpackCancelButton', () => window.location.replace(BACKPACK_PATH));
+            $document.on('click.backpack', '.js-backpack-build', this.onBuildPackage.bind(this, false, false));
+            $document.on('click.backpack', '.js-backpack-build-download', this.onBuildPackage.bind(this, false, true));
             $document.on('click.backpack', INSTALL_SEL, this.onInstallPackage);
-            $document.on('click.backpack', '#deletePackageAction', this.onDeletePackage.bind(this));
-            $document.on('submit.backpack', '#installForm', this.onHandleInstallPackageForm);
+            $document.on('click.backpack', '.js-backpack-delete-package', this.onDeletePackage.bind(this));
+            $document.on('submit.backpack', '#jsBackpackInstallForm', this.onHandleInstallPackageForm);
             $window.on('load.backpack', this.onLoad.bind(this));
         }
 
@@ -103,14 +103,14 @@
             this.$collectionItems.removeClass(`${SELECTIONS_ITEM_CLASS} ${LAST_SELECTED_CLASS}`);
             if (mustSelect) {
                 target.addClass(`${SELECTIONS_ITEM_CLASS} ${LAST_SELECTED_CLASS}`);
-                target.hasClass('primary') && this.$pulldown.removeAttr(DISABLED_MARKER);
+                target.hasClass('primary') && this.$addReferences.removeAttr(DISABLED_MARKER);
             }
         }
 
         // Make package entries selectable
         onPackageEntryClick(e) {
             const target = $(e.target.closest(`.${COLLECTION_ITEM_CLASS}`));
-            this.$pulldown.attr(DISABLED_MARKER, true);
+            this.$addReferences.attr(DISABLED_MARKER, true);
             (e.ctrlKey ? this.packageEntriesCtrlClick : e.shiftKey ? this.packageEntriesShiftClick : this.packageEntriesClick).call(this, target);
             e.stopPropagation();
 
@@ -120,7 +120,7 @@
             this.$selectionItems.each((index, item) => {
                 if (!$(item).is('.primary')) return;
                 $([EXCLUDE_CHILDREN_SEL, LIVE_COPIES_SEL, INCLUDE_CHILDREN_SEL].join(',')).removeAttr(DISABLED_MARKER);
-                this.$pulldown.removeAttr(DISABLED_MARKER);
+                this.$addReferences.removeAttr(DISABLED_MARKER);
             });
         };
 
