@@ -7,6 +7,7 @@
     FOUNDATION_REGISTRY.register('foundation.form.response.ui.success', {
         name: 'foundation.prompt.open',
         handler: function (form, config, data) {
+            if (!data) return;
             const isWarning = data.status === 'WARNING';
             if (data.status === 'ERROR' || isWarning) {
                 const dialog = EBUtils.openLogsDialog(data.logs, 'WARNING', 'Close');
