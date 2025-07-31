@@ -42,7 +42,7 @@
       const popup = new Coral.Alert();
       popup.header.innerHTML = 'INFO';
       popup.content.textContent = 'Package was successfully updated';
-      popup.id = 'references-added-alert';
+      popup.id = 'js-backpack-alert';
       document.body.append(popup);
       setTimeout(() => {
         $(popup).fadeOut();
@@ -131,7 +131,7 @@
 
     static openLogsDialog(init, title, submitText) {
       const dialog = new Coral.Dialog();
-      dialog.id = 'LogsDialog';
+      dialog.id = 'JsBackpackLogsDialog';
       dialog.header.innerHTML = `${title} Logs`;
       dialog.footer.innerHTML = `<button is="coral-button" variant="primary" coral-close>${submitText}</button>`;
 
