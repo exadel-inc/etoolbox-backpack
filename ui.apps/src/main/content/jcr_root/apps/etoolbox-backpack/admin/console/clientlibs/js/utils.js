@@ -66,17 +66,17 @@
         url: '/services/backpack/replicatePackage',
         type: 'POST',
         dataType: 'json',
-        contentType : 'application/json',
+        ContentType : 'application/json',
         data: {packagePath}
       }
 
       return this._ajaxPost(options, callback);
     }
 
-    static updateLog(packageStatus, logIndex, dialog) {
+    static async updateLog(packageStatus, logIndex, dialog) {
       try {
         if (packageStatus !== 'BUILD_IN_PROGRESS' && packageStatus !== 'INSTALL_IN_PROGRESS') return;
-        const result = $.ajax({
+        const result = await $.ajax({
           url: '/services/backpack/package/build',
           data: {packagePath, latestLogIndex: logIndex},
           timeout: 1000,
