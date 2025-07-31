@@ -110,14 +110,16 @@
 }
 
 .split-start {
-    border-radius: 0.25rem 0 0 0.25rem;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
 .split-end.foundation-toggleable-control {
     padding: 0.625rem 0.2rem;
     margin-left: 2px;
     min-width: 1.375rem;
-    border-radius: 0 0.25rem 0.25rem 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
 }
 
 .selection-action {
