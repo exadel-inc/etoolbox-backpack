@@ -1,4 +1,3 @@
 #base=js
 
 download-action.js
-regex-validator.js
