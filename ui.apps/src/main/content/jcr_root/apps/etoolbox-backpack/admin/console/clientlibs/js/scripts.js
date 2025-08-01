@@ -1,580 +1,216 @@
-(function (Granite, $) {
+(function (Granite, $, EBUtils) {
     'use strict';
 
-    const registry = Granite.UI.Foundation.Registry;
+    const DELETE_TITLE = Granite.I18n.get('Delete');
+    const CANCEL_TITLE = Granite.I18n.get('Cancel');
+
+    const $window = $(window);
+    const $document = $(document);
+    const FOUNDATION_UI = $window.adaptTo('foundation-ui');
     const packagePath = new URL(window.location.href).searchParams.get('packagePath');
+    const BACKPACK_PATH = '/tools/etoolbox/backpack.html';
+    const TITLE_ATTR = 'data-entry-title';
 
-    const BUILD_IN_PROGRESS = 'BUILD_IN_PROGRESS';
-    const INSTALL_IN_PROGRESS = 'INSTALL_IN_PROGRESS';
+    const SELECTIONS_ITEM_CLASS = 'foundation-selections-item';
+    const COLLECTION_ITEM_CLASS = 'foundation-collection-item';
+    const DISABLED_MARKER = 'disabled';
+    const LAST_SELECTED_CLASS = 'last-selected';
+    const LIVE_COPIES_SEL = '#liveCopiesAction'; // "Add live copies" button
+    const INCLUDE_CHILDREN_SEL = '#includeChildrenAction'; // "Include children" button
+    const EXCLUDE_CHILDREN_SEL = '#excludeChildrenAction'; // "Exclude children" button
+    const DELETE_SEL = '#deleteAction'; // "Delete button
+    const INSTALL_SEL = '#installAction'; // "Install" button
+    const REPLICATE_SEL = '#replicateAction'; // "Replicate" button
 
+    // calls when dom is loaded
     $(() => {
-        const $pulldown = $('.selection-pulldown');
-        $pulldown.attr('disabled', 'disabled');
+        const backpack = new EBackpack();
+        backpack.$pulldown.attr(DISABLED_MARKER, true);
+        $('.build-options').toggleClass(DISABLED_MARKER, backpack.$collectionItems.length); // "Build and download" options
+        $([INSTALL_SEL, REPLICATE_SEL].join(',')).attr(DISABLED_MARKER, backpack.$collectionItems.length ? null : true);
     });
 
-    $(() => {
-        const items = $('.foundation-collection-item');
-        if (items && items.length > 0) {
-            $('.build-options').removeClass('disabled');
-            $('#installAction').removeAttr('disabled');
-            $('#replicateAction').removeAttr('disabled');
-        } else {
-            $('.build-options').addClass('disabled');
-            $('#installAction').attr('disabled', 'disabled');
-            $('#replicateAction').attr('disabled', 'disabled');
+    class EBackpack {
+        constructor() {
+            this.bindEvents();
         }
-    });
 
-    // Make package entries selectable
+        get $collectionItems() {
+            return $(`.${COLLECTION_ITEM_CLASS}`);
+        }
 
-    $(document).on('click', '.foundation-collection-item.result-row', function(e) {
-        const $this = $(this);
-        const $pulldown = $('.selection-pulldown');
-        $pulldown.attr('disabled', 'disabled');
+        get $selectionItems() {
+            return $(`.${SELECTIONS_ITEM_CLASS}`);
+        }
 
-        if (e.ctrlKey) {
-            $('.foundation-collection-item').removeClass('last-selected');
-            if ($this.hasClass('foundation-selections-item')) {
-                $this.removeClass('foundation-selections-item');
+        // "Add References" button
+        get $pulldown() {
+            return $('.selection-pulldown');
+        }
+
+        get referencedResources () {
+            const referencedResources = [];
+            $('.reference').each(function () {
+                referencedResources.push(this.innerText);
+            });
+            return referencedResources;
+        }
+
+        bindEvents() {
+            $document.off('backpack');
+            $document.on('click.backpack', `.${COLLECTION_ITEM_CLASS}.result-row`, this.onPackageEntryClick.bind(this));
+            $document.on('click.backpack', '.toggler', this.onTogglerClick);
+            $document.on('click.backpack', INCLUDE_CHILDREN_SEL, this.onChangePackageEntries.bind(this, 'add/children'));
+            $document.on('click.backpack', EXCLUDE_CHILDREN_SEL, this.onChangePackageEntries.bind(this, 'delete/children'));
+            $document.on('click.backpack', LIVE_COPIES_SEL, this.onChangePackageEntries.bind(this, 'add/liveCopies'));
+            $document.on('click.backpack', '.add-references-action', this.onChangePackageEntries.bind(this, 'add/'));
+            $document.on('click.backpack', DELETE_SEL, this.onChangePackageEntries.bind(this, 'delete'));
+            $document.on('click.backpack', '#downloadAction', () => window.location.href = packagePath);
+            $document.on('click.backpack', '#testBuildAction', this.onTestBuild.bind(this));
+            $document.on('click.backpack', REPLICATE_SEL, this.onReplicate.bind(this));
+            $document.on('click.backpack', '#mainMenuAction, #cancelButton', () => window.location.replace(BACKPACK_PATH));
+            $document.on('click.backpack', '#buildAction', () => EBUtils.onBuildAction(false));
+            $document.on('click.backpack', '#buildAndDownloadAction', () => EBUtils.onBuildAction(true));
+            $document.on('click.backpack', INSTALL_SEL, this.onInstallPackage);
+            $document.on('click.backpack', '#deletePackageAction', this.onDeletePackage.bind(this));
+            $document.on('submit.backpack', '#installForm', this.onHandleInstallForm);
+            $window.on('load.backpack', this.onLoad.bind(this));
+        }
+
+        packageEntriesCtrlClick(target) {
+            this.$collectionItems.removeClass(LAST_SELECTED_CLASS);
+            target.toggleClass(SELECTIONS_ITEM_CLASS);
+            target.hasClass(SELECTIONS_ITEM_CLASS) && target.addClass(LAST_SELECTED_CLASS);
+        }
+
+        packageEntriesShiftClick(target) {
+            this.$collectionItems.removeClass(`${SELECTIONS_ITEM_CLASS}`);
+            target.addClass(SELECTIONS_ITEM_CLASS);
+            const $lastSelected = $('.last-selected');
+            this.$collectionItems.removeClass(`${LAST_SELECTED_CLASS}`);
+            if (target.index() > $lastSelected.index()) {
+                $lastSelected.nextUntil(target).addClass(SELECTIONS_ITEM_CLASS);
+                $lastSelected.addClass(LAST_SELECTED_CLASS);
             } else {
-                $this.addClass('foundation-selections-item');
-                $this.addClass('last-selected');
+                $lastSelected.prevUntil(target).addClass(SELECTIONS_ITEM_CLASS);
+                target.addClass(LAST_SELECTED_CLASS);
             }
-        }
-        if (e.shiftKey) {
-            $('.foundation-collection-item').removeClass('foundation-selections-item');
-            $this.addClass('foundation-selections-item');
-            var $lastSelected = $('.last-selected');
-            $('.foundation-collection-item').removeClass('last-selected');
-            if ($this.index() > $lastSelected.index()) {
-                $lastSelected.nextUntil($this).addClass('foundation-selections-item');
-                $lastSelected.addClass('last-selected');
-            } else {
-                $lastSelected.prevUntil($this).addClass('foundation-selections-item');
-                $this.addClass('last-selected');
-            }
-            $lastSelected.addClass('foundation-selections-item');
-
-
+            $lastSelected.addClass(SELECTIONS_ITEM_CLASS);
         }
 
-        if (!e.ctrlKey && !e.shiftKey) {
-            const mustSelect = !$this.hasClass('foundation-selections-item');
-            $('.foundation-collection-item').removeClass('foundation-selections-item last-selected');
+        packageEntriesClick(target) {
+            const mustSelect = !target.hasClass(SELECTIONS_ITEM_CLASS);
+            this.$collectionItems.removeClass(`${SELECTIONS_ITEM_CLASS} ${LAST_SELECTED_CLASS}`);
             if (mustSelect) {
-                $this.addClass('foundation-selections-item');
-                $this.addClass('last-selected');
-                $this.hasClass('primary') &&  $pulldown.removeAttr('disabled');
+                target.addClass(`${SELECTIONS_ITEM_CLASS} ${LAST_SELECTED_CLASS}`);
+                target.hasClass('primary') && this.$pulldown.removeAttr(DISABLED_MARKER);
             }
         }
-        e.stopPropagation();
 
-        const selection = $('.foundation-selections-item');
-        $('#liveCopiesAction').attr('disabled', 'disabled');
-        $('#deleteAction').attr('disabled', 'disabled');
-        $('#includeChildrenAction').attr('disabled', 'disabled');
-        $('#excludeChildrenAction').attr('disabled', 'disabled');
-        if (selection && selection.length > 0) {
-            $('#deleteAction').removeAttr('disabled');
-            selection.each((index, item) => {
-                const $item = $(item);
-                if ($item.is('.primary')) {
-                    $('#excludeChildrenAction').removeAttr('disabled');
-                    $('#liveCopiesAction').removeAttr('disabled');
-                    $('#includeChildrenAction').removeAttr('disabled');
-                    $pulldown.removeAttr('disabled');
-                }
+        // Make package entries selectable
+        onPackageEntryClick(e) {
+            const target = $(e.target.closest(`.${COLLECTION_ITEM_CLASS}`));
+            this.$pulldown.attr(DISABLED_MARKER, true);
+            (e.ctrlKey ? this.packageEntriesCtrlClick : e.shiftKey ? this.packageEntriesShiftClick : this.packageEntriesClick).call(this, target);
+            e.stopPropagation();
+
+            $([LIVE_COPIES_SEL, DELETE_SEL, INCLUDE_CHILDREN_SEL, EXCLUDE_CHILDREN_SEL].join(',')).attr(DISABLED_MARKER, true);
+            if (!this.$selectionItems.length) return;
+            $(DELETE_SEL).removeAttr(DISABLED_MARKER);
+            this.$selectionItems.each((index, item) => {
+                if (!$(item).is('.primary')) return;
+                $([EXCLUDE_CHILDREN_SEL, LIVE_COPIES_SEL, INCLUDE_CHILDREN_SEL].join(',')).removeAttr(DISABLED_MARKER);
+                this.$pulldown.removeAttr(DISABLED_MARKER);
             });
-        }
-    });
-
-    const foundationUi = $(window).adaptTo('foundation-ui');
-
-    // Make top-level package entries collapsible
-
-    $(document).on('click', '.toggler', function() {
-        const $this = $(this);
-        const $togglable = $this.closest('.foundation-collection-item');
-        const treeState = $togglable.attr('data-tree-state');
-        if (treeState === 'collapsed') {
-            $togglable.attr('data-tree-state', 'expanded');
-        } else if (treeState === 'expanded') {
-            $togglable.attr('data-tree-state', 'collapsed');
-        }
-    });
-
-    // Actions
-
-    $(document).on('click', '#includeChildrenAction', function() {
-        const selection = $('.foundation-selections-item');
-        const payload = [];
-        selection.each(function () {
-            if (!$(this).hasClass('secondary')) {
-                payload.push($(this).attr('data-entry-title'));
-            }
-        });
-        if (selection) {
-            doPost("/services/backpack/add/children", {'packagePath': packagePath, 'payload': payload}, success);
-        }
-    });
-
-    $(document).on('click', '#excludeChildrenAction', function() {
-        const selection = $('.foundation-selections-item');
-        if (!selection) {
-            return;
-        }
-        const payload = [];
-        selection.each(function () {
-            if (!$(this).hasClass('secondary')) {
-                payload.push($(this).attr('data-entry-title'));
-            }
-        });
-        if (selection) {
-            doPost("/services/backpack/delete/children", {'packagePath': packagePath, 'payload': payload}, success);
-        }
-    });
-
-    $(document).on('click', '#liveCopiesAction', function() {
-        const selection = $('.foundation-selections-item');
-        const payload = [];
-        selection.each(function () {
-            if (!$(this).hasClass('secondary')) {
-                payload.push($(this).attr('data-entry-title'));
-            }
-        });
-        if (selection) {
-            doPost("/services/backpack/add/liveCopies", {'packagePath': packagePath, 'payload': payload}, success);
-        }
-    });
-
-    $(document).on('click', '.add-references-action', function(event) {
-        const selection = $('.foundation-selections-item');
-        const referenceType = event.target.closest('[data-type]').getAttribute('data-type');
-        const payload = [];
-        selection.each(function () {
-            if (!$(this).hasClass('secondary')) {
-                payload.push($(this).attr('data-entry-title'));
-            }
-        });
-        if (selection) {
-            doPost("/services/backpack/add/" + referenceType, {'packagePath': packagePath, 'payload': payload}, success);
-        }
-    });
-
-    $(document).on('click', '#deleteAction', function(event) {
-        const selection = $('.foundation-selections-item');
-
-        if (!selection) {
-            return;
-        }
-
-        const payload = [];
-        selection.each(function () {
-            if ($(this).hasClass('secondary')) {
-                payload.push('[' + $(this).attr('data-entry-title') + ',' + $(this).attr('data-subsidiary-title') + ']');
-            } else {
-                payload.push($(this).attr('data-entry-title'));
-                var children = $(this).find('.secondary');
-                children.each(function () {
-                    payload.push('[' + $(this).attr('data-entry-title') + ',' + $(this).attr('data-subsidiary-title') + ']');
-                });
-            }
-        });
-        doPost("/services/backpack/delete", {'packagePath': packagePath, 'payload': payload}, success);
-    });
-
-    $(document).on('click', '#downloadAction', function() {
-        window.location.href = packagePath;
-    });
-
-    $(document).on('click', '#testBuildAction', function() {
-        buildPackage(true, function(data) {
-            if (data.log) {
-                const dialog = openLogsDialog(data.log, 'Test Build', 'Close');
-                const assetText = data.dataSize === 0
-                    ? 'There are no assets in the package'
-                    : '<h4>Approximate size of the package: ' + bytesToSize(data.dataSize) + '</h4>';
-                $(dialog.content).append('<div>' + assetText + '</div>');
-                setTimeout(function () {
-                    $(dialog.content).children("div").last()[0].scrollIntoView(false);
-                })
-            }
-        });
-    });
-
-    $(document).on('click', '#replicateAction', function() {
-        var fui = $(window).adaptTo("foundation-ui");
-        fui.prompt("Please confirm", "Replicate this package?", "notice", [{
-            text: Granite.I18n.get("Cancel")
-        }, {
-            text: "Replicate",
-            primary: true,
-            handler: function () {
-                replicatePackage(function(data) {
-                    if (data.log) {
-                        const dialog = openLogsDialog(data.log, 'Replication', 'Close');
-                        const assetText = data.dataSize === 0
-                            ? 'There are no assets in the package'
-                            : '<h4>Approximate size of the package: ' + bytesToSize(data.dataSize) + '</h4>';
-                        $(dialog.content).append('<div>' + assetText + '</div>');
-                        setTimeout(function () {
-                            $(dialog.content).children("div").last()[0].scrollIntoView(false);
-                        })
-                    }
-                });
-            }
-        }]);
-    });
-
-    $(document).on('click', '#mainMenuAction', function() {
-        window.location.replace("/tools/etoolbox/backpack.html");
-    });
-
-    $(document).on('click', '#cancelButton', function() {
-        window.location.replace("/tools/etoolbox/backpack.html");
-    });
-
-    $(document).on('click', '#buildAction', function() {
-        buildPackage(false, function(data) {
-            const dialog = openLogsDialog(data.log, 'Build', 'Close');
-            updateLog(data.packageStatus, data.log.length, dialog);
-        });
-    });
-
-    $(document).on('click', '#buildAndDownloadAction', function() {
-        buildPackage(false, function(data) {
-            const dialog = openLogsDialog(data.log, 'Build', 'Download');
-            dialog.on('coral-overlay:beforeclose', function(event) {
-                window.location.href = packagePath;
-            });
-            updateLog(data.packageStatus, data.log.length, dialog);
-        });
-    });
-
-    $(document).on('click', '#installAction', function() {
-        const dialog = document.querySelector('#installDialog');
-        if (dialog) {
-            dialog.show();
-        }
-    });
-
-    $(document).on('click', '#deletePackageAction', function() {
-        if (!packagePath) {
-            return;
-        }
-        var packageName = packagePath.split('/').pop();
-
-        var ui = $(window).adaptTo("foundation-ui");
-        var message = createEl("div");
-        var intro = createEl("p").appendTo(message);
-
-        intro.text(Granite.I18n.get("You are going to delete the following package:"));
-        createEl("p").html(createEl("b")).text(packageName).appendTo(message);
-        ui.prompt(Granite.I18n.get("Delete"), message.html(), "notice", [{
-            text: Granite.I18n.get("Cancel")
-        }, {
-            text: Granite.I18n.get("Delete"),
-            warning: true,
-            handler: function () {
-                deleteAction();
-            }
-        }]);
-    });
-
-    function deleteAction() {
-
-        var data = {
-            _charset_: "UTF-8",
-            cmd: "deletePage",
-            path: packagePath,
-            force: true
         };
 
-        $.post(Granite.HTTP.externalize("/bin/wcmcommand"), data).done(function () {
-            showAlert("Package deleted", "Delete", "warning", function () {
-                window.location.replace("/tools/etoolbox/backpack.html");
+        // Make top-level package entries collapsible
+        onTogglerClick() {
+            const $togglable = $(this).closest(`.${COLLECTION_ITEM_CLASS}`);
+            const treeState = $togglable.attr('data-tree-state');
+            if (treeState === 'collapsed' || treeState === 'expanded') {
+                $togglable.attr('data-tree-state', treeState === 'collapsed' ? 'expanded' : 'collapsed');
+            }
+        };
+
+        // 'Add/Delete children', 'Add live copies', 'Add references', 'Delete item'
+         onChangePackageEntries(action, e) {
+            if (!this.$selectionItems.length) return;
+            const payload = [];
+            this.$selectionItems.each((i, item) => {
+                const $item = $(item);
+                if (!$item.hasClass('secondary')) payload.push($item.attr(TITLE_ATTR));
+                if (action === 'delete') this.onDeleteItem.call(this, $item, payload);
             });
-        });
-    }
+            const referenceType = action === 'add' ? e.target.closest('[data-type]').getAttribute('data-type') || '' : '';
+            EBUtils.doPost(`/services/backpack/${action}` + referenceType, {packagePath, payload}, EBUtils.showSuccessMessage);
+         }
 
-    function showAlert(message, title, type, callback) {
-        var fui = $(window).adaptTo("foundation-ui"),
-            options = [{
-                id: "ok",
-                text: "OK",
-                primary: true
-            }];
+        onDeleteItem($item, payload) {
+             if (!$item.hasClass('secondary')) {
+                 $item.find('.secondary').each((i, item) => payload.push('[' + $(item).attr(TITLE_ATTR) + ',' + $(item).attr('data-subsidiary-title') + ']'));
+             } else payload.push('[' + $item.attr(TITLE_ATTR) + ',' + $item.attr('data-subsidiary-title') + ']');
+        };
 
-        message = message || "Unknown Error";
-        title = title || "Error";
-
-        fui.prompt(title, message, type, options, callback);
-    }
-
-    function createEl(name) {
-        return $(document.createElement(name));
-    }
-
-    function replicatePackage(callback) {
-        $.ajax({
-            url: '/services/backpack/replicatePackage',
-            type: "POST",
-            dataType: "json",
-            ContentType : 'application/json',
-            data: {packagePath: packagePath},
-            success: function (data) {
-                callback(data);
-            },
-            beforeSend: function () {
-                foundationUi.wait();
-            },
-            complete: function () {
-                foundationUi.clearWait();
-            }
-        })
-    }
-
-    $(document).on('submit', '#installForm', function (e) {
-        e.preventDefault();
-        const form = $(this);
-        doPost(form.attr('action'), form.serialize(), function(data) {
-            const dialog = openLogsDialog(data.log, 'Install', 'Close');
-            updateLog(data.packageStatus, data.log.length, dialog);
-        });
-    })
-
-    function doPost(url, data, success) {
-        $.ajax({
-            type: "POST",
-            url: url,
-            data: data,
-            success: success,
-            error: function(data) {
-                console.log(data);
-            },
-            beforeSend: function () {
-                foundationUi.wait();
-            },
-            complete: function () {
-                foundationUi.clearWait();
-            }
-        });
-    }
-
-    function success() {
-        showReferencedAlert();
-    }
-
-    $(window).adaptTo('foundation-registry').register('foundation.form.response.ui.success', {
-        name: 'foundation.prompt.open',
-        handler: function (form, config, data, textStatus, xhr) {
-            if (data.status == "ERROR" || data.status == "WARNING") {
-                const dialog = openLogsDialog(data.logs, 'WARNING', 'Close');
-                dialog.on('coral-overlay:close', function(event) {
-                    if (data.status == "WARNING") {
-                        window.location.reload();
-                    }
-                });
-                return;
-            }
-            if (data.packagePath) {
-                window.location.search = 'packagePath=' + data.packagePath;
-            } else {
-                window.location.reload();
-            }
+        onHandleData(data, text) {
+            const dialog = EBUtils.openLogsDialog(data.log, text, 'Close');
+            const assetText = data.dataSize === 0
+                ? 'There are no assets in the package'
+                : '<h4>Approximate size of the package: ' + EBUtils.bytesToSize(data.dataSize) + '</h4>';
+            $(dialog.content).append('<div>' + assetText + '</div>');
+            setTimeout(() => $(dialog.content).children('div').last()[0].scrollIntoView(false));
         }
-    });
 
-    $(window).adaptTo("foundation-registry").register("foundation.form.response.ui.error", {
-        name: "errorResponseCreated",
-        handler: function (form, data, xhr) {
-            const title = Granite.I18n.get("Error");
-            let message = "";
-            if (xhr.responseJSON) {
-                message = xhr.responseJSON.log;
-            } else if (xhr.responseText) {
-                const response = JSON.parse(xhr.responseText);
-                if (response && response.log) {
-                    message = response.log;
-                }
+        onTestBuild() {
+            const callback = (data) => data.log && this.onHandleData(data, 'Test Build');
+            EBUtils.buildPackage(true, callback, this.referencedResources);
+        }
+
+        onReplicate() {
+            const replicateBtn = {
+                text: 'Replicate',
+                primary: true,
+                handler: () => EBUtils.replicatePackage((data) => data.log && this.onHandleData(data, 'Replication'))
             }
-
-            const ui = $(window).adaptTo("foundation-ui");
-            ui.alert(title, message, "error");
+            FOUNDATION_UI.prompt('Please confirm', 'Replicate this package?', 'notice', [{text: CANCEL_TITLE}, replicateBtn]);
         }
-    });
 
-    // Avoid collection-related exceptions when using Granite Action API with a non-collection UI element
+        onInstallPackage() {
+            const dialog = document.querySelector('#installDialog');
+            if (dialog) dialog.show();
+        };
 
-    registry.register('foundation.adapters', {
-        type: 'foundation-collection',
-        selector: '.foundation-collection.stub-collection',
-        adapter: function (el) {
-            const collection = $(el)
-
-            return {
-                append: function(items) {
-                    collection.append(items);
-                    collection.trigger("foundation-contentloaded");
-                },
-
-                clear: function() {
-                    collection.find(".foundation-collection-item").remove();
-                },
-
-                getPagination: function () {
-                    // No operation
-                },
-
-                reload: function () {
-                    collection.trigger("coral-collection:remove")
-                    collection.trigger("foundation-collection-reload");
-                }
-            };
-        }
-    });
-
-    function buildPackage(testBuild, callback) {
-        const referencedResources = [];
-        $('.reference').each(function () {
-            referencedResources.push(this.innerText);
-        });
-        $.ajax({
-            type: 'POST',
-            url: '/services/backpack/package/build',
-            data: {
-                packagePath: packagePath,
-                referencedResources: JSON.stringify(referencedResources),
-                testBuild: testBuild
-            }, success: function (data) {
-                callback(data);
-            },
-            beforeSend: function () {
-                foundationUi.wait();
-            },
-            complete: function () {
-                foundationUi.clearWait();
-            },
-            dataType: 'json'
-        });
-    }
-
-    function updateLog(packageStatus, logIndex, dialog) {
-        if (packageStatus === BUILD_IN_PROGRESS || packageStatus === INSTALL_IN_PROGRESS) {
-            setTimeout(function () {
-                $.ajax({
-                    url: '/services/backpack/package/build',
-                    data: {packagePath: packagePath, latestLogIndex: logIndex},
-                    success: function (data) {
-                        if (data.log && data.log.length) {
-                            $.each(data.log, function (index, value) {
-                                $(dialog.content).append('<div>' + value + '</div>');
-                            });
-                            logIndex = logIndex + data.log.length;
-                            $(dialog.content).children("div").last()[0].scrollIntoView(false);
-                        }
-                        updateLog(data.packageStatus, logIndex, dialog);
-                    }
-                });
-            }, 1000);
-        }
-    }
-
-    function bytesToSize(bytes) {
-        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-        if (bytes === 0) return '0 Bytes';
-        const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-        return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
-    }
-
-    function openLogsDialog(init, title, submitText) {
-
-        const dialog = new Coral.Dialog().set({
-            id: 'LogsDialog',
-            header: {
-                innerHTML: `${title} Logs`
-            },
-            footer: {
-                innerHTML: `<button is="coral-button" variant="primary" coral-close>${submitText}</button>`
+        onDeletePackage() {
+            if (!packagePath) return;
+            const packageName = packagePath.split('/').pop();
+            const message = $(document.createElement('div'));
+            $(document.createElement('p')).text(Granite.I18n.get('You are going to delete the following package:')).appendTo(message);
+            $(document.createElement('p')).html($(document.createElement('b'))).text(packageName).appendTo(message);
+            const deleteBtn = {
+                text: DELETE_TITLE,
+                warning: true,
+                handler: () => EBUtils.deleteAction()
             }
-        });
+            FOUNDATION_UI.prompt(DELETE_TITLE, message.html(), 'notice', [{text: CANCEL_TITLE}, deleteBtn]);
+        };
 
-        if (init && init.length > 0) {
-            $.each(init, function (index, value) {
-                $(dialog.content).append('<div>' + value + '</div>');
+        onHandleInstallForm(e) {
+            e.preventDefault();
+            const form = $(this);
+            EBUtils.doPost(form.attr('action'), form.serialize(), function(data) {
+                const dialog = EBUtils.openLogsDialog(data.log, 'Install', 'Close');
+                EBUtils.updateLog(data.packageStatus, data.log.length, dialog);
             });
         }
 
-        dialog.on('coral-overlay:close', function(event) {
-            event.preventDefault();
-            setTimeout(function () {
-                dialog.remove();
-                window.location.reload();
-            });
-        });
-
-        document.body.appendChild(dialog);
-        dialog.show();
-
-        return dialog;
-    }
-
-    function showReferencedAlert() {
-
-        var popup = new Coral.Alert().set({
-            variant: 'info',
-            header: {
-                innerHTML: 'INFO'
-            },
-            content: {
-                textContent: `Package was successfully updated`
-            },
-            id: 'references-added-alert'
-        });
-        document.body.append(popup);
-        setTimeout(function () {
-            $(popup).fadeOut();
-            window.location.reload();
-        }, 2000);
-    }
-
-    function openPackageDialog(success, error) {
-        $('#editDialogButton').trigger('click');
-    }
-
-    function getPackageInfo(packagePath, errorFunction) {
-        $.ajax({
-            url: '/services/backpack/package',
-            data: {'packagePath': packagePath},
-            error: errorFunction
-        });
-    }
-
-    $(window).on('load', function() {
-        if (packagePath && packagePath.length > 0) {
-            getPackageInfo(packagePath, function (data) {
-                openPackageDialog()
-            });
-        } else {
-            openPackageDialog()
+        openPackageDialog() {
+            $('#editDialogButton').trigger('click');
         }
-    });
 
-    $(window).adaptTo("foundation-registry").register("foundation.validation.validator", {
-        selector: "[data-validation='text-validation']",
-        validate: function(el) {
-            if (!el.value || !el.value.trim()) {
-                return "Please enter a value";
-            }
-        }
-    });
-
-    if (window.DOMPurify) {
-        window.DOMPurify.addHook('uponSanitizeElement', function (node, hookEvent ) {
-            if (hookEvent && hookEvent.tagName === 'meta' && node.classList.contains('backpack-meta')) {
-                hookEvent.allowedTags.meta = true;
-            }
-        });
+        onLoad() {
+            if (packagePath && packagePath.length > 0) EBUtils.getPackageInfo(packagePath, () => this.openPackageDialog());
+            else this.openPackageDialog();
+        };
     }
 
-})(Granite, Granite.$);
+})(Granite, Granite.$, EBUtils = Granite.EBUtils || {});
