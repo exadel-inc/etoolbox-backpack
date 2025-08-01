@@ -1,3 +1,4 @@
 #base=js
 
 download-action.js
+delete-action.js
