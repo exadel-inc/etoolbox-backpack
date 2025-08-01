@@ -60,11 +60,7 @@
             $document.off('backpack');
             $document.on('click.backpack', `.${COLLECTION_ITEM_CLASS}.result-row`, this.onPackageEntryClick.bind(this));
             $document.on('click.backpack', '.toggler', this.onTogglerClick);
-            $document.on('click.backpack', INCLUDE_CHILDREN_SEL, this.onChangePackageEntries.bind(this, 'add/children'));
-            $document.on('click.backpack', EXCLUDE_CHILDREN_SEL, this.onChangePackageEntries.bind(this, 'delete/children'));
-            $document.on('click.backpack', LIVE_COPIES_SEL, this.onChangePackageEntries.bind(this, 'add/liveCopies'));
-            $document.on('click.backpack', '.js-backpack-add-references-item', this.onChangePackageEntries.bind(this, 'add/'));
-            $document.on('click.backpack', DELETE_SEL, this.onChangePackageEntries.bind(this, 'delete'));
+            $document.on('click.backpack', `${INCLUDE_CHILDREN_SEL}, ${EXCLUDE_CHILDREN_SEL}, ${LIVE_COPIES_SEL}, ${DELETE_SEL}, .js-backpack-add-references-item`, this.onChangePackageEntries.bind(this));
             $document.on('click.backpack', '.js-backpack-download', () => window.location.href = packagePath);
             $document.on('click.backpack', '.js-backpack-test-build', this.onBuildPackage.bind(this, true, false));
             $document.on('click.backpack', REPLICATE_SEL, this.onReplicatePackage.bind(this));
@@ -132,8 +128,9 @@
         };
 
         // 'Add/Delete children', 'Add live copies', 'Add references', 'Delete item'
-         onChangePackageEntries(action, e) {
+         onChangePackageEntries(e) {
             if (!this.$selectionItems.length) return;
+            const action = e.target.closest('[data-path]').dataset.path;
             const payload = [];
             this.$selectionItems.each((i, item) => {
                 const $item = $(item);
@@ -141,7 +138,7 @@
                 if (action === 'delete') this.onDeleteEntry.call(this, $item, payload);
             });
             const referenceType = action === 'add' ? e.target.closest('[data-type]').getAttribute('data-type') || '' : '';
-            EBUtils.onProcessChangeRequest(action + referenceType, {packagePath, payload}, EBUtils.showSuccessMessage);
+            EBUtils.onProcessChangeRequest(action + (referenceType ? `/${referenceType}` : ''), {packagePath, payload}, EBUtils.showSuccessMessage);
          }
 
         onDeleteEntry($item, payload) {

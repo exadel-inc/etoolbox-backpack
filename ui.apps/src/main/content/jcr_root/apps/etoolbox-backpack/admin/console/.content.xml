@@ -69,7 +69,10 @@
                         target=".package-list"
                         icon="pages"
                         text="Include Children"
-                        variant="actionBar"/>
+                        variant="actionBar">
+                    <granite:data jcr:primaryType="nt:unstructured"
+                                  path="add/children"/>
+                </includeChildren>
                 <excludeChildren
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/collection/action"
@@ -79,7 +82,10 @@
                         target=".package-list"
                         icon="pagesExclude"
                         text="Exclude Children"
-                        variant="actionBar"/>
+                        variant="actionBar">
+                    <granite:data jcr:primaryType="nt:unstructured"
+                                  path="delete/children"/>
+                </excludeChildren>
                 <liveCopies
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/collection/action"
@@ -89,7 +95,10 @@
                         target=".package-list"
                         icon="multiple"
                         text="Add Live Copies"
-                        variant="actionBar"/>
+                        variant="actionBar">
+                    <granite:data jcr:primaryType="nt:unstructured"
+                                  path="add/liveCopies"/>
+                </liveCopies>
                 <references
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/pulldown"
@@ -105,7 +114,8 @@
                                 text="Pages">
                             <granite:data
                                     jcr:primaryType="nt:unstructured"
-                                    type="pages"/>
+                                    type="pages"
+                                    path="add"/>
                         </images>
                         <assets
                                 jcr:primaryType="nt:unstructured"
@@ -114,7 +124,8 @@
                                 text="Assets">
                             <granite:data
                                     jcr:primaryType="nt:unstructured"
-                                    type="assets"/>
+                                    type="assets"
+                                    path="add"/>
                         </assets>
                         <tags
                                 jcr:primaryType="nt:unstructured"
@@ -123,7 +134,8 @@
                                 text="Tags">
                             <granite:data
                                     jcr:primaryType="nt:unstructured"
-                                    type="tags"/>
+                                    type="tags"
+                                    path="add"/>
                         </tags>
                     </items>
                 </references>
@@ -136,7 +148,10 @@
                         target=".package-list"
                         icon="delete"
                         text="Delete item"
-                        variant="actionBar"/>
+                        variant="actionBar">
+                    <granite:data jcr:primaryType="nt:unstructured"
+                                  path="delete"/>
+                </delete>
             </primary>
             <secondary jcr:primaryType="nt:unstructured">
                 <download
