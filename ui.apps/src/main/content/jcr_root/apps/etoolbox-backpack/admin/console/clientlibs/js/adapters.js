@@ -49,9 +49,9 @@
 
     REGISTRY.register('foundation.adapters', {
         type: 'foundation-collection',
-        selector: '.foundation-collection.stub-collection',
+        selector: '.foundation-collection.js-backpack-package-list',
         adapter: function (el) {
-            const collection = $(el)
+            const collection = $(el);
 
             return {
                 append: function(items) {
@@ -72,10 +72,13 @@
     });
 
     FOUNDATION_REGISTRY.register('foundation.validation.validator', {
-        selector: `[data-validation='text-validation']`,
+        selector: `[data-validation='backpack-validation'], [data-backpack-regex]`,
         validate: function(el) {
-            if (!el.value || !el.value.trim()) {
-                return 'Please enter a value';
+            const regexValue= el.dataset.backpackRegex;
+            if ((!el.value || !el.value.trim()) && !regexValue) return 'Please enter a value';
+            if (regexValue) {
+                if (!el.value) return;
+                if(!el.value.match(new RegExp(regexValue))) return el.dataset.validationMessage || 'Invalid field value';
             }
         }
     });
