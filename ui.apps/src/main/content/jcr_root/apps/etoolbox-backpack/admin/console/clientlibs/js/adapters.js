@@ -72,14 +72,17 @@
     });
 
     FOUNDATION_REGISTRY.register('foundation.validation.validator', {
-        selector: `[data-validation='backpack-validation'], [data-backpack-regex]`,
+        selector: '[data-backpack-validation-not-blank]',
         validate: function(el) {
-            const regexValue= el.dataset.backpackRegex;
-            if ((!el.value || !el.value.trim()) && !regexValue) return 'Please enter a value';
-            if (regexValue) {
-                if (!el.value) return;
-                if(!el.value.match(new RegExp(regexValue))) return el.dataset.validationMessage || 'Invalid field value';
-            }
+            if (!el.value || !el.value.trim()) return 'Please enter a value';
+        }
+    });
+
+    FOUNDATION_REGISTRY.register('foundation.validation.validator', {
+        selector: `[data-backpack-regex]`,
+        validate: function(el) {
+            if (!el.value) return;
+            if(!el.value.match(new RegExp(el.dataset.backpackRegex))) return el.dataset.validationMessage || 'Invalid field value';
         }
     });
 

@@ -337,9 +337,11 @@
                                             sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
                                             name="payload"
                                             fieldLabel="Query (in JCR-SQL2 format)"
-                                            validation="backpack-validation"
                                             required="{Boolean}true"
-                                            rows="{Long}10"/>
+                                            rows="{Long}10">
+                                        <granite:data jcr:primaryType="nt:unstructured"
+                                                      backpack-validation-not-blank="{Boolean}true"/>
+                                    </payload>
                                     <path
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
@@ -393,9 +395,11 @@
                                             sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
                                             name="payload"
                                             fieldLabel="List"
-                                            validation="backpack-validation"
                                             required="{Boolean}true"
-                                            rows="{Long}10"/>
+                                            rows="{Long}10">
+                                        <granite:data jcr:primaryType="nt:unstructured"
+                                                      backpack-validation-not-blank="{Boolean}true"/>
+                                    </payload>
                                     <path
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
