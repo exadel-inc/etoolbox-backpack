@@ -1,0 +1,31 @@
+name: eslint
+
+on:
+    push:
+        branches: [ master, develop*, release* ]
+    pull_request:
+        branches: [ master, develop*, release* ]
+    workflow_dispatch:
+
+env:
+    node-version: 20.x
+
+jobs:
+    eslint:
+        runs-on: ubuntu-latest
+
+        steps:
+            -   uses: actions/checkout@v4
+            -   name: Use Node v${{ env.node-version }}
+                uses: actions/setup-node@v4
+                with:
+                    cache: 'npm'
+                    cache-dependency-path: 'ui.apps/package-lock.json'
+                    node-version: ${{ env.node-version }}
+
+            -   name: Install NPM Dependencies
+                run: npm ci
+                working-directory: ui.apps
+            -   name: Run Linting & Tests
+                run: npm run lint
+                working-directory: ui.apps
