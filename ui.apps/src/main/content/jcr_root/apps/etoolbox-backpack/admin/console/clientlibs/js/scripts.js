@@ -25,7 +25,7 @@
     // calls when dom is loaded
     $(() => {
         const backpack = new EBackpack();
-        backpack.$addReferences.attr(DISABLED_MARKER, true);
+        backpack.$addReferencesBtn.attr(DISABLED_MARKER, true);
         $('.build-options').toggleClass(DISABLED_MARKER, backpack.$collectionItems.length); // "Build and download" options
         $([INSTALL_SEL, REPLICATE_SEL].join(',')).attr(DISABLED_MARKER, backpack.$collectionItems.length ? null : true);
     });
@@ -44,7 +44,7 @@
         }
 
         // "Add References" button
-        get $addReferences() {
+        get $addReferencesBtn() {
             return $('.js-backpack-add-references');
         }
 
@@ -99,14 +99,14 @@
             this.$collectionItems.removeClass(`${SELECTIONS_ITEM_CLASS} ${LAST_SELECTED_CLASS}`);
             if (mustSelect) {
                 target.addClass(`${SELECTIONS_ITEM_CLASS} ${LAST_SELECTED_CLASS}`);
-                target.hasClass('primary') && this.$addReferences.removeAttr(DISABLED_MARKER);
+                target.hasClass('primary') && this.$addReferencesBtn.removeAttr(DISABLED_MARKER);
             }
         }
 
         // Make package entries selectable
         onPackageEntryClick(e) {
             const target = $(e.target.closest(`.${COLLECTION_ITEM_CLASS}`));
-            this.$addReferences.attr(DISABLED_MARKER, true);
+            this.$addReferencesBtn.attr(DISABLED_MARKER, true);
             (e.ctrlKey ? this.packageEntriesCtrlClick : e.shiftKey ? this.packageEntriesShiftClick : this.packageEntriesClick).call(this, target);
             e.stopPropagation();
 
@@ -116,7 +116,7 @@
             this.$selectionItems.each((index, item) => {
                 if (!$(item).is('.primary')) return;
                 $([EXCLUDE_CHILDREN_SEL, LIVE_COPIES_SEL, INCLUDE_CHILDREN_SEL].join(',')).removeAttr(DISABLED_MARKER);
-                this.$addReferences.removeAttr(DISABLED_MARKER);
+                this.$addReferencesBtn.removeAttr(DISABLED_MARKER);
             });
         };
 

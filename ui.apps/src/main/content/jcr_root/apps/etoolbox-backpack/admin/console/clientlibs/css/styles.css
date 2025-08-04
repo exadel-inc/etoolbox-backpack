@@ -142,7 +142,7 @@
     display: none;
 }
 
-#JsBackpackLogsDialog .coral3-Dialog-content {
+#jsBackpackLogsDialog .coral3-Dialog-content {
     width: 700px;
     height: 500px;
     overflow: scroll;
