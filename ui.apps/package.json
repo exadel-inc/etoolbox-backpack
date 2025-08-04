@@ -1,0 +1,22 @@
+{
+  "name": "etoolbox-backpack",
+  "description": "",
+  "type": "module",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "lint": "eslint **/*.js"
+  },
+  "devDependencies": {
+    "eslint": "^9.32.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/exadel-inc/etoolbox-backpack.git"
+  },
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/exadel-inc/etoolbox-backpack/issues"
+  },
+  "homepage": "https://github.com/exadel-inc/etoolbox-backpack#readme"
+}
