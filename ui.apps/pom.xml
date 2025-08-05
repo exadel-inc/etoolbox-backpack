@@ -3,17 +3,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <packaging>content-package</packaging>
-
     <parent>
         <groupId>com.exadel.etoolbox</groupId>
         <artifactId>etoolbox-backpack</artifactId>
-        <version>4.0.0</version>
+        <version>4.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>etoolbox-backpack.content</artifactId>
-
-    <name>EToolbox BackPack - UI</name>
+    <!-- ====================================================================== -->
+    <!-- P R O J E C T  D E S C R I P T I O N                                   -->
+    <!-- ====================================================================== -->
+    <artifactId>etoolbox-backpack.ui.apps</artifactId>
+    <packaging>content-package</packaging>
+    <name>EToolbox BackPack - UI apps</name>
     <description>Contains static assets and webpage-rendering logic required to facilitate EToolbox BackPack browser
         functionality
     </description>
@@ -44,16 +45,32 @@
         </resources>
         <plugins>
             <plugin>
+                <groupId>org.apache.jackrabbit</groupId>
+                <artifactId>filevault-package-maven-plugin</artifactId>
+                <configuration>
+                    <properties>
+                        <cloudManagerTarget>none</cloudManagerTarget>
+                    </properties>
+                    <group>com.exadel.etoolbox</group>
+                    <name>etoolbox-backpack.ui.apps</name>
+                    <packageType>application</packageType>
+                    <repositoryStructurePackages>
+                        <repositoryStructurePackage>
+                            <groupId>com.exadel.etoolbox</groupId>
+                            <artifactId>etoolbox-backpack.ui.apps.structure</artifactId>
+                        </repositoryStructurePackage>
+                    </repositoryStructurePackages>
+                    <dependencies>
+                    </dependencies>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>com.day.jcr.vault</groupId>
                 <artifactId>content-package-maven-plugin</artifactId>
+                <extensions>true</extensions>
                 <configuration>
-                    <embeddeds>
-                        <embedded>
-                            <groupId>com.exadel.etoolbox</groupId>
-                            <artifactId>etoolbox-backpack.core</artifactId>
-                            <target>/apps/etoolbox-backpack/install</target>
-                        </embedded>
-                    </embeddeds>
+                    <verbose>true</verbose>
+                    <failOnError>true</failOnError>
                 </configuration>
             </plugin>
         </plugins>
@@ -95,6 +112,13 @@
             <groupId>com.exadel.etoolbox</groupId>
             <artifactId>etoolbox-backpack.core</artifactId>
             <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.exadel.etoolbox</groupId>
+            <artifactId>etoolbox-backpack.ui.apps.structure</artifactId>
+            <version>${project.parent.version}</version>
+            <type>zip</type>
         </dependency>
     </dependencies>
 </project>
