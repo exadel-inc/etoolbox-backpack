@@ -69,8 +69,18 @@
             $document.on('click.backpack', '.js-backpack-build-download', this.onBuildPackage.bind(this, false, true));
             $document.on('click.backpack', INSTALL_SEL, this.onInstallPackage);
             $document.on('click.backpack', '.js-backpack-delete-package', this.onDeletePackage.bind(this));
-            $document.on('submit.backpack', '#jsBackpackInstallForm', this.onHandleInstallPackageForm);
+            $document.on('submit.backpack', '#jsBackpackInstallForm', this.onHandleInstallPackageForm.bind(this));
             $window.on('load.backpack', this.onLoad.bind(this));
+        }
+
+        async wrapUiAsyncRequest(callback) {
+            FOUNDATION_UI.wait();
+            return await callback()
+                .catch((error) => {
+                    console.log(error);
+                    return null;
+                })
+                .finally (() => FOUNDATION_UI.clearWait());
         }
 
         packageEntriesCtrlClick(target) {
@@ -128,7 +138,7 @@
         };
 
         // 'Add/Delete children', 'Add live copies', 'Add references', 'Delete item'
-         onChangePackageEntries(e) {
+         async onChangePackageEntries(e) {
             if (!this.$selectionItems.length) return;
             const action = e.target.closest('[data-path]').dataset.path;
             const payload = [];
@@ -138,7 +148,13 @@
                 if (action === 'delete') this.onDeleteEntry.call(this, $item, payload);
             });
             const referenceType = action === 'add' ? e.target.closest('[data-type]').getAttribute('data-type') || '' : '';
-            EBUtils.onProcessChangeRequest(action + (referenceType ? `/${referenceType}` : ''), {packagePath, payload}, EBUtils.showSuccessMessage);
+            const callback = async () => await EBUtils.onProcessChangeRequest(action + (referenceType ? `/${referenceType}` : ''), {packagePath, payload});
+            try {
+                await this.wrapUiAsyncRequest(callback);
+                await EBUtils.showSuccessMessage();
+            } catch (error) {
+                console.log('Error during package entry change:', error);
+            }
          }
 
         onDeleteEntry($item, payload) {
@@ -156,25 +172,37 @@
             setTimeout(() => $(dialog.content).children('div').last()[0].scrollIntoView(false));
         }
 
-        onBuildPackage(isTest, isDownload) {
-            const callback = (data) => {
-                if (!(data && data.log)) return;
+        async onBuildPackage(isTest, isDownload) {
+            const callback = async () => {
+                const data = await EBUtils.buildRequest(isTest, this.referencedResources);
+                if (!data.log) throw new Error('No log data received during package build');
                 if (!isTest) {
                     const dialog = EBUtils.openLogsDialog(data.log, 'Build', isDownload ? 'Download' : 'Close');
                     isDownload && dialog.on('coral-overlay:beforeclose', () => window.location.href = packagePath);
-                    EBUtils.updateLog(data.packageStatus, data.log.length, dialog);
+                    await EBUtils.updateLog(data.packageStatus, data.log.length, dialog);
                 } else {
                     this.onHandleData(data, 'Test Build');
                 }
             }
-            EBUtils.buildRequest(isTest, callback, this.referencedResources)
+
+            try {
+                await this.wrapUiAsyncRequest(callback);
+            } catch (error) {
+                console.error('Error during package build:', error);
+            }
         }
 
-        onReplicatePackage() {
+        async onReplicatePackage() {
+            const replicateHandler = async () => {
+                const data = await this.wrapUiAsyncRequest(() => EBUtils.replicateRequest());
+                if (!data.log) throw new Error('No log data received during package replication');
+                this.onHandleData(data, 'Replication');
+
+            }
             const replicateBtn = {
                 text: 'Replicate',
                 primary: true,
-                handler: () => EBUtils.replicateRequest((data) => data.log && this.onHandleData(data, 'Replication'))
+                handler: replicateHandler
             }
             FOUNDATION_UI.prompt('Please confirm', 'Replicate this package?', 'notice', [{text: CANCEL_TITLE}, replicateBtn]);
         }
@@ -198,14 +226,20 @@
             FOUNDATION_UI.prompt(DELETE_TITLE, message.html(), 'notice', [{text: CANCEL_TITLE}, deleteBtn]);
         };
 
-        onHandleInstallPackageForm(e) {
+        async onHandleInstallPackageForm(e) {
             e.preventDefault();
-            const callback = (data) => {
-                if (!data || !data.log) return;
+            const callback = async () => {
+                const data = await EBUtils.onProcessChangeRequest('package/install', $(e.target.closest('form')).serialize());
+                if (!data.log) throw new Error('No log data received during package installation');
                 const dialog = EBUtils.openLogsDialog(data.log, 'Install', 'Close');
-                EBUtils.updateLog(data.packageStatus, data.log.length, dialog);
+                await EBUtils.updateLog(data.packageStatus, data.log.length, dialog);
             }
-            EBUtils.onProcessChangeRequest('/package/install', $(this).closest('form').serialize(), callback);
+
+            try {
+                await this.wrapUiAsyncRequest(callback);
+            } catch (error) {
+                console.error('Error during package installation:', error);
+            }
         }
 
         openPackageDialog() {
@@ -213,8 +247,11 @@
         }
 
         onLoad() {
-            if (packagePath && packagePath.length > 0) EBUtils.getPackageInfo(packagePath, () => this.openPackageDialog());
-            else this.openPackageDialog();
+            if (packagePath && packagePath.length > 0) {
+                EBUtils.getPackageInfo(packagePath).catch(() => this.openPackageDialog());
+            } else {
+                this.openPackageDialog();
+            }
         };
     }
 

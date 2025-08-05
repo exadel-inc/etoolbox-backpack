@@ -3,10 +3,9 @@
 
   const packagePath = new URL(window.location.href).searchParams.get('packagePath') || ''
   const BACKPACK_PATH = '/tools/etoolbox/backpack.html';
-  const FOUNDATION_UI = $(window).adaptTo('foundation-ui');
 
   class EBUtils {
-    static buildRequest(testBuild, callback, referencedResources) {
+    static buildRequest(testBuild, referencedResources) {
       const options = {
         type: 'POST',
         url: '/services/backpack/package/build',
@@ -18,23 +17,19 @@
           referencedResources: JSON.stringify(referencedResources)
         }
       };
-      return this._ajaxPost(options, callback);
+      return this._ajaxPost(options);
     }
 
-    static onProcessChangeRequest(action, data, success) {
+    static onProcessChangeRequest(action, data) {
       const options = {type: 'POST', url: `/services/backpack/${action}`, data};
-      return this._ajaxPost(options, success);
+      return this._ajaxPost(options);
     }
 
-    static async _ajaxPost(options, success) {
+    static async _ajaxPost(options) {
       try {
-        FOUNDATION_UI.wait();
-        const res  = await $.ajax(options);
-        res && success(res);
+        return await $.ajax(options);
       } catch (e) {
         console.log(e);
-      } finally {
-        FOUNDATION_UI.clearWait();
       }
     }
 
@@ -50,18 +45,14 @@
       }, 2000);
     }
 
-    static async getPackageInfo(packagePath, errorFunction) {
-      try {
-        await $.ajax({
-          url: '/services/backpack/package',
-          data: {packagePath}
-        });
-      } catch {
-        errorFunction();
-      }
+    static async getPackageInfo(packagePath) {
+       await $.ajax({
+        url: '/services/backpack/package',
+        data: {packagePath}
+      });
     }
 
-    static replicateRequest(callback) {
+    static replicateRequest() {
       const options = {
         url: '/services/backpack/replicatePackage',
         type: 'POST',
@@ -70,7 +61,7 @@
         data: {packagePath}
       }
 
-      return this._ajaxPost(options, callback);
+      return this._ajaxPost(options);
     }
 
     static async updateLog(packageStatus, logIndex, dialog) {
@@ -78,8 +69,7 @@
         if (packageStatus !== 'BUILD_IN_PROGRESS' && packageStatus !== 'INSTALL_IN_PROGRESS') return;
         const result = await $.ajax({
           url: '/services/backpack/package/build',
-          data: {packagePath, latestLogIndex: logIndex},
-          timeout: 1000,
+          data: {packagePath, latestLogIndex: logIndex}
         });
 
         if (result.log && result.log.length) {
@@ -90,7 +80,7 @@
           $(dialog.content).children('div').last()[0].scrollIntoView(false);
         }
 
-        EBUtils.updateLog(result.packageStatus, logIndex, dialog);
+        await EBUtils.updateLog(result.packageStatus, logIndex, dialog);
       } catch (e) {
         console.log(e);
       }
@@ -107,8 +97,8 @@
       try {
         await $.post(Granite.HTTP.externalize('/bin/wcmcommand'), data);
         EBUtils._showAlert('Package deleted', 'Delete', 'warning', () => window.location.replace(BACKPACK_PATH));
-      } catch (e) {
-        console.log(e);
+      } catch (error) {
+        console.log('Error while deleting package:', error);
       }
     }
 
@@ -119,7 +109,7 @@
             primary: true
           }];
 
-      FOUNDATION_UI.prompt(title || 'Error', message || 'Unknown Error', type, options, callback);
+      $(window).adaptTo('foundation-ui').prompt(title || 'Error', message || 'Unknown Error', type, options, callback);
     }
 
     static bytesToSize(bytes) {

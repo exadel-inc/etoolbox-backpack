@@ -33,7 +33,7 @@
 
             function deleteAction(path) {
                 $.ajax({
-                    url: '/services/backpack/package?path=' + path,
+                    url: '/services/backpack/package?path=' + encodeURIComponent(path),
                     type: 'DELETE',
                     success: () => window.location.reload()
                 });
