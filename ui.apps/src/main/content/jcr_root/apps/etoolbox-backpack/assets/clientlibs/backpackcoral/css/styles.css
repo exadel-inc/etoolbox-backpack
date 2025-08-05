@@ -16,6 +16,7 @@ coral-icon:is([icon="backpack"], [icon="backpack-sites"]) {
 }
 
 coral-icon[icon="backpack"] {
+    transform: translateY(-0.75rem);
     height: 3rem;
     width: 3rem;
 }
