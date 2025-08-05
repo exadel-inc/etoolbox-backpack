@@ -12,36 +12,32 @@
  * limitations under the License.
  */
 
-(function(window) {
-    $(window).adaptTo("foundation-registry").register("foundation.collection.action.action", {
-        name: "backpack.delete",
+(function(Granite) {
+    $(window).adaptTo('foundation-registry').register('foundation.collection.action.action', {
+        name: 'backpack.delete',
         handler: function(name, el, config) {
+            let ui = $(window).adaptTo('foundation-ui');
+            let message = $('<div>');
 
-            let ui = $(window).adaptTo("foundation-ui");
-            let message = $("<div>");
+            const title = $('<p>').text(Granite.I18n.get('You are going to delete the following package:'));
+            const packageInfo = $('<p>').append($('<b>').text(config.data.packagePath));
+            message.append(title, packageInfo);
 
-            $("<p>").text(Granite.I18n.get("You are going to delete the following package:")).appendTo(message);
-            $("<p>").append($("<b>").text(config.data.packagePath)).appendTo(message);
-
-            ui.prompt(Granite.I18n.get("Delete"), message.html(), "notice", [{
-                text: Granite.I18n.get("Cancel")
-            }, {
-                text: Granite.I18n.get("Delete"),
+            const deleteBtn = {
+                text: Granite.I18n.get('Delete'),
                 warning: true,
-                handler: function () {
-                    deleteAction(config.data.packagePath);
-                }
-            }]);
+                handler: () => deleteAction(config.data.packagePath)
+            }
+
+            ui.prompt(Granite.I18n.get('Delete'), message.html(), 'notice', [{text: Granite.I18n.get('Cancel')}, deleteBtn]);
 
             function deleteAction(path) {
                 $.ajax({
-                    url: '/services/backpack/package?path=' + path,
+                    url: '/services/backpack/package?path=' + encodeURIComponent(path),
                     type: 'DELETE',
-                    success: function(result) {
-                        window.location.reload()
-                    }
+                    success: () => window.location.reload()
                 });
             }
         }
     });
-})(window);
+})(Granite);
