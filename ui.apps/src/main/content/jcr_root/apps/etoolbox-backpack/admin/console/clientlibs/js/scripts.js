@@ -59,11 +59,11 @@
             $document.on('click.backpack', '.toggler', this.onTogglerClick);
             $document.on('click.backpack', `${INCLUDE_CHILDREN_SEL}, ${EXCLUDE_CHILDREN_SEL}, ${LIVE_COPIES_SEL}, ${DELETE_SEL}, .js-backpack-add-references-item`, this.onPreparePackageEntriesChanges.bind(this));
             $document.on('click.backpack', '.js-backpack-download', () => window.location.href = packagePath);
-            $document.on('click.backpack', '.js-backpack-test-build', () => this.wrapUiAsyncRequest(this.onBuildPackage, this,true, false));
+            $document.on('click.backpack', '.js-backpack-test-build', () => this.wrapUiAsyncRequest(this.buildPackage, this,true, false));
             $document.on('click.backpack', REPLICATE_SEL, this.onHandleReplicatePackage.bind(this));
             $document.on('click.backpack', '.js-backpack-main-menu, .js-backpack-cancel-button', () => window.location.replace(BACKPACK_PATH));
-            $document.on('click.backpack', '.js-backpack-build', () => this.wrapUiAsyncRequest(this.onBuildPackage, this,false, false));
-            $document.on('click.backpack', '.js-backpack-build-download', () => this.wrapUiAsyncRequest(this.onBuildPackage, this, false, true));
+            $document.on('click.backpack', '.js-backpack-build', () => this.wrapUiAsyncRequest(this.buildPackage, this,false, false));
+            $document.on('click.backpack', '.js-backpack-build-download', () => this.wrapUiAsyncRequest(this.buildPackage, this, false, true));
             $document.on('click.backpack', INSTALL_SEL, this.onInstallPackage);
             $document.on('click.backpack', '.js-backpack-delete-package', this.onDeletePackage.bind(this));
             $document.on('submit.backpack', '#jsBackpackInstallForm', this.onHandleInstallPackageForm.bind(this));
@@ -164,18 +164,6 @@
             setTimeout(() => $(dialog.content).children('div').last()[0].scrollIntoView(false));
         }
 
-        async onBuildPackage(isTest, isDownload) {
-            const data = await EBUtils.buildRequest(isTest, this.referencedResources);
-            if (!data.log) throw new Error('No log data received during package build');
-            if (!isTest) {
-                const dialog = EBUtils.openLogsDialog(data.log, 'Build', isDownload ? 'Download' : 'Close');
-                isDownload && dialog.on('coral-overlay:beforeclose', () => window.location.href = packagePath);
-                await EBUtils.updateLog(data.packageStatus, data.log.length, dialog);
-            } else {
-                this.onHandleData(data, 'Test Build');
-            }
-        }
-
         onHandleReplicatePackage() {
             const replicateBtn = {
                 text: 'Replicate',
@@ -186,9 +174,8 @@
         }
 
         onReplicatePackage() {
-            const data = this.wrapUiAsyncRequest(EBUtils.replicateRequest, EBUtils);
-            if (!data.log) throw new Error('No log data received during package replication');
-            this.onHandleData(data, 'Replication');
+            this.wrapUiAsyncRequest(EBUtils.replicateRequest, EBUtils)
+                .then((data) => data && this.onHandleData(data, 'Replication'));
         }
 
         onInstallPackage() {
@@ -213,27 +200,35 @@
         onHandleInstallPackageForm(e) {
             e.preventDefault();
             const $form = $(e.target.closest('form'));
-            this.wrapUiAsyncRequest(this.onSubmitInstallPackageForm, this, $form);
+            this.wrapUiAsyncRequest(this.submitInstallPackageForm, this, $form);
         }
 
-        async onSubmitInstallPackageForm($form) {
+        onLoad() {
+            if (packagePath && packagePath.length > 0) {
+                EBUtils.getPackageInfo(packagePath).catch(() => $('#editDialogButton').trigger('click'));
+            } else {
+                $('#editDialogButton').trigger('click');
+            }
+        };
+
+        async buildPackage(isTest, isDownload) {
+            const data = await EBUtils.buildRequest(isTest, this.referencedResources);
+            if (!data.log) throw new Error('No log data received during package build');
+            if (!isTest) {
+                const dialog = EBUtils.openLogsDialog(data.log, 'Build', isDownload ? 'Download' : 'Close');
+                isDownload && dialog.on('coral-overlay:beforeclose', () => window.location.href = packagePath);
+                await EBUtils.updateLog(data.packageStatus, data.log.length, dialog);
+            } else {
+                this.onHandleData(data, 'Test Build');
+            }
+        }
+
+        async submitInstallPackageForm($form) {
             const data = await EBUtils.onProcessChangeRequest('package/install', $form.serialize());
             if (!data.log) throw new Error('No log data received during package installation');
             const dialog = EBUtils.openLogsDialog(data.log, 'Install', 'Close');
             await EBUtils.updateLog(data.packageStatus, data.log.length, dialog);
         }
-
-        openPackageDialog() {
-            $('#editDialogButton').trigger('click');
-        }
-
-        onLoad() {
-            if (packagePath && packagePath.length > 0) {
-                EBUtils.getPackageInfo(packagePath).catch(() => this.openPackageDialog());
-            } else {
-                this.openPackageDialog();
-            }
-        };
     }
 
 })(Granite, Granite.$, EBUtils = Granite.EBUtils || {});
