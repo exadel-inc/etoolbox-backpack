@@ -23,10 +23,10 @@ $(function () {
 
     $(window).adaptTo('foundation-registry').register('foundation.form.response.ui.success', {
         name: 'backpack.prompt.open',
-        handler: function (form, config, data, textStatus, xhr) {
+        handler: function (form, config, data) {
             function errorPopup(ui, dataJson) {
-                $(window).adaptTo('foundation-ui').prompt(Granite.I18n.get('Error'), dataJson.message, 'error', [{
-                    text: Granite.I18n.get('Cancel'),
+                $(window).adaptTo('foundation-ui').prompt('Error', dataJson.message, 'error', [{
+                    text: 'Cancel',
                     handler: function () {
                         open(URITemplate.expand(config.redirect, {}));
                     }
@@ -35,12 +35,12 @@ $(function () {
 
             function successPopup(ui, dataJson) {
                 ui.prompt(config.title, config.message, 'success', [{
-                    text: Granite.I18n.get('Done'),
+                    text: 'Done',
                     handler: function () {
                         open(URITemplate.expand(config.redirect, dataJson));
                     }
                 }, {
-                    text: Granite.I18n.get('Open'),
+                    text: 'Open',
                     primary: true,
                     handler: function () {
                         open(URITemplate.expand(config.open, dataJson), true);

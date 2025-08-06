@@ -1,9 +1,6 @@
 (function (Granite, $, EBUtils) {
     'use strict';
 
-    const DELETE_TITLE = Granite.I18n.get('Delete');
-    const CANCEL_TITLE = Granite.I18n.get('Cancel');
-
     const $window = $(window);
     const $document = $(document);
     const FOUNDATION_UI = $window.adaptTo('foundation-ui');
@@ -204,7 +201,7 @@
                 primary: true,
                 handler: replicateHandler
             }
-            FOUNDATION_UI.prompt('Please confirm', 'Replicate this package?', 'notice', [{text: CANCEL_TITLE}, replicateBtn]);
+            FOUNDATION_UI.prompt('Please confirm', 'Replicate this package?', 'notice', [{text: 'Cancel'}, replicateBtn]);
         }
 
         onInstallPackage() {
@@ -216,14 +213,14 @@
             if (!packagePath) return;
             const packageName = packagePath.split('/').pop();
             const message = $(document.createElement('div'));
-            $(document.createElement('p')).text(Granite.I18n.get('You are going to delete the following package:')).appendTo(message);
+            $(document.createElement('p')).text('You are going to delete the following package:').appendTo(message);
             $(document.createElement('p')).html($(document.createElement('b'))).text(packageName).appendTo(message);
             const deleteBtn = {
-                text: DELETE_TITLE,
+                text: 'Delete',
                 warning: true,
                 handler: () => EBUtils.deleteRequest()
             }
-            FOUNDATION_UI.prompt(DELETE_TITLE, message.html(), 'notice', [{text: CANCEL_TITLE}, deleteBtn]);
+            FOUNDATION_UI.prompt('Delete', message.html(), 'notice', [{text: 'Cancel'}, deleteBtn]);
         };
 
         async onHandleInstallPackageForm(e) {

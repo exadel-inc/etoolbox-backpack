@@ -25,7 +25,6 @@
     FOUNDATION_REGISTRY.register('foundation.form.response.ui.error', {
         name: 'errorResponseCreated',
         handler: function (form, data, xhr) {
-            const title = Granite.I18n.get('Error');
             let message = '';
             if (xhr.responseJSON) {
                 message = xhr.responseJSON.log;
@@ -41,7 +40,7 @@
             }
 
             const ui = $(window).adaptTo('foundation-ui');
-            ui.alert(title, message, 'error');
+            ui.alert('Error', message, 'error');
         }
     });
 

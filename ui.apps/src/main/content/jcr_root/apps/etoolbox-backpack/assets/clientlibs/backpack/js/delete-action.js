@@ -12,24 +12,24 @@
  * limitations under the License.
  */
 
-(function(Granite) {
+(function() {
     $(window).adaptTo('foundation-registry').register('foundation.collection.action.action', {
         name: 'backpack.delete',
         handler: function(name, el, config) {
             let ui = $(window).adaptTo('foundation-ui');
             let message = $('<div>');
 
-            const title = $('<p>').text(Granite.I18n.get('You are going to delete the following package:'));
+            const title = $('<p>').text('You are going to delete the following package:');
             const packageInfo = $('<p>').append($('<b>').text(config.data.packagePath));
             message.append(title, packageInfo);
 
             const deleteBtn = {
-                text: Granite.I18n.get('Delete'),
+                text: 'Delete',
                 warning: true,
                 handler: () => deleteAction(config.data.packagePath)
             }
 
-            ui.prompt(Granite.I18n.get('Delete'), message.html(), 'notice', [{text: Granite.I18n.get('Cancel')}, deleteBtn]);
+            ui.prompt('Delete', message.html(), 'notice', [{text: 'Cancel'}, deleteBtn]);
 
             function deleteAction(path) {
                 $.ajax({
@@ -40,4 +40,4 @@
             }
         }
     });
-})(Granite);
+})();
