@@ -170,3 +170,11 @@ a.disabled {
     pointer-events: none;
     cursor: default;
 }
+
+._coral-Button {
+    max-height: 42px;
+
+    &.js-backpack-live-copies {
+        min-width: 105px;
+    }
+}
