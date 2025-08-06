@@ -57,26 +57,23 @@
             $document.off('backpack');
             $document.on('click.backpack', `.${COLLECTION_ITEM_CLASS}.result-row`, this.onPackageEntryClick.bind(this));
             $document.on('click.backpack', '.toggler', this.onTogglerClick);
-            $document.on('click.backpack', `${INCLUDE_CHILDREN_SEL}, ${EXCLUDE_CHILDREN_SEL}, ${LIVE_COPIES_SEL}, ${DELETE_SEL}, .js-backpack-add-references-item`, this.onChangePackageEntries.bind(this));
+            $document.on('click.backpack', `${INCLUDE_CHILDREN_SEL}, ${EXCLUDE_CHILDREN_SEL}, ${LIVE_COPIES_SEL}, ${DELETE_SEL}, .js-backpack-add-references-item`, this.onPreparePackageEntriesChanges.bind(this));
             $document.on('click.backpack', '.js-backpack-download', () => window.location.href = packagePath);
-            $document.on('click.backpack', '.js-backpack-test-build', this.onBuildPackage.bind(this, true, false));
-            $document.on('click.backpack', REPLICATE_SEL, this.onReplicatePackage.bind(this));
-            $document.on('click.backpack', '.js-backpack-main-menu, .jsBackpackCancelButton', () => window.location.replace(BACKPACK_PATH));
-            $document.on('click.backpack', '.js-backpack-build', this.onBuildPackage.bind(this, false, false));
-            $document.on('click.backpack', '.js-backpack-build-download', this.onBuildPackage.bind(this, false, true));
+            $document.on('click.backpack', '.js-backpack-test-build', () => this.wrapUiAsyncRequest(this.onBuildPackage, this,true, false));
+            $document.on('click.backpack', REPLICATE_SEL, this.onHandleReplicatePackage.bind(this));
+            $document.on('click.backpack', '.js-backpack-main-menu, .js-backpack-cancel-button', () => window.location.replace(BACKPACK_PATH));
+            $document.on('click.backpack', '.js-backpack-build', () => this.wrapUiAsyncRequest(this.onBuildPackage, this,false, false));
+            $document.on('click.backpack', '.js-backpack-build-download', () => this.wrapUiAsyncRequest(this.onBuildPackage, this, false, true));
             $document.on('click.backpack', INSTALL_SEL, this.onInstallPackage);
             $document.on('click.backpack', '.js-backpack-delete-package', this.onDeletePackage.bind(this));
             $document.on('submit.backpack', '#jsBackpackInstallForm', this.onHandleInstallPackageForm.bind(this));
             $window.on('load.backpack', this.onLoad.bind(this));
         }
 
-        async wrapUiAsyncRequest(callback) {
+        wrapUiAsyncRequest(callback, context, ...args) {
             FOUNDATION_UI.wait();
-            return await callback()
-                .catch((error) => {
-                    console.log(error);
-                    return null;
-                })
+            return callback.call(context, ...args)
+                .catch((error) => console.log(error))
                 .finally (() => FOUNDATION_UI.clearWait());
         }
 
@@ -134,7 +131,7 @@
         };
 
         // 'Add/Delete children', 'Add live copies', 'Add references', 'Delete item'
-         async onChangePackageEntries(e) {
+         onPreparePackageEntriesChanges(e) {
             if (!this.$selectionItems.length) return;
             const action = e.target.closest('[data-path]').dataset.path;
             const payload = [];
@@ -144,13 +141,12 @@
                 if (action === 'delete') this.onDeleteEntry.call(this, $item, payload);
             });
             const referenceType = action === 'add' ? e.target.closest('[data-type]').getAttribute('data-type') || '' : '';
-            const callback = async () => await EBUtils.onProcessChangeRequest(action + (referenceType ? `/${referenceType}` : ''), {packagePath, payload});
-            try {
-                await this.wrapUiAsyncRequest(callback);
-                await EBUtils.showSuccessMessage();
-            } catch (error) {
-                console.log('Error during package entry change:', error);
-            }
+            this.onChangePackageEntries(action, referenceType, payload, packagePath);
+         }
+
+         onChangePackageEntries(action, referenceType, payload, packagePath) {
+             this.wrapUiAsyncRequest(EBUtils.onProcessChangeRequest, EBUtils,action + (referenceType ? `/${referenceType}` : ''), {packagePath, payload});
+             EBUtils.showSuccessMessage();
          }
 
         onDeleteEntry($item, payload) {
@@ -169,38 +165,30 @@
         }
 
         async onBuildPackage(isTest, isDownload) {
-            const callback = async () => {
-                const data = await EBUtils.buildRequest(isTest, this.referencedResources);
-                if (!data.log) throw new Error('No log data received during package build');
-                if (!isTest) {
-                    const dialog = EBUtils.openLogsDialog(data.log, 'Build', isDownload ? 'Download' : 'Close');
-                    isDownload && dialog.on('coral-overlay:beforeclose', () => window.location.href = packagePath);
-                    await EBUtils.updateLog(data.packageStatus, data.log.length, dialog);
-                } else {
-                    this.onHandleData(data, 'Test Build');
-                }
-            }
-
-            try {
-                await this.wrapUiAsyncRequest(callback);
-            } catch (error) {
-                console.error('Error during package build:', error);
+            const data = await EBUtils.buildRequest(isTest, this.referencedResources);
+            if (!data.log) throw new Error('No log data received during package build');
+            if (!isTest) {
+                const dialog = EBUtils.openLogsDialog(data.log, 'Build', isDownload ? 'Download' : 'Close');
+                isDownload && dialog.on('coral-overlay:beforeclose', () => window.location.href = packagePath);
+                await EBUtils.updateLog(data.packageStatus, data.log.length, dialog);
+            } else {
+                this.onHandleData(data, 'Test Build');
             }
         }
 
-        async onReplicatePackage() {
-            const replicateHandler = async () => {
-                const data = await this.wrapUiAsyncRequest(() => EBUtils.replicateRequest());
-                if (!data.log) throw new Error('No log data received during package replication');
-                this.onHandleData(data, 'Replication');
-
-            }
+        onHandleReplicatePackage() {
             const replicateBtn = {
                 text: 'Replicate',
                 primary: true,
-                handler: replicateHandler
+                handler: this.onReplicatePackage.bind(this)
             }
             FOUNDATION_UI.prompt('Please confirm', 'Replicate this package?', 'notice', [{text: 'Cancel'}, replicateBtn]);
+        }
+
+        onReplicatePackage() {
+            const data = this.wrapUiAsyncRequest(EBUtils.replicateRequest, EBUtils);
+            if (!data.log) throw new Error('No log data received during package replication');
+            this.onHandleData(data, 'Replication');
         }
 
         onInstallPackage() {
@@ -222,20 +210,17 @@
             FOUNDATION_UI.prompt('Delete', message.html(), 'notice', [{text: 'Cancel'}, deleteBtn]);
         };
 
-        async onHandleInstallPackageForm(e) {
+        onHandleInstallPackageForm(e) {
             e.preventDefault();
-            const callback = async () => {
-                const data = await EBUtils.onProcessChangeRequest('package/install', $(e.target.closest('form')).serialize());
-                if (!data.log) throw new Error('No log data received during package installation');
-                const dialog = EBUtils.openLogsDialog(data.log, 'Install', 'Close');
-                await EBUtils.updateLog(data.packageStatus, data.log.length, dialog);
-            }
+            const $form = $(e.target.closest('form'));
+            this.wrapUiAsyncRequest(this.onSubmitInstallPackageForm, this, $form);
+        }
 
-            try {
-                await this.wrapUiAsyncRequest(callback);
-            } catch (error) {
-                console.error('Error during package installation:', error);
-            }
+        async onSubmitInstallPackageForm($form) {
+            const data = await EBUtils.onProcessChangeRequest('package/install', $form.serialize());
+            if (!data.log) throw new Error('No log data received during package installation');
+            const dialog = EBUtils.openLogsDialog(data.log, 'Install', 'Close');
+            await EBUtils.updateLog(data.packageStatus, data.log.length, dialog);
         }
 
         openPackageDialog() {
