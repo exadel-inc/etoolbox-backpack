@@ -8,7 +8,9 @@
     "lint": "eslint **/*.js"
   },
   "devDependencies": {
-    "eslint": "^9.32.0"
+    "eslint": "^9.32.0",
+    "globals": "^16.2.0",
+    "neostandard": "^0.12.1"
   },
   "repository": {
     "type": "git",
