@@ -142,7 +142,7 @@
     display: none;
 }
 
-#jsBackpackLogsDialog .coral3-Dialog-content {
+#js-backpack-logs-dialog .coral3-Dialog-content {
     width: 700px;
     height: 500px;
     overflow: scroll;
@@ -151,7 +151,7 @@
     overflow-y: auto;
 }
 
-#installSubmitBtn {
+#install-submit-btn {
     margin-top: 0;
 }
 

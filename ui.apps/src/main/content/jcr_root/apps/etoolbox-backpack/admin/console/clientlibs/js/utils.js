@@ -121,7 +121,7 @@
 
     static openLogsDialog(init, title, submitText) {
       const dialog = new Coral.Dialog();
-      dialog.id = 'jsBackpackLogsDialog';
+      dialog.id = 'js-backpack-logs-dialog';
       dialog.header.innerHTML = `${title} Logs`;
       dialog.footer.innerHTML = `<button is="coral-button" variant="primary" coral-close>${submitText}</button>`;
 

@@ -120,11 +120,10 @@
             $([LIVE_COPIES_SEL, DELETE_SEL, INCLUDE_CHILDREN_SEL, EXCLUDE_CHILDREN_SEL].join(',')).attr(DISABLED_MARKER, true);
             if (!this.$selectionItems.length) return;
             $(DELETE_SEL).removeAttr(DISABLED_MARKER);
-            this.$selectionItems.each((index, item) => {
-                if (!$(item).is('.primary')) return;
+            if (this.$selectionItems.is('.primary')) {
                 $([EXCLUDE_CHILDREN_SEL, LIVE_COPIES_SEL, INCLUDE_CHILDREN_SEL].join(',')).removeAttr(DISABLED_MARKER);
                 this.$addReferencesBtn.removeAttr(DISABLED_MARKER);
-            });
+            }
         };
 
         // Make top-level package entries collapsible
