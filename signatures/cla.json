@@ -71,6 +71,14 @@
       "created_at": "2025-07-21T13:45:26Z",
       "repoId": 264187691,
       "pullRequestNo": 149
+    },
+    {
+      "name": "SkoryUladzislau",
+      "id": 52072501,
+      "comment_id": 3160320855,
+      "created_at": "2025-08-06T14:04:37Z",
+      "repoId": 264187691,
+      "pullRequestNo": 153
     }
   ]
 }
