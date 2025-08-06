@@ -48,38 +48,20 @@
                     <filters>
                         <!-- /apps root -->
                         <filter><root>/apps</root></filter>
-                        <filter><root>/apps/wcm</root></filter>
-                        <filter><root>/apps/wcm/core</root></filter>
-                        <filter><root>/apps/wcm/core/content</root></filter>
-                        <filter><root>/apps/wcm/core/content/sites</root></filter>
-                        <filter><root>/apps/wcm/core/content/sites/jcr:content</root></filter>
-                        <filter><root>/apps/wcm/core/content/sites/jcr:content/actions</root></filter>
-                        <filter><root>/apps/wcm/core/content/sites/jcr:content/actions/selection</root></filter>
 
-                        <filter><root>/apps/etoolbox-backpack</root></filter>
-                        <filter><root>/apps/wcm/core/content/editor</root></filter>
-                        <filter><root>/apps/wcm/core/content/editor/jcr:content</root></filter>
-                        <filter><root>/apps/wcm/core/content/editor/jcr:content/content</root></filter>
-                        <filter><root>/apps/wcm/core/content/editor/jcr:content/content/items</root></filter>
-                        <filter><root>/apps/wcm/core/content/editor/jcr:content/content/items/content</root></filter>
-                        <filter><root>/apps/wcm/core/content/editor/jcr:content/content/items/content/header</root></filter>
-                        <filter><root>/apps/wcm/core/content/editor/jcr:content/content/items/content/header/items</root></filter>
-                        <filter><root>/apps/wcm/core/content/editor/jcr:content/content/items/content/header/items/headerbar</root></filter>
-                        <filter><root>/apps/wcm/core/content/editor/jcr:content/content/items/content/header/items/headerbar/items</root></filter>
-                        <filter><root>/apps/wcm/core/content/editor/jcr:content/content/items/content/header/items/headerbar/items/pageinfopopover</root></filter>
-                        <filter><root>/apps/wcm/core/content/editor/jcr:content/content/items/content/header/items/headerbar/items/pageinfopopover/items</root></filter>
-                        <filter><root>/apps/wcm/core/content/editor/jcr:content/content/items/content/header/items/headerbar/items/pageinfopopover/items/list</root></filter>
+                        <filter><root>/apps/wcm</root></filter>
+                        <filter><root>/apps/wcm/core/content/sites/jcr:content/actions/selection</root></filter>
                         <filter><root>/apps/wcm/core/content/editor/jcr:content/content/items/content/header/items/headerbar/items/pageinfopopover/items/list/items</root></filter>
 
-                        <!-- Common overlay roots -->
                         <filter><root>/apps/cq</root></filter>
-                        <filter><root>/apps/cq/core</root></filter>
-                        <filter><root>/apps/cq/core/content</root></filter>
-                        <filter><root>/apps/cq/core/content/nav</root></filter>
-                        <filter><root>/apps/cq/core/content/nav/tools</root></filter>
                         <filter><root>/apps/cq/core/content/nav/tools/etoolbox</root></filter>
-                        <filter><root>/apps/wcm</root></filter>
 
+                        <filter><root>/apps/etoolbox-backpack</root></filter>
+
+                        <filter><root>/apps/aembox-backpack</root></filter>
+                        <filter><root>/apps/cq/core/content/nav/tools/aembox</root></filter>
+                        <filter><root>/apps/cq/core/content/nav/tools/deployment</root></filter>
+                        <filter><root>/etc/packages</root></filter>
                     </filters>
                 </configuration>
             </plugin>
