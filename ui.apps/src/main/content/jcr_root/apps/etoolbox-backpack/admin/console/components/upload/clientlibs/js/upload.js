@@ -15,7 +15,7 @@
 $(function () {
     $('#indexTypeSelect').change(function () {
         $(this).closest('form').submit();
-    })
+    });
 });
 
 (function (window, $, URITemplate) {
@@ -49,8 +49,8 @@ $(function () {
                 }]);
             }
 
-            var ui = $(window).adaptTo('foundation-ui'),
-                dataJson = JSON.parse(data);
+            const ui = $(window).adaptTo('foundation-ui');
+            const dataJson = JSON.parse(data);
 
             if (dataJson && !!dataJson.statusCode) {
                 errorPopup(ui, dataJson);

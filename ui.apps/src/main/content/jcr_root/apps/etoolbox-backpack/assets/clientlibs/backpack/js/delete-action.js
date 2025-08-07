@@ -12,12 +12,12 @@
  * limitations under the License.
  */
 
-(function() {
+(function () {
     $(window).adaptTo('foundation-registry').register('foundation.collection.action.action', {
         name: 'backpack.delete',
-        handler: function(name, el, config) {
-            let ui = $(window).adaptTo('foundation-ui');
-            let message = $('<div>');
+        handler: function (name, el, config) {
+            const ui = $(window).adaptTo('foundation-ui');
+            const message = $('<div>');
 
             const title = $('<p>').text('You are going to delete the following package:');
             const packageInfo = $('<p>').append($('<b>').text(config.data.packagePath));
@@ -27,9 +27,9 @@
                 text: 'Delete',
                 warning: true,
                 handler: () => deleteAction(config.data.packagePath)
-            }
+            };
 
-            ui.prompt('Delete', message.html(), 'notice', [{text: 'Cancel'}, deleteBtn]);
+            ui.prompt('Delete', message.html(), 'notice', [{ text: 'Cancel' }, deleteBtn]);
 
             function deleteAction(path) {
                 $.ajax({

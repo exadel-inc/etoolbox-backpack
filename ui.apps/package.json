@@ -5,7 +5,8 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "lint": "eslint **/*.js"
+    "lint": "eslint **/*.js",
+    "lint:fix": "eslint **/*.js --fix"
   },
   "devDependencies": {
     "eslint": "^9.32.0",

@@ -45,7 +45,7 @@
             return $('.js-backpack-add-references');
         }
 
-        get referencedResources () {
+        get referencedResources() {
             const referencedResources = [];
             $('.reference').each(function () {
                 referencedResources.push(this.innerText);
@@ -59,10 +59,10 @@
             $document.on('click.backpack', '.toggler', this.onTogglerClick);
             $document.on('click.backpack', `${INCLUDE_CHILDREN_SEL}, ${EXCLUDE_CHILDREN_SEL}, ${LIVE_COPIES_SEL}, ${DELETE_SEL}, .js-backpack-add-references-item`, this.onPreparePackageEntriesChanges.bind(this));
             $document.on('click.backpack', '.js-backpack-download', () => window.location.href = packagePath);
-            $document.on('click.backpack', '.js-backpack-test-build', () => this.wrapUiAsyncRequest(this.buildPackage, this,true, false));
+            $document.on('click.backpack', '.js-backpack-test-build', () => this.wrapUiAsyncRequest(this.buildPackage, this, true, false));
             $document.on('click.backpack', REPLICATE_SEL, this.onHandleReplicatePackage.bind(this));
             $document.on('click.backpack', '.js-backpack-main-menu, .js-backpack-cancel-button', () => window.location.replace(BACKPACK_PATH));
-            $document.on('click.backpack', '.js-backpack-build', () => this.wrapUiAsyncRequest(this.buildPackage, this,false, false));
+            $document.on('click.backpack', '.js-backpack-build', () => this.wrapUiAsyncRequest(this.buildPackage, this, false, false));
             $document.on('click.backpack', '.js-backpack-build-download', () => this.wrapUiAsyncRequest(this.buildPackage, this, false, true));
             $document.on('click.backpack', INSTALL_SEL, this.onInstallPackage);
             $document.on('click.backpack', '.js-backpack-delete-package', this.onDeletePackage.bind(this));
@@ -74,7 +74,7 @@
             FOUNDATION_UI.wait();
             return callback.call(context, ...args)
                 .catch((error) => console.log(error))
-                .finally (() => FOUNDATION_UI.clearWait());
+                .finally(() => FOUNDATION_UI.clearWait());
         }
 
         packageEntriesCtrlClick(target) {
@@ -131,7 +131,7 @@
         };
 
         // 'Add/Delete children', 'Add live copies', 'Add references', 'Delete item'
-         onPreparePackageEntriesChanges(e) {
+        onPreparePackageEntriesChanges(e) {
             if (!this.$selectionItems.length) return;
             const action = e.target.closest('[data-path]').dataset.path;
             const payload = [];
@@ -142,24 +142,24 @@
             });
             const referenceType = action === 'add' ? e.target.closest('[data-type]').getAttribute('data-type') || '' : '';
             this.onChangePackageEntries(action, referenceType, payload, packagePath);
-         }
+        }
 
-         onChangePackageEntries(action, referenceType, payload, packagePath) {
-             this.wrapUiAsyncRequest(EBUtils.onProcessChangeRequest, EBUtils,action + (referenceType ? `/${referenceType}` : ''), {packagePath, payload});
-             EBUtils.showSuccessMessage();
-         }
+        onChangePackageEntries(action, referenceType, payload, packagePath) {
+            this.wrapUiAsyncRequest(EBUtils.onProcessChangeRequest, EBUtils, action + (referenceType ? `/${referenceType}` : ''), { packagePath, payload });
+            EBUtils.showSuccessMessage();
+        }
 
         onDeleteEntry($item, payload) {
-             if (!$item.hasClass('secondary')) {
-                 $item.find('.secondary').each((i, item) => payload.push('[' + $(item).attr(TITLE_ATTR) + ',' + $(item).attr('data-subsidiary-title') + ']'));
-             } else payload.push('[' + $item.attr(TITLE_ATTR) + ',' + $item.attr('data-subsidiary-title') + ']');
+            if (!$item.hasClass('secondary')) {
+                $item.find('.secondary').each((i, item) => payload.push('[' + $(item).attr(TITLE_ATTR) + ',' + $(item).attr('data-subsidiary-title') + ']'));
+            } else payload.push('[' + $item.attr(TITLE_ATTR) + ',' + $item.attr('data-subsidiary-title') + ']');
         };
 
         onHandleData(data, text) {
             const dialog = EBUtils.openLogsDialog(data.log, text, 'Close');
-            const assetText = data.dataSize === 0
-                ? 'There are no assets in the package'
-                : '<h4>Approximate size of the package: ' + EBUtils.bytesToSize(data.dataSize) + '</h4>';
+            const assetText = data.dataSize === 0 ?
+                'There are no assets in the package' :
+                '<h4>Approximate size of the package: ' + EBUtils.bytesToSize(data.dataSize) + '</h4>';
             $(dialog.content).append('<div>' + assetText + '</div>');
             setTimeout(() => $(dialog.content).children('div').last()[0].scrollIntoView(false));
         }
@@ -169,8 +169,8 @@
                 text: 'Replicate',
                 primary: true,
                 handler: this.onReplicatePackage.bind(this)
-            }
-            FOUNDATION_UI.prompt('Please confirm', 'Replicate this package?', 'notice', [{text: 'Cancel'}, replicateBtn]);
+            };
+            FOUNDATION_UI.prompt('Please confirm', 'Replicate this package?', 'notice', [{ text: 'Cancel' }, replicateBtn]);
         }
 
         onReplicatePackage() {
@@ -193,8 +193,8 @@
                 text: 'Delete',
                 warning: true,
                 handler: () => EBUtils.deleteRequest()
-            }
-            FOUNDATION_UI.prompt('Delete', message.html(), 'notice', [{text: 'Cancel'}, deleteBtn]);
+            };
+            FOUNDATION_UI.prompt('Delete', message.html(), 'notice', [{ text: 'Cancel' }, deleteBtn]);
         };
 
         onHandleInstallPackageForm(e) {
@@ -230,5 +230,4 @@
             await EBUtils.updateLog(data.packageStatus, data.log.length, dialog);
         }
     }
-
 })(Granite, Granite.$, EBUtils = Granite.EBUtils || {});

@@ -53,7 +53,7 @@
             const collection = $(el);
 
             return {
-                append: function(items) {
+                append: function (items) {
                     collection.append(items);
                     collection.trigger('foundation-contentloaded');
                 },
@@ -63,7 +63,7 @@
                 getPagination: () => { }, // No operation
 
                 reload: function () {
-                    collection.trigger('coral-collection:remove')
+                    collection.trigger('coral-collection:remove');
                     collection.trigger('foundation-collection-reload');
                 }
             };
@@ -72,25 +72,24 @@
 
     FOUNDATION_REGISTRY.register('foundation.validation.validator', {
         selector: '[data-backpack-validation-not-blank]',
-        validate: function(el) {
+        validate: function (el) {
             if (!el.value || !el.value.trim()) return 'Please enter a value';
         }
     });
 
     FOUNDATION_REGISTRY.register('foundation.validation.validator', {
-        selector: `[data-backpack-regex]`,
-        validate: function(el) {
+        selector: '[data-backpack-regex]',
+        validate: function (el) {
             if (!el.value) return;
-            if(!el.value.match(new RegExp(el.dataset.backpackRegex))) return el.dataset.validationMessage || 'Invalid field value';
+            if (!el.value.match(new RegExp(el.dataset.backpackRegex))) return el.dataset.validationMessage || 'Invalid field value';
         }
     });
 
     if (window.DOMPurify) {
-        window.DOMPurify.addHook('uponSanitizeElement', function (node, hookEvent ) {
+        window.DOMPurify.addHook('uponSanitizeElement', function (node, hookEvent) {
             if (hookEvent && hookEvent.tagName === 'meta' && node.classList.contains('backpack-meta')) {
                 hookEvent.allowedTags.meta = true;
             }
         });
     }
-
 })(Granite, Granite.$, EBUtils = Granite.EBUtils || {});
