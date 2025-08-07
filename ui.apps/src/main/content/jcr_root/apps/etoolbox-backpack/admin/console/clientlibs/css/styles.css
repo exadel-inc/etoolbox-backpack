@@ -173,8 +173,13 @@ a.disabled {
 
 ._coral-Button {
     max-height: 42px;
+    min-width: max-content;
 
     &.js-backpack-live-copies {
         min-width: 105px;
     }
+}
+
+.foundation-layout-panel:has(.js-backpack-package-list) {
+    min-width: max-content;
 }
