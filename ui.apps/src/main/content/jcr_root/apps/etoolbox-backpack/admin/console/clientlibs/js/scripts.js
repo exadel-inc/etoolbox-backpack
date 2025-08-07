@@ -58,10 +58,10 @@
             $document.on('click.backpack', `.${COLLECTION_ITEM_CLASS}.result-row`, this.onPackageEntryClick.bind(this));
             $document.on('click.backpack', '.toggler', this.onTogglerClick);
             $document.on('click.backpack', `${INCLUDE_CHILDREN_SEL}, ${EXCLUDE_CHILDREN_SEL}, ${LIVE_COPIES_SEL}, ${DELETE_SEL}, .js-backpack-add-references-item`, this.onPreparePackageEntriesChanges.bind(this));
-            $document.on('click.backpack', '.js-backpack-download', () => window.location.href = packagePath);
+            $document.on('click.backpack', '.js-backpack-download', this.onDownloadPackage);
             $document.on('click.backpack', '.js-backpack-test-build', () => this.wrapUiAsyncRequest(this.buildPackage, this, true, false));
             $document.on('click.backpack', REPLICATE_SEL, this.onHandleReplicatePackage.bind(this));
-            $document.on('click.backpack', '.js-backpack-main-menu, .js-backpack-cancel-button', () => window.location.replace(BACKPACK_PATH));
+            $document.on('click.backpack', '.js-backpack-main-menu, .js-backpack-cancel-button', this.onMainMenuNav);
             $document.on('click.backpack', '.js-backpack-build', () => this.wrapUiAsyncRequest(this.buildPackage, this, false, false));
             $document.on('click.backpack', '.js-backpack-build-download', () => this.wrapUiAsyncRequest(this.buildPackage, this, false, true));
             $document.on('click.backpack', INSTALL_SEL, this.onInstallPackage);
@@ -209,14 +209,22 @@
             } else {
                 $('#editDialogButton').trigger('click');
             }
-        };
+        }
+
+        onDownloadPackage() {
+            window.location.href = packagePath;
+        }
+
+        onMainMenuNav() {
+            window.location.replace(BACKPACK_PATH);
+        }
 
         async buildPackage(isTest, isDownload) {
             const data = await EBUtils.buildRequest(isTest, this.referencedResources);
             if (!data.log) throw new Error('No log data received during package build');
             if (!isTest) {
                 const dialog = EBUtils.openLogsDialog(data.log, 'Build', isDownload ? 'Download' : 'Close');
-                isDownload && dialog.on('coral-overlay:beforeclose', () => window.location.href = packagePath);
+                isDownload && dialog.on('coral-overlay:beforeclose', this.onDownloadPackage);
                 await EBUtils.updateLog(data.packageStatus, data.log.length, dialog);
             } else {
                 this.onHandleData(data, 'Test Build');
@@ -230,4 +238,4 @@
             await EBUtils.updateLog(data.packageStatus, data.log.length, dialog);
         }
     }
-})(Granite, Granite.$, EBUtils = Granite.EBUtils || {});
+})(Granite, Granite.$, Granite.EBUtils = Granite.EBUtils || {});

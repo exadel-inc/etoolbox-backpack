@@ -92,4 +92,4 @@
             }
         });
     }
-})(Granite, Granite.$, EBUtils = Granite.EBUtils || {});
+})(Granite, Granite.$, Granite.EBUtils = Granite.EBUtils || {});

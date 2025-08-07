@@ -25,6 +25,9 @@ export default [
         }
     },
     {
+        ignores: ['**/target/**', '**/node_modules/**']
+    },
+    {
         rules: {
             'no-new-func': 'off',
             'no-useless-call': 'off',
