@@ -1,11 +1,15 @@
 (function (Granite, $) {
     'use strict';
 
-    const packagePath = new URL(window.location.href).searchParams.get('packagePath') || '';
     const BACKPACK_PATH = '/tools/etoolbox/backpack.html';
 
     class EBUtils {
+        static get packagePath() {
+            return new URL(window.location.href).searchParams.get('packagePath') || '';
+        }
+
         static buildRequest(testBuild, referencedResources) {
+            const {packagePath} = this;
             const options = {
                 type: 'POST',
                 url: '/services/backpack/package/build',
@@ -53,6 +57,7 @@
         }
 
         static replicateRequest() {
+            const {packagePath} = this;
             const options = {
                 url: '/services/backpack/replicatePackage',
                 type: 'POST',
@@ -67,6 +72,7 @@
         static async updateLog(packageStatus, logIndex, dialog) {
             try {
                 if (packageStatus !== 'BUILD_IN_PROGRESS' && packageStatus !== 'INSTALL_IN_PROGRESS') return;
+                const {packagePath} = this;
                 const result = await $.ajax({
                     url: '/services/backpack/package/build',
                     data: { packagePath, latestLogIndex: logIndex }
@@ -90,7 +96,7 @@
             const data = {
                 _charset_: 'UTF-8',
                 cmd: 'deletePage',
-                path: packagePath,
+                path: this.packagePath,
                 force: true
             };
 
