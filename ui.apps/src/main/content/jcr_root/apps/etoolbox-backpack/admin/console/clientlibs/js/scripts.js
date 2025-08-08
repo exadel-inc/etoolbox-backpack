@@ -183,7 +183,7 @@
         };
 
         onDeletePackage() {
-            const {packagePath} = EBUtils;
+            const { packagePath } = EBUtils;
             if (!packagePath) return;
             const packageName = packagePath.split('/').pop();
             const message = $(document.createElement('div'));
@@ -204,7 +204,7 @@
         }
 
         onLoad() {
-            const {packagePath} = EBUtils;
+            const { packagePath } = EBUtils;
             if (packagePath && packagePath.length > 0) {
                 EBUtils.getPackageInfo(packagePath).catch(() => $('#editDialogButton').trigger('click'));
             } else {

@@ -1,7 +1,7 @@
 (function (Granite, $, EBUtils) {
     'use strict';
 
-    const {Registry} = Granite.UI.Foundation;
+    const { Registry } = Granite.UI.Foundation;
     const foundationRegistryAPI = $(window).adaptTo('foundation-registry');
 
     foundationRegistryAPI.register('foundation.form.response.ui.success', {
