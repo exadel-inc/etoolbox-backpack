@@ -3,7 +3,7 @@
 <coral-dialog id="installDialog" class="modal-form foundation-toggleable" closable="on" backdrop="static">
     <coral-dialog-header>Install package</coral-dialog-header>
     <coral-dialog-content>
-        <form action="/services/backpack/package/install" id="installForm" method="post"
+        <form action="/services/backpack/package/install" id="jsBackpackInstallForm" method="post"
               class="coral-Form coral-Form--vertical foundation-layout-util-maximized-container foundation-form">
             <div class="coral-FixedColumn">
                 <div class="coral-FixedColumn-column">
@@ -11,7 +11,7 @@
                     <input name="packagePath" value="${installPackageModel.packagePath}" type="hidden">
                     <input name="dependencyHandling" value="${installPackageModel.dependencyHandling}" type="hidden">
                     <coral-buttongroup name="button-group">
-                        <button type="submit" autocomplete="off" id="installSubmitBtn" is="coral-button" coral-close="" variant="primary">Install</button>
+                        <button type="submit" autocomplete="off" id="install-submit-btn" is="coral-button" coral-close="" variant="primary">Install</button>
                         <button is="coral-button" type="button" variant="secondary" coral-close="">Cancel</button>
                     </coral-buttongroup>
                 </div>

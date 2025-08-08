@@ -19,6 +19,7 @@
                 <menu
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/button"
+                        granite:class="js-backpack-main-menu"
                         granite:id="mainMenuAction"
                         icon="back"
                         variant="secondary"/>
@@ -62,37 +63,46 @@
                 <includeChildren
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/collection/action"
-                        granite:class="selection-action"
+                        granite:class="selection-action js-backpack-include-children"
                         granite:id="includeChildrenAction"
                         disabled="{Boolean}true"
                         target=".package-list"
                         icon="pages"
                         text="Include Children"
-                        variant="actionBar"/>
+                        variant="actionBar">
+                    <granite:data jcr:primaryType="nt:unstructured"
+                                  path="add/children"/>
+                </includeChildren>
                 <excludeChildren
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/collection/action"
-                        granite:class="selection-action"
+                        granite:class="selection-action js-backpack-exclude-children"
                         granite:id="excludeChildrenAction"
                         disabled="{Boolean}true"
                         target=".package-list"
                         icon="pagesExclude"
                         text="Exclude Children"
-                        variant="actionBar"/>
+                        variant="actionBar">
+                    <granite:data jcr:primaryType="nt:unstructured"
+                                  path="delete/children"/>
+                </excludeChildren>
                 <liveCopies
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/collection/action"
-                        granite:class="selection-action"
+                        granite:class="selection-action js-backpack-live-copies"
                         granite:id="liveCopiesAction"
                         disabled="{Boolean}true"
                         target=".package-list"
                         icon="multiple"
                         text="Add Live Copies"
-                        variant="actionBar"/>
+                        variant="actionBar">
+                    <granite:data jcr:primaryType="nt:unstructured"
+                                  path="add/liveCopies"/>
+                </liveCopies>
                 <references
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/pulldown"
-                        granite:class="selection-action selection-pulldown"
+                        granite:class="selection-action selection-pulldown js-backpack-add-references"
                         icon="gears"
                         text="Add References"
                         variant="actionBar">
@@ -100,48 +110,54 @@
                         <images
                                 jcr:primaryType="nt:unstructured"
                                 sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
-                                granite:class="add-references-action"
+                                granite:class="add-references-action js-backpack-add-references-item"
                                 text="Pages">
                             <granite:data
                                     jcr:primaryType="nt:unstructured"
-                                    type="pages"/>
+                                    type="pages"
+                                    path="add"/>
                         </images>
                         <assets
                                 jcr:primaryType="nt:unstructured"
                                 sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
-                                granite:class="add-references-action"
+                                granite:class="add-references-action js-backpack-add-references-item"
                                 text="Assets">
                             <granite:data
                                     jcr:primaryType="nt:unstructured"
-                                    type="assets"/>
+                                    type="assets"
+                                    path="add"/>
                         </assets>
                         <tags
                                 jcr:primaryType="nt:unstructured"
                                 sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
-                                granite:class="add-references-action"
+                                granite:class="add-references-action js-backpack-add-references-item"
                                 text="Tags">
                             <granite:data
                                     jcr:primaryType="nt:unstructured"
-                                    type="tags"/>
+                                    type="tags"
+                                    path="add"/>
                         </tags>
                     </items>
                 </references>
                 <delete
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/collection/action"
-                        granite:class="selection-action"
+                        granite:class="selection-action js-backpack-delete"
                         granite:id="deleteAction"
                         disabled="{Boolean}true"
                         target=".package-list"
                         icon="delete"
                         text="Delete item"
-                        variant="actionBar"/>
+                        variant="actionBar">
+                    <granite:data jcr:primaryType="nt:unstructured"
+                                  path="delete"/>
+                </delete>
             </primary>
             <secondary jcr:primaryType="nt:unstructured">
                 <download
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
-                        granite:class="split-start build-options disabled"
+                        granite:class="split-start build-options disabled js-backpack-build-download"
                         granite:id="buildAndDownloadAction"
                         text="Build &amp; Download"
                         variant="primary"/>
@@ -155,19 +171,19 @@
                         <onlyBuild
                                 jcr:primaryType="nt:unstructured"
                                 sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
-                                granite:class="build-options disabled"
+                                granite:class="build-options disabled js-backpack-build"
                                 granite:id="buildAction"
                                 text="Only build"/>
                         <test
                                 jcr:primaryType="nt:unstructured"
                                 sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
-                                granite:class="build-options disabled"
+                                granite:class="build-options disabled js-backpack-test-build"
                                 granite:id="testBuildAction"
                                 text="Test build"/>
                         <onlyDownload
                                 jcr:primaryType="nt:unstructured"
                                 sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
-                                granite:class="build-options disabled"
+                                granite:class="build-options disabled js-backpack-download"
                                 granite:id="downloadAction"
                                 text="Download (without building)"/>
                     </items>
@@ -175,12 +191,14 @@
                 <install
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/button"
+                        granite:class="js-backpack-install"
                         granite:id="installAction"
                         text="Install"
                         variant="secondary"/>
                 <replicate
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/button"
+                        granite:class="js-backpack-replicate"
                         granite:id="replicateAction"
                         text="Replicate"
                         variant="secondary"/>
@@ -199,6 +217,7 @@
                 <delete
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/button"
+                        granite:class="js-backpack-delete-package"
                         granite:id="deletePackageAction"
                         text="Delete"
                         variant="secondary"/>
@@ -212,7 +231,7 @@
                     <list
                             jcr:primaryType="nt:unstructured"
                             sling:resourceType="granite/ui/components/foundation/container"
-                            granite:class="package-list stub-collection"
+                            granite:class="package-list stub-collection js-backpack-package-list"
                             foundation-selections-mode="single">
                         <datasource
                                 jcr:primaryType="nt:unstructured"
@@ -318,9 +337,11 @@
                                             sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
                                             name="payload"
                                             fieldLabel="Query (in JCR-SQL2 format)"
-                                            validation="text-validation"
                                             required="{Boolean}true"
-                                            rows="{Long}10"/>
+                                            rows="{Long}10">
+                                        <granite:data jcr:primaryType="nt:unstructured"
+                                                      backpack-validation-not-blank="{Boolean}true"/>
+                                    </payload>
                                     <path
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
@@ -374,9 +395,11 @@
                                             sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
                                             name="payload"
                                             fieldLabel="List"
-                                            validation="text-validation"
                                             required="{Boolean}true"
-                                            rows="{Long}10"/>
+                                            rows="{Long}10">
+                                        <granite:data jcr:primaryType="nt:unstructured"
+                                                      backpack-validation-not-blank="{Boolean}true"/>
+                                    </payload>
                                     <path
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/form/hidden"

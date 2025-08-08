@@ -12,10 +12,10 @@
  * limitations under the License.
  */
 $(function () {
-    "use strict";
+    'use strict';
 
-    $(document).on("click", '.js-create-package-activator', function(event) {
-        var path = $('.js-create-package-activator').data('path');
+    $(document).on('click', '.js-create-package-activator', function (event) {
+        const path = $('.js-create-package-activator').data('path');
         window.location.replace('/apps/etoolbox-backpack/admin/console.html?item=' + path);
     });
 });

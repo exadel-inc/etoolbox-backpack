@@ -32,7 +32,7 @@
                         <div class="coral-Form-fieldwrapper">
                             <label class="coral-Form-fieldlabel">Thumbnail Path</label>
                             <foundation-autocomplete class="coral-Form-field"
-                                                     data-regex=".png$"
+                                                     data-backpack-regex=".png$"
                                                      data-foundation-validation
                                                      data-validation-message="Please choose a PNG image."
                                                      name="thumbnailPath"
@@ -52,7 +52,7 @@
                         <div>
                             <button type="submit" autocomplete="off" is="coral-button" variant="primary" trackingfeature="" trackingelement="save" tracking="ON">Save</button>
                             <button data-sly-test="${packageModel}" is="coral-button" type="button" variant="secondary" coral-close="">Cancel</button>
-                            <button data-sly-test="${!packageModel}" id="cancelButton" is="coral-button" type="button" variant="secondary">Cancel</button>
+                            <button data-sly-test="${!packageModel}" id="js-backpack-cancel-button" is="coral-button" type="button" variant="secondary">Cancel</button>
                         </div>
                     </div>
                 </div>
