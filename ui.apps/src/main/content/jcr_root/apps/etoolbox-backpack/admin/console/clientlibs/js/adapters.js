@@ -1,10 +1,10 @@
 (function (Granite, $, EBUtils) {
     'use strict';
 
-    const REGISTRY = Granite.UI.Foundation.Registry;
-    const FOUNDATION_REGISTRY = $(window).adaptTo('foundation-registry');
+    const {Registry} = Granite.UI.Foundation;
+    const foundationRegistryAPI = $(window).adaptTo('foundation-registry');
 
-    FOUNDATION_REGISTRY.register('foundation.form.response.ui.success', {
+    foundationRegistryAPI.register('foundation.form.response.ui.success', {
         name: 'foundation.prompt.open',
         handler: function (form, config, data) {
             if (!data) return;
@@ -22,7 +22,7 @@
         }
     });
 
-    FOUNDATION_REGISTRY.register('foundation.form.response.ui.error', {
+    foundationRegistryAPI.register('foundation.form.response.ui.error', {
         name: 'errorResponseCreated',
         handler: function (form, data, xhr) {
             let message = '';
@@ -39,14 +39,13 @@
                 }
             }
 
-            const ui = $(window).adaptTo('foundation-ui');
-            ui.alert('Error', message, 'error');
+            foundationRegistryAPI.alert('Error', message, 'error');
         }
     });
 
     // Avoid collection-related exceptions when using Granite Action API with a non-collection UI element
 
-    REGISTRY.register('foundation.adapters', {
+    Registry.register('foundation.adapters', {
         type: 'foundation-collection',
         selector: '.foundation-collection.js-backpack-package-list',
         adapter: function (el) {
@@ -70,14 +69,14 @@
         }
     });
 
-    FOUNDATION_REGISTRY.register('foundation.validation.validator', {
+    foundationRegistryAPI.register('foundation.validation.validator', {
         selector: '[data-backpack-validation-not-blank]',
         validate: function (el) {
             if (!el.value || !el.value.trim()) return 'Please enter a value';
         }
     });
 
-    FOUNDATION_REGISTRY.register('foundation.validation.validator', {
+    foundationRegistryAPI.register('foundation.validation.validator', {
         selector: '[data-backpack-regex]',
         validate: function (el) {
             if (!el.value) return;

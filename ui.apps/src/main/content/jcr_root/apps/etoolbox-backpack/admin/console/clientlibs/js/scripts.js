@@ -3,8 +3,7 @@
 
     const $window = $(window);
     const $document = $(document);
-    const FOUNDATION_UI = $window.adaptTo('foundation-ui');
-    const packagePath = new URL(window.location.href).searchParams.get('packagePath');
+    const foundationRegistryAPI = $window.adaptTo('foundation-ui');
     const BACKPACK_PATH = '/tools/etoolbox/backpack.html';
     const TITLE_ATTR = 'data-entry-title';
 
@@ -71,10 +70,10 @@
         }
 
         wrapUiAsyncRequest(callback, context, ...args) {
-            FOUNDATION_UI.wait();
+            foundationRegistryAPI.wait();
             return callback.call(context, ...args)
                 .catch((error) => console.log(error))
-                .finally(() => FOUNDATION_UI.clearWait());
+                .finally(() => foundationRegistryAPI.clearWait());
         }
 
         packageEntriesCtrlClick(target) {
@@ -141,7 +140,7 @@
                 if (action === 'delete') this.onDeleteEntry.call(this, $item, payload);
             });
             const referenceType = action === 'add' ? e.target.closest('[data-type]').getAttribute('data-type') || '' : '';
-            this.onChangePackageEntries(action, referenceType, payload, packagePath);
+            this.onChangePackageEntries(action, referenceType, payload, EBUtils.packagePath);
         }
 
         onChangePackageEntries(action, referenceType, payload, packagePath) {
@@ -170,7 +169,7 @@
                 primary: true,
                 handler: this.onReplicatePackage.bind(this)
             };
-            FOUNDATION_UI.prompt('Please confirm', 'Replicate this package?', 'notice', [{ text: 'Cancel' }, replicateBtn]);
+            foundationRegistryAPI.prompt('Please confirm', 'Replicate this package?', 'notice', [{ text: 'Cancel' }, replicateBtn]);
         }
 
         onReplicatePackage() {
@@ -184,6 +183,7 @@
         };
 
         onDeletePackage() {
+            const {packagePath} = EBUtils;
             if (!packagePath) return;
             const packageName = packagePath.split('/').pop();
             const message = $(document.createElement('div'));
@@ -194,7 +194,7 @@
                 warning: true,
                 handler: () => EBUtils.deleteRequest()
             };
-            FOUNDATION_UI.prompt('Delete', message.html(), 'notice', [{ text: 'Cancel' }, deleteBtn]);
+            foundationRegistryAPI.prompt('Delete', message.html(), 'notice', [{ text: 'Cancel' }, deleteBtn]);
         };
 
         onHandleInstallPackageForm(e) {
@@ -204,6 +204,7 @@
         }
 
         onLoad() {
+            const {packagePath} = EBUtils;
             if (packagePath && packagePath.length > 0) {
                 EBUtils.getPackageInfo(packagePath).catch(() => $('#editDialogButton').trigger('click'));
             } else {
@@ -212,7 +213,7 @@
         }
 
         onDownloadPackage() {
-            window.location.href = packagePath;
+            window.location.href = EBUtils.packagePath;
         }
 
         onMainMenuNav() {
