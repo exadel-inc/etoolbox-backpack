@@ -22,12 +22,14 @@ $(function () {
     'use strict';
 
     $(document).on('change', '.js-backpack-fileupload', function (event) {
-        const fileName = event.target.querySelector('input').files[0].name;
+        const files = event.target.querySelector('input').files;
+        if (!files || !files[0]) return;
+        const fileName = files[0].name;
         const fileElement = $(event.target.querySelector('.js-backpack-file-element'));
         if (fileElement.length) {
             fileElement.text(fileName);
         } else {
-            $(this).append(`<div class="js-backpack-file-element">${fileName}</div>`);
+            $(this).append($('<div class="js-backpack-file-element">').text(fileName));
         }
     });
 
