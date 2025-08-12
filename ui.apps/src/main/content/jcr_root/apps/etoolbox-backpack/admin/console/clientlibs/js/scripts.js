@@ -60,12 +60,12 @@
             $document.on('click.backpack', '.js-backpack-download', this.onDownloadPackage);
             $document.on('click.backpack', '.js-backpack-test-build', () => this.wrapUiAsyncRequest(this.buildPackage, this, true, false));
             $document.on('click.backpack', REPLICATE_SEL, this.onHandleReplicatePackage.bind(this));
-            $document.on('click.backpack', '.js-backpack-main-menu, .js-backpack-cancel-button', this.onMainMenuNav);
+            $document.on('click.backpack', '.js-backpack-main-menu, #js-backpack-cancel-button', this.onMainMenuNav);
             $document.on('click.backpack', '.js-backpack-build', () => this.wrapUiAsyncRequest(this.buildPackage, this, false, false));
             $document.on('click.backpack', '.js-backpack-build-download', () => this.wrapUiAsyncRequest(this.buildPackage, this, false, true));
             $document.on('click.backpack', INSTALL_SEL, this.onInstallPackage);
             $document.on('click.backpack', '.js-backpack-delete-package', this.onDeletePackage.bind(this));
-            $document.on('submit.backpack', '#jsBackpackInstallForm', this.onHandleInstallPackageForm.bind(this));
+            $document.on('submit.backpack', '#js-backpack-install-form', this.onHandleInstallPackageForm.bind(this));
             $window.on('load.backpack', this.onLoad.bind(this));
         }
 
