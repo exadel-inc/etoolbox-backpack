@@ -144,8 +144,8 @@
         }
 
         onChangePackageEntries(action, referenceType, payload, packagePath) {
-            this.wrapUiAsyncRequest(EBUtils.onProcessChangeRequest, EBUtils, action + (referenceType ? `/${referenceType}` : ''), { packagePath, payload });
-            EBUtils.showSuccessMessage();
+            this.wrapUiAsyncRequest(EBUtils.onProcessChangeRequest, EBUtils, action + (referenceType ? `/${referenceType}` : ''), { packagePath, payload })
+                .then(() => EBUtils.showSuccessMessage());
         }
 
         onDeleteEntry($item, payload) {
