@@ -39,7 +39,7 @@
                 }
             }
 
-            foundationRegistryAPI.alert('Error', message, 'error');
+            $(window).adaptTo('foundation-ui').alert('Error', message, 'error');
         }
     });
 
