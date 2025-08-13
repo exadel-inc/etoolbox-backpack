@@ -10,7 +10,7 @@
             if (!data) return;
             const isWarning = data.status === 'WARNING';
             if (data.status === 'ERROR' || isWarning) {
-                const dialog = EBUtils.openLogsDialog(data.logs, 'WARNING', 'Close');
+                const dialog = EBUtils.openLogsDialog(data.logs, 'WARNING');
                 dialog.on('coral-overlay:close', () => isWarning && window.location.reload());
                 return;
             }
