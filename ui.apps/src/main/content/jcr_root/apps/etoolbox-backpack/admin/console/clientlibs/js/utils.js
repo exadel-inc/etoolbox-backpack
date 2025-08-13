@@ -85,11 +85,15 @@
                     logIndex = logIndex + result.log.length;
                     $(dialog.content).children('div').last()[0].scrollIntoView(false);
                 }
-
+                await EBUtils.promisifyTimeout(1000);
                 await EBUtils.updateLog(result.packageStatus, logIndex, dialog);
             } catch (e) {
                 console.log(e);
             }
+        }
+
+        static promisifyTimeout(timeout) {
+            return new Promise((resolve) => setTimeout(resolve, timeout));
         }
 
         static async deleteRequest() {
