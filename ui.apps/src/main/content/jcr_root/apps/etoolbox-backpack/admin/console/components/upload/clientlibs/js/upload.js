@@ -22,15 +22,12 @@ $(function () {
     'use strict';
 
     $(document).on('change', '.js-backpack-fileupload', function (event) {
+        console.log(event, event.target.closest('form').querySelector('.js-backpack-filename'));
         const files = event.target.querySelector('input').files;
         if (!files || !files[0]) return;
         const fileName = files[0].name;
-        const fileElement = $(event.target.querySelector('.js-backpack-file-element'));
-        if (fileElement.length) {
-            fileElement.text(fileName);
-        } else {
-            $(this).append($('<div class="js-backpack-file-element">').text(fileName));
-        }
+        const input =event.target.closest('form').querySelector('.js-backpack-filename')
+        input.value = fileName;
     });
 
     $(window).adaptTo('foundation-registry').register('foundation.form.response.ui.success', {

@@ -168,6 +168,7 @@
                                     <filename
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                            granite:class="js-backpack-filename"
                                             fieldLabel="Package"
                                             name="filename"
                                             disabled="{Boolean}true"/>
