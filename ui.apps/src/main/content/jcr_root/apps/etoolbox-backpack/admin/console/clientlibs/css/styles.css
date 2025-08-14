@@ -176,7 +176,7 @@ a.disabled {
     min-width: max-content;
 
     &.js-backpack-live-copies {
-        min-width: 105px;
+        min-width: 110px;
     }
 }
 

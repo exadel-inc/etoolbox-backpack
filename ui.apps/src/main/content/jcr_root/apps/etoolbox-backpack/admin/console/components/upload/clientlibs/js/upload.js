@@ -18,57 +18,23 @@ $(function () {
     });
 });
 
-(function (window, $, URITemplate) {
+(function (window, $) {
     'use strict';
 
     $(document).on('change', '.js-backpack-fileupload', function (event) {
         const files = event.target.querySelector('input').files;
         if (!files || !files[0]) return;
         const fileName = files[0].name;
-        const fileElement = $(event.target.querySelector('.js-backpack-file-element'));
-        if (fileElement.length) {
-            fileElement.text(fileName);
-        } else {
-            $(this).append($('<div class="js-backpack-file-element">').text(fileName));
-        }
+        const input = event.target.closest('form').querySelector('.js-backpack-filename');
+        input.value = fileName;
     });
 
-    $(window).adaptTo('foundation-registry').register('foundation.form.response.ui.success', {
-        name: 'backpack.prompt.open',
-        handler: function (form, config, data) {
-            function errorPopup(ui, dataJson) {
-                $(window).adaptTo('foundation-ui').prompt('Error', dataJson.message, 'error', [{
-                    text: 'Cancel',
-                    handler: function () {
-                        open(URITemplate.expand(config.redirect, {}));
-                    }
-                }]);
-            }
-
-            function successPopup(ui, dataJson) {
-                ui.prompt(config.title, config.message, 'success', [{
-                    text: 'Done',
-                    handler: function () {
-                        open(URITemplate.expand(config.redirect, dataJson));
-                    }
-                }, {
-                    text: 'Open',
-                    primary: true,
-                    handler: function () {
-                        open(URITemplate.expand(config.open, dataJson), true);
-                        open(URITemplate.expand(config.redirect, dataJson));
-                    }
-                }]);
-            }
-
-            const ui = $(window).adaptTo('foundation-ui');
-            const dataJson = JSON.parse(data);
-
-            if (dataJson && !!dataJson.statusCode) {
-                errorPopup(ui, dataJson);
-            } else {
-                successPopup(ui, dataJson);
-            }
+    $(window).adaptTo('foundation-registry').register('foundation.form.response.parser', {
+        name: 'foundation.json',
+        contentType: /application\/json/,
+        selector: '.js-backpack-package-form',
+        handler: function (form, xhr) {
+            return JSON.parse(xhr.responseText);
         }
     });
-})(window, Granite.$, Granite.URITemplate);
+})(window, Granite.$);

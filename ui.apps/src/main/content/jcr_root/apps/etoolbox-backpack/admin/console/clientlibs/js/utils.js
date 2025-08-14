@@ -85,11 +85,15 @@
                     logIndex = logIndex + result.log.length;
                     $(dialog.content).children('div').last()[0].scrollIntoView(false);
                 }
-
+                await EBUtils.promisifyTimeout(1000);
                 await EBUtils.updateLog(result.packageStatus, logIndex, dialog);
             } catch (e) {
                 console.log(e);
             }
+        }
+
+        static promisifyTimeout(timeout) {
+            return new Promise((resolve) => setTimeout(resolve, timeout));
         }
 
         static async deleteRequest() {
@@ -125,11 +129,11 @@
             return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
         }
 
-        static openLogsDialog(init, title, submitText) {
+        static openLogsDialog(init, title) {
             const dialog = new Coral.Dialog();
             dialog.id = 'js-backpack-logs-dialog';
             dialog.header.innerHTML = `${title} Logs`;
-            dialog.footer.innerHTML = `<button is="coral-button" variant="primary" coral-close>${submitText}</button>`;
+            dialog.footer.innerHTML = '<button is="coral-button" variant="primary" coral-close>Close</button>';
 
             if (init && init.length > 0) {
                 $.each(init, (index, value) => $(dialog.content).append('<div>' + value + '</div>'));
