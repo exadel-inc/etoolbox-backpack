@@ -5,12 +5,12 @@
     const foundationRegistryAPI = $(window).adaptTo('foundation-registry');
 
     foundationRegistryAPI.register('foundation.form.response.ui.success', {
-        name: 'foundation.prompt.open',
+        name: 'backpack.form.prompt.open',
         handler: function (form, config, data) {
             if (!data) return;
             const isWarning = data.status === 'WARNING';
             if (data.status === 'ERROR' || isWarning) {
-                const dialog = EBUtils.openLogsDialog(data.logs, 'WARNING', 'Close');
+                const dialog = EBUtils.openLogsDialog(data.logs, 'WARNING');
                 dialog.on('coral-overlay:close', () => isWarning && window.location.reload());
                 return;
             }
@@ -19,27 +19,6 @@
             } else {
                 window.location.reload();
             }
-        }
-    });
-
-    foundationRegistryAPI.register('foundation.form.response.ui.error', {
-        name: 'errorResponseCreated',
-        handler: function (form, data, xhr) {
-            let message = '';
-            if (xhr.responseJSON) {
-                message = xhr.responseJSON.log;
-            } else if (xhr.responseText) {
-                try {
-                    const response = JSON.parse(xhr.responseText);
-                    if (response && response.log) {
-                        message = response.log;
-                    }
-                } catch (e) {
-                    console.error('Failed to parse responseText:', e);
-                }
-            }
-
-            $(window).adaptTo('foundation-ui').alert('Error', message, 'error');
         }
     });
 

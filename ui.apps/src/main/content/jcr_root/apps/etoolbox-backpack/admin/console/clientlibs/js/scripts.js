@@ -57,12 +57,12 @@
             $document.on('click.backpack', `.${COLLECTION_ITEM_CLASS}.result-row`, this.onPackageEntryClick.bind(this));
             $document.on('click.backpack', '.toggler', this.onTogglerClick);
             $document.on('click.backpack', `${INCLUDE_CHILDREN_SEL}, ${EXCLUDE_CHILDREN_SEL}, ${LIVE_COPIES_SEL}, ${DELETE_SEL}, .js-backpack-add-references-item`, this.onPreparePackageEntriesChanges.bind(this));
-            $document.on('click.backpack', '.js-backpack-download', this.onDownloadPackage);
-            $document.on('click.backpack', '.js-backpack-test-build', () => this.wrapUiAsyncRequest(this.buildPackage, this, true, false));
             $document.on('click.backpack', REPLICATE_SEL, this.onHandleReplicatePackage.bind(this));
             $document.on('click.backpack', '.js-backpack-main-menu, #js-backpack-cancel-button', this.onMainMenuNav);
+            $document.on('click.backpack', '.js-backpack-test-build', () => this.wrapUiAsyncRequest(this.buildPackage, this, true, false));
             $document.on('click.backpack', '.js-backpack-build', () => this.wrapUiAsyncRequest(this.buildPackage, this, false, false));
             $document.on('click.backpack', '.js-backpack-build-download', () => this.wrapUiAsyncRequest(this.buildPackage, this, false, true));
+            $document.on('click.backpack', '.js-backpack-download', this.onDownloadPackage);
             $document.on('click.backpack', INSTALL_SEL, this.onInstallPackage);
             $document.on('click.backpack', '.js-backpack-delete-package', this.onDeletePackage.bind(this));
             $document.on('submit.backpack', '#js-backpack-install-form', this.onHandleInstallPackageForm.bind(this));
@@ -155,7 +155,7 @@
         };
 
         onHandleData(data, text) {
-            const dialog = EBUtils.openLogsDialog(data.log, text, 'Close');
+            const dialog = EBUtils.openLogsDialog(data.log, text);
             const assetText = data.dataSize === 0 ?
                 'There are no assets in the package' :
                 '<h4>Approximate size of the package: ' + EBUtils.bytesToSize(data.dataSize) + '</h4>';
@@ -224,9 +224,9 @@
             const data = await EBUtils.buildRequest(isTest, this.referencedResources);
             if (!data.log) throw new Error('No log data received during package build');
             if (!isTest) {
-                const dialog = EBUtils.openLogsDialog(data.log, 'Build', isDownload ? 'Download' : 'Close');
-                isDownload && dialog.on('coral-overlay:beforeclose', this.onDownloadPackage);
+                const dialog = EBUtils.openLogsDialog(data.log, 'Build');
                 await EBUtils.updateLog(data.packageStatus, data.log.length, dialog);
+                isDownload && this.onDownloadPackage();
             } else {
                 this.onHandleData(data, 'Test Build');
             }
@@ -235,7 +235,7 @@
         async submitInstallPackageForm($form) {
             const data = await EBUtils.onProcessChangeRequest('package/install', $form.serialize());
             if (!data.log) throw new Error('No log data received during package installation');
-            const dialog = EBUtils.openLogsDialog(data.log, 'Install', 'Close');
+            const dialog = EBUtils.openLogsDialog(data.log, 'Install');
             await EBUtils.updateLog(data.packageStatus, data.log.length, dialog);
         }
     }
