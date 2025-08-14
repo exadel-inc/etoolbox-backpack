@@ -1,0 +1,73 @@
+(function (Granite, $, EBUtils) {
+    'use strict';
+
+    const { Registry } = Granite.UI.Foundation;
+    const foundationRegistryAPI = $(window).adaptTo('foundation-registry');
+
+    foundationRegistryAPI.register('foundation.form.response.ui.success', {
+        name: 'backpack.form.prompt.open',
+        handler: function (form, config, data) {
+            if (!data) return;
+            const isWarning = data.status === 'WARNING';
+            if (data.status === 'ERROR' || isWarning) {
+                const dialog = EBUtils.openLogsDialog(data.logs, 'WARNING');
+                dialog.on('coral-overlay:close', () => isWarning && window.location.reload());
+                return;
+            }
+            if (data.packagePath) {
+                window.location.search = 'packagePath=' + data.packagePath;
+            } else {
+                window.location.reload();
+            }
+        }
+    });
+
+    // Avoid collection-related exceptions when using Granite Action API with a non-collection UI element
+
+    Registry.register('foundation.adapters', {
+        type: 'foundation-collection',
+        selector: '.foundation-collection.js-backpack-package-list',
+        adapter: function (el) {
+            const collection = $(el);
+
+            return {
+                append: function (items) {
+                    collection.append(items);
+                    collection.trigger('foundation-contentloaded');
+                },
+
+                clear: () => collection.find('.foundation-collection-item').remove(),
+
+                getPagination: () => { }, // No operation
+
+                reload: function () {
+                    collection.trigger('coral-collection:remove');
+                    collection.trigger('foundation-collection-reload');
+                }
+            };
+        }
+    });
+
+    foundationRegistryAPI.register('foundation.validation.validator', {
+        selector: '[data-backpack-validation-not-blank]',
+        validate: function (el) {
+            if (!el.value || !el.value.trim()) return 'Please enter a value';
+        }
+    });
+
+    foundationRegistryAPI.register('foundation.validation.validator', {
+        selector: '[data-backpack-regex]',
+        validate: function (el) {
+            if (!el.value) return;
+            if (!el.value.match(new RegExp(el.dataset.backpackRegex))) return el.dataset.validationMessage || 'Invalid field value';
+        }
+    });
+
+    if (window.DOMPurify) {
+        window.DOMPurify.addHook('uponSanitizeElement', function (node, hookEvent) {
+            if (hookEvent && hookEvent.tagName === 'meta' && node.classList.contains('backpack-meta')) {
+                hookEvent.allowedTags.meta = true;
+            }
+        });
+    }
+})(Granite, Granite.$, Granite.EBUtils = Granite.EBUtils || {});
