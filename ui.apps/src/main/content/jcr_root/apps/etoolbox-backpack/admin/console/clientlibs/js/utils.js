@@ -133,7 +133,7 @@
             const dialog = new Coral.Dialog();
             dialog.id = 'js-backpack-logs-dialog';
             dialog.header.innerHTML = `${title} Logs`;
-            dialog.footer.innerHTML = `<button is="coral-button" variant="primary" coral-close>Close</button>`;
+            dialog.footer.innerHTML = '<button is="coral-button" variant="primary" coral-close>Close</button>';
 
             if (init && init.length > 0) {
                 $.each(init, (index, value) => $(dialog.content).append('<div>' + value + '</div>'));

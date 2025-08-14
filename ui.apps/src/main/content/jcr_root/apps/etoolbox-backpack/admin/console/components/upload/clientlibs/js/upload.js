@@ -25,7 +25,7 @@ $(function () {
         const files = event.target.querySelector('input').files;
         if (!files || !files[0]) return;
         const fileName = files[0].name;
-        const input =event.target.closest('form').querySelector('.js-backpack-filename')
+        const input = event.target.closest('form').querySelector('.js-backpack-filename');
         input.value = fileName;
     });
 
@@ -33,7 +33,7 @@ $(function () {
         name: 'foundation.json',
         contentType: /application\/json/,
         selector: '.js-backpack-package-form',
-        handler: function(form, xhr) {
+        handler: function (form, xhr) {
             return JSON.parse(xhr.responseText);
         }
     });
