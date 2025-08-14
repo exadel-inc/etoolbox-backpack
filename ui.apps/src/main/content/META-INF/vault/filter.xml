@@ -4,13 +4,11 @@
     <filter root="/apps/cq/core/content/nav/tools/etoolbox/backpack"/>
     <filter root="/apps/wcm/core/content/editor/jcr:content/content/items/content/header/items/headerbar/items/pageinfopopover/items/list/items/backpack"/>
     <filter root="/apps/wcm/core/content/sites/jcr:content/actions/selection/backpack"/>
-    <filter root="/etc/packages/EToolbox_BackPack">
-        <exclude pattern="/etc/packages/EToolbox_BackPack/.*" />
-    </filter>
-    <filter root="/home/users/system/backpack"/>
 
     <!--Temp cleanup filters-->
     <filter root="/apps/aembox-backpack"/>
     <filter root="/apps/cq/core/content/nav/tools/aembox/backpack"/>
     <filter root="/apps/cq/core/content/nav/tools/deployment/backpack"/>
+    <filter root="/etc/packages/EToolbox"/>
+    <filter root="/etc/packages/EToolbox_BackPack"/>
 </workspaceFilter>
