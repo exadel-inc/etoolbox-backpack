@@ -142,6 +142,7 @@
         <items jcr:primaryType="nt:unstructured">
             <form
                     jcr:primaryType="nt:unstructured"
+                    granite:class="js-backpack-package-form"
                     sling:resourceType="granite/ui/components/coral/foundation/form"
                     action="/services/backpack/uploadPackage"
                     foundationForm="{Boolean}true"
