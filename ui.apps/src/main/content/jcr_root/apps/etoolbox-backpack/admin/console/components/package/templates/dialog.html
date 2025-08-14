@@ -3,11 +3,11 @@
         <coral-dialog-header>${packageModel ? 'Edit' : 'Create'} Package</coral-dialog-header>
         <coral-dialog-content>
             <form action="/services/backpack/package" method="${packageModel ? 'put' : 'post'}"
-                  class="coral-Form coral-Form--vertical foundation-form"
+                  class="coral-Form coral-Form--vertical foundation-form js-backpack-package-form"
                   data-foundation-form-ajax="true"
                   data-foundation-form-loadingmask="true">
                 <meta class="foundation-form-response-ui-success backpack-meta"
-                      data-foundation-form-response-ui-success="{&#34;name&#34;:&#34;foundation.prompt.open&#34;,&#34;open&#34;:null,&#34;redirect&#34;:null,&#34;title&#34;:&#34;Success&#34;,&#34;message&#34;:null}">
+                      data-foundation-form-response-ui-success="{&#34;name&#34;:&#34;backpack.form.prompt.open&#34;,&#34;open&#34;:null,&#34;redirect&#34;:null,&#34;title&#34;:&#34;Success&#34;,&#34;message&#34;:null}">
                 <div class="coral-FixedColumn">
                     <div class="coral-FixedColumn-column">
                         <div class="coral-Form-fieldwrapper">
