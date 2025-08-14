@@ -152,8 +152,8 @@
                 <successresponse
                         jcr:primaryType="nt:unstructured"
                         jcr:title="Success"
-                        sling:resourceType="etoolbox-backpack/admin/console/components/openprompt"
-                        open="/tools/etoolbox/backpack/package.html?path={packagePath}"
+                        sling:resourceType="granite/ui/components/coral/foundation/form/responses/openprompt"
+                        open="/apps/etoolbox-backpack/admin/console.html?packagePath={packagePath}"
                         redirect="/tools/etoolbox/backpack.html/?group=/etc/packages/{groupName}"
                         text="Your package has been uploaded."/>
                 <items jcr:primaryType="nt:unstructured">

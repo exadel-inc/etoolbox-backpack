@@ -21,8 +21,9 @@ $(function () {
 (function (window, $, URITemplate) {
     'use strict';
 
+    const foundationUiAPI = $(window).adaptTo('foundation-ui');
+
     $(document).on('change', '.js-backpack-fileupload', function (event) {
-        console.log(event, event.target.closest('form').querySelector('.js-backpack-filename'));
         const files = event.target.querySelector('input').files;
         if (!files || !files[0]) return;
         const fileName = files[0].name;
@@ -31,41 +32,46 @@ $(function () {
     });
 
     $(window).adaptTo('foundation-registry').register('foundation.form.response.ui.success', {
-        name: 'backpack.prompt.open',
+        name: 'foundation.prompt.open',
         handler: function (form, config, data) {
-            function errorPopup(ui, dataJson) {
-                $(window).adaptTo('foundation-ui').prompt('Error', dataJson.message, 'error', [{
-                    text: 'Cancel',
-                    handler: function () {
-                        open(URITemplate.expand(config.redirect, {}));
-                    }
-                }]);
+            const dataJson = JSON.parse(data);
+            if (dataJson && !!dataJson.statusCode) errorPopup();
+            else successPopup();
+
+            function errorPopup() {
+                const cancelHandler = () => open(URITemplate.expand(config.redirect, {}), '_self');
+                foundationUiAPI.prompt('Error', dataJson.message, 'error', [{text: 'Cancel', handler: cancelHandler}]);
             }
 
-            function successPopup(ui, dataJson) {
-                ui.prompt(config.title, config.message, 'success', [{
+            function successPopup() {
+                const redirectHandler = () => open(URITemplate.expand(config.redirect, dataJson), '_self');
+                const openHandler = () => open(URITemplate.expand(config.open, dataJson), '_self');
+                foundationUiAPI.prompt(config.title, config.message, 'success', [{
                     text: 'Done',
-                    handler: function () {
-                        open(URITemplate.expand(config.redirect, dataJson));
-                    }
+                    handler: redirectHandler
                 }, {
                     text: 'Open',
                     primary: true,
-                    handler: function () {
-                        open(URITemplate.expand(config.open, dataJson), true);
-                        open(URITemplate.expand(config.redirect, dataJson));
-                    }
+                    handler: openHandler
                 }]);
             }
+        }
+    });
 
-            const ui = $(window).adaptTo('foundation-ui');
-            const dataJson = JSON.parse(data);
-
-            if (dataJson && !!dataJson.statusCode) {
-                errorPopup(ui, dataJson);
-            } else {
-                successPopup(ui, dataJson);
+    $(window).adaptTo('foundation-registry').register('foundation.form.response.ui.error', {
+        name: 'errorResponseCreated',
+        handler: function (form, data, xhr) {
+            let message = 'An error occurred while uploading the package.';
+            try {
+                const response = JSON.parse(xhr.responseText);
+                if (response && response.log) {
+                    message = response.log;
+                }
+            } catch (e) {
+                console.error('Failed to parse responseText:', e);
             }
+
+            foundationUiAPI.alert('Error', message, 'error');
         }
     });
 })(window, Granite.$, Granite.URITemplate);
