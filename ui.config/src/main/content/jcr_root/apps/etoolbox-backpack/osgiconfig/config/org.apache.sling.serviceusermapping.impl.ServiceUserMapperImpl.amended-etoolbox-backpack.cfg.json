@@ -1,0 +1,5 @@
+{
+  "user.mapping": [
+    "etoolbox-link-inspector.core:etoolbox-link-inspector-service=[link-inspector-service]"
+  ]
+}
