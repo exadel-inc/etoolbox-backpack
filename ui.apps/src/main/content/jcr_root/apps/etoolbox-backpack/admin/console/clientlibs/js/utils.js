@@ -33,7 +33,7 @@
             try {
                 return await $.ajax(options);
             } catch (e) {
-                console.log(e);
+                console.error('[Backpack]: ', e);
             }
         }
 
@@ -88,7 +88,7 @@
                 await EBUtils.promisifyTimeout(1000);
                 await EBUtils.updateLog(result.packageStatus, logIndex, dialog);
             } catch (e) {
-                console.log(e);
+                console.error('[Backpack]: ', e);
             }
         }
 
@@ -108,7 +108,7 @@
                 await $.post(Granite.HTTP.externalize('/bin/wcmcommand'), data);
                 EBUtils._showAlert('Package deleted', 'Delete', 'warning', () => window.location.replace(BACKPACK_PATH));
             } catch (error) {
-                console.log('Error while deleting package:', error);
+                console.error('[Backpack] Error while deleting package:', error);
             }
         }
 
