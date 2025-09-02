@@ -268,7 +268,7 @@
                           jcr:title="Success"
                           jcr:titleError="Error"
                           granite:class="backpack-meta"
-                          sling:resourceType="granite/ui/components/coral/foundation/form/responses/openprompt"/>
+                          sling:resourceType="granite/ui/components/coral/foundation/form/responses/reload"/>
                 <items jcr:primaryType="nt:unstructured">
                     <content jcr:primaryType="nt:unstructured"
                              jcr:title="Add by Path"
@@ -323,7 +323,7 @@
                         jcr:title="Success"
                         jcr:titleError="Error"
                         granite:class="backpack-meta"
-                        sling:resourceType="granite/ui/components/coral/foundation/form/responses/openprompt"/>
+                        sling:resourceType="granite/ui/components/coral/foundation/form/responses/reload"/>
                 <items jcr:primaryType="nt:unstructured">
                     <content jcr:primaryType="nt:unstructured"
                              jcr:title="Add by Query"
@@ -381,7 +381,7 @@
                         jcr:title="Success"
                         jcr:titleError="Error"
                         granite:class="backpack-meta"
-                        sling:resourceType="granite/ui/components/coral/foundation/form/responses/openprompt"/>
+                        sling:resourceType="granite/ui/components/coral/foundation/form/responses/reload"/>
                 <items jcr:primaryType="nt:unstructured">
                     <content jcr:primaryType="nt:unstructured"
                              jcr:title="Add by List"
