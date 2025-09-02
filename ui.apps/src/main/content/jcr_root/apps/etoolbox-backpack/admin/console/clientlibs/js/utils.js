@@ -53,7 +53,7 @@
             try {
                 return await $.ajax({
                     url: '/services/backpack/package',
-                    data: {packagePath}
+                    data: { packagePath }
                 });
             } catch (e) {
                 console.error('[Backpack] Error while loading package:', e);
