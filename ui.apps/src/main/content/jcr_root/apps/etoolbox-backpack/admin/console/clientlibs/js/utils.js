@@ -50,10 +50,14 @@
         }
 
         static async getPackageInfo(packagePath) {
-            await $.ajax({
-                url: '/services/backpack/package',
-                data: { packagePath }
-            });
+            try {
+                return await $.ajax({
+                    url: '/services/backpack/package',
+                    data: {packagePath}
+                });
+            } catch (e) {
+                console.error('[Backpack] Error while loading package:', e);
+            }
         }
 
         static replicateRequest() {
