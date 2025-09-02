@@ -33,7 +33,7 @@
             try {
                 return await $.ajax(options);
             } catch (e) {
-                console.log(e);
+                console.error('[Backpack]: ', e);
             }
         }
 
@@ -50,10 +50,14 @@
         }
 
         static async getPackageInfo(packagePath) {
-            await $.ajax({
-                url: '/services/backpack/package',
-                data: { packagePath }
-            });
+            try {
+                return await $.ajax({
+                    url: '/services/backpack/package',
+                    data: { packagePath }
+                });
+            } catch (e) {
+                console.error('[Backpack] Error while loading package:', e);
+            }
         }
 
         static replicateRequest() {
@@ -88,7 +92,7 @@
                 await EBUtils.promisifyTimeout(1000);
                 await EBUtils.updateLog(result.packageStatus, logIndex, dialog);
             } catch (e) {
-                console.log(e);
+                console.error('[Backpack]: ', e);
             }
         }
 
@@ -108,7 +112,7 @@
                 await $.post(Granite.HTTP.externalize('/bin/wcmcommand'), data);
                 EBUtils._showAlert('Package deleted', 'Delete', 'warning', () => window.location.replace(BACKPACK_PATH));
             } catch (error) {
-                console.log('Error while deleting package:', error);
+                console.error('[Backpack] Error while deleting package:', error);
             }
         }
 
