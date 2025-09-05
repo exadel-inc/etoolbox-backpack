@@ -25,3 +25,10 @@ coral-icon[icon="backpack-sites"] {
     height: 1.2rem;
     width: 1.2rem;
 }
+
+.js-create-package-activator.js-create-package-activator[is=coral-button] {
+    display: flex;
+    coral-button-label {
+        text-align: left;
+    }
+}
