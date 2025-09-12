@@ -18,7 +18,7 @@
     <jcr:content
             jcr:mixinTypes="[sling:VanityPath]"
             jcr:primaryType="nt:unstructured"
-            jcr:title="Package"
+            jcr:title="Backpack"
             backHref="/tools/etoolbox/backpack.html/?group=/etc/packages/EToolbox_BackPack"
             sling:redirect="{Boolean}false"
             sling:resourceType="granite/ui/components/shell/propertiespage"

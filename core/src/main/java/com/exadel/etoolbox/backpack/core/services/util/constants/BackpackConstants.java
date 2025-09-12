@@ -1,5 +1,7 @@
 package com.exadel.etoolbox.backpack.core.services.util.constants;
 
+import java.time.format.DateTimeFormatter;
+
 public class BackpackConstants {
 
     private BackpackConstants() {
@@ -21,4 +23,6 @@ public class BackpackConstants {
     public static final String CLOSE_BRACKET = "]";
     public static final String COMMA = ",";
     public static final String JCR_CONTENT = "/jcr:content";
+
+    public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 }

@@ -6,6 +6,7 @@
           jcr:primaryType="cq:Page">
     <jcr:content
             jcr:primaryType="nt:unstructured"
+            jcr:title="Backpack"
             sling:resourceType="granite/ui/components/shell/collectionpage"
             targetCollection=".package-list">
         <head jcr:primaryType="nt:unstructured">
