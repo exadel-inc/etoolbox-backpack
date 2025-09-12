@@ -1,16 +1,16 @@
 (function (Granite, $, EBUtils) {
     'use strict';
 
-    const REGISTRY = Granite.UI.Foundation.Registry;
-    const FOUNDATION_REGISTRY = $(window).adaptTo('foundation-registry');
+    const { Registry } = Granite.UI.Foundation;
+    const foundationRegistryAPI = $(window).adaptTo('foundation-registry');
 
-    FOUNDATION_REGISTRY.register('foundation.form.response.ui.success', {
-        name: 'foundation.prompt.open',
+    foundationRegistryAPI.register('foundation.form.response.ui.success', {
+        name: 'backpack.form.prompt.open',
         handler: function (form, config, data) {
             if (!data) return;
             const isWarning = data.status === 'WARNING';
             if (data.status === 'ERROR' || isWarning) {
-                const dialog = EBUtils.openLogsDialog(data.logs, 'WARNING', 'Close');
+                const dialog = EBUtils.openLogsDialog(data.logs, 'WARNING');
                 dialog.on('coral-overlay:close', () => isWarning && window.location.reload());
                 return;
             }
@@ -22,39 +22,16 @@
         }
     });
 
-    FOUNDATION_REGISTRY.register('foundation.form.response.ui.error', {
-        name: 'errorResponseCreated',
-        handler: function (form, data, xhr) {
-            const title = Granite.I18n.get('Error');
-            let message = '';
-            if (xhr.responseJSON) {
-                message = xhr.responseJSON.log;
-            } else if (xhr.responseText) {
-                try {
-                    const response = JSON.parse(xhr.responseText);
-                    if (response && response.log) {
-                        message = response.log;
-                    }
-                } catch (e) {
-                    console.error('Failed to parse responseText:', e);
-                }
-            }
-
-            const ui = $(window).adaptTo('foundation-ui');
-            ui.alert(title, message, 'error');
-        }
-    });
-
     // Avoid collection-related exceptions when using Granite Action API with a non-collection UI element
 
-    REGISTRY.register('foundation.adapters', {
+    Registry.register('foundation.adapters', {
         type: 'foundation-collection',
-        selector: '.foundation-collection.stub-collection',
+        selector: '.foundation-collection.js-backpack-package-list',
         adapter: function (el) {
-            const collection = $(el)
+            const collection = $(el);
 
             return {
-                append: function(items) {
+                append: function (items) {
                     collection.append(items);
                     collection.trigger('foundation-contentloaded');
                 },
@@ -64,28 +41,33 @@
                 getPagination: () => { }, // No operation
 
                 reload: function () {
-                    collection.trigger('coral-collection:remove')
+                    collection.trigger('coral-collection:remove');
                     collection.trigger('foundation-collection-reload');
                 }
             };
         }
     });
 
-    FOUNDATION_REGISTRY.register('foundation.validation.validator', {
-        selector: `[data-validation='text-validation']`,
-        validate: function(el) {
-            if (!el.value || !el.value.trim()) {
-                return 'Please enter a value';
-            }
+    foundationRegistryAPI.register('foundation.validation.validator', {
+        selector: '[data-backpack-validation-not-blank]',
+        validate: function (el) {
+            if (!el.value || !el.value.trim()) return 'Please enter a value';
+        }
+    });
+
+    foundationRegistryAPI.register('foundation.validation.validator', {
+        selector: '[data-backpack-regex]',
+        validate: function (el) {
+            if (!el.value) return;
+            if (!el.value.match(new RegExp(el.dataset.backpackRegex))) return el.dataset.validationMessage || 'Invalid field value';
         }
     });
 
     if (window.DOMPurify) {
-        window.DOMPurify.addHook('uponSanitizeElement', function (node, hookEvent ) {
+        window.DOMPurify.addHook('uponSanitizeElement', function (node, hookEvent) {
             if (hookEvent && hookEvent.tagName === 'meta' && node.classList.contains('backpack-meta')) {
                 hookEvent.allowedTags.meta = true;
             }
         });
     }
-
-})(Granite, Granite.$, EBUtils = Granite.EBUtils || {});
+})(Granite, Granite.$, Granite.EBUtils = Granite.EBUtils || {});

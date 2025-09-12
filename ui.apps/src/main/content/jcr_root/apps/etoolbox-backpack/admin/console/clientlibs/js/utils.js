@@ -1,159 +1,162 @@
 (function (Granite, $) {
-  'use strict';
+    'use strict';
 
-  const packagePath = new URL(window.location.href).searchParams.get('packagePath') || ''
-  const BACKPACK_PATH = '/tools/etoolbox/backpack.html';
-  const FOUNDATION_UI = $(window).adaptTo('foundation-ui');
+    const BACKPACK_PATH = '/tools/etoolbox/backpack.html';
 
-  class EBUtils {
-    // Handles click on 'Build/download' button
-    static onBuildAction(isDownload, referencedResources) {
-      this.buildPackage(false, (data) => {
-        if (!(data && data.log)) return;
-        const dialog = this.openLogsDialog.call(this, data.log, 'Build', isDownload ? 'Download' : 'Close');
-        isDownload && dialog.on('coral-overlay:beforeclose', () => window.location.href = packagePath);
-        this.updateLog(data.packageStatus, data.log.length, dialog);
-      }, referencedResources);
-    }
+    class EBUtils {
+        static get packagePath() {
+            return new URL(window.location.href).searchParams.get('packagePath') || '';
+        }
 
-    static doPost(url, data, success) {
-      return $.ajax({
-        type: 'POST',
-        url: url,
-        data: data,
-        success: success,
-        error: (data) => console.log(data),
-        beforeSend: () => FOUNDATION_UI.wait(),
-        complete: () => FOUNDATION_UI.clearWait()
-      });
-    }
+        static buildRequest(testBuild, referencedResources) {
+            const { packagePath } = this;
+            const options = {
+                type: 'POST',
+                url: '/services/backpack/package/build',
+                dataType: 'json',
+                ContentType: 'application/json',
+                data: {
+                    packagePath,
+                    testBuild,
+                    referencedResources: JSON.stringify(referencedResources)
+                }
+            };
+            return this._ajaxPost(options);
+        }
 
-    static showSuccessMessage() {
-      const popup = new Coral.Alert();
-      popup.header.innerHTML = 'INFO';
-      popup.content.textContent = 'Package was successfully updated';
-      popup.id = 'references-added-alert';
-      document.body.append(popup);
-      setTimeout(() => {
-        $(popup).fadeOut();
-        window.location.reload();
-      }, 2000);
-    }
+        static onProcessChangeRequest(action, data) {
+            const options = { type: 'POST', url: `/services/backpack/${action}`, data };
+            return this._ajaxPost(options);
+        }
 
-    static getPackageInfo(packagePath, errorFunction) {
-      return $.ajax({
-        url: '/services/backpack/package',
-        data: {packagePath},
-        error: errorFunction
-      });
-    }
-
-    static buildPackage(testBuild, callback, referencedResources) {
-      $.ajax({
-        type: 'POST',
-        url: '/services/backpack/package/build',
-        dataType: 'json',
-        ContentType : 'application/json',
-        data: {
-          packagePath,
-          testBuild,
-          referencedResources: JSON.stringify(referencedResources)
-        },
-        success: (data) => callback(data),
-        beforeSend: () => FOUNDATION_UI.wait(),
-        complete: () => FOUNDATION_UI.clearWait()
-      });
-    }
-
-    static replicatePackage(callback) {
-      return $.ajax({
-        url: '/services/backpack/replicatePackage',
-        type: 'POST',
-        dataType: 'json',
-        ContentType : 'application/json',
-        data: {packagePath: packagePath},
-        success: (data)  => callback(data),
-        beforeSend: () => FOUNDATION_UI.wait(),
-        complete: () => FOUNDATION_UI.clearWait()
-      })
-    }
-
-    static updateLog(packageStatus, logIndex, dialog) {
-      if (packageStatus === 'BUILD_IN_PROGRESS' || packageStatus === 'INSTALL_IN_PROGRESS') {
-        setTimeout(() => {
-          $.ajax({
-            url: '/services/backpack/package/build',
-            data: {packagePath, latestLogIndex: logIndex},
-            success: (data) => {
-              if (data.log && data.log.length) {
-                $.each(data.log, function (index, value) {
-                  $(dialog.content).append('<div>' + value + '</div>');
-                });
-                logIndex = logIndex + data.log.length;
-                $(dialog.content).children('div').last()[0].scrollIntoView(false);
-              }
-              EBUtils.updateLog(data.packageStatus, logIndex, dialog);
+        static async _ajaxPost(options) {
+            try {
+                return await $.ajax(options);
+            } catch (e) {
+                console.error('[Backpack]: ', e);
             }
-          });
-        }, 1000);
-      }
+        }
+
+        static showSuccessMessage() {
+            const popup = new Coral.Alert();
+            popup.header.innerHTML = 'INFO';
+            popup.content.textContent = 'Package was successfully updated';
+            popup.id = 'js-backpack-alert';
+            document.body.append(popup);
+            setTimeout(() => {
+                $(popup).fadeOut();
+                window.location.reload();
+            }, 2000);
+        }
+
+        static async getPackageInfo(packagePath) {
+            try {
+                return await $.ajax({
+                    url: '/services/backpack/package',
+                    data: { packagePath }
+                });
+            } catch (e) {
+                console.error('[Backpack] Error while loading package:', e);
+            }
+        }
+
+        static replicateRequest() {
+            const { packagePath } = this;
+            const options = {
+                url: '/services/backpack/replicatePackage',
+                type: 'POST',
+                dataType: 'json',
+                ContentType: 'application/json',
+                data: { packagePath }
+            };
+
+            return this._ajaxPost(options);
+        }
+
+        static async updateLog(packageStatus, logIndex, dialog) {
+            try {
+                if (packageStatus !== 'BUILD_IN_PROGRESS' && packageStatus !== 'INSTALL_IN_PROGRESS') return;
+                const { packagePath } = this;
+                const result = await $.ajax({
+                    url: '/services/backpack/package/build',
+                    data: { packagePath, latestLogIndex: logIndex }
+                });
+
+                if (result.log && result.log.length) {
+                    $.each(result.log, function (index, value) {
+                        $(dialog.content).append('<div>' + value + '</div>');
+                    });
+                    logIndex = logIndex + result.log.length;
+                    $(dialog.content).children('div').last()[0].scrollIntoView(false);
+                }
+                await EBUtils.promisifyTimeout(1000);
+                await EBUtils.updateLog(result.packageStatus, logIndex, dialog);
+            } catch (e) {
+                console.error('[Backpack]: ', e);
+            }
+        }
+
+        static promisifyTimeout(timeout) {
+            return new Promise((resolve) => setTimeout(resolve, timeout));
+        }
+
+        static async deleteRequest() {
+            const data = {
+                _charset_: 'UTF-8',
+                cmd: 'deletePage',
+                path: this.packagePath,
+                force: true
+            };
+
+            try {
+                await $.post(Granite.HTTP.externalize('/bin/wcmcommand'), data);
+                EBUtils._showAlert('Package deleted', 'Delete', 'warning', () => window.location.replace(BACKPACK_PATH));
+            } catch (error) {
+                console.error('[Backpack] Error while deleting package:', error);
+            }
+        }
+
+        static _showAlert(message, title, type, callback) {
+            const options = [{
+                id: 'ok',
+                text: 'OK',
+                primary: true
+            }];
+
+            $(window).adaptTo('foundation-ui').prompt(title || 'Error', message || 'Unknown Error', type, options, callback);
+        }
+
+        static bytesToSize(bytes) {
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            if (typeof bytes !== 'number' || bytes <= 0) return '0 Bytes';
+            const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+            return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
+        }
+
+        static openLogsDialog(init, title) {
+            const dialog = new Coral.Dialog();
+            dialog.id = 'js-backpack-logs-dialog';
+            dialog.header.innerHTML = `${title} Logs`;
+            dialog.footer.innerHTML = '<button is="coral-button" variant="primary" coral-close>Close</button>';
+
+            if (init && init.length > 0) {
+                $.each(init, (index, value) => $(dialog.content).append('<div>' + value + '</div>'));
+            }
+
+            dialog.on('coral-overlay:close', (event) => {
+                event.preventDefault();
+                setTimeout(() => {
+                    dialog.remove();
+                    window.location.reload();
+                });
+            });
+
+            document.body.appendChild(dialog);
+            dialog.show();
+
+            return dialog;
+        }
     }
 
-    static deleteAction() {
-      const data = {
-        _charset_: 'UTF-8',
-        cmd: 'deletePage',
-        path: packagePath,
-        force: true
-      };
-
-      $.post(Granite.HTTP.externalize('/bin/wcmcommand'), data).done(() => {
-        this.showAlert('Package deleted', 'Delete', 'warning', () => window.location.replace(BACKPACK_PATH));
-      });
-    }
-
-    static showAlert(message, title, type, callback) {
-      const options = [{
-            id: 'ok',
-            text: 'OK',
-            primary: true
-          }];
-
-      FOUNDATION_UI.prompt(title || 'Error', message || 'Unknown Error', type, options, callback);
-    }
-
-    static bytesToSize(bytes) {
-      const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-      if (typeof bytes !== 'number' || bytes <= 0) return '0 Bytes';
-      const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-      return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
-    }
-
-    static openLogsDialog(init, title, submitText) {
-      const dialog = new Coral.Dialog();
-      dialog.id = 'LogsDialog';
-      dialog.header.innerHTML = `${title} Logs`;
-      dialog.footer.innerHTML = `<button is="coral-button" variant="primary" coral-close>${submitText}</button>`;
-
-      if (init && init.length > 0) {
-        $.each(init, (index, value) => $(dialog.content).append('<div>' + value + '</div>'));
-      }
-
-      dialog.on('coral-overlay:close', (event) => {
-        event.preventDefault();
-        setTimeout(() => {
-          dialog.remove();
-          window.location.reload();
-        });
-      });
-
-      document.body.appendChild(dialog);
-      dialog.show();
-
-      return dialog;
-    }
-  }
-
-  Granite.EBUtils = EBUtils;
-
+    Granite.EBUtils = EBUtils;
 })(Granite, Granite.$);
