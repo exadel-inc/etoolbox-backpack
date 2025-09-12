@@ -77,3 +77,6 @@ buildNumber.properties
 
 # AEM Repo Tool Configuration File
 .repo
+
+# NPM
+node_modules/
