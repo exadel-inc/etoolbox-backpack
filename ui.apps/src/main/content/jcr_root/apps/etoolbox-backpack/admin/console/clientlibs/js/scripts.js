@@ -53,7 +53,7 @@
         }
 
         bindEvents() {
-            $document.off('backpack');
+            $document.off('.backpack');
             $document.on('click.backpack', `.${COLLECTION_ITEM_CLASS}.result-row`, this.onPackageEntryClick.bind(this));
             $document.on('click.backpack', '.toggler', this.onTogglerClick);
             $document.on('click.backpack', `${INCLUDE_CHILDREN_SEL}, ${EXCLUDE_CHILDREN_SEL}, ${LIVE_COPIES_SEL}, ${DELETE_SEL}, .js-backpack-add-references-item`, this.onPreparePackageEntriesChanges.bind(this));
