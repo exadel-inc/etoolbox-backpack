@@ -62,12 +62,6 @@
                             <type>zip</type>
                             <target>/apps/etoolbox-backpack-packages/application/install</target>
                         </embedded>
-                        <embedded>
-                            <groupId>com.exadel.etoolbox</groupId>
-                            <artifactId>etoolbox-backpack.ui.config</artifactId>
-                            <type>zip</type>
-                            <target>/apps/etoolbox-backpack-packages/application/install</target>
-                        </embedded>
                     </embeddeds>
                 </configuration>
             </plugin>
@@ -134,12 +128,6 @@
         <dependency>
             <groupId>com.exadel.etoolbox</groupId>
             <artifactId>etoolbox-backpack.ui.apps</artifactId>
-            <version>${project.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>com.exadel.etoolbox</groupId>
-            <artifactId>etoolbox-backpack.ui.config</artifactId>
             <version>${project.version}</version>
             <type>zip</type>
         </dependency>

@@ -57,8 +57,6 @@ import java.util.stream.Collectors;
  */
 @Component(service = BuildPackageService.class)
 public class BuildPackageServiceImpl implements BuildPackageService {
-    private static final String SERVICE_NAME = "backpack-service";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(BuildPackageServiceImpl.class);
 
     protected static final Gson GSON = new Gson();
