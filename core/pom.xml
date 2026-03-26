@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.exadel.etoolbox</groupId>
         <artifactId>etoolbox-backpack</artifactId>
-        <version>4.0.1-SNAPSHOT</version>
+        <version>4.0.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>etoolbox-backpack.core</artifactId>
@@ -50,7 +50,8 @@
                 </executions>
                 <configuration>
                     <instructions>
-                        <Embed-Dependency>commons-lang3;scope=compile</Embed-Dependency>
+                        <Embed-Dependency>commons-lang3;scope=compile,guava;scope=compile</Embed-Dependency>
+                        <Import-Package>sun.misc;resolution:=optional,*</Import-Package>
                     </instructions>
                 </configuration>
             </plugin>
@@ -172,6 +173,10 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
         <!-- Testing -->
         <dependency>
