@@ -83,7 +83,6 @@ public interface BasePackageService {
      * @param jcrPackageDefinition {@code JcrPackageDefinition} Definition of the package to update
      * @param userSession          Current user {@code Session} as adapted from the acting {@code ResourceResolver}
      * @param packageInfo          {@code PackageInfo} object to store status information in
-     * @param paths                {@code List} of {@code PathModel} will be stored in package metadata information and used in future package modifications
      * @param filter               {@code DefaultWorkspaceFilter} instance representing resource selection mechanism for the package
      */
     void setPackageInfo(JcrPackageDefinition jcrPackageDefinition,
@@ -125,12 +124,10 @@ public interface BasePackageService {
                            String version) throws RepositoryException;
 
     /**
-     * Gets current {@link PackageInfo} objects cache
+     * Gets current {@link PackageInfo} objects cache as a concurrent map view
      *
-     * @return {@code Cache<String, PackageInfo>} object
+     * @return {@code ConcurrentMap<String, PackageInfo>} object
      */
-    @SuppressWarnings("UnstableApiUsage")
-    // sticking to Guava Cache version bundled in uber-jar; still safe to use
     ConcurrentMap<String, PackageInfo> getPackageCacheAsMap();
 
     /**

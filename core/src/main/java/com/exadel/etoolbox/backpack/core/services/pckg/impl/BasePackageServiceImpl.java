@@ -20,8 +20,6 @@ import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
 import com.exadel.etoolbox.backpack.core.services.util.constants.BackpackConstants;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageModel;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -78,10 +76,8 @@ public class BasePackageServiceImpl implements BasePackageService {
     private SlingRepository slingRepository;
 
 
-    @SuppressWarnings("UnstableApiUsage") // sticking to Guava Cache version bundled in uber-jar; still safe to use
-    protected Cache<String, PackageInfo> packageInfos;
-
     protected boolean enableStackTrace;
+    private ConcurrentMap<String, PackageInfo> packageCache;
 
     /**
      * Run upon this OSGi service activation to initialize cache storage of collected {@link PackageInfo} objects
@@ -92,10 +88,8 @@ public class BasePackageServiceImpl implements BasePackageService {
     @SuppressWarnings("unused") // run internally by the OSGi mechanism
     private void activate(Configuration config) {
         enableStackTrace = config.enableStackTraceShowing();
-        packageInfos = CacheBuilder.newBuilder()
-                .maximumSize(100)
-                .expireAfterWrite(config.buildInfoTTL(), TimeUnit.DAYS)
-                .build();
+        long cacheTtlMillis = Math.max(0L, TimeUnit.DAYS.toMillis(config.buildInfoTTL()));
+        packageCache = new PackageInfoCache(cacheTtlMillis);
     }
 
     @Override
@@ -297,11 +291,9 @@ public class BasePackageServiceImpl implements BasePackageService {
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings("UnstableApiUsage")
-    // sticking to Guava Cache version bundled in uber-jar; still safe to use
     @Override
     public ConcurrentMap<String, PackageInfo> getPackageCacheAsMap() {
-        return packageInfos.asMap();
+        return packageCache;
     }
 
     @Override
