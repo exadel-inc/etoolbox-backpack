@@ -18,6 +18,7 @@ import com.day.cq.dam.api.Asset;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
+import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoCacheAccess;
 import com.exadel.etoolbox.backpack.core.services.util.constants.BackpackConstants;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageModel;
 import com.google.gson.Gson;
@@ -51,7 +52,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -77,7 +77,7 @@ public class BasePackageServiceImpl implements BasePackageService {
 
 
     protected boolean enableStackTrace;
-    private ConcurrentMap<String, PackageInfo> packageCache;
+    private PackageInfoCacheAccess packageCache;
 
     /**
      * Run upon this OSGi service activation to initialize cache storage of collected {@link PackageInfo} objects
@@ -292,7 +292,7 @@ public class BasePackageServiceImpl implements BasePackageService {
      * {@inheritDoc}
      */
     @Override
-    public ConcurrentMap<String, PackageInfo> getPackageCacheAsMap() {
+    public PackageInfoCacheAccess getPackageCache() {
         return packageCache;
     }
 
@@ -363,6 +363,6 @@ public class BasePackageServiceImpl implements BasePackageService {
     }
 
     private void clearCache(String key) {
-        getPackageCacheAsMap().remove(key);
+        getPackageCache().remove(key);
     }
 }

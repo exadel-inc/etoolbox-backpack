@@ -25,8 +25,6 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.util.Collection;
-import java.util.concurrent.ConcurrentMap;
-
 /**
  * Represents a service running in an AEM instance responsible for base operation with package
  */
@@ -124,11 +122,11 @@ public interface BasePackageService {
                            String version) throws RepositoryException;
 
     /**
-     * Gets current {@link PackageInfo} objects cache as a concurrent map view
+     * Gets current {@link PackageInfo} objects cache via a narrow cache-specific API
      *
-     * @return {@code ConcurrentMap<String, PackageInfo>} object
+     * @return {@link PackageInfoCacheAccess} object
      */
-    ConcurrentMap<String, PackageInfo> getPackageCacheAsMap();
+    PackageInfoCacheAccess getPackageCache();
 
     /**
      * @param resourceResolver {@code ResourceResolver} used to collect assets details

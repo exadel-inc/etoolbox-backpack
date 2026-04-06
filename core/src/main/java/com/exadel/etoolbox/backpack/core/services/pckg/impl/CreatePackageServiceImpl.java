@@ -55,7 +55,7 @@ public class CreatePackageServiceImpl implements CreatePackageService {
         createPackage(session, packageInfo, basePackageService.buildWorkspaceFilter(packageInfo.getPaths()));
 
         if (PackageStatus.CREATED.equals(packageInfo.getPackageStatus())) {
-            basePackageService.getPackageCacheAsMap().put(packageInfo.getPackagePath(), packageInfo);
+            basePackageService.getPackageCache().put(packageInfo.getPackagePath(), packageInfo);
         }
 
         return packageInfo;

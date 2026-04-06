@@ -196,7 +196,7 @@ public class BuildPackageServiceImpl implements BuildPackageService {
         if (!PackageStatus.BUILD_IN_PROGRESS.equals(packageInfo.getPackageStatus()) && !PackageStatus.INSTALL_IN_PROGRESS.equals(packageInfo.getPackageStatus())) {
             packageInfo.setPackageStatus(PackageStatus.BUILD_IN_PROGRESS);
             packageInfo.clearLog();
-            basePackageService.getPackageCacheAsMap().put(requestInfo.getPackagePath(), packageInfo);
+            basePackageService.getPackageCache().put(requestInfo.getPackagePath(), packageInfo);
             buildPackageAsync(resourceResolver.getUserID(), packageInfo, requestInfo.getReferencedResources());
         }
 

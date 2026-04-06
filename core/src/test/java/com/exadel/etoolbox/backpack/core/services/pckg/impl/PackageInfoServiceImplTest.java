@@ -27,7 +27,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -109,10 +108,9 @@ public class PackageInfoServiceImplTest extends Base {
         public void shouldReturnInMemoryPackageInfo() {
             PackageInfoModel packageInfoModel = new PackageInfoModel();
             packageInfoModel.setPackagePath(TEST_ZIP);
-            Map<String, PackageInfo> packageInfos = basePackageService.getPackageCacheAsMap();
             PackageInfo packageInfo = new PackageInfo();
             packageInfo.setPackageName(TEST);
-            packageInfos.put(TEST_ZIP, packageInfo);
+            basePackageService.getPackageCache().put(TEST_ZIP, packageInfo);
 
             PackageInfo result = packageInfoService.getPackageInfo(resourceResolver, packageInfoModel.getPackagePath());
 
@@ -192,12 +190,11 @@ public class PackageInfoServiceImplTest extends Base {
             latestPackageInfoModel.setPackagePath(PACKAGE_PATH);
             latestPackageInfoModel.setLatestLogIndex(LATEST_INDEX);
 
-            Map<String, PackageInfo> packageInfos = basePackageService.getPackageCacheAsMap();
             PackageInfo packageInfo = new PackageInfo();
 
             packageInfo.addLogMessage(TEST);
             packageInfo.addLogMessage(TEST);
-            packageInfos.put(PACKAGE_PATH, packageInfo);
+            basePackageService.getPackageCache().put(PACKAGE_PATH, packageInfo);
 
             PackageInfo result = packageInfoService.getLatestPackageBuildInfo(latestPackageInfoModel);
 
@@ -209,9 +206,8 @@ public class PackageInfoServiceImplTest extends Base {
             LatestPackageInfoModel latestPackageInfoModel = new LatestPackageInfoModel();
             latestPackageInfoModel.setPackagePath(PACKAGE_PATH);
 
-            Map<String, PackageInfo> packageInfos = basePackageService.getPackageCacheAsMap();
             PackageInfo packageInfo = new PackageInfo();
-            packageInfos.put(PACKAGE_PATH, packageInfo);
+            basePackageService.getPackageCache().put(PACKAGE_PATH, packageInfo);
 
             PackageInfo result = packageInfoService.getLatestPackageBuildInfo(latestPackageInfoModel);
 
