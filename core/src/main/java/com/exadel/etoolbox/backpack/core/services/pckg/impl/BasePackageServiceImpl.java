@@ -18,7 +18,7 @@ import com.day.cq.dam.api.Asset;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
-import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoCacheAccess;
+import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoCache;
 import com.exadel.etoolbox.backpack.core.services.util.constants.BackpackConstants;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageModel;
 import com.google.gson.Gson;
@@ -77,7 +77,7 @@ public class BasePackageServiceImpl implements BasePackageService {
 
 
     protected boolean enableStackTrace;
-    private PackageInfoCacheAccess packageCache;
+    private PackageInfoCache packageCache;
 
     /**
      * Run upon this OSGi service activation to initialize cache storage of collected {@link PackageInfo} objects
@@ -89,7 +89,7 @@ public class BasePackageServiceImpl implements BasePackageService {
     private void activate(Configuration config) {
         enableStackTrace = config.enableStackTraceShowing();
         long cacheTtlMillis = Math.max(0L, TimeUnit.DAYS.toMillis(config.buildInfoTTL()));
-        packageCache = new PackageInfoCache(cacheTtlMillis);
+        packageCache = new PackageInfoCacheImpl(cacheTtlMillis);
     }
 
     @Override
@@ -292,7 +292,7 @@ public class BasePackageServiceImpl implements BasePackageService {
      * {@inheritDoc}
      */
     @Override
-    public PackageInfoCacheAccess getPackageCache() {
+    public PackageInfoCache getPackageCache() {
         return packageCache;
     }
 

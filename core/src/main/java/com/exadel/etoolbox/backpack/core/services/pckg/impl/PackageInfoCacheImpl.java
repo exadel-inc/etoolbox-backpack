@@ -1,7 +1,7 @@
 package com.exadel.etoolbox.backpack.core.services.pckg.impl;
 
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
-import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoCacheAccess;
+import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoCache;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -9,14 +9,14 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-final class PackageInfoCache implements PackageInfoCacheAccess {
+final class PackageInfoCacheImpl implements PackageInfoCache {
 
     private static final int MAX_CACHE_SIZE = 100;
 
     private final ConcurrentMap<String, CacheEntry> packageInfos = new ConcurrentHashMap<>();
     private final long cacheTtlMillis;
 
-    PackageInfoCache(long cacheTtlMillis) {
+    PackageInfoCacheImpl(long cacheTtlMillis) {
         this.cacheTtlMillis = cacheTtlMillis;
     }
 

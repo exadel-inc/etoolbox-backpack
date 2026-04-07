@@ -124,9 +124,9 @@ public interface BasePackageService {
     /**
      * Gets current {@link PackageInfo} objects cache via a narrow cache-specific API
      *
-     * @return {@link PackageInfoCacheAccess} object
+     * @return {@link PackageInfoCache} object
      */
-    PackageInfoCacheAccess getPackageCache();
+    PackageInfoCache getPackageCache();
 
     /**
      * @param resourceResolver {@code ResourceResolver} used to collect assets details
