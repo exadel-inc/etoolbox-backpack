@@ -25,8 +25,6 @@ public class PackageInfoCacheImplTest {
         PackageInfoCacheImpl cache = new PackageInfoCacheImpl(NON_EXPIRING_TTL);
 
         assertNull(cache.get("missing"));
-        assertNull(cache.get(42));
-        assertNull(cache.get((Object) null));
     }
 
     @Test

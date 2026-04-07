@@ -43,14 +43,6 @@ final class PackageInfoCacheImpl implements PackageInfoCache {
         return unwrapEntry(key, entry);
     }
 
-    public PackageInfo get(Object key) {
-        if (!(key instanceof String)) {
-            return null;
-        }
-        return get((String) key);
-    }
-
-
     @Override
     public PackageInfo put(String key, PackageInfo value) {
         Objects.requireNonNull(value);
