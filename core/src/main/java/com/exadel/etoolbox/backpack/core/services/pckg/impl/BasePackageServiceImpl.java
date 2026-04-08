@@ -88,7 +88,7 @@ public class BasePackageServiceImpl implements BasePackageService {
     @SuppressWarnings("unused") // run internally by the OSGi mechanism
     private void activate(Configuration config) {
         enableStackTrace = config.enableStackTraceShowing();
-        long cacheTtlMillis = Math.max(0L, TimeUnit.DAYS.toMillis(config.buildInfoTTL()));
+        long cacheTtlMillis = TimeUnit.DAYS.toMillis(config.buildInfoTTL());
         packageCache = new PackageInfoCacheImpl(cacheTtlMillis);
     }
 

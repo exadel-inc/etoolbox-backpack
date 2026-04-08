@@ -20,20 +20,6 @@ final class PackageInfoCacheImpl implements PackageInfoCache {
         this.cacheTtlMillis = cacheTtlMillis;
     }
 
-    private static final class CacheEntry {
-        private final PackageInfo value;
-        private final long expiresAt;
-
-        private CacheEntry(PackageInfo value, long expiresAt) {
-            this.value = value;
-            this.expiresAt = expiresAt;
-        }
-
-        private boolean isExpired(long now) {
-            return expiresAt <= now;
-        }
-    }
-
     @Override
     public PackageInfo get(String key) {
         CacheEntry entry = packageInfos.get(key);
@@ -106,6 +92,20 @@ final class PackageInfoCacheImpl implements PackageInfoCache {
         if (iterator.hasNext()) {
             iterator.next();
             iterator.remove();
+        }
+    }
+
+    private static final class CacheEntry {
+        private final PackageInfo value;
+        private final long expiresAt;
+
+        private CacheEntry(PackageInfo value, long expiresAt) {
+            this.value = value;
+            this.expiresAt = expiresAt;
+        }
+
+        private boolean isExpired(long now) {
+            return expiresAt <= now;
         }
     }
 }
