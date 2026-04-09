@@ -5,7 +5,6 @@ import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoCache;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -13,6 +12,7 @@ final class PackageInfoCacheImpl implements PackageInfoCache {
 
     private static final int MAX_CACHE_SIZE = 100;
 
+    private final Object lock = new Object();
     private final ConcurrentMap<String, CacheEntry> packageInfos = new ConcurrentHashMap<>();
     private final long cacheTtlMillis;
 
@@ -31,8 +31,10 @@ final class PackageInfoCacheImpl implements PackageInfoCache {
 
     @Override
     public PackageInfo put(String key, PackageInfo value) {
-        Objects.requireNonNull(value);
-        synchronized (this) {
+        if(value == null){
+            throw new IllegalArgumentException("Package info cannot be null.");
+        }
+        synchronized (lock) {
             evictExpiredEntries();
             ensureCapacityFor(key);
             CacheEntry previous = packageInfos.put(key, newCacheEntry(value));

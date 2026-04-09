@@ -72,7 +72,7 @@ public class PackageInfoCacheImplTest {
         assertNull(cache.get(key));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void shouldRejectNullValues() {
         PackageInfoCacheImpl cache = new PackageInfoCacheImpl(NON_EXPIRING_TTL);
 
