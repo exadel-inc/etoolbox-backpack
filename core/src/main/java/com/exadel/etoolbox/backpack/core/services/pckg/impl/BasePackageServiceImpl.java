@@ -104,7 +104,8 @@ public class BasePackageServiceImpl implements BasePackageService {
     @interface Configuration {
         @AttributeDefinition(
                 name = "Package Build Info TTL",
-                description = "Specify TTL for package build information cache (in days).",
+                description = "Specify TTL for package build information cache (in days). " +
+                        "A negative value means that the cache is indefinite, 0 means that the cache is disabled.",
                 type = AttributeType.INTEGER
         )
         int buildInfoTTL() default 1;
