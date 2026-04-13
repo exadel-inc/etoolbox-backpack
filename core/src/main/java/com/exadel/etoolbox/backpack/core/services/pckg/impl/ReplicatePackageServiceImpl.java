@@ -65,7 +65,7 @@ public class ReplicatePackageServiceImpl implements ReplicatePackageService {
             packageInfo.clearLog();
             packageInfo.addLogMessage(START_REPLICATE_MESSAGE + packageInfoModel.getPackagePath());
             packageInfo.addLogMessage(LocalDateTime.now().format(BackpackConstants.DATE_TIME_FORMATTER));
-            basePackageService.getPackageCacheAsMap().put(packageInfoModel.getPackagePath(), packageInfo);
+            basePackageService.getPackageCache().put(packageInfoModel.getPackagePath(), packageInfo);
             replicatePackage(resourceResolver.getUserID(), packageInfo);
         } else {
             packageInfo.addLogMessage(LocalDateTime.now().format(BackpackConstants.DATE_TIME_FORMATTER));

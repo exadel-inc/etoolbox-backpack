@@ -25,8 +25,6 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.util.Collection;
-import java.util.concurrent.ConcurrentMap;
-
 /**
  * Represents a service running in an AEM instance responsible for base operation with package
  */
@@ -83,7 +81,6 @@ public interface BasePackageService {
      * @param jcrPackageDefinition {@code JcrPackageDefinition} Definition of the package to update
      * @param userSession          Current user {@code Session} as adapted from the acting {@code ResourceResolver}
      * @param packageInfo          {@code PackageInfo} object to store status information in
-     * @param paths                {@code List} of {@code PathModel} will be stored in package metadata information and used in future package modifications
      * @param filter               {@code DefaultWorkspaceFilter} instance representing resource selection mechanism for the package
      */
     void setPackageInfo(JcrPackageDefinition jcrPackageDefinition,
@@ -125,13 +122,11 @@ public interface BasePackageService {
                            String version) throws RepositoryException;
 
     /**
-     * Gets current {@link PackageInfo} objects cache
+     * Gets current {@link PackageInfo} objects cache via a narrow cache-specific API
      *
-     * @return {@code Cache<String, PackageInfo>} object
+     * @return {@link PackageInfoCache} object
      */
-    @SuppressWarnings("UnstableApiUsage")
-    // sticking to Guava Cache version bundled in uber-jar; still safe to use
-    ConcurrentMap<String, PackageInfo> getPackageCacheAsMap();
+    PackageInfoCache getPackageCache();
 
     /**
      * @param resourceResolver {@code ResourceResolver} used to collect assets details

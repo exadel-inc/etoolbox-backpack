@@ -81,8 +81,8 @@ public class EditPackageServiceImpl implements EditPackageService {
         modifyPackage(session, modificationPackageModel.getPackagePath(), packageInfo, basePackageService.buildWorkspaceFilter(packageInfo.getPaths()));
 
         if (PackageStatus.MODIFIED.equals(packageInfo.getPackageStatus())) {
-            basePackageService.getPackageCacheAsMap().remove(modificationPackageModel.getPackagePath());
-            basePackageService.getPackageCacheAsMap().put(packageInfo.getPackagePath(), packageInfo);
+            basePackageService.getPackageCache().remove(modificationPackageModel.getPackagePath());
+            basePackageService.getPackageCache().put(packageInfo.getPackagePath(), packageInfo);
         }
 
         return packageInfo;

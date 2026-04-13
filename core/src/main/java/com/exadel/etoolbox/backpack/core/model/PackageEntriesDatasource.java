@@ -11,7 +11,6 @@ import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoService;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageInfoModel;
 import com.exadel.etoolbox.backpack.request.RequestAdapter;
 import com.exadel.etoolbox.backpack.request.validator.ValidatorResponse;
-import com.google.common.collect.ImmutableMap;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
@@ -110,7 +109,7 @@ public class PackageEntriesDatasource {
     private void addSubsidiaries(List<Resource> subsidiaries, Set<String> subsidiaryPaths, String type) {
         if (!subsidiaryPaths.isEmpty()) {
             subsidiaries.addAll(subsidiaryPaths.stream()
-                    .map(path -> createPackageEntry(type, path, ImmutableMap.of("upstream", path)))
+                    .map(path -> createPackageEntry(type, path, Collections.singletonMap("upstream", path)))
                     .collect(Collectors.toList()));
         }
     }

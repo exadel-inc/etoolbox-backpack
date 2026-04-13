@@ -19,7 +19,6 @@ import com.exadel.etoolbox.backpack.request.annotations.RequestParam;
 import com.exadel.etoolbox.backpack.request.annotations.Validate;
 import com.exadel.etoolbox.backpack.request.validator.impl.RequiredValidator;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,10 +28,8 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Represents the set of user-defined options supplied to a request for information about a previously created/built
- * package. Upon initialization, passed as a parameter to the {@link PackageInfoService#getPackageInfo(ResourceResolver, PackageInfoModel)}
- *
- * @see PackageInfoServlet
+ * Represents the set of user-defined options supplied to a request for information about a previously created or built
+ * package. Upon initialization, it is passed to the package info endpoint as the source of the target package path.
  */
 @RequestMapping
 public class PackageInfoModel {
