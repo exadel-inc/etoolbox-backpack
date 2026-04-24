@@ -59,8 +59,8 @@ public class InstallPackageServiceImpl implements InstallPackageService {
             packageInfo.setPackageStatus(PackageStatus.INSTALL_IN_PROGRESS);
             packageInfo.clearLog();
             packageInfo.addLogMessage(START_INSTALL_MESSAGE + packageInfo.getPackagePath());
-            packageInfo.addLogMessage(LocalDateTime.now().toString());
-            basePackageService.getPackageCacheAsMap().put(installPackageModel.getPackagePath(), packageInfo);
+            packageInfo.addLogMessage(LocalDateTime.now().format(BackpackConstants.DATE_TIME_FORMATTER));
+            basePackageService.getPackageCache().put(installPackageModel.getPackagePath(), packageInfo);
             installPackageAsync(resourceResolver.getUserID(), installPackageModel, packageInfo);
         }
         return packageInfo;

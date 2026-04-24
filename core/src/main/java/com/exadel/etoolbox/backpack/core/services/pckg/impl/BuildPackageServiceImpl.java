@@ -22,8 +22,8 @@ import com.exadel.etoolbox.backpack.core.services.util.LoggerService;
 import com.exadel.etoolbox.backpack.core.services.util.SessionService;
 import com.exadel.etoolbox.backpack.core.services.util.constants.BackpackConstants;
 import com.exadel.etoolbox.backpack.core.servlets.model.BuildPackageModel;
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
@@ -57,7 +57,6 @@ import java.util.stream.Collectors;
  */
 @Component(service = BuildPackageService.class)
 public class BuildPackageServiceImpl implements BuildPackageService {
-    private static final String SERVICE_NAME = "backpack-service";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BuildPackageServiceImpl.class);
 
@@ -197,7 +196,7 @@ public class BuildPackageServiceImpl implements BuildPackageService {
         if (!PackageStatus.BUILD_IN_PROGRESS.equals(packageInfo.getPackageStatus()) && !PackageStatus.INSTALL_IN_PROGRESS.equals(packageInfo.getPackageStatus())) {
             packageInfo.setPackageStatus(PackageStatus.BUILD_IN_PROGRESS);
             packageInfo.clearLog();
-            basePackageService.getPackageCacheAsMap().put(requestInfo.getPackagePath(), packageInfo);
+            basePackageService.getPackageCache().put(requestInfo.getPackagePath(), packageInfo);
             buildPackageAsync(resourceResolver.getUserID(), packageInfo, requestInfo.getReferencedResources());
         }
 

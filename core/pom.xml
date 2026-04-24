@@ -8,12 +8,12 @@
     <parent>
         <groupId>com.exadel.etoolbox</groupId>
         <artifactId>etoolbox-backpack</artifactId>
-        <version>4.0.1</version>
+        <version>4.1.0</version>
     </parent>
 
     <artifactId>etoolbox-backpack.core</artifactId>
 
-    <name>EToolbox BackPack - Bundle</name>
+    <name>EToolbox BackPack - Core</name>
     <description>Contains classes and interfaces required to facilitate EToolbox BackPack server-side functionality</description>
 
     <properties>
@@ -35,10 +35,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -201,8 +197,6 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>RELEASE</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

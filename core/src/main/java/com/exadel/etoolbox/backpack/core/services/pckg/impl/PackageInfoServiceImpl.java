@@ -61,7 +61,7 @@ public class PackageInfoServiceImpl implements PackageInfoService {
 
     @Override
     public PackageInfo getPackageInfo(final ResourceResolver resourceResolver, final String packagePath) {
-        PackageInfo packageInfo = basePackageService.getPackageCacheAsMap().get(packagePath);
+        PackageInfo packageInfo = basePackageService.getPackageCache().get(packagePath);
         if (packageInfo != null) {
             return packageInfo;
         }
@@ -79,7 +79,7 @@ public class PackageInfoServiceImpl implements PackageInfoService {
                 if (packageNode != null) {
                     jcrPackage = packMgr.open(packageNode);
                     getPackageInfo(packageInfo, jcrPackage, packageNode);
-                    basePackageService.getPackageCacheAsMap().put(packagePath, packageInfo);
+                    basePackageService.getPackageCache().put(packagePath, packageInfo);
                 }
             }
         } catch (RepositoryException e) {
@@ -234,7 +234,7 @@ public class PackageInfoServiceImpl implements PackageInfoService {
     }
 
     /**
-     * Called by {@link PackageInfoService#getPackageInfo(ResourceResolver, PackageInfoModel)} to populate a preliminarily
+     * Called by {@link PackageInfoService#getPackageInfo(ResourceResolver, String)} to populate a preliminarily
      * initialized {@link PackageInfo} object as it represents an <i>actual</i> storage item, with information on
      * package specifics
      *
@@ -285,7 +285,7 @@ public class PackageInfoServiceImpl implements PackageInfoService {
     public PackageInfo getLatestPackageBuildInfo(final LatestPackageInfoModel latestPackageInfoModel) {
         String packagePath = latestPackageInfoModel.getPackagePath();
         String packageNotExistMsg = String.format(BackpackConstants.PACKAGE_DOES_NOT_EXIST_MESSAGE, packagePath);
-        PackageInfo completeBuildInfo = basePackageService.getPackageCacheAsMap().get(packagePath);
+        PackageInfo completeBuildInfo = basePackageService.getPackageCache().get(packagePath);
         PackageInfo partialBuildInfo;
 
         if (completeBuildInfo != null) {

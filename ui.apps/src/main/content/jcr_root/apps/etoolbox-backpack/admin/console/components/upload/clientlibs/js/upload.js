@@ -15,48 +15,26 @@
 $(function () {
     $('#indexTypeSelect').change(function () {
         $(this).closest('form').submit();
-    })
+    });
 });
 
-(function (window, $, URITemplate) {
+(function (window, $) {
     'use strict';
 
-    $(window).adaptTo('foundation-registry').register('foundation.form.response.ui.success', {
-        name: 'backpack.prompt.open',
-        handler: function (form, config, data, textStatus, xhr) {
-            function errorPopup(ui, dataJson) {
-                $(window).adaptTo('foundation-ui').prompt(Granite.I18n.get('Error'), dataJson.message, 'error', [{
-                    text: Granite.I18n.get('Cancel'),
-                    handler: function () {
-                        open(URITemplate.expand(config.redirect, {}));
-                    }
-                }]);
-            }
+    $(document).on('change', '.js-backpack-fileupload', function (event) {
+        const files = event.target.querySelector('input').files;
+        if (!files || !files[0]) return;
+        const fileName = files[0].name;
+        const input = event.target.closest('form').querySelector('.js-backpack-filename');
+        input.value = fileName;
+    });
 
-            function successPopup(ui, dataJson) {
-                ui.prompt(config.title, config.message, 'success', [{
-                    text: Granite.I18n.get('Done'),
-                    handler: function () {
-                        open(URITemplate.expand(config.redirect, dataJson));
-                    }
-                }, {
-                    text: Granite.I18n.get('Open'),
-                    primary: true,
-                    handler: function () {
-                        open(URITemplate.expand(config.open, dataJson), true);
-                        open(URITemplate.expand(config.redirect, dataJson));
-                    }
-                }]);
-            }
-
-            var ui = $(window).adaptTo('foundation-ui'),
-                dataJson = JSON.parse(data);
-
-            if (dataJson && !!dataJson.statusCode) {
-                errorPopup(ui, dataJson);
-            } else {
-                successPopup(ui, dataJson);
-            }
+    $(window).adaptTo('foundation-registry').register('foundation.form.response.parser', {
+        name: 'foundation.json',
+        contentType: /application\/json/,
+        selector: '.js-backpack-package-form',
+        handler: function (form, xhr) {
+            return JSON.parse(xhr.responseText);
         }
     });
-})(window, Granite.$, Granite.URITemplate);
+})(window, Granite.$);

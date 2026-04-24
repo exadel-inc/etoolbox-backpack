@@ -13,12 +13,14 @@ When you select e.g. a page for inclusion into package, all the assets reference
 
 ### Project structure
 
-The project consists of two modules: 
+The project is organized as a multi-module Maven build:
 
-* *core module* runs in an AEM instance containing to respond to user commands and provide data processing service.
-* *ui/application module* embeds into AEM administering interface and runs in browser to give to the user control over package creation and storage, as well as detailed feedback. This module is built upon the modern Coral 3 graphic interface and TouchUI-ready.
+* `core` — the server-side OSGi bundle. It contains the Java code that implements BackPack services, request processing, package handling logic, and tests.
+* `ui.apps` — the AEM application package. It contains the repository content installed under the application area, including the UI assets and browser-facing integration.
+* `ui.apps.structure` — the repository structure package. It defines the AEM repository roots required by the application packages.
+* `ui.config` — the AEM configuration package. It contains configuration content packaged separately from the application code.
+* `all` — the aggregate container package. It embeds the `core`, `ui.apps`, and `ui.config` artifacts into a single package for deployment.
 
-The two modules communicate via JSON-based REST protocol. Basically, a user command is sent to an endpoint, parsed and processed by a specially designed AEM service, then result and/or status message returned to user.
 
 ### Installation
 
@@ -57,10 +59,6 @@ There is also the specific "test" profile that helps to collect code quality sta
     
 The project is in active development stage. Community contribution is heartily welcome.
 
-### Known issues
-
-The project uses `com.google.common.cache.Cache` bundled in `uber-jar-6.3.0` which is in "beta" status. Despite this class is out of beta stage in standalone Google Guava releases since *20.0*, we are currently sticking to *uber-jar* version to avoid inconsistency. We have tested this doesn't cause trouble in regular usage.
-
 ### Licensing
 
-The project is licensed under [Apache License, Version 2.0](LICENSE). All runtime project dependencies are guaranteed to be compliant with the license. Dependencies such as Adobe's *uber-jar* are considered *provided* in the end-user environment and are not explicitly engaged. The end user is to comply with the regulations of the corresponding licenses. 
+The project is licensed under [Apache License, Version 2.0](LICENSE). All runtime project dependencies are guaranteed to be compliant with the license. Dependencies such as Adobe's *uber-jar* are considered *provided* in the end-user environment and are not explicitly engaged. The end user is to comply with the regulations of the corresponding licenses.

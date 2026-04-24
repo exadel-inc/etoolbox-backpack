@@ -18,10 +18,9 @@ import com.day.cq.dam.api.Asset;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageInfo;
 import com.exadel.etoolbox.backpack.core.dto.response.PackageStatus;
 import com.exadel.etoolbox.backpack.core.services.pckg.BasePackageService;
+import com.exadel.etoolbox.backpack.core.services.pckg.PackageInfoCache;
 import com.exadel.etoolbox.backpack.core.services.util.constants.BackpackConstants;
 import com.exadel.etoolbox.backpack.core.servlets.model.PackageModel;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -53,7 +52,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -78,10 +76,8 @@ public class BasePackageServiceImpl implements BasePackageService {
     private SlingRepository slingRepository;
 
 
-    @SuppressWarnings("UnstableApiUsage") // sticking to Guava Cache version bundled in uber-jar; still safe to use
-    protected Cache<String, PackageInfo> packageInfos;
-
     protected boolean enableStackTrace;
+    private PackageInfoCache packageCache;
 
     /**
      * Run upon this OSGi service activation to initialize cache storage of collected {@link PackageInfo} objects
@@ -92,10 +88,8 @@ public class BasePackageServiceImpl implements BasePackageService {
     @SuppressWarnings("unused") // run internally by the OSGi mechanism
     private void activate(Configuration config) {
         enableStackTrace = config.enableStackTraceShowing();
-        packageInfos = CacheBuilder.newBuilder()
-                .maximumSize(100)
-                .expireAfterWrite(config.buildInfoTTL(), TimeUnit.DAYS)
-                .build();
+        long cacheTtlMillis = TimeUnit.DAYS.toMillis(config.buildInfoTTL());
+        packageCache = new PackageInfoCacheImpl(cacheTtlMillis);
     }
 
     @Override
@@ -110,7 +104,8 @@ public class BasePackageServiceImpl implements BasePackageService {
     @interface Configuration {
         @AttributeDefinition(
                 name = "Package Build Info TTL",
-                description = "Specify TTL for package build information cache (in days).",
+                description = "Specify TTL for package build information cache (in days). " +
+                        "A negative value means that the cache is indefinite, 0 means that the cache is disabled.",
                 type = AttributeType.INTEGER
         )
         int buildInfoTTL() default 1;
@@ -297,11 +292,9 @@ public class BasePackageServiceImpl implements BasePackageService {
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings("UnstableApiUsage")
-    // sticking to Guava Cache version bundled in uber-jar; still safe to use
     @Override
-    public ConcurrentMap<String, PackageInfo> getPackageCacheAsMap() {
-        return packageInfos.asMap();
+    public PackageInfoCache getPackageCache() {
+        return packageCache;
     }
 
     @Override
@@ -371,6 +364,6 @@ public class BasePackageServiceImpl implements BasePackageService {
     }
 
     private void clearCache(String key) {
-        getPackageCacheAsMap().remove(key);
+        getPackageCache().remove(key);
     }
 }
